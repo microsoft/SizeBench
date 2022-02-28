@@ -1,0 +1,53 @@
+<!-- This contains common things shared among all projects in the SizeBench repo -->
+
+<Project>
+  <!-- These properties apply to both product and test code -->
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    
+    <!-- Below this, in this PropertyGroup, is all about Code Analysis -->
+    <AnalysisLevel>6</AnalysisLevel> <!-- Update this when upgrading from net6 -->
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+
+
+
+  <!-- These properties and items apply only to product code. -->
+  <ItemGroup Condition="'$(SizeBenchTestCode)'!='true'">
+    <!-- Enable SourceLink for product code only (don't need it for tests) -->
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
+  </ItemGroup>
+
+
+
+  <!-- These properties and items apply only to C# test code. -->
+  <PropertyGroup Condition="'$(SizeBenchTestCode)'=='true' And '$(MSBuildProjectExtension)'=='.csproj'">
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(SizeBenchTestCode)'=='true' And '$(MSBuildProjectExtension)'=='.csproj'">
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="2.2.7" />
+    <PackageReference Include="MSTest.TestFramework" Version="2.2.7" />
+    <PackageReference Include="Moq" Version="4.16.1" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(SizeBenchTestCode)'=='true'">
+    <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting"/>
+    <Using Include="Moq"/>
+  </ItemGroup>
+
+
+
+
+  <!-- Embed the git hash in the assembly informational version -->
+  <Target Name="InitializeSourceControlInformation" BeforeTargets="AddSourceRevisionToInformationalVersion">
+    <Exec
+      Command="git describe --long --always --dirty --exclude=* --abbrev=8"
+      ConsoleToMSBuild="True"
+      IgnoreExitCode="False"
+      >
+      <Output PropertyName="SourceRevisionId" TaskParameter="ConsoleOutput"/>
+    </Exec>
+  </Target>
+</Project>

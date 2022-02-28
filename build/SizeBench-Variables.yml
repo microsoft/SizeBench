@@ -1,0 +1,11 @@
+variables:
+  versionMajor: 2
+  revision: $[counter(format('{0:yyyyMMdd}', pipeline.startTime), 0)]
+  pipelineYearMonth: $[format('{0:yyMM}', pipeline.startTime)]
+  pipelineDay: $[format('{0:dd}', pipeline.startTime)]
+  buildPlatform: 'x64'
+  buildConfiguration: Release
+
+  # To enable code coverage in the pipelines, use this:
+  # codeCoverageArgs: '--collect "Code coverage"'
+  codeCoverageArgs: ''

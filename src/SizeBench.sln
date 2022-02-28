@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32210.238
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SizeBench.PathLocators", "SizeBench.PathLocators\SizeBench.PathLocators.csproj", "{8DC65B1C-73E7-4115-BEF9-A4E2BB227BBD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PathLocators", "PathLocators", "{42A14DC3-4E12-43EA-BA1F-4A3AA3176624}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F280E6E5-6895-4ABC-ACB5-0015D2E7C70B}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+		Directory.Build.targets = Directory.Build.targets
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SizeBench.LocalBuild", "SizeBench.LocalBuild\SizeBench.LocalBuild.csproj", "{F1FED405-1C77-4DF1-A8C7-1FB85496271F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{48871072-BBA3-4232-AB7E-6A204F4109C9}"
+	ProjectSection(SolutionItems) = preProject
+		..\build\SizeBench-BuildAndTest-Job.yml = ..\build\SizeBench-BuildAndTest-Job.yml
+		..\build\SizeBench-BuildAndTest-Steps.yml = ..\build\SizeBench-BuildAndTest-Steps.yml
+		..\build\SizeBench-CI.yml = ..\build\SizeBench-CI.yml
+		..\build\SizeBench-Variables.yml = ..\build\SizeBench-Variables.yml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8DC65B1C-73E7-4115-BEF9-A4E2BB227BBD}.Debug|x64.ActiveCfg = Debug|x64
+		{8DC65B1C-73E7-4115-BEF9-A4E2BB227BBD}.Debug|x64.Build.0 = Debug|x64
+		{8DC65B1C-73E7-4115-BEF9-A4E2BB227BBD}.Release|x64.ActiveCfg = Release|Any CPU
+		{8DC65B1C-73E7-4115-BEF9-A4E2BB227BBD}.Release|x64.Build.0 = Release|Any CPU
+		{F1FED405-1C77-4DF1-A8C7-1FB85496271F}.Debug|x64.ActiveCfg = Debug|x64
+		{F1FED405-1C77-4DF1-A8C7-1FB85496271F}.Debug|x64.Build.0 = Debug|x64
+		{F1FED405-1C77-4DF1-A8C7-1FB85496271F}.Release|x64.ActiveCfg = Release|x64
+		{F1FED405-1C77-4DF1-A8C7-1FB85496271F}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{8DC65B1C-73E7-4115-BEF9-A4E2BB227BBD} = {42A14DC3-4E12-43EA-BA1F-4A3AA3176624}
+		{F1FED405-1C77-4DF1-A8C7-1FB85496271F} = {42A14DC3-4E12-43EA-BA1F-4A3AA3176624}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {936F9790-BC54-416C-9C26-BB58BA16D33E}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,112 @@
+parameters:
+  packageMSIX: false
+  packageNuGets: false
+  publishNuGets: false
+  runTests: true
+
+steps:
+- task: PowerShell@2
+  displayName: 'Establish version number'
+  inputs:
+    targetType: inline
+    script: |
+      $versionMinor = $(pipelineYearMonth)
+      Write-Host Setting versionMinor variable to $versionMinor
+      Write-Host "##vso[task.setvariable variable=versionMinor]$versionMinor"
+      $versionPatch = ([Int32]::Parse("$(pipelineDay)").ToString()) + ([Int32]::Parse("$(revision)").ToString("00"))
+      Write-Host Setting versionPatch variable to $versionPatch
+      Write-Host "##vso[task.setvariable variable=versionPatch]$versionPatch"
+      $versionRelease = "$(versionMajor)" + "." + "$versionMinor" + "." + "$versionPatch" + ".0"
+      Write-Host Setting versionRelease variable to $versionRelease
+      Write-Host "##vso[task.setvariable variable=versionRelease]$versionRelease"
+
+- task: UseDotNet@2
+  displayName: 'Use .NET 6 SDK'
+  inputs:
+    packageType: sdk
+    version: 6.x
+    installationPath: $(Agent.ToolsDirectory)/dotnet
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet restore'
+  inputs:
+    command: restore
+    feedsToUse: config
+    nugetConfigPath: NuGet.config
+    verbosityRestore: 'minimal'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet restore R2R'
+  inputs:
+    command: restore
+    restoreArguments: '/p:PublishReadyToRun=true'
+    feedsToUse: config
+    nugetConfigPath: NuGet.config
+    verbosityRestore: 'minimal'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet build'
+  inputs:
+    projects: '**/*.csproj'
+    arguments: '--no-restore --configuration $(buildConfiguration) -p:Version=$(versionRelease)'
+
+
+- ${{ if eq(parameters.runTests, true) }}:
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet --list-runtimes'
+    inputs:
+      command: custom
+      custom: '--list-runtimes'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet --list-sdks'
+    inputs:
+      command: custom
+      custom: '--list-sdks'
+
+  # 'dotnet test --blame-crash' requires procdump.exe to capture full dumps of native crashes.
+  # We need this because the tests can crash sometimes and this is the only way I've found to get a dump out to debug from the pipeline.
+  - task: PowerShell@2
+    displayName: 'Install ProcDump'
+    inputs:
+      targetType: inline
+      script: |
+        # Install Procdump
+        Write-Host "Starting ProcDump install to capture test crashes if they happen"
+        if (-Not (Test-Path "$(Agent.TempDirectory)\procdump")) {
+          Write-Host "Creating directory $(Agent.TempDirectory)\procdump"
+          mkdir "$(Agent.TempDirectory)\procdump"
+          Invoke-WebRequest -UserAgent wget -Uri https://download.sysinternals.com/files/Procdump.zip -OutFile "$(Agent.TempDirectory)\procdump\procdump.zip"
+          Expand-Archive -LiteralPath "$(Agent.TempDirectory)\procdump\procdump.zip" -DestinationPath "$(Agent.TempDirectory)\procdump"
+        }
+        Write-Host "Setting PROCDUMP_PATH to $(Agent.TempDirectory)\procdump"
+        Write-Host "##vso[task.setvariable variable=PROCDUMP_PATH]$(Agent.TempDirectory)\procdump"
+        Write-Host "Setting VSTEST_DUMP_FORCEPROCDUMP=1 to ensure native crash dumps are collected"
+        Write-Host "##vso[task.setvariable variable=VSTEST_DUMP_FORCEPROCDUMP]1"
+
+  - task: DotNetCoreCLI@2
+    displayName: 'dotnet test'
+    inputs:
+      command: test
+      projects: '**/*.csproj'
+      arguments: '--no-restore --configuration $(buildConfiguration) --blame-crash --settings RunSettings.runsettings $(codeCoverageArgs)'
+      testRunTitle: 'Tests for $(buildConfiguration)'
+      publishTestResults: true
+  
+
+
+- task: CopyFiles@2
+  displayName: 'Copy failure dumps'
+  condition: failed()
+  inputs:
+    sourceFolder: '$(Agent.TempDirectory)'
+    contents: '**\*.dmp'
+    targetFolder: '$(Build.ArtifactStagingDirectory)\failure-dumps'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: drop'
+  condition: or(failed(), eq(variables['buildConfiguration'], 'Release'))
+  inputs:
+    artifactName: 'drop'
+    parallel: true
+    pathToPublish: $(Build.ArtifactStagingDirectory)

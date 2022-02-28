@@ -1,0 +1,18 @@
+trigger:
+- master
+
+variables:
+- template: ./SizeBench-Variables.yml
+
+pool:
+  name: Azure Pipelines
+  vmImage: 'windows-2022'
+  
+name: 'SizeBench_$(versionMajor).$(pipelineYearMonth).$(pipelineDay)_$(revision)'
+
+jobs:
+  - template: ./SizeBench-BuildAndTest-Job.yml
+    parameters:
+      packageMSIX: false
+      packageNugets: false
+      publishNugets: false

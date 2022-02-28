@@ -1,0 +1,22 @@
+parameters:
+  packageMSIX: false
+  packageNuGets: false
+  publishNuGets: false
+
+jobs:
+- job: BuildJob
+  displayName: Build and Test
+  timeoutInMinutes: 60
+  strategy:
+    maxParallel: 2
+    matrix:
+      Release:
+        buildConfiguration: Release
+      Debug:
+        buildConfiguration: Debug
+  steps:
+  - template: ./SizeBench-BuildAndTest-Steps.yml
+    parameters:
+      packageMSIX: ${{parameters.packageMSIX}}
+      packageNuGets: ${{parameters.packageNuGets}}
+      publishNuGets: ${{parameters.publishNuGets}}

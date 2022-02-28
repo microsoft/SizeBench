@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<ItemGroup>
+		<PackageReference Include="Castle.Windsor" Version="5.1.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\SizeBench.PathLocators\SizeBench.PathLocators.csproj" />
+	</ItemGroup>
+</Project>

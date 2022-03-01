@@ -31,13 +31,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{5E7F622A
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{DDB4277D-5229-47F8-8A1C-576CA06F7D0D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SizeBench.AsyncInfrastructure", "SizeBench.AsyncInfrastructure\SizeBench.AsyncInfrastructure.csproj", "{F2EE1D2F-E908-4C6B-9A03-22E101F95882}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SizeBench.AsyncInfrastructure", "SizeBench.AsyncInfrastructure\SizeBench.AsyncInfrastructure.csproj", "{F2EE1D2F-E908-4C6B-9A03-22E101F95882}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SizeBench.Logging", "SizeBench.Logging\SizeBench.Logging.csproj", "{77B1C741-09A2-4C69-9CE9-CCC814104F2E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SizeBench.Logging", "SizeBench.Logging\SizeBench.Logging.csproj", "{77B1C741-09A2-4C69-9CE9-CCC814104F2E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SizeBench.Logging.Tests", "SizeBench.Logging.Tests\SizeBench.Logging.Tests.csproj", "{67AB8708-AC46-4AB4-BE88-AFEBBFF0798E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SizeBench.Logging.Tests", "SizeBench.Logging.Tests\SizeBench.Logging.Tests.csproj", "{67AB8708-AC46-4AB4-BE88-AFEBBFF0798E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SizeBench.TestInfrastructure", "SizeBench.TestInfrastructure\SizeBench.TestInfrastructure.csproj", "{97DCB2D9-F2C5-4342-B229-1708A11F0DD9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SizeBench.TestInfrastructure", "SizeBench.TestInfrastructure\SizeBench.TestInfrastructure.csproj", "{97DCB2D9-F2C5-4342-B229-1708A11F0DD9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SizeBench.ErrorReporting", "SizeBench.ErrorReporting\SizeBench.ErrorReporting.csproj", "{45FED563-6A30-4145-AB46-7D91FC6DA891}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SizeBench.ErrorReporting.Tests", "SizeBench.ErrorReporting.Tests\SizeBench.ErrorReporting.Tests.csproj", "{5158845A-13ED-484C-8B7B-555E503CDACF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +73,14 @@ Global
 		{97DCB2D9-F2C5-4342-B229-1708A11F0DD9}.Debug|x64.Build.0 = Debug|x64
 		{97DCB2D9-F2C5-4342-B229-1708A11F0DD9}.Release|x64.ActiveCfg = Release|x64
 		{97DCB2D9-F2C5-4342-B229-1708A11F0DD9}.Release|x64.Build.0 = Release|x64
+		{45FED563-6A30-4145-AB46-7D91FC6DA891}.Debug|x64.ActiveCfg = Debug|x64
+		{45FED563-6A30-4145-AB46-7D91FC6DA891}.Debug|x64.Build.0 = Debug|x64
+		{45FED563-6A30-4145-AB46-7D91FC6DA891}.Release|x64.ActiveCfg = Release|x64
+		{45FED563-6A30-4145-AB46-7D91FC6DA891}.Release|x64.Build.0 = Release|x64
+		{5158845A-13ED-484C-8B7B-555E503CDACF}.Debug|x64.ActiveCfg = Debug|x64
+		{5158845A-13ED-484C-8B7B-555E503CDACF}.Debug|x64.Build.0 = Debug|x64
+		{5158845A-13ED-484C-8B7B-555E503CDACF}.Release|x64.ActiveCfg = Release|x64
+		{5158845A-13ED-484C-8B7B-555E503CDACF}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -80,6 +92,8 @@ Global
 		{77B1C741-09A2-4C69-9CE9-CCC814104F2E} = {DDB4277D-5229-47F8-8A1C-576CA06F7D0D}
 		{67AB8708-AC46-4AB4-BE88-AFEBBFF0798E} = {DDB4277D-5229-47F8-8A1C-576CA06F7D0D}
 		{97DCB2D9-F2C5-4342-B229-1708A11F0DD9} = {5E7F622A-2164-45BD-94F2-682AD964C057}
+		{45FED563-6A30-4145-AB46-7D91FC6DA891} = {DDB4277D-5229-47F8-8A1C-576CA06F7D0D}
+		{5158845A-13ED-484C-8B7B-555E503CDACF} = {DDB4277D-5229-47F8-8A1C-576CA06F7D0D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {936F9790-BC54-416C-9C26-BB58BA16D33E}

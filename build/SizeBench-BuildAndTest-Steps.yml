@@ -32,16 +32,6 @@ steps:
   inputs:
     command: restore
     feedsToUse: config
-    nugetConfigPath: NuGet.config
-    verbosityRestore: 'minimal'
-
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet restore R2R'
-  inputs:
-    command: restore
-    restoreArguments: '/p:PublishReadyToRun=true'
-    feedsToUse: config
-    nugetConfigPath: NuGet.config
     verbosityRestore: 'minimal'
 
 - task: DotNetCoreCLI@2

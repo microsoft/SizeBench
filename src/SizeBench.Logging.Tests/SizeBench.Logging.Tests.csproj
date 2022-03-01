@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <SizeBenchTestCode>true</SizeBenchTestCode>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\SizeBench.AsyncInfrastructure\SizeBench.AsyncInfrastructure.csproj" />
+        <ProjectReference Include="..\SizeBench.Logging\SizeBench.Logging.csproj" />
+        <ProjectReference Include="..\SizeBench.TestInfrastructure\SizeBench.TestInfrastructure.csproj" />
+    </ItemGroup>
+
+</Project>

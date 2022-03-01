@@ -23,6 +23,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{48871072
 		..\build\SizeBench-Variables.yml = ..\build\SizeBench-Variables.yml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{5E7F622A-2164-45BD-94F2-682AD964C057}"
+	ProjectSection(SolutionItems) = preProject
+		RunSettings.runsettings = RunSettings.runsettings
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64

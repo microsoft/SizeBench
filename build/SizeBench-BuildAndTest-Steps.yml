@@ -33,6 +33,7 @@ steps:
     command: restore
     feedsToUse: config
     verbosityRestore: 'minimal'
+    projects: src/SizeBench.sln
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet build'
@@ -79,7 +80,7 @@ steps:
     inputs:
       command: test
       projects: '**/*.csproj'
-      arguments: '--no-restore --configuration $(buildConfiguration) --blame-crash --settings RunSettings.runsettings $(codeCoverageArgs)'
+      arguments: '--no-restore --configuration $(buildConfiguration) --blame-crash --settings src\RunSettings.runsettings $(codeCoverageArgs)'
       testRunTitle: 'Tests for $(buildConfiguration)'
       publishTestResults: true
   

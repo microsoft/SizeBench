@@ -1,0 +1,10 @@
+namespace MyProject
+{
+    runtimeclass TestRuntimeClass
+    {
+        // Declaring a constructor (or constructors) in the IDL causes the runtime class to be
+        // activatable from outside the compilation unit.
+        TestRuntimeClass();
+        String Name;
+    }
+}

@@ -381,3 +381,16 @@ FodyWeavers.xsd
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+# SizeBench TestPEs
+/src/TestPEs_Staging
+/src/TestPEProjects/StaticLibs/Before/StaticLib1/Before
+/src/TestPEProjects/StaticLibs/After/StaticLib1/After
+/src/TestPEProjects/StaticLibs/After/StaticLib3/After
+/src/TestPEProjects/StaticLibs/Before/StaticLib2/Before
+/SizeBench.AnalysisEngine.Tests.CppTestCasesBefore/TestPEs_Staging
+**/*.FileListAbsolute.txt
+/src/TestPEProjects/**/TestPEs
+**/TestPEs/Merged*
+**/TestPEs/Unmerged*
+*.*recipe

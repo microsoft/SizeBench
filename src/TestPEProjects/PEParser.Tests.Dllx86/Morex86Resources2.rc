@@ -1,0 +1,153 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource1.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "winres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Japanese (Japan) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_JPN)
+LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
+#pragma code_page(932)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_BITMAP1             BITMAP                  "bitmap1.bmp"
+
+#endif    // Japanese (Japan) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_TOOLBAR1            BITMAP                  "toolbar1.bmp"
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE
+BEGIN
+"resource1.h\0"
+END
+
+2 TEXTINCLUDE
+BEGIN
+"#include ""afxres.h""\r\n"
+"\0"
+END
+
+3 TEXTINCLUDE
+BEGIN
+"#include ""Morex86Resources2.rc2"" // non-App Studio edited resources\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON1               ICON                    "icon1.ico"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU1 MENU
+BEGIN
+POPUP "Menu1"
+BEGIN
+MENUITEM "Submenu1", ID_MENU1_SUBMENU1
+MENUITEM "Submenu2", ID_MENU1_SUBMENU2
+END
+MENUITEM "Menu2", 0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// RT_RIBBON_XML
+//
+
+IDR_RIBBON1             RT_RIBBON_XML           "ribbon1.mfcribbon-ms"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+IDS_STRING102           "Test string 1"
+IDS_STRING103           "Test string 2"
+IDS_STRING104           "Test string 3"
+IDS_STRING105           "Test string 4"
+IDS_STRING106           "Test string 5"
+IDS_STRING107           "Test string 6"
+IDS_STRING108           "Test string 7"
+IDS_STRING109           "Test string 8"
+IDS_STRING110           "Test string 9"
+IDS_STRING111           "Test string 10"
+END
+
+STRINGTABLE
+BEGIN
+IDS_STRING112           "Test string 11"
+IDS_STRING113           "Test string 12"
+IDS_STRING114           "Test string 13"
+IDS_STRING115           "Test string 14"
+IDS_STRING116           "Test string 15"
+IDS_STRING117           "Test string 16"
+END
+
+STRINGTABLE
+BEGIN
+IDS_STRING118           "Test string 17"
+END
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#include "Morex86Resources2.rc2" // non-App Studio edited resources
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED

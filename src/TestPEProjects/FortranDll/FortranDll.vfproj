@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioProject ProjectType="typeDynamicLibrary" ProjectCreator="Intel Fortran" Keyword="Dll" Version="11.0" ProjectIdGuid="{106F0BDF-01E1-4894-A5C5-4D6691D055F8}">
+	<Platforms>
+		<Platform Name="x64"/>
+  </Platforms>
+  <Configurations>
+    <Configuration Name="Debug|x64" ConfigurationType="typeDynamicLibrary">
+      <Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" WarnInterfaces="true" Traceback="true" BoundsCheck="true" StackFrameCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
+      <Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" GenerateDebugInformation="true" GenerateMapFile="true" SubSystem="subSystemWindows" LinkDLL="true"/>
+      <Tool Name="VFResourceCompilerTool"/>
+      <Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
+      <Tool Name="VFCustomBuildTool"/>
+      <Tool Name="VFPreLinkEventTool"/>
+      <Tool Name="VFPreBuildEventTool"/>
+      <Tool Name="VFPostBuildEventTool"/>
+      <Tool Name="VFManifestTool" SuppressStartupBanner="true"/>
+    </Configuration>
+  </Configurations>
+	<Files>
+		<Filter Name="Header Files" Filter="fi;fd"/>
+		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"/>
+		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<File RelativePath=".\File2.f90"/>
+		<File RelativePath=".\FortranDll.f90"/></Filter>
+  </Files>
+	<Globals/>
+</VisualStudioProject>

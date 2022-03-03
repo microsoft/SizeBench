@@ -1,0 +1,21 @@
+//
+// Morex86Resources2.RC2 - resources App Studio does not edit directly
+//
+
+#ifdef APSTUDIO_INVOKED
+	#error this file is not editable by App Studio
+#endif //APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Add manually edited resources here...
+
+// APSTUDIO doesn't do well with multi-line strings, so to test this we'll do this one manually.
+STRINGTABLE
+BEGIN
+IDS_REALLYLONGSTRING           "A really long string With newlines in it \n\
+And more newlines \n\
+And \thorizontal tab"
+END
+
+/////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,225 @@
+<html>
+    <head>
+        <title>Wasteful Virtuals</title>
+        <link rel="stylesheet" type="text/css" href="styles.css?v1">
+    </head>
+    <body>
+        <h1 style="border-bottom: 0;">SizeBench - a binary analysis tool for Windows</h1>
+        <h2>Wasteful Virtuals</h2>
+
+        <p>
+            One of the heuristic analyses that SizeBench can do is to look for virtual functions that appear to be wasting space.
+        </p>
+
+        <h3>What is a Wasteful Virtual?</h3>
+
+        <p>
+            To understand why some virtual functions can be statically determined to be wasteful, let's start by recalling how virtual functions work.
+        </p>
+
+        <p>
+            Virtual functions are implemented in all the major compilers using vtables - each type that contains at least one virtual function, or derives
+            from a type that contains at least one virtual function, will have one or more vtables associated with it, with one vfptr per vtable, but that's
+            another topic on memory layout for another day. For the purposes of binary size on disk, the important thing is the vtables themselves, not the
+            vfptrs. A vtable is just an array of function pointers that the compiler constructs. So imagine you have some types like these:
+        </p>
+
+        <pre>
+    class Base {
+    public:
+        void RegularNonVirtual() { }
+        virtual void VirtualFunctionWithManyOverrides() { }
+        virtual int VirtualFunctionWithNoOverrides() { return 3; };
+    };
+
+    class Base_Derived1 : public Base {
+    public:
+        void VirtualFunctionWithManyOverrides() override { };
+        virtual void PureVirtualFunctionWithOneOverride() = 0;
+        virtual void VirtualFunctionWithNoOverrides2() { };
+        virtual int VirtualFunctionWithNoOverrides(int x) { return x; }; // Note this has an argument, so it's not an override for the one in Base1
+    };
+
+    class Base_Derived1_MoreDerived : public Base_Derived1 {
+    public:
+        void VirtualFunctionWithManyOverrides() override final { };
+        virtual int VirtualFunctionWithNoOverrides() const { return 5; }; // Note this is const, so it's not an override for the one in Base1
+        virtual int VirtualFunctionWithNoOverrides(float y) { return (int)y; }; // Note this has a float argument so it's not an override for the int version in Base1_Derived1 or the argument-less version in Base1
+        void PureVirtualFunctionWithOneOverride() override { };
+    };
+
+    class Base_Derived2 : public Base {
+    public:
+        void VirtualFunctionWithManyOverrides() override final { };
+    };
+        </pre>
+
+        <p>
+            Then you'll end up with vtables that look like these:
+        </p>
+
+        <pre>
+    Base vtable:
+    -------------------------------------------
+    | &Base::VirtualFunctionWithManyOverrides |
+    | &Base::VirtualFunctionWithNoOverrides   |
+    -------------------------------------------
+
+    Base_Derived1 vtable:
+    -------------------------------------------------------
+    | &Base::VirtualFunctionWithManyOverrides             |
+    | &Base::VirtualFunctionWithNoOverrides               |
+    | &_purecall                                          | &lt;-- this is PureVirtualFunctionWithOneOverride
+    | &Base_Derived1::VirtualFunctionWithNoOverrides2     |
+    | &Base_Derived1::VirtualFunctionWithNoOverrides(int) |
+    -------------------------------------------------------
+
+    Base_Derived1_MoreDerived vtable:
+    ---------------------------------------------------------------------
+    | &Base_Derived1_MoreDerived::VirtualFunctionWithManyOverrides      |
+    | &Base::VirtualFunctionWithNoOverrides                             |
+    | &Base_Derived1_MoreDerived::PureVirtualFunctionWithOneOverride    |
+    | &Base_Derived1::VirtualFunctionWithNoOverrides2                   |
+    | &Base_Derived1::VirtualFunctionWithNoOverrides(int)               |
+    | &Base_Derived1_MoreDerived::VirtualFunctionWithNoOverrides const  |
+    | &Base_Derived1_MoreDerived::VirtualFunctionWithNoOverrides(float) |
+    ---------------------------------------------------------------------
+
+    Base_Derived2 vtable:
+    ----------------------------------------------------
+    | &Base_Derived2::VirtualFunctionWithManyOverrides |
+    | &Base::VirtualFunctionWithNoOverrides            |
+    ----------------------------------------------------
+        </pre>
+
+        <p>
+            So, a couple of things are interesting here.
+        </p>
+
+        <ol>
+            <li>
+                <tt>VirtualFunctionWithNoOverrides</tt> in <tt>Base</tt> is using up a vtable slot in all 4 of these types, but it's
+                never overridden so this is pointless.
+            </li>
+            <li>
+                <tt>PureVirtualFunctionWithOneOverride</tt> in <tt>Base_Derived1</tt> is using
+                up a vtable slot in two types even though it has just one implementation. Imagine the class hierarchy were much deeper,
+                it would use up a vtable slot in all the types in the hierarchy even if there's just one implementation.<br />
+            </li>
+        </ol>
+
+        <p>
+            These are the two classes of things SizeBench tries to detect. But why bother? What costs are there, really? There's a few:
+        </p>
+
+        <ol>
+            <li>
+                These vtable slots end up on disk as function pointers.  They're encoded as Relative Virtual Addresses (RVAs) so they take
+                up 4 bytes each. In very large class hierarchies, this can add up to a surprising amount.
+            </li>
+            <li>
+                Each vtable slot is a function pointer, and function pointers require an entry in te .reloc Binary Section. Each reloc entry
+                is exactly 4 bytes, regardless of architecture, as they are also RVAs (Relative Virtual Addresses, offsets into the binary image).
+                Worse, every reloc entry is parsed and relocated immediately on module load by the loader.
+            </li>
+            <li>
+                Callsites for virtuals almost always have <a href="https://docs.microsoft.com/windows/win32/secbp/control-flow-guard">Control Flow Guard (CFG)</a>
+                enforced, which generates several additional assembly instructions, bloating code size at each callsite. There are some exceptions,
+                but generally this is true.
+            </li>
+            <li>Virtual calls often can't be devirtualized by the compiler so it can't inline things for optimization purposes.</li>
+            <li>
+                Profile Guided Optimization can cause even further code size bloat for virtuals, if they're in hot/warm code, as it will try
+                to "speculatively devirtualize" - detecting if the vfptr is a well-known vtable entry in the binary to convert the virtual call to
+                direct, but it does this essentially with "if (well known vfptr) { direct call } else { virtual call }" - so the code size is larger
+                than a direct call or an indirect call, it's both!
+            </li>
+        </ol>
+
+        <p>
+            There may be more costs, but those are the ones I know of at the moment. Thus, reducing virtual usage can benefit binary size, CPU speed,
+            reference set for disk I/O to not need to load so much code/data.
+        </p>
+
+
+
+        <h3>Example in SizeBench UI</h3>
+        <img class="screenshot" src="Images/WastefulVirtuals_Overview.png" width=800 />
+        <p>
+            If you click the "Wasteful Virtuals" button after loading a binary in the tool, you'll get a screenshot similar to the right.  This example
+            happens to be from a binary called OpenConsole.exe in <a href="https://github.com/Microsoft/Terminal">Windows Terminal</a>, from commit
+            <tt>10222a2b</tt> if you'd like to replicate this exactly.
+        </p>
+
+        <p>
+            The top row shows a type called <tt>Microsoft::Console::Render::VtEngine</tt> that has some wasteful virtual functions detected on it.  Some
+            of the functions are named <tt>InvalidateSelection</tt>, <tt>StartPaint</tt>, and <tt>UpdateFont</tt> among many others. Each of these functions
+            wastes 24 bytes (the "Waste Per Slot" column), and collectively across all the derived types this wastes 600 bytes of binary size.
+        </p>
+
+        <p>
+            In some cases you may get a better return on investment by focusing on things that are high on the "Waste Per Slot" metric as that means fixing just
+            one virtual function improves the most.  In other cases you may want to target an entire type and prefer to sort by "Wasted Size" which is across
+            the entire type.  You can click the column headers to sort either one, depending on which way you want to approach this.
+        </p>
+
+        <br style="clear:right" />
+
+        <br/>
+        <br/>
+
+        <img class="screenshot" src="Images/WastefulVirtuals_VtEngine.png" width=800 />
+        <p>
+            If you click on a specific Wasteful Virtual (the link in the Name column), you'll get a screen like this.
+        </p>
+
+        <p>
+            This screenshot shows the <tt>VtEngine</tt> from the first screenshot, it's just an expanded view. Here, each of the wasteful functions
+            is a link you can use to see that symbol, and eventually this view should also show more about the total waste of the function (vtable slot entries,
+            reloc entries, and so on) - but for now it just shows the vtable slot waste so it underestimates how much you'll save.
+        </p>
+
+        <br style="clear:right" />
+
+        <h3>How To Fix These</h3>
+
+        <p>
+            There are a few ways to go about removing the waste from these.
+        </p>
+
+        <ol>
+            <li>If the function is virtual, but has no overrides, of course it's as simple as removing the virtual keyword. You may be surprised how often
+                this is the case - code changes a lot, and something that used to be polymorphic may no longer be, but the keyword lingers with all its costs
+                noted above.</li>
+            <li>If the function is pure virtual, with just one override, then perhaps the function can be removed from the base type and the virtual/override
+                removed from the single implementation. In some cases, I've seen code where nobody actually needs to call it on the base type, so again this is
+                pretty simple to do.</li>
+            <li>If the function is pure virtual, with just one override, but folks need to call it on the base class, then there are a few strategies you can use:
+                <ul>
+                    <li>If your binary already requires RTTI (which has a lot of costs - be careful!), you could remove the pure virtual function, make it non-virtual
+                        on both the base type and the derived type containing the implementation. Then, in the base type, dynamic_cast to the derived type - if
+                        successful, directly dispatch to the derived type. If the dynamic_cast fails, no-op/crash/assert/whatever is appropriate for your codebase.</li>
+                    <li>If your binary does not require RTTI, perhaps you already have a hand-rolled RTTI-esque system (many binaries do). In this case, use your
+                        own "<tt>GetTypeIndex()</tt>" or whatever you may have, to implement the same idea as the dynamic_cast above, but without all the costs of C++
+                        RTTI. This is what the Windows XAML framework does internally, and Chromium has a similar mechanism.</li>
+                    <li>If your binary does not require RTTI and does not have a hand-rolled RTTI-esque system, perhaps with a little analysis the callers that have a
+                        pointer to a base type could be plumbed to have the derived type with the implementation.</li>
+                    <li>If all those fail, maybe this function isn't worth devirtualizing.</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>Does This Really Add Up?</h3>
+
+        <p>
+            Not for every binary - but for some this can matter a lot. As an example, the XAML framework in Windows extensively uses virtual functions, and by using
+            this analysis to identify problems and a few techniques to implement solutions, has been able to save >10% of their binary size (over 1MB). XAML may be 
+            pathologically bad at using virtuals, but it's an example of how it can add up in some cases.
+        </p>
+
+        <p>
+            If you run this analysis on your binary and the "Wasted Size" column in measured in bytes, probably this is a bad use of your time to bother with.  But if
+            it is measured in 10s or hundreds of KBs then that can really matter for certain workloads.
+        </p>
+</body>
+</html>

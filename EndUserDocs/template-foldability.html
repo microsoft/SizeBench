@@ -1,0 +1,232 @@
+<html>
+    <head>
+        <title>Template Foldability</title>
+        <link rel="stylesheet" type="text/css" href="styles.css?v1">
+    </head>
+    <body>
+        <h1 style="border-bottom: 0;">SizeBench - a binary analysis tool for Windows</h1>
+        <h2>Template Foldability</h2>
+
+        <p>
+            One of the heuristic analyses that SizeBench can do is to look for C++ templated functions that are ripe for opportunities
+            because they are 'almost COMDAT-foldable'.
+        </p>
+
+        <h3>What is the Core Idea of Template Foldability?</h3>
+
+        <p>
+            Suppose you have this template:
+        </p>
+
+        <pre>
+    template <typename T>
+    void MyCoolTemplate(T y, bool shouldBeEvenCooler)
+    {
+       if(shouldBeEvenCooler) { cout &lt;&lt; "I'm even cooler!"; return; }
+
+       cout &lt;&lt; y-&gt;someField;
+    }
+        </pre>
+
+        <p>
+            One question you may have is just "how much size does <tt>MyCoolTemplate&lt;T&gt;</tt> contribute to my binary?" - as this is
+            not at all obvious from reading the code. It depends on many factors, such as how many times the template was instantiated,
+            and whether the linker's Identical COMDAT Folding (ICF) feature was able to fold any of these instantiations together.
+        </p>
+
+        <p>
+            Imagine you use <tt>MyCoolTemplate&lt;Type1&gt;</tt>, <tt>MyCoolTemplate&lt;Type2&gt;</tt>, and <tt>MyCoolTemplate&lt;Type3&gt;</tt>
+            in your binary - that's 3 instantiations. So the compiler will spit out 3 copies of this code, one per type T that was used as a
+            template parameter. Each of them contains some bytes of assembly code. Then, the linker will come in later and fold together any of
+            these that have identical bodies. But, what happens if the bodies are 95% the same bytes of assembly code, with a small difference due
+            to the type T? Then no folding occurs, and you "waste" 95% of each copy by triplicating it. Bummer.
+        </p>
+
+        <p>
+            So to add to the example above, imagine that <tt>Type1, Type2, and Type3</tt> look like this:
+        </p>
+
+        <pre>
+    class Type1 {
+    public:
+      int someField;
+      bool someFlag;
+    };
+
+    class Type2 {
+    public:
+      bool someFlag;
+      int someField;
+      bool someOtherFlag;
+    };
+
+    class Type3 {
+    public:
+      bool yetAnotherFlag;
+      int someField;
+    };
+        </pre>
+
+        <p>
+            Then what'll happen is <tt>MyCoolTemplate&lt;Type2&gt;</tt> and <tt>MyCoolTemplate&lt;Type3&gt;</tt> will fold together perfectly as the offset
+            of "someField" is identical, so the offset that gets put into the assemlby is the same. But <tt>MyCoolTemplate&lt;Type1&gt;</tt> will not fold,
+            since someField is at another offset so the number of bytes that must be offset from "y" to find "someField" is different.
+        </p>
+
+        <p>
+            Again, this is extremely difficult to see from just reading code as you must know the layouts of every type involved, the layout of any vtables
+            called, the order of the vfptrs, and so on.
+        </p>
+
+        <p>
+            Enter SizeBench's Template Foldability analysis! SizeBench will examine all templated functions in the binary, see which ones fold together,
+            and tell you a few things about each template:
+        </p>
+
+        <ul>
+            <li>What is the total cost of this templated function across all instantiations?</li>
+            <li>How many symbols are there (how many times was the template expanded)?</li>
+            <li>How many of those symbols are at unique addresses after COMDAT folding, dead code is stripped out, and so on?</li>
+            <li>How similar are the instantiations to each other (0-100%)?</li>
+            <li>What is the amount of "waste" in those similar parts across all those unique copies?</li>
+        </ul>
+
+        <h3>Example in SizeBench UI</h3>
+
+        <p>
+            Below we'll walk through an example found in an open source part of Chromium-based Edge.
+        </p>
+
+        <p>
+            After opening this binary in SizeBench and clicking on Template Foldability, this is what we see:
+        </p>
+
+        <img src="Images/TemplateFoldability_Anaheim_Overview.png" width=800 />
+
+        <p>
+            The highlighted row is the template we'll look at. As you can see from the screenshot, SizeBench says this templated function takes up around
+            40 KB in the binary, and each copy is 94% similar to the others - so 37.6 KB is considered "waste" in that it's duplicated bytes of code. This
+            is across 463 copies of the template being instantiated, and after all folding 364 of them ended up being unique.
+        </p>
+
+        <p>
+            Note that SizeBench cannot tell you the template's full name as this is not in the debugging information, so "&lt;T1&gt;" is used to mean "the
+            first template parameter." The names throughout the Template Foldability analysis are all anonymized like this with T1, T2, etc.
+        </p>
+
+        <p>
+            After clicking on that template we drill in to see this page:
+        </p>
+
+        <img src="Images/TemplateFoldability_Anaheim_MojoValidateStruct.png" width=800 />
+
+        <p>
+            This shows a diff of the disassembly from two instantiations of the template, each of which is 112 bytes (you can see that in the drop-down
+            ComboBoxes). You can pick any two instantiations that you like, but by default the first two that match in size are chosen.
+        </p>
+
+        <p>
+            The disassembly is identical for the first 53 lines, so this view automatically scrolled to line 54 to show us that this single "call" instruction
+            is the only thing different between these two 112-byte template instantiations. If we want to see exactly which line of source code this line of
+            assembly came from, we can just scroll to the right to see this:
+        </p>
+
+        <img src="Images/TemplateFoldability_Anaheim_MojoValidateStruct_LineNumber.png" width=800 />
+
+        <p>
+            So we can see that validation_util.h line 172 is the line that is doing something dependent on type T. Let's take a look at validation_util.h as 
+            it was at this time, for this templated function. It looked like this:
+        </p>
+
+        <pre>
+    163  template &lt;typename T&gt;
+    164  bool ValidateStruct(const Pointer&lt;T&gt;& input,
+    165                      ValidationContext* validation_context) {
+    166    ValidationContext::ScopedDepthTracker depth_tracker(validation_context);
+    167    if (validation_context-&gt;ExceedsMaxDepth()) {
+    168      ReportValidationError(validation_context,
+    169                            VALIDATION_ERROR_MAX_RECURSION_DEPTH);
+    170      return false;
+    171    }
+    172    return ValidatePointer(input, validation_context) &&
+    173           T::Validate(input.Get(), validation_context);
+    174  }
+        </pre>
+
+        <p>
+            Wow, this template is only 5-8 lines long, depending on how you like to count them. Let's call it 8. Yet it takes 40 KB of the binary! We can see there's
+            some validation code at the top to instantiate a <tt>ScopedDepthTracker</tt>, check if it exceeds a max depth, report an error, and so on - all this code is 
+            identical for each of the "T" types used to expand this template. The real difference is on line 172 where the <tt>T::Validate</tt> function is called. It makes 
+            sense that this is unique to each type T as it's a direct call - perhaps in some cases it can inline and end up with identical bytes, so some copies fold,
+            but in general this does not fold together.
+        </p>
+
+        <p>
+            What can be done about this? Let's take a look in the next section.
+        </p>
+
+        <h3>How To Fix These</h3>
+
+        <p>
+            Let's continue with the example above - how can we fix this, or at least improve it? There's a few techniques you could use:
+        </p>
+
+        <ul>
+            <li>Add an interface for the <tt>Validate</tt> function, such as "<tt>IValidatable</tt>" and then have the template call the virtual function <tt>IValidatable::Validate(...)</tt>.
+                This has the disadvantage of adding an indirect call, reducing the ability to inline, and other CPU perf characteristics - but for code that's not particularly hot may be
+                the simplest way. In this case in Chromium this was not acceptable for security reasons.</li>
+            <li>Have each <tt>T::Validate</tt> be foldable, as then each "call" in the template above would call the same address so they'd fold - this can be done for some types of problems,
+                but is difficult to maintain.</li>
+            <li>Separate out the foldable part, in this case the validation code, into a <tt>__declspec(noinline)</tt> function to prevent it from being inlined back into the template.</li>
+        </ul>
+
+        <p>
+            The actual change done by Emily Andrews on the Edge team <a href="https://chromium.googlesource.com/chromium/src.git/+/bebb5c663a5d32b21ab72a1599c036fb988390e6%5E%21/">can be seen here</a>.
+            Now the template looks like this:
+        </p>
+
+        <pre>
+    171  template &lt;typename T&gt;
+    172  bool ValidateStruct(const Pointer&lt;T&gt;& input,
+    173                      ValidationContext* validation_context) {
+    174    ValidationContext::ScopedDepthTracker depth_tracker(validation_context);
+    175    return ValidateParams(input, validation_context) &&
+    176           T::Validate(input.Get(), validation_context);
+    177  }
+        </pre>
+
+        <p>
+            And <tt>ValidateParams</tt> looks like this:
+        </p>
+
+        <pre>
+    149  template &lt;typename T&gt;
+    150  bool ValidateParams(const Pointer&lt;T&gt;& input,
+    151                      ValidationContext* validation_context) {
+    152    if (validation_context-&gt;ExceedsMaxDepth()) {
+    153      ReportValidationError(validation_context,
+    154                            VALIDATION_ERROR_MAX_RECURSION_DEPTH);
+    155      return false;
+    156    }
+    157    return ValidatePointer(input, validation_context);
+    158  }
+        </pre>
+
+        <p>
+            In this case, the <tt>ValidateParams</tt> template is not marked as <tt>__declspec(noinline)</tt>, though that would be my recommendation in cases like this in case
+            the inliner gets more aggressive later. In this case, it happened to not inline, so the <tt>ValidateStruct</tt> templates shrunk a lot per copy, and the 
+            <tt>ValidateParams&lt;T&gt;</tt> template perfectly folded down to one copy.
+        </p>
+
+        <h3>Other Examples</h3>
+
+        <p>
+            There are a few more examples of using Template Foldability that are internal to Microsoft, unfortunately not in OSS'd code.  If you are a Microsoft employee, you
+            can visit here: <a href="https://aka.ms/sizebench-ms-internal-template-foldability-examples">MS Internal Template Foldability examples</a>.
+        </p>
+
+        <p>
+            If you land any changes from using this analysis, please send them my way so I can add them here for others to learn from them!
+        </p>
+    </body>
+</html>

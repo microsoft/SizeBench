@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Binary Sections</title>
+        <link rel="stylesheet" type="text/css" href="styles.css?v1">
+    </head>
+    <body>
+        <h1 style="border-bottom: 0;">SizeBench - a binary analysis tool for Windows</h1>
+        <h2>Binary Sections</h2>
+
+        <p>
+            A section is basically the smallest chunk of a binary that the Windows OS Loader cares about.  Each section in a binary has so-called 
+            <a href="https://docs.microsoft.com/windows/win32/api/winnt/ns-winnt-image_section_header">"characteristics"</a> which define
+            things like whether that section contains executable code, contains read-only data or read-write data, and whether that section
+            contains initialized or uninitialized data.
+        </p>
+        
+        <p>
+            When the binary is loaded into a process, the loader will ensure that everything not marked executable in these headers is in fact
+            never executed, these days this often uses a hardware <a href="https://en.wikipedia.org/wiki/NX_bit">NX-bit</a> for security, for
+            example.  Similarly, the OS will enforce that read-only sections never get written to as you would expect.
+        </p>
+
+        <img class="screenshot" src="Images/Size_vs_VirtualSize.png" width=800/>
+        <p>
+            The OS can only accomplish this by ensuring sections occupy whole pages of memory.  On Windows, these pages are 4KB, so if a section
+            contains, say, 1,096 bytes of code - then when loaded into memory an additional 3,000 bytes of memory will be allocated and zero'd out
+            to fill up the full 4,096 bytes (4 KB) of that page.  Likewise, if a section contains 4,100 bytes of read-only data then it will need
+            to occupy 8,192 bytes (8 KB) of space across two pages, resulting in 4,092 bytes (8,192 - 4,100) of zero padding.
+        </p>
+
+        <p>
+            Sections can be very coarse and challenging to really understand in full, especially in large binaries.  If you want to dig in deeper
+            than a section, your next step is to break down the section by <a href="coff-group.html">COFF Groups</a>,
+            which give more semantic meaning to chunks that have the same OS-loader-level capabilities, and are all grouped into the same section.
+        </p>
+
+        <h3>Commonly-seen section name decoder ring</h3>
+        <p>
+            One thing that makes sections tricky to talk about is that their names are just by convention.  For example, the name <tt>.text</tt> is,
+            by convention, used to hold the code in a binary commonly.  But nothing stops you from picking another one.  For example, many kernel-mode
+            binaries choose the name <tt>PAGE</tt> for their page-able code and place non-pageable code in another section.<br/>
+            <br/>
+            As a result of this all being by convention, we can't easily just say "if you want to find all of your code, look in <tt>.text</tt>" and
+            instead need to see all of these obtuse/arcane names directly in tools like SizeBench.  To aid with that, here is a "decoder ring" with some
+            commonly-seen sections in the wild, and what they mean in human-readable words.
+        </p>
+
+        <table>
+            <tr>
+                <th>Section Name</th>
+                <th>Purpose</th>
+                <th>Ways To Reduce</th>
+            </tr>
+            <tr>
+                <td><tt>.CRT</tt></td>
+                <td>The C Runtime uses this to store pointers to <a href="dynamic-initializers.html">dynamic initializers</a>.<br />
+                    Note this is often placed inside the <tt>.rdata</tt> section.  In some rare cases it can be its own section.
+                </td>
+                <td>
+                    Use less <a href="dynamic-initializers.html">dynamic initializers</a> - this also reduces the <tt>.text$di</tt> <a href="coff-group.html">COFF Group</a> and
+                    CPU use on DLL load so that's an added bonus.<br/>
+                </td>
+            </tr>
+            <tr>
+                <td><tt>.data</tt></td>
+                <td>Mutable data (read/write).</td>
+                <td>
+                    Reduce data you don't need, or move it to .rdata to make it shareable.  To move to .rdata see if you can mark more things constexpr (or const, in some cases) or make
+                    them simple POD (plain old data) types.<br/>
+                    <br/>
+                    Look for large arrays of data, for example, and see if each instance in the array might have padding waste with SizeBench's <a href="type-layout.html">Type Layout</a> view.<br/>
+                    Reducing <a href="dynamic-initializers.html">dynamic initializers</a> can also move data from .data to .rdata.
+                </td>
+            </tr>
+            <tr>
+                <td><tt>.didat</tt></td>
+                <td>Delay-load import address table (IAT).</td>
+                <td>Import less functions in a delay-loaded fashion.<br/>
+                    See imports with <tt>link /dump /imports path\to\your\binary.dll</tt></td>
+            </tr>
+            <tr>
+                <td><tt>.idata</tt></td>
+                <td>Import address table (IAT).<br/>
+                    Similar to <tt>.didat</tt> except these ones are not delay-loaded.</td>
+                <td>Import less functions.<br/>
+                    See imports with <tt>link /dump /imports path\to\your\binary.dll</tt></td>
+            </tr>
+            <tr>
+                <td><tt>.nep</tt></td>
+                <td>"Native entry points" - used by C++/CLI binaries that mix native and managed code in the same binary.</td>
+                <td>Unknown.  If you find a way, pass it along so these docs can be updated!</td>
+            </tr>
+            <tr>
+                <td><tt>.pdata</tt></td>
+                <td>"Procedure data" - there is  12 byte entry in here for each function in the binary, in a tightly packed array.</td>
+                <td>Have less functions in the binary.  Not very practical advice - so try reducing <tt>.text</tt> and this should shrink as you go.</td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td>Read-only data (shareable data pages).  This includes vtables, strings and constepr/const data.</td>
+                <td>Remove data/strings you don't use.<br/>
+                    Reduce vtable sizes (the <a href="wasteful-virtuals.html">Wasteful Virtuals</a> functionality may help with that).</td>
+            </tr>
+            <tr>
+                <td><tt>.reloc</tt></td>
+                <td>Base relocations.<br/>
+                    These are used if module doesn't load at preferred load address, which most modules don't because of <a href="https://en.wikipedia.org/wiki/Address_space_layout_randomization">ASLR</a>.</td>
+                <td>Reduce virtual functions because vtables need to be relocated (the <a href="wasteful-virtuals.html">Wasteful Virtuals</a> functionality may help with that).<br/>
+                    Reduce the number of functions whose address is taken.</td>
+            </tr>
+            <tr>
+                <td><tt>.rsrc</tt></td>
+                <td>Win32 Resources, typically from .rc files.</td>
+                <td>Remove unused resources<br/>
+                    Compress images, say by using compressed file formats like JPEG over BMP when possible<br/>
+                    Reduce icon sizes.  Do you really need that 512 x 512 variation inside your .ico file?</td>
+            </tr>
+            <tr>
+                <td><tt>.text</tt></td>
+                <td>Code.</td>
+                <td>Simplify code, turn on optimizations more often.<br/>
+                    Look for any old usages of <tt>#pragma optimize(..., off)</tt> and see if they can be removed.<br/>
+                    Try to build with the <tt>/Oxs</tt> compiler option.<br/>
+                    See if the <a href="template-foldability.html">Template Foldability</a> analysis may help reduce templated code size.
+                </td>
+            </tr>
+        </table>
+
+
+
+        <h3>Other tools you can use</h3>
+        <p>
+            If you want to explore sections there are lots of tools available, as this file format has existed for decades.  The MSVC Linker (link.exe)
+            is a good one.  You can execute a command like this:
+        </p>
+
+        <p style="margin-left: 50px;">
+            <tt>link /dump /headers path\to\your\binary.dll</tt>
+        </p>
+
+        <p>
+            And you will see output like this for each section:
+        </p>
+
+        <p style="margin-left: 50px;">
+            <pre>
+    SECTION HEADER #1
+    .text name
+   9CC879 virtual size
+     1000 virtual address (0000000180001000 to 00000001809CD878)
+   9CCA00 size of raw data
+      400 file pointer to raw data (00000400 to 009CCDFF)
+        0 file pointer to relocation table
+        0 file pointer to line numbers
+        0 number of relocations
+        0 number of line numbers
+ 60000020 flags
+          Code
+          Execute Read
+            </pre>
+        </p>
+
+        <p>
+            The name of the section above is <tt>.text</tt> and you can see its size and various properties.  At the end of the <tt>link /dump</tt> output is a
+            summary table that looks like this, showing every section's size at a glance (note the values are in hex):
+        </p>
+
+        <p margin="margin-left: 50px;">
+            <pre>
+    Summary
+         10000 .data
+          1000 .didat
+         99000 .pdata
+        462000 .rdata
+         83000 .reloc
+         1E000 .rsrc
+        9CD000 .text
+            </pre>
+        </p>
+    </body>
+</html>

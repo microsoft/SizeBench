@@ -1,0 +1,91 @@
+<html>
+    <head>
+        <title>SizeBench features when analyzing a single binary</title>
+        <link rel="stylesheet" type="text/css" href="styles.css?v1">
+    </head>
+    <body>
+        <h1 style="border-bottom: 0;">SizeBench - a binary analysis tool for Windows</h1>
+        <h2>Features you can use when analyzing a single binary</h2>
+
+        <p>SizeBench has a variety of ways to help you break down an individual binary.  If you want to diff between two variations of a binary instead,
+           see <a href="diff.html">analyzing a diff.</a>
+        </p>
+        
+        <p>Once you open an individual binary, there are three types of activities you can do:</p>
+
+        <ul>
+            <li><strong>"Start Exploring By…" buttons</strong>, which let you explore the binary with different pivots, like looking at everything in an individual 
+                <a href="binary-section.html">Binary Section</a>, or an individual static lib. This is usually used when you want to optimize on-disk size or reference set,
+                though you can see CPU perf benefits with smaller code or data.</li>
+            <li><strong>"Analyze Object Size" buttons</strong>, which let you explore the size of types in memory, visualize padding, and how vfptrs (pointers to vtables) add to
+                size. Generally most useful when you want to try to use less memory at runtime, or you want to shrink a type that is frequently used (like in a large const/constexpr array).</li>
+            <li><strong>"Analyze For Waste" buttons</strong>, to run heuristic analyses for more actionable things you can do to reduce binary size, like reducing virtual function
+                usage that is especially wasteful or data that is duplicated.</li>
+        </ul>
+
+        <h3>Start Exploring By Binary Section</h3>
+        <p>
+            This view lets you begin your exploration with <a href="binary-section.html">Binary Sections</a>, which is one of the coarsest ways of viewing the constituent parts of a
+            binary. Binary sections are in turn composed of <a href="coff-group.html">COFF Groups</a>. For example, the <tt>.text</tt> section may have a <tt>.text$mn</tt> COFF Group
+            in it, or a <tt>.rdata</tt> section may have a <tt>.rdata$r</tt> COFF Group in it.<br />
+            <br />
+            When viewing an individual section, there are tabs in the UI to see all the COFF Groups within that section, all the static libs that contribute space to that section, all the
+            <a href="compiland.html">compilands</a> that contribute space to that section, and all the symbols contained in the section.
+        </p>
+
+        <h3>Start Exploring By Lib</h3>
+        <p>
+            This view lets you begin your exploration with static libs contained in the binary - this is a less coarse view than <a href="binary-section.html">sections</a> or 
+            <a href="coff-group.html">COFF Groups</a> since usually you'll recognize the names a bit more and there are more of them in a typical binary.<br/>
+            <br/>
+            In the list of all libs, you can see every section and every COFF Group that they contribute to, and can reorder/sort those columns to help focus on specific problem areas.<br/>
+            <br/>
+            When viewing a specific lib, you can see all the binary sections, and COFF Groups that this lib contributes to (and how much this lib contributes into them). You can also see
+            all the <a href="compiland.html">compilands</a> contained within the lib, and all the symbols in the lib.
+        </p>
+
+        <h3>Start Exploring By Compiland</h3>
+        <p>
+            This view lets you begin your exploration with <a href="compiland.html">"compilands"</a> contained in the binary. A compiland is essentially a Translation Unit in C++
+            (one .obj file). These are even more granular than libs, <a href="coff-group.html">COFF Groups</a>, or <a href="binary-section.html">sections</a>, so they are a great place to
+            jump in for a more detailed analysis. Plus you'll almost certainly know the names of these, they're usually the names of the source files that you build into the binary.<br/>
+            <br/>
+            When viewing the list of all compilands, just as with libs, you can see every section and every COFF Group that they contribute to, and can reorder/sort to focus.<br/>
+            <br/>
+            When viewing a specific compiland, you can see all the sections and COFF Groups that this compiland contributes to, and you can see all the symbols contained in that compiland.
+        </p>
+
+        <h3>Start Exploring By Source File</h3>
+        <p>
+            This view lets you begin your exploration by source file, which is frequently the finest grained way to explore a binary.  If a source file contributes to multiple
+            <a href="compiland.html">compilands</a>, such as a header file that is included in many translation units, then this is a great place to see the total cost across all its
+            inclusions.  This is especially valuable for templated code which may be instantiated differently in different compilands.<br/>
+            <br/>
+            Unfortunately, due to limitations of the information recorded in a PDB file, the source files view can only break down contributions of code - it cannot show most kinds of data
+            contributions, so this view can leave important parts of a binary out and it is recommended that you not use <strong>only</strong> this view when investigating your total 
+            binary's size.  However, if you want to focus on code size, which is often a very large chunk of a binary, this can be a great way to visualize that.<br/>
+            <br/>
+            SizeBench is at least able to attribute PDATA and XDATA because this is directly associated with code - for more on PDATA and XDATA see <a href="exceptions.html">exceptions</a>.
+        </p>
+
+        <h3>Type Layout</h3>
+        <p>
+            This view can show you a treeview-style layout of a type in your binary, which can help with optimizing the memory usage of an app in-memory.  If you know this type is used
+            frequently at runtime this could amount to substantial memory improvements.  If you know this type is used in a large constant array in the binary, it could also reduce on-disk
+            size.<br/>
+            <br/>
+            When viewing a type, you can see how much "waste" there is in the type layout in the form of alignment.<br/>
+            <br/>
+            For more details on this see <a href="type-layout.html">this page</a>.
+        </p>
+
+        <h3>Wasteful Virtuals</h3>
+        <p>This topic is more complex and is discussed on <a href="wasteful-virtuals.html">this page</a>.</p>
+
+        <h3>Duplicate Data</h3>
+        <p>This topic is more complex and is discussed on <a href="duplicate-data.html">this page</a>.</p>
+
+        <h3>Template Foldability</h3>
+        <p>This topic is more complex and is discussed on <a href="template-foldability.html">this page</a>.</p>
+    </body>
+</html>

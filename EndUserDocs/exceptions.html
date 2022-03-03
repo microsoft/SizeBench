@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Exceptions</title>
+        <link rel="stylesheet" type="text/css" href="styles.css?v1">
+    </head>
+    <body>
+        <h1 style="border-bottom: 0;">SizeBench - a binary analysis tool for Windows</h1>
+        <h2>Exceptions</h2>
+
+        <p>
+            Exceptions come in several forms on Windows - natively, Windows supports
+            <a href="https://docs.microsoft.com/windows/win32/debug/structured-exception-handling">Structured Event Handling (SEH)</a>, originally provided with Win32.  Windows also
+            supports "language-specific" exceptions, where each language is able to use its own semantics for things like unwinding the stack safely.  As of now, SizeBench deeply understands
+            Structured Exception Handling, and the Microsoft implementation of C++ exception handling.
+        </p>
+
+        <p>
+            This documentation will focus on x64 exception unwinding.  It is very similar for ARM and ARM64, just with slightly different data structures.  For x86 things are much more complicated,
+            as x64/ARM/ARM64 use so-called "zero-overhead exceptions" or "table-based exceptions" where no cost is incurred to "try" only to "catch".  x86 has a cost even to enter a "try" block, and
+            it is not discussed here.
+        </p>
+
+        <p>
+            There is a page detailing many of the data structures involved in x64 exception unwinding <a href="https://docs.microsoft.com/cpp/build/exception-handling-x64?view=msvc-160">here</a>,
+            and this page will walk through the flow in more detail.
+        </p>
+
+
+        <div class="toc">
+            <h2>Table of Contents</h2><br />
+            <ol>
+                <li><a href="#why-are-exceptions-important-to-binary-size">Why are exceptions important to binary size?</a></li>
+                <li><a href="#when-an-exception-is-thrown">How does this start?  Or, when an Exception is thrown</a></li>
+                <li><a href="#where-is-exception-data-stored">Where is the data stored?</a></li>
+                <li>
+                    <a href="#unwinding-cplusplus-exceptions">Unwinding C++ Exceptions</a>
+                    <ol>
+                        <li><a href="#cplusplus-exception-unwind-handlers">C++ Exception unwind handlers</a></li>
+                        <li><a href="#cplusplus-exception-unwind-symbols">Symbols for C++ exception unwind data</a></li>
+                    </ol>
+                </li>
+            </ol>
+        </div>
+
+
+
+        <h3><a id="why-are-exceptions-important-to-binary-size">Why are exceptions important to binary size?</a></h3>
+        <p>
+            C++ on the whole aims to be a "pay for play" language, where you only incur a cost when you use a feature.  There are two parts of the language that as of now are, unfortunately, not "pay
+            for play" - Exceptions and Run-Time Type Information (RTTI).  Herb Sutter talks about this in this CppCon talk from 2019 which you can watch
+            <a href="https://www.youtube.com/watch?v=ARYP83yNAWk">here</a>.  If your codebase never uses a single try, catch, or throw, you'll still pay a significant cost for exception handling
+            metadata throughout your binary.
+        </p>
+
+        <p>
+            Because of this lack of "pay for play" Exceptions are banned in many codebases.  If your codebase isn't using exceptions, check to see if they're enabled, you may be able to save significant
+            space by disabling them.  Of course, if you wish to use many modern C++ features you'll want to enable exceptions and many codebases do extensively use them - so this is not meant to say
+            you should disable exceptions in all the codebases you work in, merely that you should only pay for them if you use them, and that in this case with C++ you have to be explicit about not
+            using a feature.
+        </p>
+
+
+        <h3><a id="when-an-exception-is-thrown">How does this start?  Or, when an Exception is thrown</a></h3>
+        <p>
+            When an exception is raised, Windows will consult the "Exception Directory" in the PE file's header to determine where the PDATA is stored.  PDATA stands for "Procedure Data" and is a tightly
+            packed array of RUNTIME_FUNCTION structures.  Each RUNTIME_FUNCTION is very simple, consisting of the Relative Virtual Address (RVA) of the start and end addresses of the region that it knows
+            how to unwind, and then the RVA of the data needed to unwind.  This PDATA array is sorted by the start address to aid in finding the appropriate entry at runtime.
+        </p>
+
+        <p>
+            In many cases this means that an entire function will have one RUNTIME_FUNCTION whose start and end addresses are the start and end addresses of the entire function.  Some functions will
+            not have any PDATA and need not participate in unwinding - such as trivial getter functions like "return m_foo" - these can't throw so they don't need to know how to unwind.  As a side note,
+            this is why the C++ keyword <tt>noexcept</tt> can be so valuable, because it allows a callsite to know that it can't see an exception escape out of it - with enough of these, entire functions
+            can know they can't possibly be part of a throwing operation, so they can elide their exception unwinding info entirely.
+        </p>
+
+        <p>
+            Some functions may contain multiple PDATA entries because they have, for example, separate try blocks throughout a longer function, or nested try blocks.  If you are using
+            <a href="https://docs.microsoft.com/cpp/build/profile-guided-optimizations?view=msvc-160">Profile Guided Optimization (PGO)</a> this may also result in some parts of the exception
+            unwinding data including PDATA needing to exist multiple times within a single function, for the different separated blocks that PGO can generate throughout the binary, as they have
+            non-contiguous start and end RVAs relative to the function's main body.
+        </p>
+
+        <p>
+            SizeBench can discover these PDATA entries and you will see them with "<tt>[pdata]</tt>" at the beginning of the name.  For example "<tt>[pdata] DoFoo</tt>" is the PDATA entry for the DoFoo
+            function.
+        </p>
+
+        <p>
+            So, once an exception is thrown and the correct PDATA entry is determined, the next step is to look at the UNWIND_INFO structure, pointed to by the PDATA.  UNWIND_INFO has details common to
+            all forms of unwinding, whether they be C++ or Structured Exception Handling or some other language-specific method.  In SizeBench these show up with "<tt>[unwind]</tt>" at the beginning of
+            the name.  The UNWIND_INFO contains two especially important things for this process - the RVA of the exception unwinding function to use, and optional "language-specific data" which that
+            handling function may consume.
+        </p>
+
+
+        <h3><a id="where-is-exception-data-stored">Where is the data stored?</a></h3>
+        <p>
+            When compiling with the Microsoft C++ Compiler (cl.exe), the PDATA records tend to end up in the <tt>.pdata</tt> <a href="binary-section.html">binary section</a>, and the other exception
+            handling metadata including <tt>[unwind]</tt> structures and language-specific data is stored in the .xdata <a href="coff-group.html">COFF Group</a> in almost all cases.  A few rare cases
+            seem to leave some langauge-specific data incorrectly in the .rdata COFF Group, this especially seems to happen for <tt>[cppxdata]</tt> symbols - in practice being in a different COFF Group
+            in this case has little to no impact as in both cases, these are within the .rdata <a href="binary-section.html">binary section</a> so this data is mapped in as read-only data and it is
+            shareable pages between processes that load the same binary.
+        </p>
+
+        <p>
+            When this data is emitted, occasionally a small amount of code is needed as well, to know how to call the right destructor with the right 'this' parameter.  This is often referred to as a
+            'funclet' and if these are generated, they should end up in the <tt>.text$x</tt> <a href="coff-group.html">COFF Group</a>.  In some cases, especially with <tt>__CxxFrameHandler4</tt>, the
+            call to the destructor is encoded directly in the XDATA so no funclet is needed, which is more efficient.
+        </p>
+
+
+        <h3><a id="unwinding-cplusplus-exceptions">Unwinding C++ Exceptions</a></h3>
+        <p>
+            When unwinding a C++ exception, many things must happen, so this is the most complicated to walk through.  As the stack unwinds, the language needs to ensure that each object with a destructor
+            gets an opportunity to run that destructor as it exits scope, in reverse order of construction.  It also needs to only run destructors whose corresponding constructors have run.  The
+            exception also needs to be caught in appropriate catch blocks that match the right type, which may potentially re-throw the exception.  There are also things like
+            <a href="https://en.cppreference.com/w/cpp/error/uncaught_exception">std::uncaught_exception</a> that need to be updated and aware of in-flight exceptions.  This is a lot to coordinate, and
+            changes with language versions over time, so Windows is agnostic to all of this and simply considers C++ exceptions as "language-specific".
+        </p>
+
+        <h4><a id="cplusplus-exception-unwind-handlers">C++ exception unwind handlers</a></h4>
+        <p>
+            There have been multiple versions of the C++ exception unwinding code over the years, the most recent of which is <tt>__CxxFrameHandler4</tt>.  This handler is a dramatically better version
+            and it is recommended that all code use this whenever possible, for more details on this and the <tt>/FH4</tt> switch that enables it, see
+            <a href="https://devblogs.microsoft.com/cppblog/making-cpp-exception-handling-smaller-x64/">this blog post</a>.  Regardless of the version used the basic ideas are the same, so everything
+            below applies to any version of Microsoft's C++ unwinding code, but <tt>__CxxFrameHandler4</tt> is the most efficient encoding.  The general idea is that this is encoded as a state machine
+            where each state knows how to run some set of destructors - potentially encoded as pure data or sometimes encoded as a 'funclet' that is a very small bit of code that knows how to hop into
+            the right destructor with the right 'this' parameter.
+        </p>
+
+        <h4><a id="cplusplus-exception-unwind-symbols">Symbols for C++ exception data</a></h4>
+        <p>
+            C++ exceptions have many kinds of data associated with them, and SizeBench shows these as "<tt>[prefix] FunctionName</tt>" to explain what kind of data they are and what function they apply
+            to.  The table below gives a brief description of each of these symbol prefixes and what they mean, so you can better understand what you see in the UI breaking down sizes.
+        </p>
+
+        <table>
+            <tr>
+                <th>Symbol prefix</th>
+                <th>What it is</th>
+            </tr>
+            <tr>
+                <td>[cppxdata]</td>
+                <td>Language-specific data used to unwind C++ exceptions.</td>
+            </tr>
+            <tr>
+                <td>[handlerMap]</td>
+                <td>Data per catch block.</td>
+            </tr>
+            <tr>
+                <td>[ip2state]</td>
+                <td>Data to translate the instruction pointer (IP) to a state in the unwinding process.</td>
+            </tr>
+            <tr>
+                <td>[seg2ip2state]</td>
+                <td>
+                    Same as ip2state, except used for segmented/separated code blocks generated by tools like
+                    <a href="https://docs.microsoft.com/cpp/build/profile-guided-optimizations?view=msvc-160">Profile Guided Optimization (PGO)</a>.
+                </td>
+            </tr>
+            <tr>
+                <td>[stateUnwindMap]</td>
+                <td>Data per 'state' in the unwinding process, describing what to do and what state to transition to next in the state machine.</td>
+            </tr>
+            <tr>
+                <td>[tryMap]</td>
+                <td>Data per 'try' block.</td>
+            </tr>
+        </table>
+    </body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Dynamic Initializers</title>
+        <link rel="stylesheet" type="text/css" href="styles.css?v1">
+    </head>
+    <body>
+        <h1 style="border-bottom: 0;">SizeBench - a binary analysis tool for Windows</h1>
+        <h2>Dynamic Initializers</h2>
+
+        <p>
+            Or, why 'const' may not be as const as you thought.
+        </p>
+
+        <p>
+            Dynamic initializers are an interesting thing in binaries because they not only contribute code and data, they do so eagerly
+            whenever your binary is loaded into a process.  Thus, they create overhead even if they're never used.
+        </p>
+
+        <h3>What is a Dynamic Initializer?</h3>
+
+        <p>
+            Before I explain what a dynamic initializer is, let's show an example type and how its constructor is impacted by const
+            non-POD <a href="https://en.wikipedia.org/wiki/Passive_data_structure">(Plain Old Data)</a> types.  So let's start with this type:
+        </p>
+
+        <pre>
+    class SomeType {
+         const std::wstring str1{L"str1"};
+         const std::wstring str2{L"str2"};
+         // ... many more of these ...
+    };
+        </pre>
+
+        <p>
+            If you're familiar with modern C++, this looks pretty reasonable.  You have some strings, they're constant, they carry their
+            length with them unlike C-style strings that are just raw pointers.  This seems good!  But, 'const' here isn't as constant as
+            you may have intended.  In this case, the constant-ness of this is enforced by the C++ langauge which will prevent you from
+            writing to these variables at compile-time.  But nothing enforces that at the operating system level.  These strings still have
+            buffers that are in read/write memory from an OS perspective, and you can potentially const_cast them and mutate them (don't
+            do that...but you might get away with it).
+        </p>
+
+        <p>
+            The reason for this is because a Plain-Old-Data (POD) type like an integer or floating point value can really be stored in
+            the binary and in memory as a set of bytes that are in read-only memory.  A non-POD type can't do that because it needs to
+            have its constructor run, and that code in many cases won't run at compile-time (constexpr can help, but only so much).  So
+            in this case, <tt>std::wstring</tt> is not a POD type because it has a nontrivial constructor, and that in turn means that
+            <tt>SomeType</tt> has a non-trivial constructor that will call the <tt>str1</tt> and <tt>str2</tt> constructors.  Thus,
+            <tt>SomeType</tt> is also not a POD type.
+        </p>
+
+        <p>
+            So what can you do about this?  You want constant wide strings in C++, but why does it need to run constructors at runtime?
+            What you can do is translate the code to something like this:
+        </p>
+
+        <pre>
+    class SomeType {
+         static constexpr wchar_t* str1 = L"str1";
+         static constexpr wchar_t* str2 = L"str2";
+         // ... many more of these ...
+    };
+        </pre>
+
+        <p>
+            Or you could use <tt>constexpr std::wstring_view</tt> too, if you know you'll need the lengths often to avoid repeatedly
+            running strlen.  But the point is that now these are old-school POD types (wchar_t*) and that means the <tt>SomeType</tt>
+            constructor does not need to call constructors on these.  This in turn can cause <tt>SomeType</tt> to now have a trivial
+            constructor and become a POD type itself.  In Microsoft Office we found a case like this with a lot of <tt>std::wstring</tt>
+            instances, and changed it as shown above.  This resulted in the <tt>SomeType</tt> constructor going from 50kb of code to
+            not existing at all.  And as a bonus, now each instance of <tt>SomeType</tt> doesn't have separate copies of the strings,
+            they are static, so memory consumption goes down if you have more than one of these objects around.
+        </p>
+
+        <p>
+            If you do decide to change a type to be POD then it is possible to have the compiler help verify that this is true and that
+            it doesn't regress in the future, courtesy of <tt>static_assert</tt>.  The following statement would verify the previous
+            example:
+        </p>
+
+        <pre>
+    static_assert(std::is_podp&lt;SomeType&gt;(), "SomeType should be a POD type");
+        </pre>
+
+        <p>
+            So that's the basic idea behind why POD types are so efficient.  But how does this relate to Dynamic Initializers?<br />
+            <br />
+            Well, imagine that an instance of <tt>SomeType</tt> were declared in the global scope.  That means someone, somewhere needs
+            to generate code to run that <tt>SomeType</tt> constructor upon module load - this is done by the C(++) Run Time (CRT) before
+            your <tt>[Dll]Main</tt> executes.  That way you can immediately use your global object as you'd expect.  Thus, to continue
+            with the example from Office, this means all 50KB of code in the <tt>SomeType</tt> constructor needs to run just for this
+            DLL to be loaded into memory, even if no one ever actually touches that global instance of <tt>SomeType</tt>.<br />
+            <br />
+            Worse, if some of those strings are long enough, this could go past the small-string optimization and have the <tt>std::wstring</tt>
+            variables allocating memory on the heap, which is substantially slower.  And all these dynamic initializers run synchronously,
+            so they can get in the way of critical paths like launching your app.
+        </p>
+
+        <h3>A worse example, with a <tt>std::map</tt></h3>
+
+        <p>
+            Let's see another example of this.  Imagine you have this code:
+        </p>
+
+        <pre>
+    // In the global namespace
+    const std::map&lt;int,std::string&gt; g_enumsToNames = {
+         { 0, "invalid" },
+         { 1, "whoops" },
+         { 2, "failure" }
+    };
+        </pre>
+
+        <p>
+            This is a pattern I've seen in many codebases, to map enumeration values to friendly string names for things like logging, error
+            messages for users, and so on.<br />
+            <br />
+            <tt>std::map</tt> has a nontrivial constructor so it is not a POD type, and because this is in the global scope it will generate
+            a dynamic initializer.  That initializer calls the constructor of <tt>std::map</tt>, the constructor of <tt>std::string</tt> (3 times),
+            it allocates memory on the heap for the map's buckets, and more.  Doing all of that requires code generation by the compiler, and
+            as mentioned above this will synchronously execute before <tt>[Dll]Main</tt> and impacts runtime to execute.
+        </p>
+
+        <p>
+            This is even worse because when you want to look up a value in this map, it will end up chasing pointer-dereferences to find the right
+            bucket in the map's internal data structures, and so on, which will quickly blow out your data cache on your CPU.
+        </p>
+
+        <p>
+            Instead of the above, you could have code like this:
+        </p>
+
+        <pre>
+    struct EnumToNameMapEntry {
+         int enumValue;
+         const char* name;
+    };
+     constexpr EnumToNameMapEntry g_enumsToNames[] = {
+         { 0, "invalid" },
+         { 1, "whoops" },
+         { 2, "failure" }
+    };
+</pre>
+
+        <p>
+            In this case, <tt>EnumToNameMapEntry</tt> is a POD type because it stores only POD types as members and has no nontrivial constructor
+            defined.  The <tt>g_enumsToNames</tt> array is then also a POD because it's just an array of PODs.  So no dynamic initializer is
+            generated at all.  Each dynamic initializer generates a symmetric 'atexit destructor' in the <tt>.text$yd</tt> <a href="coff-group.html">COFF Group</a>
+            that can run in the case of shutdown which is similarly gone after making this change.  The data in this map is also now in
+            <tt>.rdata</tt> read-only data pages and shareable between processes, if this binary should be loaded into multiple processes.
+            Lots of sweet things have happened with this transformation.
+        </p>
+
+        <p>
+            But wait, there's more!  This array is very small, and these entries are very small - each instance of <tt>EnumToNameMapEntry</tt> is
+            only 8-12 bytes long depending on whether you compile for 32-bit or 64-bit.  So this array of 3 values consumes 24-36 bytes in total
+            and fits entirely on a CPU cache line.  Thus, walking linearly down this to find the right value instead of <tt>std::map</tt>'s fancier
+            search algorithms, will be much faster.  All the data will stay in L0 cache and the code to linearly search an array is something that
+            modern CPUs are incredibly tuned for.
+        </p>
+
+        <p>
+            So you get smaller data, that is share-able between processes, less code to execute on module load, and faster lookup times at runtime
+            too!  Pretty awesome.  This is an anonymized real example that we fixed in the Microsoft Dynamics AX codebase.
+        </p>
+
+        <h3>Example in SizeBench UI</h3>
+        <img class="screenshot" src="Images/DynamicInitializers_Overview.png" width="800" />
+
+        <p>
+            To look for dynamic initializers in your binary, start by opening it up in SizeBench.  Go to the 'Binary Sections' view and click on the
+            <tt>.text</tt> <a href="binary-section.html">binary section</a>.  That's where all the code lives and dynamic initializers are just
+            code generated by the compiler for you.  Then, within <tt>.text</tt> look for the <a href="coff-group.html">COFF Group</a> called
+            <tt>.text$di</tt> (di stands for "dynamic initializers" so at least it's somewhat memorable).
+        </p>
+
+        <p>
+            The example to the right shows what that looks like for the OpenConsole.exe binary from
+            <a href="https://github.com/Microsoft/Terminal">Windows Terminal</a>, as of commit <tt>10222a2b</tt>.  At the bottom of the
+            screen you can see a list of all the symbols in that <a href="coff-group.html">COFF Group</a>.  The last one visible in that list is a good
+            example.  It's called <tt>`dynamic initializer for 'aliasesSeparator''</tt> and it is, as the name implies, related to the variable
+            named <tt>aliasesSeparator</tt>.  This dynamic initializer is 45 bytes of code, again executed synchronously on module load.
+        </p>
+
+        <br style="clear:right" />
+
+        <br />
+        <br />
+
+        <img class="screenshot" src="Images/DynamicInitializers_aliasesSeparator.png" width=800 />
+        <p>
+            To the right is a screenshot of what SizeBench displays when you click on this dynamic initializer symbol.  It will show what section
+            and COFF Group the symbol is contained in (<tt>.text$di</tt> in this case, as expected for a dynamic initializer), what library,
+            <a href="compiland.html">compiland</a> and source file it came from (alias.cpp in alias.obj in ConhostV2Lib.lib), the length of the
+            function, stuff like that.  Next, look up alias.cpp from this commit on GitHub and it's
+            <a href="https://github.com/microsoft/terminal/blob/d09fdd61cbb11b7ef2ccdd4820349ffe898ad583/src/host/alias.cpp#L297">declared like this</a>:
+        </p>
+
+        <pre>
+    static std::wstring aliasesSeparator(L"=");
+        </pre>
+
+        <p>
+            This is very much like the example with <tt>std::map</tt> from Dynamics AX above.  It's a non-POD type (<tt>std::wstring</tt>), so
+            the initializer is running the <tt>std::wstring</tt> constructor, pointing to the appropriate "=" constant string in the read-only
+            pages of the binary.  If this code were changed to use <tt>const std::wstring_view</tt> or <tt>wchar_t*</tt> or some other form of
+            encoding the string that is a POD, then this dynamic initializer would disappear, as would its corresponding atexit destructor in
+            <tt>.text$yd</tt>.
+        </p>
+
+        <br style="clear:right" />
+
+    </body>
+</html>

@@ -1,0 +1,305 @@
+<html>
+    <head>
+        <title>Type Layout</title>
+        <link rel="stylesheet" type="text/css" href="styles.css?v1">
+    </head>
+    <body>
+        <h1 style="border-bottom: 0;">SizeBench - a binary analysis tool for Windows</h1>
+        <h2>Type Layout</h2>
+
+        <p>
+            SizeBench enables you to view the in-memory layout of types in your code.  This can be valuable because of data alignment rules (discussed below) which can lead to non-obvious padding
+            between members, sometimes quite a bit of it.  For types that are used in very hot paths, or allocated frequently, or types that are in large constant arrays in the binary, reducing
+            this padding waste can sometimes yield significant improvements in CPU (due to data locality), memory usage, or disk footprint.
+        </p>
+
+        <p>
+            To begin, you can either enter the full name of a type in the box, or you can use the "*" wildcard to look for multiple types, such as "Foo*" to find all types
+            beginning with Foo.  Note that SizeBench uses the fully-qualified version of a type's name, including the namespace, so you could also use wildcards to look
+            for all types in a namespace by searching for something like "myNamespace::*".  After you enter the name you want, simply hit the "View Layout(s)" button.
+        </p>
+
+        <p>
+            What's returned is a tree view showing each type that matches the name pattern given.  Each type shows its full size, as well as how much "waste" SizeBench
+            sees.  The waste is shown both exclusive-to a type (just the data members of that type, not including any base types) and also inclusively with all base types.
+            For details on exactly what this waste is and how you can remove it, see more on data alignment and specific examples below.
+        </p>
+
+        <div class="toc">
+            <h2>Table of Contents</h2><br />
+            <ol>
+                <li>
+                    <a href="#data-alignment">Data Alignment</a>
+                    <ol>
+                        <li><a href="#reduce-by-rearranging-members">One way to reduce this - rearranging members</a></li>
+                        <li><a href="#reduce-by-using-pragma-pack">Another way to fix this - #pragma pack push/pop</a></li>
+                        <li><a href="#alignment-between-bitfields">Why is this alignment here between bitfields?</a></li>
+                    </ol>
+                </li>
+                <li><a href="#visualization-and-exports">SizeBench type layout visualization and exports</a></li>
+                <li><a href="#example-windows-terminal-ROW">Example: Windows Terminal ROW structure</a></li>
+                <li><a href="#example-windows-terminal-FontInfo">Example: Windows Terminal FontInfo structure</a></li>
+            </ol>
+        </div>
+
+
+        <h3><a id="data-alignment">Data Alignment</a></h3>
+        <p>
+            Data alignment is a very important topic in modern CPUs that are heavily memory bandwidth constrained.  There is a high-level description
+            <a href="https://en.wikipedia.org/wiki/Data_structure_alignment">on Wikipedia</a> that's worth reading.  In short, each field within a type must, by default, be aligned in some way.
+            Each primitive type has a specific alignment requirement, which differs by CPU architecture.
+        </p>
+
+        <p>
+            For example, 'char' has an alignment requirement of 1 byte, while 'short' has an alignment requirement of 2 bytes.  This means that a simple structure that looks like this:
+        </p>
+
+        <p style="margin-left: 50px;">
+            <pre>
+    struct Simple {
+        char x;
+        short y;
+        char z;
+    };
+            </pre>
+        </p>
+
+        <p>
+            Then you might expect this struct to be 4 bytes in size - two one-byte characters and a 2-byte short.  However, the layout in-memory will look like this, resulting in 6 bytes:
+        </p>
+
+        <p style="margin-left: 50px;">
+            <pre>
+    struct Simple {
+        char x;    // offset: 0
+        [padding]  // offset: 1
+        short y;   // offset: 2
+        char z;    // offset: 4
+        [padding]  // offset: 5
+    };
+            </pre>
+        </p>
+
+        <p>
+            Why is this the case?  What is this padding?  Well, the 'x' char is straightforward - it's at offset 0 at the top of the struct and takes up one byte.  So far so good.  But the 'y'
+            short member by default needs to be 2-byte aligned, meaning its address must be divisible by 2.  So it can't be placed at offset 1 right after the x member, instead an empty byte of padding
+            is left there so 'y' is at offset 2.  The 'z' char has a 1-byte alignment requirement, so it can happily live at any byte and is at offset 4 right after the short, as you might expect.
+            The final piece of the puzzle is this last byte of padding - why is that there?  Because types by default are rounded up in size to the largest alignment of any member, in this case that is 2
+            (for the short).  This is so that if you have an array of these structs, each instance in that otherwise-tightly-packed array keeps required alignments for each instance in the array.<br />
+            <br />
+            SizeBench calls alignment between members "&lt;alignment padding&gt;" and alignment at the end of a type "&lt;tail slop alignment padding&gt;"
+        </p>
+
+        <h4><a id="reduce-by-rearranging-members">One way to reduce this - rearranging members</a></h4>
+        <p>
+            So, if you want to reduce the size of this example Simple type, you can re-arrange the members like so, resulting in only 4 bytes of memory for the struct as was likely intended:
+        </p>
+
+        <p style="margin-left: 50px;">
+            <pre>
+    struct Simple {
+        short y;  // offset: 0
+        char x;   // offset: 2
+        char z;   // offset: 3
+    };
+    static_assert(sizeof(Simple) == 4, "Simple has no padding");
+            </pre>
+        </p>
+
+        <p>
+            This basically puts 'z' into the byte that used to be empty padding.  The 'y' member is at offset zero which satisfies all possibile alignment requirements.
+            This also eliminates the tail slop padding at the end of the type because the 4 bytes of the type are an even multiple of 2, the highest alignment requirement of any member.
+            As a rule of thumb, sorting the members of a struct or class from largest to smallest will generally give good results because smaller types have some ability to fit into
+            the padding created by larger types.  <tt>static_assert</tt> combined with <tt>sizeof()</tt> and <tt>offsetof()</tt> can be helpful because they will get the compiler to
+            check the expectations for the memory alignment every time the code is compiled.
+        </p>
+
+        <p>
+            Two bytes may not seem like it's much to worry about, and indeed in many cases it's not.  But if this type were used in a very critical hot loop with, say, thousands or millions of copies
+            being examined, this could greatly improve performance.  Most modern CPUs have a cache line of 64 bytes, so by moving from 6 bytes to 4 bytes, this allows the cache line to hold 16 copies of
+            this struct instead of 10.  This may also significantly reduce memory usage if there are many thousands or millions of these in your program.  If you had a large read-only array of these in
+            your binary, it could also reduce disk footprint noticeably by having that large array be more tightly packed.  And of course this example is simple with only a few members and a few bytes
+            of padding - in some codebases with larger types there can be dozens or hundreds of bytes of padding per instance of some commonly used structures.
+        </p>
+
+        <h4><a id="reduce-by-using-pragma-pack">Another way to fix this - #pragma pack push/pop</a></h4>
+        <p>
+            Another way to reduce the size of types is by using <a href="https://docs.microsoft.com/cpp/preprocessor/pack?view=msvc-160">#pragma pack</a>.  Be careful when using this, as it can
+            cause un-aligned memory accesses.  On some CPU architectures this may result in a noticeable performance hit, depending on how the data is used.  But in some circumstances, this memory savings
+            is worthwhile, or those performance penalties may not apply to the way the data is used.  Be sure to test performance when using this option to understand any trade-offs that may be at play.
+        </p>
+
+        <p>
+            Thus, you could change the Simple type above to look like this:
+        </p>
+
+        <p style="margin-left: 50px;">
+            <pre>
+    #pragma pack(push, 1)
+    struct Simple {
+        char x;    // offset: 0
+        short y;   // offset: 1
+        char z;    // offset: 3
+    };
+    #pragma pack(pop)
+            </pre>
+        </p>
+
+
+        <h4><a id="alignment-between-bitfields">Why is this alignment here between bitfields?</a></h4>
+        <p>
+            Sometimes alignment is non-obvious.  As an example, consider this code:
+        </p>
+
+        <p style="margin-left: 50px;">
+            <pre>
+    struct Simple {
+        char x : 2;
+        unsigned int y : 30;
+    };
+            </pre>
+        </p>
+
+        <p>
+            You might expect this to be exactly 4 bytes (32 bits) because there are two bitfields specified precisely - unfortunately, this is not true.  The underlying types need to match when
+            two bitfields are next to each other, or else they won't collapse into the same memory slot.  So in this case, the memory layout will look like this:
+        </p>
+
+        <p style="margin-left: 50px;">
+            <pre>
+    struct Simple {
+        char x : 2;          // offset: 0
+        [padding] : 30;      // offset: 2 bits
+        unsigned int y : 30; // offset: 2 bytes
+        [padding] : 2;       // offset: 2 bytes + 30 bits
+    };
+            </pre>
+        </p>
+
+        <p>
+            The fix here is to match underlying types, so if 'x' is changed into an unsigned int (still 2 bits), then these will fold as expected into one single 32-bit value.  This comes up a lot
+            when mixing bool bitfields and integer bitfields in many codebases.
+        </p>
+
+
+        <h3><a id="visualization-and-exports">SizeBench type layout visualization and exports</a></h3>
+        <p>
+            When showing a type layout in SizeBench, it will be visualized as a tree view, to aid with two things:
+            <ul>
+                <li>Seeing how base types contribute to total size</li>
+                <li>Seeing how members expand, if they are non-trivial types themselves with multiple members</li>
+            </ul>
+        </p>
+
+        <p>
+            Once you are viewing a type's layout, the members will be shown as hyperlinks when they are non-primitive types.  You can click that hyperlink to load the layout of that type, if you want
+            to start at a big type and then drill in to a specific member's type on its own.
+        </p>
+
+        <p>
+            You can export to Excel in this view as in many other places in SizeBench - but it doesn't make so much sense to try to export each member or a tree view to a tabular data model like
+            Excel.  Instead, the export just lists the bytes of padding (exclusive, and including base types), as well as how many bytes are spent on vfptrs (exclusive, and including base types).
+            Thus, one handy way to use this tool is to put "*" into the search box, load the layouts for every type in the entire binary, then export to Excel and begin to sort and spelunk around for
+            types with high amounts of alignment waste, or with a high % of their total size being waste.
+        </p>
+
+
+
+
+        <h3><a id="example-windows-terminal-ROW">Example: Windows Terminal ROW structure</a></h3>
+        <img class="screenshot" src="Images/TypeLayout_WindowsTerminal_ROW.png" width=600 />
+        <p>
+            Let's take a look at an example of a more complex type than the simple ones used to describe alignment above.  In the screenshot to the right, SizeBench
+            has been loaded up with a binary from <a href="https://github.com/Microsoft/Terminal">Windows Terminal</a>.  If you'd like to follow along at home, you
+            can clone the Terminal repo from GitHub and go to commit <tt>10222a2b</tt>, where this example was built.  The repo has instructions for how to clone and
+            build everything - do that and build an x64 Release binary, then load the OpenConsole.exe/.pdb in SizeBench and you should see identical information to
+            what's shown in these screenshots.
+        </p>
+
+        <p>
+            We open OpenConsole.exe/.pdb and go to the Type Layout view, then search for "ROW" to see the screenshot to the right.  This type is a good example because
+            it's relatively simple, yet still has members with complex types.  At the very top of the tree view it says this:<br />
+            <div style="margin-left: 50px;">ROW (size: 472, waste exclusive: 6, waste incl. base types: 6)</div>
+            <br />
+            This means that each instance of ROW takes up 472 bytes, and in those 472 bytes there are a total of 6 bytes of wasted alignment.  All of that alignment is exclusive
+            to this type, none comes from base types - which makes sense, as ROW does not have any base types anyway.  This amount of alignment waste is quite good, as this
+            structure has 8-byte alignment requirements so wasting 6 bytes is very close to optimal, it could only be lower if it was zero.
+        </p>
+
+        <p>
+            Each member is listed beginning with "this+[some number] [type]" which shows in-memory how far offset from the start of the type this member is stored, and what
+            type that member is. For example, at the very beginning of the class is <tt>_charRow</tt> which is 0 bytes from the start of the class (this+000), and is of
+            type <tt>CharRow</tt>.  An instance of <tt>CharRow</tt> is 400 bytes, so the second member <tt>_attrRow</tt> shows as "this+400" because that member begins 400 bytes
+            into the class in-memory.  This cotinues down for every member of the type until the final one <tt>_pParent</tt> which is a pointer to a <tt>TextBuffer</tt> that begins
+            464 bytes in.
+        </p>
+
+        <p>
+            Right after the <tt>_doubleBytePadded</tt> field there are 6 bytes of alignment waste.  This is because <tt>_doubleBytePadded</tt> begins at this+457, and is just one byte
+            long.  However, the next member <tt>_pParent</tt> is a pointer, and for a 64-bit binary like this, pointers need to be 64-bit aligned, or 8-byte aligned.  So even though
+            there is unused space at this+458, it cannot be used to hold this pointer while satisfying alignment requirements - padding space is left until this+464, as 464 is the next
+            offset divisible by 8.
+        </p>
+
+        <p>
+            This is good to know, as the next time data needs to be added to this type, it would be ideal to add it right after <tt>_doubleBytePadded</tt>, into that blank padding space,
+            which could prevent increasing the size of this type even if additional state is stored.
+        </p>
+
+        <br style="clear:right;" />
+
+        <br />
+
+        <img class="screenshot" src="Images/TypeLayout_WindowsTerminal_ROW_CharRowExpanded.png" width=600 />
+        <p>
+            So this type takes up 472 bytes in total, and 400 of those are in the CharRow member named <tt>_charRow</tt>.  If you expand that tree view node, you can see where those 400
+            bytes go.  This next screenshot shows that.  In this case, <tt>CharRow</tt> has two members - a <tt>small_vector</tt> that is 392 bytes and a pointer back to the ROW that is
+            8 bytes.  You could further expand the <tt>small_vector</tt> and recursively understand where each byte exactly comes from.
+        </p>
+
+        <br style="clear:right" />
+
+        <br />
+        <br />
+        <br />
+
+        <h3><a id="example-windows-terminal-FontInfo">Example: Windows Terminal FontInfo structure</a></h3>
+        <img class="screenshot" src="Images/TypeLayout_WindowsTerminal_FontInfo.png" width=600 />
+
+        <p>
+            Here's another example from <a href="https://github.com/Microsoft/Terminal">Windows Terminal</a>.  As above, if you'd like to follow along at home, you
+            can clone the Terminal repo from GitHub and go to commit <tt>10222a2b</tt>, where this example was built.  The repo has instructions for how to clone and
+            build everything - do that and build an x64 Release binary, then load the OpenConsole.exe/.pdb in SizeBench and you should see identical information to
+            what's shown in these screenshots.
+        </p>
+
+        <p>
+            This class is called <tt>FontInfo</tt> and it's interesting because it has a base class, where <tt>ROW</tt> in the example above is simpler with no base type.  When looking at
+            FontInfo, SizeBench says this:<br />
+            <div style="margin-left: 50px;">FontInfo (size: 64, waste exclusive: 7, waste incl. base types: 13)</div>
+            <br />
+            This means that the <tt>FontInfo</tt> type on its own has 7 bytes of alignment waste throughout.  Its base type, <tt>FontInfoBase</tt> has an additional 6 bytes of padding waste, so
+            in total this means the type has 13 bytes of waste.
+        </p>
+
+        <p>
+            The member view is much like the <tt>ROW</tt> example above, so this example won't go into detail there.  But, notice the base type being listed in the tree view near the top - this is
+            to show that the base type's data is also part of the memory utilized by an instance of <tt>FontInfo</tt>.  Here it shows that <tt>FontInfoBase</tt> accounts for 48 bytes of space, of
+            the 64 bytes total used by each <tt>FontInfo</tt>.  Beyond the base type, <tt>FontInfo</tt> adds a couple of <tt>_COORD</tt> members, a boolean, and then some alignment padding.
+        </p>
+
+        <br style="clear:right;" />
+
+        <br />
+
+        <img class="screenshot" src="Images/TypeLayout_WindowsTerminal_FontInfo_FontInfoBaseExpanded.png" width=600 />
+        <p>
+            Once <tt>FontInfoBase</tt> is expanded, we can see that it has a <tt>std::basic_string</tt> (probably a <tt>std::wstring</tt>), a couple integers, a char, ad so forth in it.  It also
+            contains a 'hole' of alignment padding between two members, and some slop at the end.  If the <tt>_fDefaultRasterSetFromEngine</tt> member were moved up, it could fit into the alignment
+            'hole' - which may save space overall, depending on what the final alignment requirements are of the <tt>FontInfoBase</tt>.
+        </p>
+
+        <br style="clear:right" />
+
+    </body>
+</html>

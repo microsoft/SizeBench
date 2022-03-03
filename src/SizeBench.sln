@@ -39,9 +39,56 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SizeBench.Logging.Tests", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SizeBench.TestInfrastructure", "SizeBench.TestInfrastructure\SizeBench.TestInfrastructure.csproj", "{97DCB2D9-F2C5-4342-B229-1708A11F0DD9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SizeBench.ErrorReporting", "SizeBench.ErrorReporting\SizeBench.ErrorReporting.csproj", "{45FED563-6A30-4145-AB46-7D91FC6DA891}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SizeBench.ErrorReporting", "SizeBench.ErrorReporting\SizeBench.ErrorReporting.csproj", "{45FED563-6A30-4145-AB46-7D91FC6DA891}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SizeBench.ErrorReporting.Tests", "SizeBench.ErrorReporting.Tests\SizeBench.ErrorReporting.Tests.csproj", "{5158845A-13ED-484C-8B7B-555E503CDACF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SizeBench.ErrorReporting.Tests", "SizeBench.ErrorReporting.Tests\SizeBench.ErrorReporting.Tests.csproj", "{5158845A-13ED-484C-8B7B-555E503CDACF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{85C0E032-D387-4A5A-BEC8-346E02B38ADE}"
+	ProjectSection(SolutionItems) = preProject
+		..\docs\Analysis Engine internals.md = ..\docs\Analysis Engine internals.md
+		..\docs\Opening a Session.md = ..\docs\Opening a Session.md
+		..\docs\Principles.md = ..\docs\Principles.md
+		..\docs\Size VirtualSize and RVAs.md = ..\docs\Size VirtualSize and RVAs.md
+		..\docs\Solution Architecture.md = ..\docs\Solution Architecture.md
+		..\docs\Test Strategy.md = ..\docs\Test Strategy.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EndUserDocs", "EndUserDocs", "{D2149B95-7115-43D7-9E9E-B68D703F205C}"
+	ProjectSection(SolutionItems) = preProject
+		..\EndUserDocs\binary-section.html = ..\EndUserDocs\binary-section.html
+		..\EndUserDocs\coff-group.html = ..\EndUserDocs\coff-group.html
+		..\EndUserDocs\compiland.html = ..\EndUserDocs\compiland.html
+		..\EndUserDocs\diff.html = ..\EndUserDocs\diff.html
+		..\EndUserDocs\duplicate-data.html = ..\EndUserDocs\duplicate-data.html
+		..\EndUserDocs\dynamic-initializers.html = ..\EndUserDocs\dynamic-initializers.html
+		..\EndUserDocs\exceptions.html = ..\EndUserDocs\exceptions.html
+		..\EndUserDocs\index.html = ..\EndUserDocs\index.html
+		..\EndUserDocs\single-binary.html = ..\EndUserDocs\single-binary.html
+		..\EndUserDocs\styles.css = ..\EndUserDocs\styles.css
+		..\EndUserDocs\template-foldability.html = ..\EndUserDocs\template-foldability.html
+		..\EndUserDocs\type-layout.html = ..\EndUserDocs\type-layout.html
+		..\EndUserDocs\wasteful-virtuals.html = ..\EndUserDocs\wasteful-virtuals.html
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Images", "Images", "{593BF351-442B-49CD-B75B-D11905FB76FE}"
+	ProjectSection(SolutionItems) = preProject
+		..\EndUserDocs\Images\Deeplinks.png = ..\EndUserDocs\Images\Deeplinks.png
+		..\EndUserDocs\Images\DuplicateData_duplicatedPointArray.png = ..\EndUserDocs\Images\DuplicateData_duplicatedPointArray.png
+		..\EndUserDocs\Images\DuplicateData_Overview.png = ..\EndUserDocs\Images\DuplicateData_Overview.png
+		..\EndUserDocs\Images\DynamicInitializers_aliasesSeparator.png = ..\EndUserDocs\Images\DynamicInitializers_aliasesSeparator.png
+		..\EndUserDocs\Images\DynamicInitializers_Overview.png = ..\EndUserDocs\Images\DynamicInitializers_Overview.png
+		..\EndUserDocs\Images\Size_vs_VirtualSize.png = ..\EndUserDocs\Images\Size_vs_VirtualSize.png
+		..\EndUserDocs\Images\TemplateFoldability_Anaheim_MojoValidateStruct.png = ..\EndUserDocs\Images\TemplateFoldability_Anaheim_MojoValidateStruct.png
+		..\EndUserDocs\Images\TemplateFoldability_Anaheim_MojoValidateStruct_LineNumber.png = ..\EndUserDocs\Images\TemplateFoldability_Anaheim_MojoValidateStruct_LineNumber.png
+		..\EndUserDocs\Images\TemplateFoldability_Anaheim_Overview.png = ..\EndUserDocs\Images\TemplateFoldability_Anaheim_Overview.png
+		..\EndUserDocs\Images\TypeLayout_WindowsTerminal_FontInfo.png = ..\EndUserDocs\Images\TypeLayout_WindowsTerminal_FontInfo.png
+		..\EndUserDocs\Images\TypeLayout_WindowsTerminal_FontInfo_FontInfoBaseExpanded.png = ..\EndUserDocs\Images\TypeLayout_WindowsTerminal_FontInfo_FontInfoBaseExpanded.png
+		..\EndUserDocs\Images\TypeLayout_WindowsTerminal_ROW.png = ..\EndUserDocs\Images\TypeLayout_WindowsTerminal_ROW.png
+		..\EndUserDocs\Images\TypeLayout_WindowsTerminal_ROW_CharRowExpanded.png = ..\EndUserDocs\Images\TypeLayout_WindowsTerminal_ROW_CharRowExpanded.png
+		..\EndUserDocs\Images\WastefulVirtuals_Overview.png = ..\EndUserDocs\Images\WastefulVirtuals_Overview.png
+		..\EndUserDocs\Images\WastefulVirtuals_VtEngine.png = ..\EndUserDocs\Images\WastefulVirtuals_VtEngine.png
+		..\EndUserDocs\Images\WelcomePage.png = ..\EndUserDocs\Images\WelcomePage.png
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -94,6 +141,7 @@ Global
 		{97DCB2D9-F2C5-4342-B229-1708A11F0DD9} = {5E7F622A-2164-45BD-94F2-682AD964C057}
 		{45FED563-6A30-4145-AB46-7D91FC6DA891} = {DDB4277D-5229-47F8-8A1C-576CA06F7D0D}
 		{5158845A-13ED-484C-8B7B-555E503CDACF} = {DDB4277D-5229-47F8-8A1C-576CA06F7D0D}
+		{593BF351-442B-49CD-B75B-D11905FB76FE} = {D2149B95-7115-43D7-9E9E-B68D703F205C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {936F9790-BC54-416C-9C26-BB58BA16D33E}

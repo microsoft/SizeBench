@@ -1,0 +1,22 @@
+<html>
+    <head>
+        <title>Compilands</title>
+        <link rel="stylesheet" type="text/css" href="styles.css?v1">
+    </head>
+    <body>
+        <h1 style="border-bottom: 0;">SizeBench - a binary analysis tool for Windows</h1>
+        <h2>Compilands</h2>
+
+        <p>
+            A compiland is the term used in Windows PDB files for essentially an OBJ file - in C/C++ this is a <a href="https://en.wikipedia.org/wiki/Translation_unit_(programming)">translation unit</a>
+            of content that gets linked into the final binary.
+        </p>
+
+        <p>
+            SizeBench is capable of breaking a binary down by compiland, which can be a very useful way to investigate size as the filenames should be readily familiar as they correspond to the names
+            of the c/cpp files that get compiled.  This familiarity, to someone familiar with a codebase, makes these names much more approachable than the more obtuse names for
+            <a href="binary-section.html">binary sections</a> or <a href="coff-group.html">COFF Groups</a>.  There also tend to be many more of these in any reasonable-sized codebase, meaning this is
+            a finer-grained way to break down size into more tractable units that a human can wrap their head around.  Sections and COFF Groups can be awfully big sometimes by comparison.
+        </p>
+    </body>
+</html>

@@ -1,0 +1,114 @@
+body {
+    line-height: 1.3;
+    font-family: "Linux Libertine","Georgia","Times",serif;
+    padding: 24px;
+    margin-bottom: 200px;
+}
+
+/*********************/
+/* Table of Contents */
+/*********************/
+.toc {
+    display: table;
+    border: 1px solid #a2a9b1;
+    background-color: #f8f9fa;
+    padding: 7px;
+}
+
+.toc h2 {
+    display: inline;
+    border: 0;
+    padding: 0;
+    font-weight: bold;
+    font-size: 100%;
+}
+
+.toc a {
+    text-decoration: none;
+}
+
+.toc a:hover {
+    text-decoration: underline;
+}
+
+.toc a:focus {
+    text-decoration: underline;
+}
+
+/*********************/
+/* Links             */
+/*********************/
+
+a[id] {
+    color: black;
+}
+
+a:not([id]) {
+    color: #0645ad;
+}
+
+a:visited:not([id]) {
+       color: #0645ad;
+}
+
+/*********************/
+/* Headings          */
+/*********************/
+h1, h2, h3, h4, h5, h6 {
+    font-weight: normal;
+}
+
+h1, h2, h3 {
+    border-bottom: 1px solid #a2a9b1;
+    margin-top: 21px;
+}
+
+h3 {
+    margin-top: 60px;
+}
+
+h4 {
+    text-decoration: underline;
+    margin: 0;
+}
+
+/*********************/
+/* Body text         */
+/*********************/
+
+/*p {
+    margin: 0;
+}*/
+
+/*********************/
+/* Screenshots       */
+/*********************/
+
+.screenshot {
+    float: right;
+    margin-left: 10px;
+}
+
+/*********************/
+/* Tables            */
+/*********************/
+
+table{
+    border-collapse:collapse;
+    border:1px solid black;
+}
+    
+table td{
+    border:1px solid black;
+    padding: 7px;
+    vertical-align: top;
+}
+
+table th{
+    border:1px solid black;
+    padding: 7px;
+}
+
+tr:nth-child(even) { 
+    background-color: Lightblue; 
+} 

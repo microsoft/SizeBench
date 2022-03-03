@@ -1,0 +1,561 @@
+<html>
+    <head>
+        <title>COFF Groups</title>
+        <link rel="stylesheet" type="text/css" href="styles.css?v1">
+    </head>
+    <body>
+        <h1 style="border-bottom: 0;">SizeBench - a binary analysis tool for Windows</h1>
+        <h2>COFF Groups</h2>
+
+        <p>
+            A COFF Group is a named contiguous 'chunk' of a <a href="binary-section.html">binary section</a>.  All COFF Groups in a section share the same set of
+            characteristics such as being executable or read-only or read-write.  What they offer is a name that helps semantically understand a section at the
+            next level of detail.
+        </p>
+
+        <img class="screenshot" src="Images/Size_vs_VirtualSize.png" width=800/>
+        <p>
+            When the OS loads a binary into memory, these COFF Groups get expanded in memory, as shown in the diagram to the right.  The COFF Groups
+            are sorted, by the linker, so they exist in alphabetical order within their parent section in the binary.  The exception is for COFF Groups that exist
+            in-memory but not on-disk, those are always last so they can be materialized into the section padding.  When a COFF Group is mapped into the
+            address space of a process, generally they will be mapped directly from disk as-is as a big continuous chunk of memory.  But sometimes, like
+            with the <tt>.bss</tt> COFF Group, they don't exist on-disk and will be materialized when used, as zero-initialized pages, which you can also
+            see in the diagram.
+        </p>
+
+        <p>
+            For more details on the padding shown, see the page on <a href="binary-section.html">binary sections.</a>
+        </p>
+
+        <br style="clear:right"/>
+        
+        <h3>Commonly-seen COFF Group name decoder ring</h3>
+        <p>
+            One thing that makes COFF Groups, like <a href="binary-section.html">sections</a>, tricky to talk about is that their names are just by convention
+            in most cases.  For example, the <tt>.text</tt> section is, by convention, used to hold the code in a binary commonly, and thus all COFF Groups
+            within the <tt>.text</tt> section are code.  But nothing stops you from picking your own names, and in fact several popular libraries define
+            their own COFF Groups (such as the CRT, and WRL).<br/>
+            <br/>
+            As a result of this all being by convention, we can't easily just say "if you want to find all of your code, look in <tt>.text</tt>" and
+            instead need to see all of these obtuse/arcane names directly in tools like SizeBench.  To aid with that, here is a "decoder ring" with some
+            commonly-seen sections in the wild, and what they mean in human-readable words.  These are grouped by section since that's often how you'll
+            navigate to a COFF Group in SizeBench's UI.
+        </p>
+
+
+        <table>
+            <tr>
+                <th>Section Name</th>
+                <th>COFF Group Name</th>
+                <th>Purpose</th>
+                <th>Ways To Reduce</th>
+            </tr>
+
+            <!-- ############# -->
+            <!-- .data section -->
+            <!-- ############# -->
+            <tr>
+                <td><tt>.data</tt></td>
+                <td><tt>.data$00</tt></td>
+                <td>Data that is in phase 00, corresponds to Pri7-00 code phase.</td>
+                <td>Stop initializing data in the declaration if possible, especially zero initialized.</td>
+            </tr>
+            <tr>
+                <td><tt>.data</tt></td>
+                <td><tt>.data$01</tt></td>
+                <td>Data that is in phase 01, corresponds to Pri7-01 code phase.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.data</tt></td>
+                <td><tt>.data$d</tt></td>
+                <td>RTTI type information that needs to be written to.</td>
+                <td>Disable RTTI.</td>
+            </tr>
+            <tr>
+                <td><tt>.data</tt></td>
+                <td><tt>.data$dk</tt></td>
+                <td><a href="https://docs.microsoft.com/cpp/build/profile-guided-optimizations?view=msvc-160">PGO</a> “Don’t know”, global vars we only see reads to, but have their address taken (and may have been written to through a pointer).</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.data</tt></td>
+                <td><tt>.data$pr</tt></td>
+                <td>"<a href="https://docs.microsoft.com/cpp/build/profile-guided-optimizations?view=msvc-160">PGO</a> Read", global vars we’re certain were only read from in training.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.data</tt></td>
+                <td><tt>.data$r</tt></td>
+                <td>RTTI for writable data.</td>
+                <td>Disable RTTI.</td>
+            </tr>
+            <tr>
+                <td><tt>.data</tt></td>
+                <td><tt>.data$zz</tt></td>
+                <td>Data that is "dead" because it is not accessed during <a href="https://docs.microsoft.com/cpp/build/profile-guided-optimizations?view=msvc-160">PGO</a> training.<br/>
+                    It's placed here at the end of .data so it's least likely to be paged off disk.</td>
+                <td></td>
+            </tr>
+            
+            <!-- ############## -->
+            <!-- .didat section -->
+            <!-- ############## -->
+            <tr>
+                <td><tt>.didat</tt></td>
+                <td><tt>.didat*</tt></td>
+                <td>Delay-loaded Import Address Table (IAT)</td>
+                <td>There can be many COFF Groups that begin with ".didat$", I have yet to figure out how they differ, but they're all related to delay-loaded imports.</td>
+            </tr>
+
+
+            <!-- ############## -->
+            <!-- .rdata section -->
+            <!-- ############## -->
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.cfguard</tt></td>
+                <td><a href="https://docs.microsoft.com/windows/win32/secbp/control-flow-guard">Control Flow Guard (CFG)</a> data.</td>
+                <td>Have less indirect function calls - virtual functions are frequently a major contributor here (the <a href="wasteful-virtuals.html">Wasteful Virtuals</a> functionality may help with reducing these).<br/>
+                    You can also disable CFG for your binary - but this has security implications so make sure you deeply understand your scenarios and deployment environment.  This is rarely advisable.</td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRT$XCA</tt></td>
+                <td>First C++ Initializer.</td>
+                <td>
+                    Use constexpr/const more often, and use POD types more often - this also reduces the <tt>.text$di</tt> COFF Group and CPU use on DLL
+                    load so that's an added bonus.<br/>
+                    For some examples of this, see the <a href="dynamic-initializers.html">dynamic initializers</a> page.
+                </td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRT$XCAA</tt></td>
+                <td>Startup C++ Initializer.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRT$XCU</tt></td>
+                <td>Debug code masquerading as CRT code.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRTA$XCZ</tt></td>
+                <td>Last C++ Initializer.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRTA$XDA</tt></td>
+                <td>First Dynamic TLS Initializer.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRTA$XDZ</tt></td>
+                <td>Last Dynamic TLS Initializer.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRTA$XIA</tt></td>
+                <td>First C Initializer.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRT$XIAA</tt></td>
+                <td>Startup C Initializer.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRT$XIC</tt></td>
+                <td>CRT C Initializers.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRTA$XIZ</tt></td>
+                <td>Last C Initializer.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRTA$XLA</tt></td>
+                <td>First Loader TLS Callback.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRT$XLC</tt></td>
+                <td>CRT TLS Constructor.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRT$XLD</tt></td>
+                <td>CRT TLS Terminator.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRTA$XLZ</tt></td>
+                <td>Last Loader TLS Callback.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRTA$XPA</tt></td>
+                <td>First Pre-Terminator.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRTA$XPB</tt></td>
+                <td>CRT ConcRT (Concurrency Runtime) Pre-Terminator.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRT$XPX</tt></td>
+                <td>CRT Pre-Terminators.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRT$XPXA</tt></td>
+                <td>CRT stdio Pre-Terminator.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRTA$XPZ</tt></td>
+                <td>Last Pre-Terminator.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRTA$XTA</tt></td>
+                <td>First Terminator.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRTA$XTZ</tt></td>
+                <td>Last Terminator.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRTMA$XCA</tt></td>
+                <td>First Managed C++ Initializer.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRTMA$XCZ</tt></td>
+                <td>Last Managed C++ Initializer.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRTVT$XCA</tt></td>
+                <td>First Managed VTable Initializer.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.CRTVT$XCZ</tt></td>
+                <td>Last Managed VTable Initializer.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.edata</tt></td>
+                <td>Exported function data.<br/>
+                    Documented as part of the <a href="https://docs.microsoft.com/windows/win32/debug/pe-format#the-edata-section-image-only">PE Format</a>.
+                </td>
+                <td>Export fewer functions from your binary.<br/>
+                    When exported by name, the exported function's name must exist as a string, so consider exporting by ordinal if that's sufficient.</td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.gfids</tt></td>
+                <td><a href="https://docs.microsoft.com/windows/win32/secbp/control-flow-guard">Control Flow Guard (CFG)</a> data.</td>
+                <td>Have less indirect functionc alls - virtual functions are frequently a major contributor here (the <a href="wasteful-virtuals.html">Wasteful Virtuals</a> functionality may help with reducing these).<br/>
+                    You can also disable CFG for your binary - but this has security implications so make sure you deeply understand your scenarios and deployment environment.  This is rarely advisable.</td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.idata*</tt></td>
+                <td>Imported function data.<br/>
+                    Documented as part of the <a href="https://docs.microsoft.com/windows/win32/debug/pe-format#the-idata-section">PE Format</a>.
+                </td>
+                <td>Import fewer functions into your binary.</td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.rdata</tt></td>
+                <td>Other read-only data.</td>
+                <td>Yes, unfortunately there is a COFF Group named <tt>.rdata</tt> within the <tt>.rdata</tt> section so it gets confusing to refer to these by name.<br/>
+                    If you're using <a href="https://docs.microsoft.com/cpp/build/profile-guided-optimizations?view=msvc-160">Profile Guided Optimization (PGO)</a>, this is where
+                    un-phased read-only data goes.<br/>
+                    This is basically a catch-all bucket for all other types of read-only data not called out elsewhere - such as strings, vtables, and constant data like big arrays.<br/>
+                    As such, it's difficult to give specific guidance on reduction, but consider looking at the <a href="wasteful-virtuals.html">Wasteful Virtuals</a> functionality in SizeBench, 
+                    as well as the <a href="duplicate-data.html">Duplicate Data</a> functionality for some starters.  Or just look at the symbols in here to see if anything stands out.</td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.rdata$00</tt></td>
+                <td>Read-only data that is "hot" from <a href="https://docs.microsoft.com/cpp/build/profile-guided-optimizations?view=msvc-160">PGO</a>, in phase 0</td>
+                <td>Reduce read-only data, or make some of this data more 'cold' to PGO by not accessing it during PGO training.</td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.rdata$01</tt></td>
+                <td>Read-only data that is "hot" from <a href="https://docs.microsoft.com/cpp/build/profile-guided-optimizations?view=msvc-160">PGO</a>, in phase 1</td>
+                <td>Reduce read-only data, or make some of this data more 'cold' to PGO by not accessing it during PGO training.</td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.rdata$brc</tt></td>
+                <td>Base relocation clustering, controlled by the /baserelocclustering option in the linker.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.rdata$r</tt></td>
+                <td>Read-only data used by RTTI</td>
+                <td>Disable RTTI.</td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.rtc$IAA</tt></td>
+                <td>First RTC (Run-Time-Checks) Initializer.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.rtc$IZZ</tt></td>
+                <td>Last RTC (Run-Time-Checks) Initializer.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.rtc$TAA</tt></td>
+                <td>First RTC (Run-Time-Checks) Terminator.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.rtc$TZZ</tt></td>
+                <td>Last RTC (Run-Time-Checks) Terminator.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.rdata$wbrd</tt></td>
+                <td>Read-only data that is related to Warbird code obfuscation.</td>
+                <td>Warbird is undocumented and intended to be Microsoft-internal.  You probably aren't using this.</td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.rdata$zETW0</tt></td>
+                <td>A fixed-length header that is present if the DLL contains any 
+                    <a href="https://docs.microsoft.com/windows/win32/api/traceloggingprovider/nf-traceloggingprovider-traceloggingwrite">TraceLoggingWrite</a></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.rdata$zETW1</tt></td>
+                <td>Read-only data that contains one chunk of metadata for each 
+                    <a href="https://docs.microsoft.com/windows/win32/api/traceloggingprovider/nf-traceloggingprovider-traceloggingwrite">TraceLoggingWrite</a></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.rdata$zETW2</tt></td>
+                <td>Read-only data that contains one chunk of metadata for each
+                    <a href="https://docs.microsoft.com/windows/win32/api/traceloggingprovider/nf-traceloggingprovider-tracelogging_define_provider">TRACELOGGING_DEFINE_PROVIDER</a></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.rdata$zETW9</tt></td>
+                <td>A fixed-length footer that is present if the image contains any
+                    <a href="https://docs.microsoft.com/windows/win32/api/traceloggingprovider/nf-traceloggingprovider-traceloggingwrite">TraceLoggingWrite</a></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.rdata$zz</tt></td>
+                <td>Read-only data that is "dead"/very cold because it is not accessed during <a href="https://docs.microsoft.com/cpp/build/profile-guided-optimizations?view=msvc-160">PGO</a>
+                    training.</td>
+                <td>Same strategies as <tt>.rdata</tt> COFF Group, or if you want something in here to be hot then touch it in PGO training which will move it to another COFF Group.</td>
+            </tr>
+            <tr>
+                <td><tt>.rdata</tt></td>
+                <td><tt>.xdata</tt></td>
+                <td>Exception data used for stack unwinding and ETW stack walking on amd64, arm, and arm64 (not used on x86).</td>
+                <td>Exceptions are a complex topic and have <a href="exceptions.html">their own page</a>.</td>
+            </tr>
+
+
+
+            <!-- ############## -->
+            <!-- .text section -->
+            <!-- ############## -->
+            <tr>
+                <td><tt>.text</tt></td>
+                <td><tt>.text$di</tt></td>
+                <td>Code for <a href="dynamic-initializers.html">dynamic initializers</a></td>
+                <td>See the <a href="dynamic-initializens.html">dynamic initializers</a> page for details.</td>
+            </tr>
+            <tr>
+                <td><tt>.text</tt></td>
+                <td><tt>.text$lp*</tt></td>
+                <td>Code in a "loader phase" from <a href="https://docs.microsoft.com/cpp/build/profile-guided-optimizations?view=msvc-160">Profile Guided Optimization (PGO)</a>.<br/>
+                    lp00 is "loader phase 00" and is the hottest code, lp01 is "loader phase 01" and is the second-hottest code after lp00, and so on as the loader phase numbers increase.<br/>
+                    In most uses of PGO, you'll only have one phase, so you'll only see lp00.
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.text</tt></td>
+                <td><tt>.text$mn</tt></td>
+                <td>The "main" code</td>
+                <td>If using <a href="https://docs.microsoft.com/cpp/build/profile-guided-optimizations?view=msvc-160">Profile Guided Optimization (PGO)</a>, this is where code is
+                    placed that can't be PGO'd into a phase.  This may indicate LTCG isn't turned on correctly.<br/>
+                    If not using PGO, this is where most of your code will go, unless it fits in another bucket described.</td>
+            </tr>
+            <tr>
+                <td><tt>.text</tt></td>
+                <td><tt>.text$np</tt></td>
+                <td>Code that has optimizations turned off, is written in assembly, or is otherwise unable to be optimized by the entire toolchain.<br/>
+                    I think np stands for "no pgo" or "no pragma".</td>
+                <td>Allow optimizations (remove #pragmas stopping this).</td>
+            </tr>
+            <tr>
+                <td><tt>.text</tt></td>
+                <td><tt>.text$x</tt></td>
+                <td>Exception Handling funclets such as __finally blocks</td>
+                <td>Exceptions are a complex topic and have <a href="exceptions.html">their own page</a>.</td>
+            </tr>
+            <tr>
+                <td><tt>.text</tt></td>
+                <td><tt>.text$yd</tt></td>
+                <td>Code for atexit destructors, the inverse of <a href="dynamic-initializers.html">dynamic initializers</a></td>
+                <td>See the <a href="dynamic-initializens.html">dynamic initializers</a> page for details.<br/>
+                    When removing a dynamic initializer, generally you will also remove an atexit destructor that pairs with it.</td>
+            </tr>
+            <tr>
+                <td><tt>.text</tt></td>
+                <td><tt>.text$yz</tt></td>
+                <td>Code blocks (as in, a single if block within a function, for example) that are "cold" to 
+                    <a href="https://docs.microsoft.com/cpp/build/profile-guided-optimizations?view=msvc-160">PGO</a>, but within a "hot" function.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.text</tt></td>
+                <td><tt>.text$zs</tt></td>
+                <td>Code that is not dead, but is rarely called in training.<br/>
+                    Also inserted when using TFL (Telemetry Function Lists), where traditional training based
+                    <a href="https://docs.microsoft.com/cpp/build/profile-guided-optimizations?view=msvc-160">PGO</a> is augmented using telemetry data. Functions that are rarely
+                    called in training, but telemetry shows are important, can therefore be separated from .text$zy and .text$zz for better locality.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.text</tt></td>
+                <td><tt>.text$zy</tt></td>
+                <td>Code blocks (as in, a single if block within a function, for example) that are "dead" to 
+                    <a href="https://docs.microsoft.com/cpp/build/profile-guided-optimizations?view=msvc-160">PGO</a> - not seen in training data.<br/>
+                    This code may be "live" but for cases not hit in the PGO training lab so it is moved to colder pages.</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td><tt>.text</tt></td>
+                <td><tt>.text$zz</tt></td>
+                <td>The same as <tt>.text$zy</tt> except for whole functions that are "dead"/cold.</td>
+                <td></td>
+            </tr>
+
+
+            <!-- Windows OS binary-specific .text COFF Groups.  Put at the end since most people won't use these, so they're out of alphabetical order. -->
+            <tr>
+                <td><tt>.text</tt></td>
+                <td><tt>.text$*_coldboot</tt></td>
+                <td>Code that is only executed during <a href="https://docs.microsoft.com/cpp/build/profile-guided-optimizations?view=msvc-160">PGO</a> training of cold boot scenarios.</td>
+                <td>This applies only to Windows OS binaries, the Windows fundamentals team will manage this for you if this applies to you.<br/>
+                    Name is set as part of the build process and is used for "phasing" / code locality.</td>
+            </tr>
+            <tr>
+                <td><tt>.text</tt></td>
+                <td><tt>.text$*_clientonly</tt></td>
+                <td>Code that is shared between client and server (despite its name).<br/>
+                    Historically, also used for Windows Phone-only code if the binary is built in the phone repo and only used on mobile.</td>
+                <td>This applies only to Windows OS binaries, the Windows fundamentals team will manage this for you if this applies to you.<br/>
+                    Name is set as part of the build process and is used for "phasing" / code locality.</td>
+            </tr>
+            <tr>
+                <td><tt>.text</tt></td>
+                <td><tt>.text$*_hybridboot</tt></td>
+                <td>Code that is executed during <a href="https://docs.microsoft.com/cpp/build/profile-guided-optimizations?view=msvc-160">PGO</a> training of cold or hybrid boot scenarios.</td>
+                <td>This applies only to Windows OS binaries, the Windows fundamentals team will manage this for you if this applies to you.<br/>
+                    Name is set as part of the build process and is used for "phasing" / code locality.</td>
+            </tr>
+            <tr>
+                <td><tt>.text</tt></td>
+                <td><tt>.text$*_pri7</tt></td>
+                <td>Code that is executed during Pri-7 database training scenarios.</td>
+                <td>This applies only to Windows OS binaries, the Windows fundamentals team will manage this for you if this applies to you.<br/>
+                    Name is set as part of the build process and is used for "phasing" / code locality.</td>
+            </tr>
+            <tr>
+                <td><tt>.text</tt></td>
+                <td><tt>.text$*_serveronly</tt></td>
+                <td>Code that is only executed during <a href="https://docs.microsoft.com/cpp/build/profile-guided-optimizations?view=msvc-160">PGO</a> training on Server SKUs.</td>
+                <td>This applies only to Windows OS binaries, the Windows fundamentals team will manage this for you if this applies to you.<br/>
+                    Name is set as part of the build process and is used for "phasing" / code locality.</td>
+            </tr>
+        </table>
+
+
+
+        <h3>Other tools you can use</h3>
+        <p>
+            If you want to explore COFF Groups there are some other tools available beyond SizeBench.  The MSVC Linker (link.exe) is a good one.  You can
+            execute a command like this:
+        </p>
+
+        <p style="margin-left: 50px;">
+            <tt>link /dump /headers /coffgroup path\to\your\binary.dll</tt>
+        </p>
+
+        <p>
+            You'll see a Debug Directory listed that has some COFF Groups with names like these (note that all sizes are in hex, as bytes):
+        </p>
+
+        <p style="margin-left: 50px;">
+            <pre>
+        Debug Directories
+    
+        Time Type       Size      RVA  Pointer
+    -------- ------- -------- -------- --------
+    55557445 cv            2C 00BE097C   BDF77C    Format: RSDS, {9B038C1E-EFC9-46E0-A0D9-0FB65786A656}, 1, windows.ui.xaml.pdb
+    55557445 coffgrp       D8 00BE0A10   BDF810    50475500 (PGU)
+
+             RVA     Size  Name
+        -------- --------  ----
+        000016C0    60874  00windows.ui.xaml.dll!20_pri7
+        00061F40   268D65  01windows.ui.xaml.dll!20_pri7
+        002CACB0     31E6  03windows.ui.xaml.dll!30_clientonly
+        002CDE98      10C  06windows.ui.xaml.dll!35_hybridboot
+        002CDFB0    5AD97  07windows.ui.xaml.dll!35_hybridboot
+            </pre>
+        </p>
+    </body>
+</html>

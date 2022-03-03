@@ -1,0 +1,107 @@
+<html>
+    <head>
+        <title>Duplicate Data</title>
+        <link rel="stylesheet" type="text/css" href="styles.css?v1">
+    </head>
+    <body>
+        <h1 style="border-bottom: 0;">SizeBench - a binary analysis tool for Windows</h1>
+        <h2>Duplicate Data</h2>
+
+        <p>
+            In C++ it's sorta easy to accidentally cause data in a binary to be duplicated - strings, arrays, and the like. Rarely-to-never
+            would you want this duplicated data to exist on-disk, but the standard requires it in some cases if you use keywords in ways
+            you may not mean to. This is especially easy to do if coming from a background of C# or Java where '<tt>static</tt>' has a different meaning.
+        </p>
+
+        <p>
+            SizeBench can detect when data is duplicated this way so you can quickly find these and de-dupe them, usually with very little work.
+        </p>
+
+        <h3>How Does Duplicate Data Happen?</h3>
+
+        <p>
+            Imagine you have code like this:
+        </p>
+
+        <pre>
+    /* In SharedHeader.h */
+    static const char* c_DuplicatedString = "This string has two copies in the binary - whoops!";
+
+    /* In File1.cpp */
+    ...in some code somewhere...
+    CallSomeFunction(c_DuplicatedString);
+
+    /* In File2.cpp */
+    ...in some code somewhere...
+    CallSomeFunction(c_DuplicatedString);
+        </pre>
+
+        <p>
+            Then you've inadvertently created two copies of the data in c_DuplicatedString inside your binary. Why? Because each translation unit gets its
+            own copy when it references this symbol. If you only reference the symbol in one translation unit then you're good - but in that case you may as
+            well put it in that translation unit anyway instead of some shared header file.
+        </p>
+
+        <h3>Why doesn't the compiler/linker/whatever just fix this for me?</h3>
+
+        <p>
+            The C++ standard prevents it from doing so. If you use <tt>static const</tt> then each translation unit must get a unique copy - because the address
+            of each one must be unique if you were to take it.  But honestly people rarely do that.
+        </p>
+
+        <h3>Example in SizeBench UI</h3>
+        <img class="screenshot" src="Images/DuplicateData_Overview.png" width=800 />
+        <p>
+            If you click the "Duplicate Data" button after loading a binary in the tool, you'll get a screenshot similar to the right.
+        </p>
+
+        <p>
+            In this case, this binary has just two pieces of duplicate data - <tt>duplicatedPointArray</tt> and <tt>duplicatedPoint</tt>.
+        </p>
+
+        <p>
+            <tt>duplicatedPointArray</tt> is 24 bytes for each copy, and a total of 72 bytes of waste because as we'll see in a moment it's included in 4 translation
+            units (one must store the data, 3 are unneeded duplicates). <tt>duplicatedPoint</tt> is only 8 bytes per copy, with a total of 24 bytes of waste, as it
+            too is included in 4 translation units.
+        </p>
+
+        <br style="clear:right" />
+
+        <br/>
+        <br/>
+
+        <img class="screenshot" src="Images/DuplicateData_duplicatedPointArray.png" width=800 />
+        <p>
+            If you click on <tt>duplicatedPointArray</tt> you'll see a view like this.
+        </p>
+
+        <p>
+            This view will show you specifically which translation units have caused a copy of the data to be included - typically through some header they all pull in,
+            though the details of exactly which source file caused this are unfortunately not recorded in the PDB so SizeBench can't tell you that.
+        </p>
+
+        <br style="clear:right" />
+
+        <h3>How To Fix These</h3>
+
+        <p>
+            If the data is marked as <tt>static const</tt>, then just removing <tt>static</tt> is often enough to de-dupe the data. static in C++ requires a unique
+            copy in each translation unit by the standard, so just don't request that. I'm not sure why, but in some cases instead you'll want to use
+            <tt>extern __declspec(selectany) const</tt> to fully convince MSVC to de-dupe the data. If anyone knows why this is required in some cases, please let me know
+            so I can update these docs!
+        </p>
+
+        <p>
+            Note that the <tt>extern __declspec(selectany) const</tt> method means you need to be sure each copy really has the same data at build time - no funky macro
+            expansions or <tt>#ifdef</tt> shenanigans that cause different versions to show up. The <tt>__declspec(selectany)</tt> tells the linker it can select any one
+            copy of the symbol with this name and let it win (hence the name "selectany") so if they contain different data only one of those versions will make it into
+            the resulting binary. But you really shouldn't have the same name with different data in different translation units anyway, that's confusing to begin with,
+            so for most binaries this isn't a significant concern.
+        </p>
+
+        <p>
+            For <tt>constexpr</tt> or <tt>static constexpr</tt> variables, you can instead use the <tt>inline constexpr</tt> syntax if you are using C++17 or later.  This
+            will cause these readonly variables to combine into a single copy in the final binary.
+        </p>
+    </body>
+</html>

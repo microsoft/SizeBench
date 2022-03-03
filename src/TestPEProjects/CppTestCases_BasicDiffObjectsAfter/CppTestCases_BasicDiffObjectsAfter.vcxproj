@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{694D30FE-FA6D-4CBC-A0B3-D397A8F82CFF}</ProjectGuid>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>CppTestCases_BasicDiffObjectsAfter</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="..\TestPEDll.props" />
+  </ImportGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\StaticLibs\After\StaticLib1;$(ProjectDir)..\StaticLibs\After\StaticLib3;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <CompileAsManaged>false</CompileAsManaged>
+      <PrecompiledHeader />
+    </ClCompile>
+    <ClCompile Include="CppTestCases_BasicDiffObjectsAfter.cpp" />
+    <ClCompile Include="SourceFile1.cpp" />
+    <ClCompile Include="SourceFile3.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\StaticLibs\After\StaticLib1\StaticLib1.vcxproj">
+      <Project>{69e04b57-3cb8-4327-9cc0-7342061f4839}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\StaticLibs\After\StaticLib3\StaticLib3.vcxproj">
+      <Project>{b6664b36-18a2-4590-acd4-423104013c5d}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,1580 @@
+ SizeBenchV2.AnalysisEngine.Tests.CppWinRT
+
+ Timestamp is 6138f9b8 (Wed Sep  8 10:58:16 2021)
+
+ Preferred load address is 0000000140000000
+
+ Start         Length     Name                   Class
+ 0001:00000000 000058c0H .text$mn                CODE
+ 0001:000058c0 00000040H .text$mn$00             CODE
+ 0001:00005900 0000060dH .text$x                 CODE
+ 0002:00000000 000002d0H .idata$5                DATA
+ 0002:000002d0 00000028H .00cfg                  DATA
+ 0002:000002f8 00000008H .CRT$XCA                DATA
+ 0002:00000300 00000008H .CRT$XCAA               DATA
+ 0002:00000308 00000008H .CRT$XCZ                DATA
+ 0002:00000310 00000008H .CRT$XIA                DATA
+ 0002:00000318 00000008H .CRT$XIAA               DATA
+ 0002:00000320 00000008H .CRT$XIAC               DATA
+ 0002:00000328 00000008H .CRT$XIZ                DATA
+ 0002:00000330 00000008H .CRT$XPA                DATA
+ 0002:00000338 00000008H .CRT$XPZ                DATA
+ 0002:00000340 00000008H .CRT$XTA                DATA
+ 0002:00000348 00000008H .CRT$XTZ                DATA
+ 0002:00000350 00000000H .gehcont$y              DATA
+ 0002:00000350 00000000H .gfids$y                DATA
+ 0002:00000350 00001330H .rdata                  DATA
+ 0002:00001680 00001014H .rdata$r                DATA
+ 0002:00002694 00000354H .rdata$zzzdbg           DATA
+ 0002:000029e8 00000008H .rtc$IAA                DATA
+ 0002:000029f0 00000008H .rtc$IZZ                DATA
+ 0002:000029f8 00000008H .rtc$TAA                DATA
+ 0002:00002a00 00000008H .rtc$TZZ                DATA
+ 0002:00002a08 00000860H .xdata                  DATA
+ 0002:00003268 000006b4H .xdata$x                DATA
+ 0002:0000391c 00000000H .edata                  DATA
+ 0002:0000391c 0000008cH .idata$2                DATA
+ 0002:000039a8 00000018H .idata$3                DATA
+ 0002:000039c0 000002d0H .idata$4                DATA
+ 0002:00003c90 00000682H .idata$6                DATA
+ 0003:00000000 00000050H .data                   DATA
+ 0003:00000050 00000d90H .data$r                 DATA
+ 0003:00000de0 00000660H .bss                    DATA
+ 0004:00000000 0000087cH .pdata                  DATA
+ 0005:00000000 0000007fH .msvcjmc                DATA
+ 0006:00000000 00000060H .rsrc$01                DATA
+ 0006:00000060 00000180H .rsrc$02                DATA
+
+  Address         Publics by Value              Rva+Base               Lib:Object
+
+ 0000:00000000       __arm64x_redirection_metadata_count 0000000000000000     <absolute>
+ 0000:00000000       __guard_longjmp_table      0000000000000000     <absolute>
+ 0000:00000000       __arm64x_redirection_metadata 0000000000000000     <absolute>
+ 0000:00000000       __guard_fids_count         0000000000000000     <absolute>
+ 0000:00000000       __hybrid_code_map_count    0000000000000000     <absolute>
+ 0000:00000000       __x64_code_ranges_to_entry_points 0000000000000000     <absolute>
+ 0000:00000000       __guard_iat_table          0000000000000000     <absolute>
+ 0000:00000000       __dynamic_value_reloc_table 0000000000000000     <absolute>
+ 0000:00000000       __hybrid_code_map          0000000000000000     <absolute>
+ 0000:00000000       __guard_iat_count          0000000000000000     <absolute>
+ 0000:00000000       __guard_eh_cont_count      0000000000000000     <absolute>
+ 0000:00000000       __guard_longjmp_count      0000000000000000     <absolute>
+ 0000:00000000       __arm64x_native_entrypoint 0000000000000000     <absolute>
+ 0000:00000000       __volatile_metadata        0000000000000000     <absolute>
+ 0000:00000000       __guard_eh_cont_table      0000000000000000     <absolute>
+ 0000:00000000       __enclave_config           0000000000000000     <absolute>
+ 0000:00000000       __arm64x_extra_rfe_table   0000000000000000     <absolute>
+ 0000:00000000       __x64_code_ranges_to_entry_points_count 0000000000000000     <absolute>
+ 0000:00000000       ___safe_se_handler_count   0000000000000000     <absolute>
+ 0000:00000000       __AbsoluteZero             0000000000000000     <absolute>
+ 0000:00000000       ___safe_se_handler_table   0000000000000000     <absolute>
+ 0000:00000000       __arm64x_extra_rfe_table_size 0000000000000000     <absolute>
+ 0000:00000000       __guard_fids_table         0000000000000000     <absolute>
+ 0000:00000000       __hybrid_auxiliary_iat     0000000000000000     <absolute>
+ 0000:00000100       __guard_flags              0000000000000100     <absolute>
+ 0000:00000000       __ImageBase                0000000140000000     <linker-defined>
+ 0001:00000000       main                       0000000140001000 f   main.obj
+ 0001:00000260       ??1IUriRuntimeClassFactory@Foundation@Windows@winrt@@QEAA@XZ 0000000140001260 f i main.obj
+ 0001:00000260       ??1Uri@Foundation@Windows@winrt@@QEAA@XZ 0000000140001260 f i main.obj
+ 0001:00000260       ??1TestRuntimeClass@MyProject@winrt@@QEAA@XZ 0000000140001260 f i main.obj
+ 0001:00000270       __local_stdio_printf_options 0000000140001270 f i main.obj
+ 0001:00000290       printf                     0000000140001290 f i main.obj
+ 0001:00000300       ?fallback_RoGetActivationFactory@impl@winrt@@YAHPEAXAEBUguid@2@PEAPEAX@Z 0000000140001300 f i main.obj
+ 0001:00000330       ??$assign@Uhstring@winrt@@$0A@@?$basic_string@_WU?$char_traits@_W@std@@V?$allocator@_W@2@@std@@QEAAAEAV01@AEBUhstring@winrt@@@Z 0000000140001330 f i main.obj
+ 0001:000004d0       ?append@?$basic_string@_WU?$char_traits@_W@std@@V?$allocator@_W@2@@std@@QEAAAEAV12@QEB_W_K@Z 00000001400014d0 f i main.obj
+ 0001:00000680       ?_Xlen_string@std@@YAXXZ   0000000140001680 f i main.obj
+ 0001:000006a0       ??$_Allocate@$0BA@U_Default_allocate_traits@std@@$0A@@std@@YAPEAX_K@Z 00000001400016a0 f i main.obj
+ 0001:00000780       ??0bad_array_new_length@std@@QEAA@XZ 0000000140001780 f i main.obj
+ 0001:000007c0       ??1invalid_argument@std@@UEAA@XZ 00000001400017c0 f i main.obj
+ 0001:000007c0       ??1bad_alloc@std@@UEAA@XZ  00000001400017c0 f i main.obj
+ 0001:000007c0       ??1bad_array_new_length@std@@UEAA@XZ 00000001400017c0 f i main.obj
+ 0001:000007e0       ??_Eexception@std@@UEAAPEAXI@Z 00000001400017e0 f i * CIL library *:* CIL module *
+ 0001:000007e0       ??_Ginvalid_argument@std@@UEAAPEAXI@Z 00000001400017e0 f i main.obj
+ 0001:000007e0       ??_Einvalid_argument@std@@UEAAPEAXI@Z 00000001400017e0 f i * CIL library *:* CIL module *
+ 0001:000007e0       ??_Ebad_alloc@std@@UEAAPEAXI@Z 00000001400017e0 f i * CIL library *:* CIL module *
+ 0001:000007e0       ??_Gexception@std@@UEAAPEAXI@Z 00000001400017e0 f i main.obj
+ 0001:000007e0       ??_Gbad_array_new_length@std@@UEAAPEAXI@Z 00000001400017e0 f i main.obj
+ 0001:000007e0       ??_Glogic_error@std@@UEAAPEAXI@Z 00000001400017e0 f i main.obj
+ 0001:000007e0       ??_Elogic_error@std@@UEAAPEAXI@Z 00000001400017e0 f i * CIL library *:* CIL module *
+ 0001:000007e0       ??_Ebad_array_new_length@std@@UEAAPEAXI@Z 00000001400017e0 f i * CIL library *:* CIL module *
+ 0001:000007e0       ??_Gbad_alloc@std@@UEAAPEAXI@Z 00000001400017e0 f i main.obj
+ 0001:00000830       ??0bad_array_new_length@std@@QEAA@AEBV01@@Z 0000000140001830 f i main.obj
+ 0001:00000870       ?_Throw_bad_array_new_length@std@@YAXXZ 0000000140001870 f i main.obj
+ 0001:000008a0       ?_Orphan_all@_Container_base12@std@@QEAAXXZ 00000001400018a0 f i main.obj
+ 0001:00000930       ??$_Deallocate@$0BA@$0A@@std@@YAXPEAX_K@Z 0000000140001930 f i main.obj
+ 0001:00000a60       ??$_Reallocate_grow_by@V<lambda_a3050a43f3157934f354774ab3dd2e02>@@_K_W@?$basic_string@_WU?$char_traits@_W@std@@V?$allocator@_W@2@@std@@AEAAAEAV01@_KV<lambda_a3050a43f3157934f354774ab3dd2e02>@@_K_W@Z 0000000140001a60 f i main.obj
+ 0001:00000bc0       ?unconditional_release_ref@?$com_ptr@UIRestrictedErrorInfo@impl@winrt@@@winrt@@AEAAXXZ 0000000140001bc0 f i main.obj
+ 0001:00000bc0       ?unconditional_release_ref@IUnknown@Foundation@Windows@winrt@@AEAAXXZ 0000000140001bc0 f i main.obj
+ 0001:00000bc0       ?unconditional_release_ref@?$com_ptr@UILanguageExceptionErrorInfo2@impl@winrt@@@winrt@@AEAAXXZ 0000000140001bc0 f i main.obj
+ 0001:00000bc0       ?unconditional_release_ref@?$com_ptr@UIAgileObject@impl@winrt@@@winrt@@AEAAXXZ 0000000140001bc0 f i main.obj
+ 0001:00000bc0       ?unconditional_release_ref@?$com_ptr@Utype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@impl@winrt@@@winrt@@AEAAXXZ 0000000140001bc0 f i TestRuntimeClass.obj
+ 0001:00000bc0       ?unconditional_release_ref@?$com_ptr@UIMarshal@impl@winrt@@@winrt@@AEAAXXZ 0000000140001bc0 f i TestRuntimeClass.obj
+ 0001:00000bc0       ?unconditional_release_ref@?$com_ptr@Utype@?$abi@UIActivationFactory@Foundation@Windows@winrt@@X@impl@winrt@@@winrt@@AEAAXXZ 0000000140001bc0 f i main.obj
+ 0001:00000bc0       ?unconditional_release_ref@?$com_ptr@UIErrorInfo@impl@winrt@@@winrt@@AEAAXXZ 0000000140001bc0 f i main.obj
+ 0001:00000bf0       ??$get_runtime_activation_factory_impl@$0A@@impl@winrt@@YA?AUhresult@1@AEBUhstring@param@1@AEBUguid@1@PEAPEAX@Z 0000000140001bf0 f i main.obj
+ 0001:00000fe0       ??1factory_count_guard@impl@winrt@@QEAA@XZ 0000000140001fe0 f i main.obj
+ 0001:00001010       ??R<lambda_0a61d549bec6c444b35123f4c9509ca7>@@QEBA?AUUri@Foundation@Windows@winrt@@AEBUIUriRuntimeClassFactory@234@@Z 0000000140002010 f i main.obj
+ 0001:00001090       ??$call@AEAV<lambda_0a61d549bec6c444b35123f4c9509ca7>@@@?$factory_cache_entry@UUri@Foundation@Windows@winrt@@UIUriRuntimeClassFactory@234@@impl@winrt@@QEAA?AUUri@Foundation@Windows@2@AEAV<lambda_0a61d549bec6c444b35123f4c9509ca7>@@@Z 0000000140002090 f i main.obj
+ 0001:00001230       ??0hresult_access_denied@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140002230 f i main.obj
+ 0001:00001260       ??1hresult_class_not_registered@winrt@@QEAA@XZ 0000000140002260 f i main.obj
+ 0001:00001260       ??1hresult_no_interface@winrt@@QEAA@XZ 0000000140002260 f i main.obj
+ 0001:00001260       ??1hresult_changed_state@winrt@@QEAA@XZ 0000000140002260 f i main.obj
+ 0001:00001260       ??1hresult_not_implemented@winrt@@QEAA@XZ 0000000140002260 f i main.obj
+ 0001:00001260       ??1hresult_out_of_bounds@winrt@@QEAA@XZ 0000000140002260 f i main.obj
+ 0001:00001260       ??1hresult_access_denied@winrt@@QEAA@XZ 0000000140002260 f i main.obj
+ 0001:00001260       ??1hresult_canceled@winrt@@QEAA@XZ 0000000140002260 f i main.obj
+ 0001:00001260       ??1hresult_illegal_state_change@winrt@@QEAA@XZ 0000000140002260 f i main.obj
+ 0001:00001260       ??1hresult_wrong_thread@winrt@@QEAA@XZ 0000000140002260 f i main.obj
+ 0001:00001260       ??1hresult_illegal_method_call@winrt@@QEAA@XZ 0000000140002260 f i main.obj
+ 0001:00001260       ??1hresult_illegal_delegate_assignment@winrt@@QEAA@XZ 0000000140002260 f i main.obj
+ 0001:00001260       ??1hresult_invalid_argument@winrt@@QEAA@XZ 0000000140002260 f i main.obj
+ 0001:00001260       ??1hresult_class_not_available@winrt@@QEAA@XZ 0000000140002260 f i main.obj
+ 0001:00001260       ??1hresult_error@winrt@@QEAA@XZ 0000000140002260 f i main.obj
+ 0001:000012a0       ??0hresult_illegal_delegate_assignment@winrt@@QEAA@AEBU01@@Z 00000001400022a0 f i main.obj
+ 0001:000012a0       ??0hresult_class_not_registered@winrt@@QEAA@AEBU01@@Z 00000001400022a0 f i main.obj
+ 0001:000012a0       ??0hresult_changed_state@winrt@@QEAA@AEBU01@@Z 00000001400022a0 f i main.obj
+ 0001:000012a0       ??0hresult_access_denied@winrt@@QEAA@AEBU01@@Z 00000001400022a0 f i main.obj
+ 0001:000012a0       ??0hresult_not_implemented@winrt@@QEAA@AEBU01@@Z 00000001400022a0 f i main.obj
+ 0001:000012a0       ??0hresult_canceled@winrt@@QEAA@AEBU01@@Z 00000001400022a0 f i main.obj
+ 0001:000012a0       ??0hresult_class_not_available@winrt@@QEAA@AEBU01@@Z 00000001400022a0 f i main.obj
+ 0001:000012a0       ??0hresult_illegal_method_call@winrt@@QEAA@AEBU01@@Z 00000001400022a0 f i main.obj
+ 0001:000012a0       ??0hresult_no_interface@winrt@@QEAA@AEBU01@@Z 00000001400022a0 f i main.obj
+ 0001:000012a0       ??0hresult_invalid_argument@winrt@@QEAA@AEBU01@@Z 00000001400022a0 f i main.obj
+ 0001:000012a0       ??0hresult_out_of_bounds@winrt@@QEAA@AEBU01@@Z 00000001400022a0 f i main.obj
+ 0001:000012a0       ??0hresult_wrong_thread@winrt@@QEAA@AEBU01@@Z 00000001400022a0 f i main.obj
+ 0001:000012a0       ??0hresult_illegal_state_change@winrt@@QEAA@AEBU01@@Z 00000001400022a0 f i main.obj
+ 0001:000012e0       ??0hresult_wrong_thread@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 00000001400022e0 f i main.obj
+ 0001:00001310       ??0hresult_not_implemented@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140002310 f i main.obj
+ 0001:00001340       ??0hresult_invalid_argument@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140002340 f i main.obj
+ 0001:00001370       ??0hresult_out_of_bounds@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140002370 f i main.obj
+ 0001:000013a0       ??0hresult_no_interface@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 00000001400023a0 f i main.obj
+ 0001:000013d0       ??0hresult_class_not_available@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 00000001400023d0 f i main.obj
+ 0001:00001400       ??0hresult_class_not_registered@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140002400 f i main.obj
+ 0001:00001430       ??0hresult_changed_state@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140002430 f i main.obj
+ 0001:00001460       ??0hresult_illegal_method_call@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140002460 f i main.obj
+ 0001:00001490       ??0hresult_illegal_state_change@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140002490 f i main.obj
+ 0001:000014c0       ??0hresult_illegal_delegate_assignment@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 00000001400024c0 f i main.obj
+ 0001:000014f0       ??0hresult_canceled@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 00000001400024f0 f i main.obj
+ 0001:00001520       ?GetGUID@error_info_fallback@impl@winrt@@UEAAHPEAUguid@3@@Z 0000000140002520 f i main.obj
+ 0001:00001550       ?GetSource@error_info_fallback@impl@winrt@@UEAAHPEAPEA_W@Z 0000000140002550 f i main.obj
+ 0001:00001550       ?GetHelpFile@error_info_fallback@impl@winrt@@UEAAHPEAPEA_W@Z 0000000140002550 f i main.obj
+ 0001:00001550       ?GetReference@error_info_fallback@impl@winrt@@UEAAHPEAPEA_W@Z 0000000140002550 f i main.obj
+ 0001:00001580       ?GetDescription@error_info_fallback@impl@winrt@@UEAAHPEAPEA_W@Z 0000000140002580 f i main.obj
+ 0001:000015e0       ?GetHelpContext@error_info_fallback@impl@winrt@@UEAAHPEAI@Z 00000001400025e0 f i main.obj
+ 0001:00001610       ??$is_guid_of@UIUnknown@Foundation@Windows@winrt@@@winrt@@YA_NAEBUguid@0@@Z 0000000140002610 f i main.obj
+ 0001:00001650       ?QueryInterface@error_info_fallback@impl@winrt@@UEAAHAEBUguid@3@PEAPEAX@Z 0000000140002650 f i main.obj
+ 0001:00001740       ?QueryInterface@error_info_fallback@impl@winrt@@W7EAAHAEBUguid@3@PEAPEAX@Z 0000000140002740 f i main.obj
+ 0001:00001750       ?AddRef@error_info_fallback@impl@winrt@@UEAAIXZ 0000000140002750 f i main.obj
+ 0001:00001778       ?AddRef@error_info_fallback@impl@winrt@@W7EAAIXZ 0000000140002778 f i main.obj
+ 0001:00001790       ?Release@error_info_fallback@impl@winrt@@UEAAIXZ 0000000140002790 f i main.obj
+ 0001:00001808       ?Release@error_info_fallback@impl@winrt@@W7EAAIXZ 0000000140002808 f i main.obj
+ 0001:00001820       ?GetErrorDetails@error_info_fallback@impl@winrt@@UEAAHPEAPEA_WPEAH00@Z 0000000140002820 f i main.obj
+ 0001:000018b0       ?duplicate_hstring@impl@winrt@@YAPEAUhstring_header@12@PEAU312@@Z 00000001400028b0 f i main.obj
+ 0001:00001980       ??0invalid_argument@std@@QEAA@PEBD@Z 0000000140002980 f i main.obj
+ 0001:00001a00       ??0invalid_argument@std@@QEAA@AEBV01@@Z 0000000140002a00 f i main.obj
+ 0001:00001a40       ??0logic_error@std@@QEAA@AEBV01@@Z 0000000140002a40 f i main.obj
+ 0001:00001a80       ??0bad_alloc@std@@QEAA@XZ  0000000140002a80 f i main.obj
+ 0001:00001ac0       ??0bad_alloc@std@@QEAA@AEBV01@@Z 0000000140002ac0 f i main.obj
+ 0001:00001b00       ?what@exception@std@@UEBAPEBDXZ 0000000140002b00 f i main.obj
+ 0001:00001b30       ??0exception@std@@QEAA@AEBV01@@Z 0000000140002b30 f i main.obj
+ 0001:00001b80       ?precreate_hstring_on_heap@impl@winrt@@YAPEAUshared_hstring_header@12@I@Z 0000000140002b80 f i main.obj
+ 0001:00001c70       ?close@?$handle_type@Uhstring_traits@impl@winrt@@@winrt@@QEAAXXZ 0000000140002c70 f i main.obj
+ 0001:00001d10       ?fallback_RoOriginateLanguageException@hresult_error@winrt@@CAHHPEAX0@Z 0000000140002d10 f i main.obj
+ 0001:00001f60       ?originate@hresult_error@winrt@@AEAAXUhresult@2@PEAX@Z 0000000140002f60 f i main.obj
+ 0001:00002140       ??0hresult_error@winrt@@QEAA@Uhresult@1@Utake_ownership_from_abi_t@1@@Z 0000000140003140 f i main.obj
+ 0001:00002470       ??0hresult_error@winrt@@QEAA@AEBU01@@Z 0000000140003470 f i main.obj
+ 0001:000024d0       ?throw_hresult@winrt@@YAXUhresult@1@@Z 00000001400034d0 f i main.obj
+ 0001:000026d0       ?abi_val@natvis@impl@winrt@@SA@PEAXPEB_WH@Z 00000001400036d0 f i pch.obj
+ 0001:000027e0       ?get_val@natvis@impl@winrt@@SA?ATvariant@?1??abi_val@123@SA@PEAXPEB_WH@Z@PEAUIInspectable@Foundation@Windows@3@1H@Z 00000001400037e0 f i pch.obj
+ 0001:000028f0       ??_G?$heap_implements@UTestRuntimeClass@implementation@MyProject@winrt@@@impl@winrt@@UEAAPEAXI@Z 00000001400038f0 f i TestRuntimeClass.obj
+ 0001:000028f0       ??_E?$heap_implements@UTestRuntimeClass@implementation@MyProject@winrt@@@impl@winrt@@UEAAPEAXI@Z 00000001400038f0 f i * CIL library *:* CIL module *
+ 0001:00002980       ?use_make_function_to_create_this_object@?$heap_implements@UTestRuntimeClass@implementation@MyProject@winrt@@@impl@winrt@@UEAAXXZ 0000000140003980 f i TestRuntimeClass.obj
+ 0001:00002990       ?GetRuntimeClassName@?$TestRuntimeClass_base@UTestRuntimeClass@implementation@MyProject@winrt@@$$V@implementation@MyProject@winrt@@UEBA?AUhstring@4@XZ 0000000140003990 f i TestRuntimeClass.obj
+ 0001:000029c0       ?get_unknown@?$implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@winrt@@EEBAPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@impl@2@XZ 00000001400039c0 f i TestRuntimeClass.obj
+ 0001:000029c0       ?find_inspectable@?$implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@winrt@@UEBAPEAUtype@?$abi@UIInspectable@Foundation@Windows@winrt@@X@impl@2@XZ 00000001400039c0 f i TestRuntimeClass.obj
+ 0001:000029f0       ?get_local_iids@?$implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@winrt@@UEBA?AU?$pair@IPEBUguid@winrt@@@std@@XZ 00000001400039f0 f i TestRuntimeClass.obj
+ 0001:00002a20       ?find_interface@?$implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@winrt@@UEBAPEAXAEBUguid@2@@Z 0000000140003a20 f i TestRuntimeClass.obj
+ 0001:00002a80       ?GetTrustLevel@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@MEBA?AW4TrustLevel@Foundation@Windows@3@XZ 0000000140003a80 f i TestRuntimeClass.obj
+ 0001:00002aa0       ?query_interface_tearoff@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@MEBAHAEBUguid@3@PEAPEAX@Z 0000000140003aa0 f i TestRuntimeClass.obj
+ 0001:00002ac0       ?put_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAX@Z 0000000140003ac0 f i TestRuntimeClass.obj
+ 0001:00002b30       ?get_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAPEAX@Z 0000000140003b30 f i TestRuntimeClass.obj
+ 0001:00002bb0       ?GetTrustLevel@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAHPEAW4TrustLevel@Foundation@Windows@3@@Z 0000000140003bb0 f i TestRuntimeClass.obj
+ 0001:00002bf0       ?GetRuntimeClassName@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAHPEAPEAX@Z 0000000140003bf0 f i TestRuntimeClass.obj
+ 0001:00002c30       ?GetIids@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAHPEAIPEAPEAUguid@3@@Z 0000000140003c30 f i TestRuntimeClass.obj
+ 0001:00002ce0       ?Release@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAIXZ 0000000140003ce0 f i TestRuntimeClass.obj
+ 0001:00002d60       ?AddRef@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAIXZ 0000000140003d60 f i TestRuntimeClass.obj
+ 0001:00002dc0       ?QueryInterface@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAHAEBUguid@3@PEAPEAX@Z 0000000140003dc0 f i TestRuntimeClass.obj
+ 0001:00002e10       ??1abi_guard@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@QEAA@XZ 0000000140003e10 f i TestRuntimeClass.obj
+ 0001:00002e30       ?decrement_strong@?$weak_ref@$00$00@impl@winrt@@QEAAIXZ 0000000140003e30 f i TestRuntimeClass.obj
+ 0001:00002ea0       ?Resolve@?$weak_ref@$00$00@impl@winrt@@UEAAHAEBUguid@3@PEAPEAX@Z 0000000140003ea0 f i TestRuntimeClass.obj
+ 0001:00002f00       ?Release@?$weak_ref@$00$00@impl@winrt@@UEAAIXZ 0000000140003f00 f i TestRuntimeClass.obj
+ 0001:00002f70       ?AddRef@?$weak_ref@$00$00@impl@winrt@@UEAAIXZ 0000000140003f70 f i TestRuntimeClass.obj
+ 0001:00002fa0       ?QueryInterface@?$weak_ref@$00$00@impl@winrt@@UEAAHAEBUguid@3@PEAPEAX@Z 0000000140003fa0 f i TestRuntimeClass.obj
+ 0001:00003080       ?GetWeakReference@?$weak_source@$00$00@impl@winrt@@UEAAHPEAPEAUIWeakReference@23@@Z 0000000140004080 f i TestRuntimeClass.obj
+ 0001:000030d0       ?Release@?$weak_source@$00$00@impl@winrt@@UEAAIXZ 00000001400040d0 f i TestRuntimeClass.obj
+ 0001:00003110       ?AddRef@?$weak_source@$00$00@impl@winrt@@UEAAIXZ 0000000140004110 f i TestRuntimeClass.obj
+ 0001:00003150       ?QueryInterface@?$weak_source@$00$00@impl@winrt@@UEAAHAEBUguid@3@PEAPEAX@Z 0000000140004150 f i TestRuntimeClass.obj
+ 0001:000031f0       ?NonDelegatingGetTrustLevel@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAW4TrustLevel@Foundation@Windows@3@@Z 00000001400041f0 f i TestRuntimeClass.obj
+ 0001:00003230       ?NonDelegatingGetRuntimeClassName@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAPEAX@Z 0000000140004230 f i TestRuntimeClass.obj
+ 0001:00003290       ?AddRef@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@QEAAIXZ 0000000140004290 f i TestRuntimeClass.obj
+ 0001:000032e0       ?query_interface@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@AEAAHAEBUguid@3@PEAPEAX@Z 00000001400042e0 f i TestRuntimeClass.obj
+ 0001:00003480       ?make_weak_ref@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@AEAAPEAUIWeakReferenceSource@23@XZ 0000000140004480 f i TestRuntimeClass.obj
+ 0001:00003630       ?unconditional_release_ref@?$com_ptr@U?$weak_ref@$00$00@impl@winrt@@@winrt@@AEAAXXZ 0000000140004630 f i TestRuntimeClass.obj
+ 0001:000036a0       ??$is_guid_of@UIWeakReferenceSource@impl@winrt@@@winrt@@YA_NAEBUguid@0@@Z 00000001400046a0 f i TestRuntimeClass.obj
+ 0001:000036e0       ??$copy@PEBUguid@winrt@@PEAU12@@std@@YAPEAUguid@winrt@@PEBU12@0PEAU12@@Z 00000001400046e0 f i TestRuntimeClass.obj
+ 0001:00003790       ?QueryInterface@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHAEBUguid@4@1@Z 0000000140004790 f i TestRuntimeClass.obj
+ 0001:00003810       ?AddRef@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAIXZ 0000000140004810 f i TestRuntimeClass.obj
+ 0001:00003840       ?Release@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAIXZ 0000000140004840 f i TestRuntimeClass.obj
+ 0001:000038b0       ?GetUnmarshalClass@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHAEBUguid@4@PEAXI3IPEAU74@@Z 00000001400048b0 f i TestRuntimeClass.obj
+ 0001:00003940       ?GetMarshalSizeMax@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHAEBUguid@4@PEAXI3IPEAI@Z 0000000140004940 f i TestRuntimeClass.obj
+ 0001:000039d0       ?MarshalInterface@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHPEAXAEBUguid@4@2I2I@Z 00000001400049d0 f i TestRuntimeClass.obj
+ 0001:00003a60       ?UnmarshalInterface@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHPEAXAEBUguid@4@1@Z 0000000140004a60 f i TestRuntimeClass.obj
+ 0001:00003ad0       ?ReleaseMarshalData@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHPEAX@Z 0000000140004ad0 f i TestRuntimeClass.obj
+ 0001:00003b20       ?DisconnectObject@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHI@Z 0000000140004b20 f i TestRuntimeClass.obj
+ 0001:00003b70       ?make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@12@PEAPEAX@Z 0000000140004b70 f i TestRuntimeClass.obj
+ 0001:00003d30       ?to_abi@hresult_error@winrt@@QEBA?AUhresult@2@XZ 0000000140004d30 f i TestRuntimeClass.obj
+ 0001:00003dd0       ?to_hresult@winrt@@YA?AUhresult@1@XZ 0000000140004dd0 f i TestRuntimeClass.obj
+ 0001:00003e50       ??0hstring@winrt@@QEAA@PEB_W@Z 0000000140004e50 f i TestRuntimeClass.obj
+ 0001:00003ef0       __security_check_cookie    0000000140004ef0 f   MSVCRTD:amdsecgs.obj
+ 0001:00003f20       ??1type_info@@UEAA@XZ      0000000140004f20 f   MSVCRTD:std_type_info_static.obj
+ 0001:00003f40       ??_Gtype_info@@UEAAPEAXI@Z 0000000140004f40 f i MSVCRTD:std_type_info_static.obj
+ 0001:00003f40       ??_Etype_info@@UEAAPEAXI@Z 0000000140004f40 f i MSVCRTD:std_type_info_static.obj
+ 0001:00003f80       ??3@YAXPEAX_K@Z            0000000140004f80 f   MSVCRTD:delete_scalar_size.obj
+ 0001:00003fa0       ??2@YAPEAX_KAEBUnothrow_t@std@@@Z 0000000140004fa0 f   MSVCRTD:new_scalar_nothrow.obj
+ 0001:00003fe0       ??2@YAPEAX_K@Z             0000000140004fe0 f   MSVCRTD:new_scalar.obj
+ 0001:000042e0       ?configure_argv@__scrt_narrow_argv_policy@@SAHXZ 00000001400052e0 f i MSVCRTD:exe_main.obj
+ 0001:00004300       ?initialize_environment@__scrt_narrow_environment_policy@@SAHXZ 0000000140005300 f i MSVCRTD:exe_main.obj
+ 0001:00004350       ?set_app_type@__scrt_main_policy@@SAXXZ 0000000140005350 f i MSVCRTD:exe_main.obj
+ 0001:00004370       ?set_commode@__scrt_file_policy@@SAXXZ 0000000140005370 f i MSVCRTD:exe_main.obj
+ 0001:00004390       ?set_fmode@__scrt_file_policy@@SAXXZ 0000000140005390 f i MSVCRTD:exe_main.obj
+ 0001:000043b0       mainCRTStartup             00000001400053b0 f   MSVCRTD:exe_main.obj
+ 0001:000043c0       __raise_securityfailure    00000001400053c0 f   MSVCRTD:gs_report.obj
+ 0001:00004400       __report_gsfailure         0000000140005400 f   MSVCRTD:gs_report.obj
+ 0001:000045a0       ??3@YAXPEAX@Z              00000001400055a0 f   MSVCRTD:delete_scalar.obj
+ 0001:000045c0       ?__scrt_throw_std_bad_alloc@@YAXXZ 00000001400055c0 f   MSVCRTD:throw_bad_alloc.obj
+ 0001:000045f0       ?__scrt_throw_std_bad_array_new_length@@YAXXZ 00000001400055f0 f   MSVCRTD:throw_bad_alloc.obj
+ 0001:00004780       NtCurrentTeb               0000000140005780 f i MSVCRTD:utility.obj
+ 0001:00004790       __scrt_acquire_startup_lock 0000000140005790 f   MSVCRTD:utility.obj
+ 0001:00004800       __scrt_initialize_crt      0000000140005800 f   MSVCRTD:utility.obj
+ 0001:00004850       __scrt_initialize_onexit_tables 0000000140005850 f   MSVCRTD:utility.obj
+ 0001:00004960       __scrt_is_nonwritable_in_current_image 0000000140005960 f   MSVCRTD:utility.obj
+ 0001:000049f0       __scrt_release_startup_lock 00000001400059f0 f   MSVCRTD:utility.obj
+ 0001:00004a20       __scrt_uninitialize_crt    0000000140005a20 f   MSVCRTD:utility.obj
+ 0001:00004a60       _onexit                    0000000140005a60 f   MSVCRTD:utility.obj
+ 0001:00004ae0       atexit                     0000000140005ae0 f   MSVCRTD:utility.obj
+ 0001:00004be0       __security_init_cookie     0000000140005be0 f   MSVCRTD:gs_support.obj
+ 0001:00004c60       _matherr                   0000000140005c60 f   MSVCRTD:matherr.obj
+ 0001:00004c70       _get_startup_argv_mode     0000000140005c70 f   MSVCRTD:argv_mode.obj
+ 0001:00004c80       _get_startup_new_mode      0000000140005c80 f   MSVCRTD:new_mode.obj
+ 0001:00004c80       _get_startup_thread_locale_mode 0000000140005c80 f   MSVCRTD:thread_locale.obj
+ 0001:00004c80       __scrt_stub_for_initialize_mta 0000000140005c80 f   MSVCRTD:utility_desktop.obj
+ 0001:00004c80       __scrt_initialize_winrt    0000000140005c80 f   MSVCRTD:utility_desktop.obj
+ 0001:00004c80       _get_startup_commit_mode   0000000140005c80 f   MSVCRTD:commit_mode.obj
+ 0001:00004c80       __scrt_exe_initialize_mta  0000000140005c80 f   MSVCRTD:utility_desktop.obj
+ 0001:00004c90       _get_startup_file_mode     0000000140005c90 f   MSVCRTD:file_mode.obj
+ 0001:00004ca0       ?__scrt_initialize_type_info@@YAXXZ 0000000140005ca0 f   MSVCRTD:tncleanup.obj
+ 0001:00004cc0       __acrt_initialize          0000000140005cc0 f   MSVCRTD:ucrt_stubs.obj
+ 0001:00004cc0       __scrt_stub_for_acrt_initialize 0000000140005cc0 f   MSVCRTD:ucrt_stubs.obj
+ 0001:00004cc0       _should_initialize_environment 0000000140005cc0 f   MSVCRTD:env_mode.obj
+ 0001:00004cc0       __vcrt_initialize          0000000140005cc0 f   MSVCRTD:ucrt_stubs.obj
+ 0001:00004cd0       _initialize_invalid_parameter_handler 0000000140005cd0 f   MSVCRTD:invalid_parameter_handler.obj
+ 0001:00004cd0       _initialize_denormal_control 0000000140005cd0 f   MSVCRTD:denormal_control.obj
+ 0001:00004ce0       __local_stdio_scanf_options 0000000140005ce0 f i MSVCRTD:default_local_stdio_options.obj
+ 0001:00004cf0       __scrt_initialize_default_local_stdio_options 0000000140005cf0 f   MSVCRTD:default_local_stdio_options.obj
+ 0001:00004d40       __scrt_is_user_matherr_present 0000000140005d40 f   MSVCRTD:matherr_detection.obj
+ 0001:00004d70       __scrt_get_dyn_tls_init_callback 0000000140005d70 f   MSVCRTD:dyn_tls_init.obj
+ 0001:00004d80       __scrt_get_dyn_tls_dtor_callback 0000000140005d80 f   MSVCRTD:dyn_tls_dtor.obj
+ 0001:00004d90       __crt_debugger_hook        0000000140005d90 f   MSVCRTD:utility_desktop.obj
+ 0001:00004da0       __scrt_fastfail            0000000140005da0 f   MSVCRTD:utility_desktop.obj
+ 0001:00004f40       __scrt_initialize_mta      0000000140005f40 f   MSVCRTD:utility_desktop.obj
+ 0001:00004f50       __scrt_is_managed_app      0000000140005f50 f   MSVCRTD:utility_desktop.obj
+ 0001:00005000       __scrt_set_unhandled_exception_filter 0000000140006000 f   MSVCRTD:utility_desktop.obj
+ 0001:00005020       __scrt_unhandled_exception_filter 0000000140006020 f   MSVCRTD:utility_desktop.obj
+ 0001:000050c0       _RTC_Initialize            00000001400060c0 f   MSVCRTD:initsect.obj
+ 0001:00005110       _RTC_Terminate             0000000140006110 f   MSVCRTD:initsect.obj
+ 0001:00005160       _guard_check_icall_nop     0000000140006160 f i MSVCRTD:guard_support.obj
+ 0001:00005170       __isa_available_init       0000000140006170 f   MSVCRTD:cpu_disp.obj
+ 0001:00005510       __scrt_is_ucrt_dll_in_use  0000000140006510 f   MSVCRTD:ucrt_detection.obj
+ 0001:00005540       __GSHandlerCheck           0000000140006540 f   MSVCRTD:gshandler.obj
+ 0001:00005580       __GSHandlerCheckCommon     0000000140006580 f   MSVCRTD:gshandler.obj
+ 0001:00005678       __CxxFrameHandler4         0000000140006678 f   vcruntimed:VCRUNTIME140_1D.dll
+ 0001:0000567e       __std_terminate            000000014000667e f   vcruntimed:VCRUNTIME140D.dll
+ 0001:00005684       __C_specific_handler       0000000140006684 f   vcruntimed:VCRUNTIME140D.dll
+ 0001:0000568a       _CxxThrowException         000000014000668a f   vcruntimed:VCRUNTIME140D.dll
+ 0001:00005690       __current_exception        0000000140006690 f   vcruntimed:VCRUNTIME140D.dll
+ 0001:00005696       __current_exception_context 0000000140006696 f   vcruntimed:VCRUNTIME140D.dll
+ 0001:0000569c       _callnewh                  000000014000669c f   ucrtd:ucrtbased.dll
+ 0001:000056a2       malloc                     00000001400066a2 f   ucrtd:ucrtbased.dll
+ 0001:000056a8       _seh_filter_exe            00000001400066a8 f   ucrtd:ucrtbased.dll
+ 0001:000056ae       _set_app_type              00000001400066ae f   ucrtd:ucrtbased.dll
+ 0001:000056b4       __setusermatherr           00000001400066b4 f   ucrtd:ucrtbased.dll
+ 0001:000056ba       _configure_narrow_argv     00000001400066ba f   ucrtd:ucrtbased.dll
+ 0001:000056c0       _initialize_narrow_environment 00000001400066c0 f   ucrtd:ucrtbased.dll
+ 0001:000056c6       _get_initial_narrow_environment 00000001400066c6 f   ucrtd:ucrtbased.dll
+ 0001:000056cc       _initterm                  00000001400066cc f   ucrtd:ucrtbased.dll
+ 0001:000056d2       _initterm_e                00000001400066d2 f   ucrtd:ucrtbased.dll
+ 0001:000056d8       exit                       00000001400066d8 f   ucrtd:ucrtbased.dll
+ 0001:000056de       _exit                      00000001400066de f   ucrtd:ucrtbased.dll
+ 0001:000056e4       _set_fmode                 00000001400066e4 f   ucrtd:ucrtbased.dll
+ 0001:000056ea       __p___argc                 00000001400066ea f   ucrtd:ucrtbased.dll
+ 0001:000056f0       __p___argv                 00000001400066f0 f   ucrtd:ucrtbased.dll
+ 0001:000056f6       _cexit                     00000001400066f6 f   ucrtd:ucrtbased.dll
+ 0001:000056fc       _c_exit                    00000001400066fc f   ucrtd:ucrtbased.dll
+ 0001:00005702       _register_thread_local_exe_atexit_callback 0000000140006702 f   ucrtd:ucrtbased.dll
+ 0001:00005708       _configthreadlocale        0000000140006708 f   ucrtd:ucrtbased.dll
+ 0001:0000570e       _set_new_mode              000000014000670e f   ucrtd:ucrtbased.dll
+ 0001:00005714       __p__commode               0000000140006714 f   ucrtd:ucrtbased.dll
+ 0001:0000571a       _free_dbg                  000000014000671a f   ucrtd:ucrtbased.dll
+ 0001:00005720       _initialize_onexit_table   0000000140006720 f   ucrtd:ucrtbased.dll
+ 0001:00005726       _register_onexit_function  0000000140006726 f   ucrtd:ucrtbased.dll
+ 0001:0000572c       _crt_atexit                000000014000672c f   ucrtd:ucrtbased.dll
+ 0001:00005732       terminate                  0000000140006732 f   ucrtd:ucrtbased.dll
+ 0001:00005738       IsProcessorFeaturePresent  0000000140006738 f   kernel32:KERNEL32.dll
+ 0001:0000573e       GetProcessHeap             000000014000673e f   kernel32:KERNEL32.dll
+ 0001:0000573e       WINRT_IMPL_GetProcessHeap  000000014000673e f   kernel32:KERNEL32.dll
+ 0001:00005744       HeapFree                   0000000140006744 f   kernel32:KERNEL32.dll
+ 0001:00005744       WINRT_IMPL_HeapFree        0000000140006744 f   kernel32:KERNEL32.dll
+ 0001:0000574a       WINRT_IMPL_HeapAlloc       000000014000674a f   kernel32:KERNEL32.dll
+ 0001:0000574a       HeapAlloc                  000000014000674a f   kernel32:KERNEL32.dll
+ 0001:00005750       FormatMessageW             0000000140006750 f   kernel32:KERNEL32.dll
+ 0001:00005750       WINRT_IMPL_FormatMessageW  0000000140006750 f   kernel32:KERNEL32.dll
+ 0001:00005756       WINRT_IMPL_LoadLibraryW    0000000140006756 f   kernel32:KERNEL32.dll
+ 0001:00005756       LoadLibraryW               0000000140006756 f   kernel32:KERNEL32.dll
+ 0001:0000575c       GetProcAddress             000000014000675c f   kernel32:KERNEL32.dll
+ 0001:0000575c       WINRT_IMPL_GetProcAddress  000000014000675c f   kernel32:KERNEL32.dll
+ 0001:00005762       InterlockedPushEntrySList  0000000140006762 f   kernel32:KERNEL32.dll
+ 0001:00005762       WINRT_IMPL_InterlockedPushEntrySList 0000000140006762 f   kernel32:KERNEL32.dll
+ 0001:00005768       WINRT_IMPL_FreeLibrary     0000000140006768 f   kernel32:KERNEL32.dll
+ 0001:00005768       FreeLibrary                0000000140006768 f   kernel32:KERNEL32.dll
+ 0001:0000576e       WINRT_IMPL_VirtualQuery    000000014000676e f   kernel32:KERNEL32.dll
+ 0001:0000576e       VirtualQuery               000000014000676e f   kernel32:KERNEL32.dll
+ 0001:00005774       WINRT_IMPL_MultiByteToWideChar 0000000140006774 f   kernel32:KERNEL32.dll
+ 0001:00005774       MultiByteToWideChar        0000000140006774 f   kernel32:KERNEL32.dll
+ 0001:0000577a       SysFreeString              000000014000677a f   WindowsApp:OLEAUT32.dll
+ 0001:0000577a       WINRT_IMPL_SysFreeString   000000014000677a f   WindowsApp:OLEAUT32.dll
+ 0001:00005780       WINRT_IMPL_GetErrorInfo    0000000140006780 f   WindowsApp:OLEAUT32.dll
+ 0001:00005780       GetErrorInfo               0000000140006780 f   WindowsApp:OLEAUT32.dll
+ 0001:00005786       WINRT_IMPL_SetErrorInfo    0000000140006786 f   WindowsApp:OLEAUT32.dll
+ 0001:00005786       SetErrorInfo               0000000140006786 f   WindowsApp:OLEAUT32.dll
+ 0001:0000578c       WINRT_IMPL_SysAllocString  000000014000678c f   WindowsApp:OLEAUT32.dll
+ 0001:0000578c       SysAllocString             000000014000678c f   WindowsApp:OLEAUT32.dll
+ 0001:00005792       SysStringLen               0000000140006792 f   WindowsApp:OLEAUT32.dll
+ 0001:00005792       WINRT_IMPL_SysStringLen    0000000140006792 f   WindowsApp:OLEAUT32.dll
+ 0001:00005798       WINRT_IMPL_CoInitializeEx  0000000140006798 f   WindowsApp:api-ms-win-core-com-l1-1-0.dll
+ 0001:00005798       CoInitializeEx             0000000140006798 f   WindowsApp:api-ms-win-core-com-l1-1-0.dll
+ 0001:0000579e       WINRT_IMPL_IIDFromString   000000014000679e f   WindowsApp:api-ms-win-core-com-l1-1-0.dll
+ 0001:0000579e       IIDFromString              000000014000679e f   WindowsApp:api-ms-win-core-com-l1-1-0.dll
+ 0001:000057a4       WINRT_IMPL_CoCreateFreeThreadedMarshaler 00000001400067a4 f   WindowsApp:api-ms-win-core-com-l1-1-0.dll
+ 0001:000057a4       CoCreateFreeThreadedMarshaler 00000001400067a4 f   WindowsApp:api-ms-win-core-com-l1-1-0.dll
+ 0001:000057aa       CoTaskMemAlloc             00000001400067aa f   WindowsApp:api-ms-win-core-com-l1-1-0.dll
+ 0001:000057aa       WINRT_IMPL_CoTaskMemAlloc  00000001400067aa f   WindowsApp:api-ms-win-core-com-l1-1-0.dll
+ 0001:000057b0       __scrt_stub_for_acrt_uninitialize 00000001400067b0 f   MSVCRTD:ucrt_stubs.obj
+ 0001:000057b0       __vcrt_uninitialize        00000001400067b0 f   MSVCRTD:ucrt_stubs.obj
+ 0001:000057b0       __acrt_uninitialize        00000001400067b0 f   MSVCRTD:ucrt_stubs.obj
+ 0001:000057c0       __CheckForDebuggerJustMyCode 00000001400067c0 f   MSVCRTD:debugger_jmc.obj
+ 0001:00005800       __GSHandlerCheck_EH4       0000000140006800 f   MSVCRTD:gshandlereh4.obj
+ 0001:000058a7       memcpy                     00000001400068a7 f   vcruntimed:VCRUNTIME140D.dll
+ 0001:000058ad       memmove                    00000001400068ad f   vcruntimed:VCRUNTIME140D.dll
+ 0001:000058b3       memset                     00000001400068b3 f   vcruntimed:VCRUNTIME140D.dll
+ 0001:000058d0       _guard_dispatch_icall_nop  00000001400068d0 f   MSVCRTD:guard_dispatch.obj
+ 0001:000058f0       _guard_xfg_dispatch_icall_nop 00000001400068f0 f   MSVCRTD:guard_xfg_dispatch.obj
+ 0002:00000000       __imp_InterlockedPushEntrySList 0000000140007000     kernel32:KERNEL32.dll
+ 0002:00000008       __imp_RtlLookupFunctionEntry 0000000140007008     kernel32:KERNEL32.dll
+ 0002:00000010       __imp_RtlVirtualUnwind     0000000140007010     kernel32:KERNEL32.dll
+ 0002:00000018       __imp_UnhandledExceptionFilter 0000000140007018     kernel32:KERNEL32.dll
+ 0002:00000020       __imp_SetUnhandledExceptionFilter 0000000140007020     kernel32:KERNEL32.dll
+ 0002:00000028       __imp_GetCurrentProcess    0000000140007028     kernel32:KERNEL32.dll
+ 0002:00000030       __imp_TerminateProcess     0000000140007030     kernel32:KERNEL32.dll
+ 0002:00000038       __imp_IsProcessorFeaturePresent 0000000140007038     kernel32:KERNEL32.dll
+ 0002:00000040       __imp_QueryPerformanceCounter 0000000140007040     kernel32:KERNEL32.dll
+ 0002:00000048       __imp_GetCurrentProcessId  0000000140007048     kernel32:KERNEL32.dll
+ 0002:00000050       __imp_GetCurrentThreadId   0000000140007050     kernel32:KERNEL32.dll
+ 0002:00000058       __imp_GetSystemTimeAsFileTime 0000000140007058     kernel32:KERNEL32.dll
+ 0002:00000060       __imp_InitializeSListHead  0000000140007060     kernel32:KERNEL32.dll
+ 0002:00000068       __imp_IsDebuggerPresent    0000000140007068     kernel32:KERNEL32.dll
+ 0002:00000070       __imp_GetModuleHandleW     0000000140007070     kernel32:KERNEL32.dll
+ 0002:00000078       __imp_GetProcessHeap       0000000140007078     kernel32:KERNEL32.dll
+ 0002:00000080       __imp_HeapFree             0000000140007080     kernel32:KERNEL32.dll
+ 0002:00000088       __imp_HeapAlloc            0000000140007088     kernel32:KERNEL32.dll
+ 0002:00000090       __imp_FormatMessageW       0000000140007090     kernel32:KERNEL32.dll
+ 0002:00000098       __imp_LoadLibraryW         0000000140007098     kernel32:KERNEL32.dll
+ 0002:000000a0       __imp_MultiByteToWideChar  00000001400070a0     kernel32:KERNEL32.dll
+ 0002:000000a8       __imp_VirtualQuery         00000001400070a8     kernel32:KERNEL32.dll
+ 0002:000000b0       __imp_FreeLibrary          00000001400070b0     kernel32:KERNEL32.dll
+ 0002:000000b8       __imp_RtlCaptureContext    00000001400070b8     kernel32:KERNEL32.dll
+ 0002:000000c0       __imp_GetProcAddress       00000001400070c0     kernel32:KERNEL32.dll
+ 0002:000000c8       \177KERNEL32_NULL_THUNK_DATA 00000001400070c8     kernel32:KERNEL32.dll
+ 0002:000000d0       __imp_??0_Lockit@std@@QEAA@H@Z 00000001400070d0     msvcprtd:MSVCP140D.dll
+ 0002:000000d8       __imp_?_Xlength_error@std@@YAXPEBD@Z 00000001400070d8     msvcprtd:MSVCP140D.dll
+ 0002:000000e0       __imp_??1_Lockit@std@@QEAA@XZ 00000001400070e0     msvcprtd:MSVCP140D.dll
+ 0002:000000e8       \177MSVCP140D_NULL_THUNK_DATA 00000001400070e8     msvcprtd:MSVCP140D.dll
+ 0002:000000f0       __imp_SetErrorInfo         00000001400070f0     WindowsApp:OLEAUT32.dll
+ 0002:000000f8       __imp_GetErrorInfo         00000001400070f8     WindowsApp:OLEAUT32.dll
+ 0002:00000100       __imp_SysStringLen         0000000140007100     WindowsApp:OLEAUT32.dll
+ 0002:00000108       __imp_SysAllocString       0000000140007108     WindowsApp:OLEAUT32.dll
+ 0002:00000110       __imp_SysFreeString        0000000140007110     WindowsApp:OLEAUT32.dll
+ 0002:00000118       \177OLEAUT32_NULL_THUNK_DATA 0000000140007118     WindowsApp:OLEAUT32.dll
+ 0002:00000120       __imp___current_exception  0000000140007120     vcruntimed:VCRUNTIME140D.dll
+ 0002:00000128       __imp___C_specific_handler 0000000140007128     vcruntimed:VCRUNTIME140D.dll
+ 0002:00000130       __imp___std_exception_destroy 0000000140007130     vcruntimed:VCRUNTIME140D.dll
+ 0002:00000138       __imp___std_exception_copy 0000000140007138     vcruntimed:VCRUNTIME140D.dll
+ 0002:00000140       __imp___std_terminate      0000000140007140     vcruntimed:VCRUNTIME140D.dll
+ 0002:00000148       __imp_memmove              0000000140007148     vcruntimed:VCRUNTIME140D.dll
+ 0002:00000150       __imp___current_exception_context 0000000140007150     vcruntimed:VCRUNTIME140D.dll
+ 0002:00000158       __imp_memcpy               0000000140007158     vcruntimed:VCRUNTIME140D.dll
+ 0002:00000160       __imp__CxxThrowException   0000000140007160     vcruntimed:VCRUNTIME140D.dll
+ 0002:00000168       __imp_memset               0000000140007168     vcruntimed:VCRUNTIME140D.dll
+ 0002:00000170       \177VCRUNTIME140D_NULL_THUNK_DATA 0000000140007170     vcruntimed:VCRUNTIME140D.dll
+ 0002:00000178       __imp___CxxFrameHandler4   0000000140007178     vcruntimed:VCRUNTIME140_1D.dll
+ 0002:00000180       \177VCRUNTIME140_1D_NULL_THUNK_DATA 0000000140007180     vcruntimed:VCRUNTIME140_1D.dll
+ 0002:00000188       __imp_IIDFromString        0000000140007188     WindowsApp:api-ms-win-core-com-l1-1-0.dll
+ 0002:00000190       __imp_CoCreateFreeThreadedMarshaler 0000000140007190     WindowsApp:api-ms-win-core-com-l1-1-0.dll
+ 0002:00000198       __imp_CoInitializeEx       0000000140007198     WindowsApp:api-ms-win-core-com-l1-1-0.dll
+ 0002:000001a0       __imp_CoTaskMemAlloc       00000001400071a0     WindowsApp:api-ms-win-core-com-l1-1-0.dll
+ 0002:000001a8       \177api-ms-win-core-com-l1-1-0_NULL_THUNK_DATA 00000001400071a8     WindowsApp:api-ms-win-core-com-l1-1-0.dll
+ 0002:000001b0       __imp___p__commode         00000001400071b0     ucrtd:ucrtbased.dll
+ 0002:000001b8       __imp__set_new_mode        00000001400071b8     ucrtd:ucrtbased.dll
+ 0002:000001c0       __imp__configthreadlocale  00000001400071c0     ucrtd:ucrtbased.dll
+ 0002:000001c8       __imp__register_thread_local_exe_atexit_callback 00000001400071c8     ucrtd:ucrtbased.dll
+ 0002:000001d0       __imp__c_exit              00000001400071d0     ucrtd:ucrtbased.dll
+ 0002:000001d8       __imp__cexit               00000001400071d8     ucrtd:ucrtbased.dll
+ 0002:000001e0       __imp___p___argv           00000001400071e0     ucrtd:ucrtbased.dll
+ 0002:000001e8       __imp___p___argc           00000001400071e8     ucrtd:ucrtbased.dll
+ 0002:000001f0       __imp__set_fmode           00000001400071f0     ucrtd:ucrtbased.dll
+ 0002:000001f8       __imp__exit                00000001400071f8     ucrtd:ucrtbased.dll
+ 0002:00000200       __imp_exit                 0000000140007200     ucrtd:ucrtbased.dll
+ 0002:00000208       __imp__initterm_e          0000000140007208     ucrtd:ucrtbased.dll
+ 0002:00000210       __imp__initterm            0000000140007210     ucrtd:ucrtbased.dll
+ 0002:00000218       __imp__get_initial_narrow_environment 0000000140007218     ucrtd:ucrtbased.dll
+ 0002:00000220       __imp__free_dbg            0000000140007220     ucrtd:ucrtbased.dll
+ 0002:00000228       __imp__configure_narrow_argv 0000000140007228     ucrtd:ucrtbased.dll
+ 0002:00000230       __imp___setusermatherr     0000000140007230     ucrtd:ucrtbased.dll
+ 0002:00000238       __imp__set_app_type        0000000140007238     ucrtd:ucrtbased.dll
+ 0002:00000240       __imp__seh_filter_exe      0000000140007240     ucrtd:ucrtbased.dll
+ 0002:00000248       __imp_malloc               0000000140007248     ucrtd:ucrtbased.dll
+ 0002:00000250       __imp__callnewh            0000000140007250     ucrtd:ucrtbased.dll
+ 0002:00000258       __imp___stdio_common_vfprintf 0000000140007258     ucrtd:ucrtbased.dll
+ 0002:00000260       __imp___acrt_iob_func      0000000140007260     ucrtd:ucrtbased.dll
+ 0002:00000268       __imp_iswspace             0000000140007268     ucrtd:ucrtbased.dll
+ 0002:00000270       __imp__errno               0000000140007270     ucrtd:ucrtbased.dll
+ 0002:00000278       __imp__invalid_parameter_noinfo 0000000140007278     ucrtd:ucrtbased.dll
+ 0002:00000280       __imp__CrtDbgReport        0000000140007280     ucrtd:ucrtbased.dll
+ 0002:00000288       __imp__invalid_parameter   0000000140007288     ucrtd:ucrtbased.dll
+ 0002:00000290       __imp_abort                0000000140007290     ucrtd:ucrtbased.dll
+ 0002:00000298       __imp__CrtDbgReportW       0000000140007298     ucrtd:ucrtbased.dll
+ 0002:000002a0       __imp_terminate            00000001400072a0     ucrtd:ucrtbased.dll
+ 0002:000002a8       __imp__crt_atexit          00000001400072a8     ucrtd:ucrtbased.dll
+ 0002:000002b0       __imp__initialize_narrow_environment 00000001400072b0     ucrtd:ucrtbased.dll
+ 0002:000002b8       __imp__register_onexit_function 00000001400072b8     ucrtd:ucrtbased.dll
+ 0002:000002c0       __imp__initialize_onexit_table 00000001400072c0     ucrtd:ucrtbased.dll
+ 0002:000002c8       \177ucrtbased_NULL_THUNK_DATA 00000001400072c8     ucrtd:ucrtbased.dll
+ 0002:000002d0       __guard_check_icall_fptr   00000001400072d0     MSVCRTD:guard_support.obj
+ 0002:000002d8       __guard_xfg_check_icall_fptr 00000001400072d8     MSVCRTD:guard_support.obj
+ 0002:000002e0       __guard_dispatch_icall_fptr 00000001400072e0     MSVCRTD:guard_support.obj
+ 0002:000002e8       __guard_xfg_dispatch_icall_fptr 00000001400072e8     MSVCRTD:guard_support.obj
+ 0002:000002f0       __guard_xfg_table_dispatch_icall_fptr 00000001400072f0     MSVCRTD:guard_support.obj
+ 0002:000002f8       __xc_a                     00000001400072f8     MSVCRTD:initializers.obj
+ 0002:00000308       __xc_z                     0000000140007308     MSVCRTD:initializers.obj
+ 0002:00000310       __xi_a                     0000000140007310     MSVCRTD:initializers.obj
+ 0002:00000328       __xi_z                     0000000140007328     MSVCRTD:initializers.obj
+ 0002:00000330       __xp_a                     0000000140007330     MSVCRTD:initializers.obj
+ 0002:00000338       __xp_z                     0000000140007338     MSVCRTD:initializers.obj
+ 0002:00000340       __xt_a                     0000000140007340     MSVCRTD:initializers.obj
+ 0002:00000348       __xt_z                     0000000140007348     MSVCRTD:initializers.obj
+ 0002:00000350       ?nothrow@std@@3Unothrow_t@1@B 0000000140007350     msvcprtd:nothrow.obj
+ 0002:00000360       ??_7type_info@@6B@         0000000140007360     MSVCRTD:std_type_info_static.obj
+ 0002:00000380       ??_7exception@std@@6B@     0000000140007380     MSVCRTD:throw_bad_alloc.obj
+ 0002:00000398       ??_7bad_alloc@std@@6B@     0000000140007398     MSVCRTD:throw_bad_alloc.obj
+ 0002:000003b0       ??_7bad_array_new_length@std@@6B@ 00000001400073b0     MSVCRTD:throw_bad_alloc.obj
+ 0002:000003c0       ??_C@_1CO@CGKKODI@?$AAh?$AAt?$AAt?$AAp?$AA?3?$AA?1?$AA?1?$AAa?$AAk?$AAa?$AA?4?$AAm?$AAs?$AA?1?$AAc@ 00000001400073c0     main.obj
+ 0002:000003f0       ??_C@_0N@GFBGMFLE@Hello?0?5?$CFls?$CB?6@ 00000001400073f0     main.obj
+ 0002:00000400       ??_C@_1BE@EJFBCLK@?$AAt?$AAe?$AAs?$AAt?$AA?5?$AAn?$AAa?$AAm?$AAe@ 0000000140007400     main.obj
+ 0002:00000418       ??_C@_0CE@BGOIHDIM@TestRuntimeClass?5instance?4Name?$DN@ 0000000140007418     main.obj
+ 0002:00000440       ??$guid_v@UIWeakReferenceSource@impl@winrt@@@impl@winrt@@3Uguid@2@B 0000000140007440     main.obj
+ 0002:00000450       ??$guid_v@UIInspectable@Foundation@Windows@winrt@@@impl@winrt@@3Uguid@2@B 0000000140007450     main.obj
+ 0002:00000460       ??$guid_v@UIWeakReference@impl@winrt@@@impl@winrt@@3Uguid@2@B 0000000140007460     main.obj
+ 0002:00000470       ??$guid_v@UIMarshal@impl@winrt@@@impl@winrt@@3Uguid@2@B 0000000140007470     main.obj
+ 0002:00000480       ??_C@_0BH@ELDDNMMN@RoGetActivationFactory@ 0000000140007480     main.obj
+ 0002:00000498       ??_C@_0BE@KIFAHOHK@CoIncrementMTAUsage@ 0000000140007498     main.obj
+ 0002:000004b0       ??_C@_19BHIGINDB@?$AA?4?$AAd?$AAl?$AAl@ 00000001400074b0     main.obj
+ 0002:000004c0       ??_C@_0BA@JFNIOLAK@string?5too?5long@ 00000001400074c0     main.obj
+ 0002:000004d0       ??_C@_1EO@GFNCMDLA@?$AAs?$AAt?$AAd?$AA?3?$AA?3?$AA_?$AAA?$AAl?$AAl?$AAo?$AAc?$AAa?$AAt?$AAe?$AA_@ 00000001400074d0     main.obj
+ 0002:00000520       ??_C@_0BF@KINCDENJ@bad?5array?5new?5length@ 0000000140007520     main.obj
+ 0002:00000538       ??_C@_0BB@FCMFBGOM@invalid?5argument@ 0000000140007538     main.obj
+ 0002:00000550       ??_C@_0GJ@EHJGLGPD@C?3?2Program?5Files?5?$CIx86?$CJ?2Microsof@ 0000000140007550     main.obj
+ 0002:000005c0       ??_C@_1NC@LBGPBFDE@?$AAC?$AA?3?$AA?2?$AAP?$AAr?$AAo?$AAg?$AAr?$AAa?$AAm?$AA?5?$AAF?$AAi?$AAl?$AAe@ 00000001400075c0     main.obj
+ 0002:000006a0       ??_C@_1EK@NIFDJFDG@?$AAs?$AAt?$AAd?$AA?3?$AA?3?$AA_?$AAA?$AAd?$AAj?$AAu?$AAs?$AAt?$AA_?$AAm?$AAa@ 00000001400076a0     main.obj
+ 0002:000006f0       ??_C@_1CG@JNLFBNGN@?$AA?$CC?$AAi?$AAn?$AAv?$AAa?$AAl?$AAi?$AAd?$AA?5?$AAa?$AAr?$AAg?$AAu?$AAm?$AAe@ 00000001400076f0     main.obj
+ 0002:00000718       ??_C@_0BI@CBEEAIL@DllGetActivationFactory@ 0000000140007718     main.obj
+ 0002:00000730       ??$guid_v@UIUriRuntimeClassFactory@Foundation@Windows@winrt@@@impl@winrt@@3Uguid@2@B 0000000140007730     main.obj
+ 0002:00000740       ??_C@_0BP@FCPKDACH@non?9zero?5size?5null?5string_view@ 0000000140007740     main.obj
+ 0002:00000760       ??_C@_0GJ@LOFLLKBK@C?3?2Program?5Files?5?$CIx86?$CJ?2Microsof@ 0000000140007760     main.obj
+ 0002:000007d0       ??_C@_1NC@FPODOMOF@?$AAC?$AA?3?$AA?2?$AAP?$AAr?$AAo?$AAg?$AAr?$AAa?$AAm?$AA?5?$AAF?$AAi?$AAl?$AAe@ 00000001400077d0     main.obj
+ 0002:000008b0       ??_C@_1KK@IKKHLFNC@?$AAs?$AAt?$AAd?$AA?3?$AA?3?$AAb?$AAa?$AAs?$AAi?$AAc?$AA_?$AAs?$AAt?$AAr?$AAi@ 00000001400078b0     main.obj
+ 0002:00000960       ??_C@_1EC@EBKHCANC@?$AA?$CC?$AAn?$AAo?$AAn?$AA?9?$AAz?$AAe?$AAr?$AAo?$AA?5?$AAs?$AAi?$AAz?$AAe?$AA?5@ 0000000140007960     main.obj
+ 0002:000009a8       ??_C@_1CO@FCGHFFFN@?$AAW?$AAi?$AAn?$AAd?$AAo?$AAw?$AAs?$AA?4?$AAF?$AAo?$AAu?$AAn?$AAd?$AAa?$AAt@ 00000001400079a8     main.obj
+ 0002:000009d8       ?error_access_denied@impl@winrt@@3Uhresult@2@B 00000001400079d8     main.obj
+ 0002:000009dc       ?error_wrong_thread@impl@winrt@@3Uhresult@2@B 00000001400079dc     main.obj
+ 0002:000009e0       ?error_not_implemented@impl@winrt@@3Uhresult@2@B 00000001400079e0     main.obj
+ 0002:000009e4       ?error_invalid_argument@impl@winrt@@3Uhresult@2@B 00000001400079e4     main.obj
+ 0002:000009e8       ?error_out_of_bounds@impl@winrt@@3Uhresult@2@B 00000001400079e8     main.obj
+ 0002:000009ec       ?error_class_not_available@impl@winrt@@3Uhresult@2@B 00000001400079ec     main.obj
+ 0002:000009f0       ?error_class_not_registered@impl@winrt@@3Uhresult@2@B 00000001400079f0     main.obj
+ 0002:000009f4       ?error_changed_state@impl@winrt@@3Uhresult@2@B 00000001400079f4     main.obj
+ 0002:000009f8       ?error_illegal_method_call@impl@winrt@@3Uhresult@2@B 00000001400079f8     main.obj
+ 0002:000009fc       ?error_illegal_state_change@impl@winrt@@3Uhresult@2@B 00000001400079fc     main.obj
+ 0002:00000a00       ?error_illegal_delegate_assignment@impl@winrt@@3Uhresult@2@B 0000000140007a00     main.obj
+ 0002:00000a04       ?error_canceled@impl@winrt@@3Uhresult@2@B 0000000140007a04     main.obj
+ 0002:00000a08       ??_C@_1BC@GNDKGMGC@?$AAc?$AAo?$AAd?$AAe?$AA?5?$AA?$DM?$AA?5?$AA0@ 0000000140007a08     main.obj
+ 0002:00000a20       ??_C@_1GG@GBPKAHDJ@?$AA0?$AA?5?$AA?$DN?$AA?$DN?$AA?5?$AAm?$AA_?$AAi?$AAn?$AAf?$AAo?$AA?9?$AA?$DO?$AAG?$AAe@ 0000000140007a20     main.obj
+ 0002:00000a88       ??$guid_v@UILanguageExceptionErrorInfo2@impl@winrt@@@impl@winrt@@3Uguid@2@B 0000000140007a88     main.obj
+ 0002:00000aa0       ??_C@_1FO@BNACNOLH@?$AA0?$AA?5?$AA?$DN?$AA?$DN?$AA?5?$AAi?$AAn?$AAf?$AAo?$AA2?$AA?9?$AA?$DO?$AAC?$AAa?$AAp@ 0000000140007aa0     main.obj
+ 0002:00000b08       ??_7error_info_fallback@impl@winrt@@6BIErrorInfo@12@@ 0000000140007b08     main.obj
+ 0002:00000b48       ??$guid_v@UIUnknown@Foundation@Windows@winrt@@@impl@winrt@@3Uguid@2@B 0000000140007b48     main.obj
+ 0002:00000b58       ??$guid_v@UIAgileObject@impl@winrt@@@impl@winrt@@3Uguid@2@B 0000000140007b58     main.obj
+ 0002:00000b68       ??$guid_v@UIErrorInfo@impl@winrt@@@impl@winrt@@3Uguid@2@B 0000000140007b68     main.obj
+ 0002:00000b78       ?error_no_interface@impl@winrt@@3Uhresult@2@B 0000000140007b78     main.obj
+ 0002:00000b7c       ??_C@_11LOCGONAA@@         0000000140007b7c     main.obj
+ 0002:00000b88       ??_7error_info_fallback@impl@winrt@@6BIRestrictedErrorInfo@12@@ 0000000140007b88     main.obj
+ 0002:00000bb0       ??_C@_1HG@BKPJIKID@?$AAW?$AAI?$AAN?$AAR?$AAT?$AA_?$AAI?$AAM?$AAP?$AAL?$AA_?$AAH?$AAe?$AAa?$AAp@ 0000000140007bb0     main.obj
+ 0002:00000c28       ??_C@_1BI@ODEMMKNH@?$AAl?$AAe?$AAn?$AAg?$AAt?$AAh?$AA?5?$AA?$CB?$AA?$DN?$AA?5?$AA0@ 0000000140007c28     main.obj
+ 0002:00000c40       ??_C@_06IJDLPEM@length@    0000000140007c40     main.obj
+ 0002:00000c50       ??_7invalid_argument@std@@6B@ 0000000140007c50     main.obj
+ 0002:00000c68       ??_7logic_error@std@@6B@   0000000140007c68     main.obj
+ 0002:00000c78       ??_C@_0P@GHFPNOJB@bad?5allocation@ 0000000140007c78     main.obj
+ 0002:00000c88       ??_C@_0BC@EOODALEL@Unknown?5exception@ 0000000140007c88     main.obj
+ 0002:00000ca0       ??_C@_1FM@CPFJPBGL@?$AA?$CI?$AAh?$AAa?$AAn?$AAd?$AAl?$AAe?$AA?9?$AA?$DO?$AAf?$AAl?$AAa?$AAg?$AAs?$AA?5@ 0000000140007ca0     main.obj
+ 0002:00000cfc       ??_C@_02DKCKIIND@?$CFs@    0000000140007cfc     main.obj
+ 0002:00000d00       ??_C@_1FI@EAMODOPF@?$AA0?$AA?5?$AA?$DN?$AA?$DN?$AA?5?$AAW?$AAI?$AAN?$AAR?$AAT?$AA_?$AAI?$AAM?$AAP?$AAL@ 0000000140007d00     main.obj
+ 0002:00000d58       ??_C@_0BN@JPBHHFJC@RoOriginateLanguageException@ 0000000140007d58     main.obj
+ 0002:00000d78       ??_C@_1BI@IDAOOPDH@?$AAc?$AAo?$AAm?$AAb?$AAa?$AAs?$AAe?$AA?4?$AAd?$AAl?$AAl@ 0000000140007d78     main.obj
+ 0002:00000d90       ??_C@_1EA@CJOLHGLO@?$AAh?$AAa?$AAn?$AAd?$AAl?$AAe?$AAr?$AA?$CI?$AAc?$AAo?$AAd?$AAe?$AA?0?$AA?5?$AAm@ 0000000140007d90     main.obj
+ 0002:00000dd0       ??_C@_1GC@ICNLKKO@?$AA0?$AA?5?$AA?$DN?$AA?$DN?$AA?5?$AAW?$AAI?$AAN?$AAR?$AAT?$AA_?$AAI?$AAM?$AAP?$AAL@ 0000000140007dd0     main.obj
+ 0002:00000e38       ??$guid_v@UIRestrictedErrorInfo@impl@winrt@@@impl@winrt@@3Uguid@2@B 0000000140007e38     main.obj
+ 0002:00000e48       ??_C@_1CI@LJOMKGHF@?$AAi?$AAn?$AAf?$AAo?$AA?4?$AAt?$AAr?$AAy?$AA_?$AAa?$AAs?$AA?$CI?$AAm?$AA_?$AAi@ 0000000140007e48     main.obj
+ 0002:00000e70       ??_C@_17CNPHIMPH@?$AA?$CF?$AAl?$AAs@ 0000000140007e70     main.obj
+ 0002:00000e80       ??_C@_1PO@PJNIIDPP@?$AAC?$AA?3?$AA?2?$AAU?$AAs?$AAe?$AAr?$AAs?$AA?2?$AAa?$AAu?$AAs?$AAt?$AAi?$AA?2@ 0000000140007e80     main.obj
+ 0002:00000f80       ??$guid_v@UITestRuntimeClass@MyProject@winrt@@@impl@winrt@@3Uguid@2@B 0000000140007f80     main.obj
+ 0002:00000f80       ?value@?$uncloaked_iids@U?$interface_list@UTestRuntimeClass@MyProject@winrt@@@impl@winrt@@@impl@winrt@@2V?$array@Uguid@winrt@@$00@std@@B 0000000140007f80     TestRuntimeClass.obj
+ 0002:00000f90       ??_C@_0BP@NINKNLNB@C?$CL?$CL?1WinRT?5version?32?40?4210825?43@ 0000000140007f90     pch.obj
+ 0002:00000fb0       WINRT_version              0000000140007fb0     pch.obj
+ 0002:00000fb8       ??_C@_1DG@PEOMNIDN@?$AAM?$AAy?$AAP?$AAr?$AAo?$AAj?$AAe?$AAc?$AAt?$AA?4?$AAT?$AAe?$AAs?$AAt?$AAR@ 0000000140007fb8     TestRuntimeClass.obj
+ 0002:00000ff0       ??_C@_1O@EJHDPCJ@?$AAo?$AAb?$AAj?$AAe?$AAc?$AAt@ 0000000140007ff0     TestRuntimeClass.obj
+ 0002:00001000       ??_C@_1FM@JHLLIGPK@?$AA?$CI?$AAr?$AAe?$AAi?$AAn?$AAt?$AAe?$AAr?$AAp?$AAr?$AAe?$AAt?$AA_?$AAc?$AAa@ 0000000140008000     TestRuntimeClass.obj
+ 0002:00001060       ??_C@_0BJ@HAJGEHKO@transposed?5pointer?5range@ 0000000140008060     TestRuntimeClass.obj
+ 0002:00001080       ??_C@_0GK@OHAIDBEA@C?3?2Program?5Files?5?$CIx86?$CJ?2Microsof@ 0000000140008080     TestRuntimeClass.obj
+ 0002:000010f0       ??_C@_1NE@NLDHILHB@?$AAC?$AA?3?$AA?2?$AAP?$AAr?$AAo?$AAg?$AAr?$AAa?$AAm?$AA?5?$AAF?$AAi?$AAl?$AAe@ 00000001400080f0     TestRuntimeClass.obj
+ 0002:000011c8       ??_C@_1CG@LJCPDKEJ@?$AAs?$AAt?$AAd?$AA?3?$AA?3?$AA_?$AAV?$AAe?$AAr?$AAi?$AAf?$AAy?$AA_?$AAr?$AAa@ 00000001400081c8     TestRuntimeClass.obj
+ 0002:000011f0       ??_C@_1DG@FJIKMGFD@?$AA?$CC?$AAt?$AAr?$AAa?$AAn?$AAs?$AAp?$AAo?$AAs?$AAe?$AAd?$AA?5?$AAp?$AAo?$AAi@ 00000001400081f0     TestRuntimeClass.obj
+ 0002:00001230       ??_7?$weak_source@$00$00@impl@winrt@@6B@ 0000000140008230     TestRuntimeClass.obj
+ 0002:00001258       ??_7?$weak_ref@$00$00@impl@winrt@@6B@ 0000000140008258     TestRuntimeClass.obj
+ 0002:00001280       ??_7marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@23@PEAPEAX@Z@6B@ 0000000140008280     TestRuntimeClass.obj
+ 0002:000012d0       ??_C@_1JG@DPACOLJP@?$AA0?$AA?5?$AA?$DN?$AA?$DN?$AA?5?$AAW?$AAI?$AAN?$AAR?$AAT?$AA_?$AAI?$AAM?$AAP?$AAL@ 00000001400082d0     TestRuntimeClass.obj
+ 0002:00001370       ??_C@_1OO@NBLAIIPP@?$AAs?$AAi?$AAz?$AAe?$AA?5?$AA?$DN?$AA?$DN?$AA?5?$AAW?$AAI?$AAN?$AAR?$AAT?$AA_?$AAI@ 0000000140008370     TestRuntimeClass.obj
+ 0002:00001468       ??_7?$heap_implements@UTestRuntimeClass@implementation@MyProject@winrt@@@impl@winrt@@6B@ 0000000140008468     TestRuntimeClass.obj
+ 0002:000014b8       ??_7?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@6B@ 00000001400084b8     TestRuntimeClass.obj
+ 0002:00001550       _load_config_used          0000000140008550     MSVCRTD:loadcfg.obj
+ 0002:00001680       ??_R4type_info@@6B@        0000000140008680     MSVCRTD:std_type_info_static.obj
+ 0002:000016a8       ??_R3type_info@@8          00000001400086a8     MSVCRTD:std_type_info_static.obj
+ 0002:000016c0       ??_R2type_info@@8          00000001400086c0     MSVCRTD:std_type_info_static.obj
+ 0002:000016d0       ??_R1A@?0A@EA@type_info@@8 00000001400086d0     MSVCRTD:std_type_info_static.obj
+ 0002:000016f8       ??_R1A@?0A@EA@bad_array_new_length@std@@8 00000001400086f8     main.obj
+ 0002:00001720       ??_R2bad_array_new_length@std@@8 0000000140008720     main.obj
+ 0002:00001740       ??_R3bad_array_new_length@std@@8 0000000140008740     main.obj
+ 0002:00001758       ??_R4bad_array_new_length@std@@6B@ 0000000140008758     main.obj
+ 0002:00001780       ??_R4error_info_fallback@impl@winrt@@6BIErrorInfo@12@@ 0000000140008780     main.obj
+ 0002:000017a8       ??_R1A@?0A@EA@error_info_fallback@impl@winrt@@8 00000001400087a8     main.obj
+ 0002:000017d0       ??_R2IErrorInfo@impl@winrt@@8 00000001400087d0     main.obj
+ 0002:000017e8       ??_R3IErrorInfo@impl@winrt@@8 00000001400087e8     main.obj
+ 0002:00001800       ??_R1A@?0A@EA@IErrorInfo@impl@winrt@@8 0000000140008800     main.obj
+ 0002:00001828       ??_R1A@?0A@EC@type@?$abi@UIUnknown@Foundation@Windows@winrt@@X@impl@winrt@@8 0000000140008828     main.obj
+ 0002:00001850       ??_R1A@?0A@EA@IRestrictedErrorInfo@impl@winrt@@8 0000000140008850     main.obj
+ 0002:00001878       ??_R2IRestrictedErrorInfo@impl@winrt@@8 0000000140008878     main.obj
+ 0002:00001890       ??_R3IRestrictedErrorInfo@impl@winrt@@8 0000000140008890     main.obj
+ 0002:000018a8       ??_R17?0A@EA@IRestrictedErrorInfo@impl@winrt@@8 00000001400088a8     main.obj
+ 0002:000018d0       ??_R1A@?0A@EA@type@?$abi@UIUnknown@Foundation@Windows@winrt@@X@impl@winrt@@8 00000001400088d0     main.obj
+ 0002:000018f8       ??_R2type@?$abi@UIUnknown@Foundation@Windows@winrt@@X@impl@winrt@@8 00000001400088f8     main.obj
+ 0002:00001908       ??_R3type@?$abi@UIUnknown@Foundation@Windows@winrt@@X@impl@winrt@@8 0000000140008908     main.obj
+ 0002:00001920       ??_R17?0A@EC@type@?$abi@UIUnknown@Foundation@Windows@winrt@@X@impl@winrt@@8 0000000140008920     main.obj
+ 0002:00001948       ??_R1A@?0A@EA@?$module_lock_updater@$00@impl@winrt@@8 0000000140008948     main.obj
+ 0002:00001970       ??_R2?$module_lock_updater@$00@impl@winrt@@8 0000000140008970     main.obj
+ 0002:00001980       ??_R3?$module_lock_updater@$00@impl@winrt@@8 0000000140008980     main.obj
+ 0002:00001998       ??_R1BA@?0A@EA@?$module_lock_updater@$00@impl@winrt@@8 0000000140008998     main.obj
+ 0002:000019c0       ??_R2error_info_fallback@impl@winrt@@8 00000001400089c0     main.obj
+ 0002:000019f8       ??_R3error_info_fallback@impl@winrt@@8 00000001400089f8     main.obj
+ 0002:00001a10       ??_R4error_info_fallback@impl@winrt@@6BIRestrictedErrorInfo@12@@ 0000000140008a10     main.obj
+ 0002:00001a38       ??_R1A@?0A@EA@invalid_argument@std@@8 0000000140008a38     main.obj
+ 0002:00001a60       ??_R2invalid_argument@std@@8 0000000140008a60     main.obj
+ 0002:00001a80       ??_R3invalid_argument@std@@8 0000000140008a80     main.obj
+ 0002:00001a98       ??_R4invalid_argument@std@@6B@ 0000000140008a98     main.obj
+ 0002:00001ac0       ??_R1A@?0A@EA@logic_error@std@@8 0000000140008ac0     main.obj
+ 0002:00001ae8       ??_R2logic_error@std@@8    0000000140008ae8     main.obj
+ 0002:00001b00       ??_R3logic_error@std@@8    0000000140008b00     main.obj
+ 0002:00001b18       ??_R4logic_error@std@@6B@  0000000140008b18     main.obj
+ 0002:00001b40       ??_R1A@?0A@EA@bad_alloc@std@@8 0000000140008b40     main.obj
+ 0002:00001b68       ??_R2bad_alloc@std@@8      0000000140008b68     main.obj
+ 0002:00001b80       ??_R3bad_alloc@std@@8      0000000140008b80     main.obj
+ 0002:00001b98       ??_R4bad_alloc@std@@6B@    0000000140008b98     main.obj
+ 0002:00001bc0       ??_R1A@?0A@EA@exception@std@@8 0000000140008bc0     main.obj
+ 0002:00001be8       ??_R2exception@std@@8      0000000140008be8     main.obj
+ 0002:00001bf8       ??_R3exception@std@@8      0000000140008bf8     main.obj
+ 0002:00001c10       ??_R4exception@std@@6B@    0000000140008c10     main.obj
+ 0002:00001c38       ??_R2?$weak_source@$00$00@impl@winrt@@8 0000000140008c38     TestRuntimeClass.obj
+ 0002:00001c60       ??_R2?$heap_implements@UTestRuntimeClass@implementation@MyProject@winrt@@@impl@winrt@@8 0000000140008c60     TestRuntimeClass.obj
+ 0002:00001cc0       ??_R2?$weak_ref@$00$00@impl@winrt@@8 0000000140008cc0     TestRuntimeClass.obj
+ 0002:00001ce8       ??_R2?$weak_source_producer@$00$00@impl@winrt@@8 0000000140008ce8     TestRuntimeClass.obj
+ 0002:00001cf8       ??_R2?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@8 0000000140008cf8     TestRuntimeClass.obj
+ 0002:00001d28       ??_R2?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@8 0000000140008d28     TestRuntimeClass.obj
+ 0002:00001d50       ??_R2TestRuntimeClass@implementation@MyProject@winrt@@8 0000000140008d50     TestRuntimeClass.obj
+ 0002:00001db0       ??_R2?$TestRuntimeClass_base@UTestRuntimeClass@implementation@MyProject@winrt@@$$V@implementation@MyProject@winrt@@8 0000000140008db0     TestRuntimeClass.obj
+ 0002:00001e00       ??_R2?$implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@winrt@@8 0000000140008e00     TestRuntimeClass.obj
+ 0002:00001e48       ??_R2?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@8 0000000140008e48     TestRuntimeClass.obj
+ 0002:00001e70       ??_R2?$root_implements_composable_inner@UTestRuntimeClass@implementation@MyProject@winrt@@$0A@@impl@winrt@@8 0000000140008e70     TestRuntimeClass.obj
+ 0002:00001e80       ??_R2?$root_implements_composing_outer@$0A@@impl@winrt@@8 0000000140008e80     TestRuntimeClass.obj
+ 0002:00001e90       ??_R2?$producers_base@UTestRuntimeClass@implementation@MyProject@winrt@@V?$tuple@UTestRuntimeClass@MyProject@winrt@@@std@@@impl@winrt@@8 0000000140008e90     TestRuntimeClass.obj
+ 0002:00001eb0       ??_R2?$producer_convert@UTestRuntimeClass@implementation@MyProject@winrt@@U134@X@impl@winrt@@8 0000000140008eb0     TestRuntimeClass.obj
+ 0002:00001ec8       ??_R2?$producer@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@8 0000000140008ec8     TestRuntimeClass.obj
+ 0002:00001ed8       ??_R2type@?$abi@UITestRuntimeClass@MyProject@winrt@@X@impl@winrt@@8 0000000140008ed8     TestRuntimeClass.obj
+ 0002:00001ef8       ??_R2IWeakReferenceSource@impl@winrt@@8 0000000140008ef8     TestRuntimeClass.obj
+ 0002:00001f10       ??_R2IWeakReference@impl@winrt@@8 0000000140008f10     TestRuntimeClass.obj
+ 0002:00001f28       ??_R2type@?$abi@UIInspectable@Foundation@Windows@winrt@@X@impl@winrt@@8 0000000140008f28     TestRuntimeClass.obj
+ 0002:00001f40       ??_R1A@?0A@EA@?$weak_source@$00$00@impl@winrt@@8 0000000140008f40     TestRuntimeClass.obj
+ 0002:00001f68       ??_R1A@?0A@EA@?$heap_implements@UTestRuntimeClass@implementation@MyProject@winrt@@@impl@winrt@@8 0000000140008f68     TestRuntimeClass.obj
+ 0002:00001f90       ??_R17?0A@EA@?$weak_source_producer@$00$00@impl@winrt@@8 0000000140008f90     TestRuntimeClass.obj
+ 0002:00001fb8       ??_R1A@?0A@EA@?$weak_ref@$00$00@impl@winrt@@8 0000000140008fb8     TestRuntimeClass.obj
+ 0002:00001fe0       ??_R1A@?0A@EA@?$weak_source_producer@$00$00@impl@winrt@@8 0000000140008fe0     TestRuntimeClass.obj
+ 0002:00002008       ??_R1A@?0A@EA@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@8 0000000140009008     TestRuntimeClass.obj
+ 0002:00002030       ??_R1A@?0A@EA@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@8 0000000140009030     TestRuntimeClass.obj
+ 0002:00002058       ??_R1A@?0A@EA@TestRuntimeClass@implementation@MyProject@winrt@@8 0000000140009058     TestRuntimeClass.obj
+ 0002:00002080       ??_R1A@?0A@EA@?$TestRuntimeClass_base@UTestRuntimeClass@implementation@MyProject@winrt@@$$V@implementation@MyProject@winrt@@8 0000000140009080     TestRuntimeClass.obj
+ 0002:000020a8       ??_R1BA@?0A@EA@?$producer@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@8 00000001400090a8     TestRuntimeClass.obj
+ 0002:000020d0       ??_R1BA@?0A@EA@?$producer_convert@UTestRuntimeClass@implementation@MyProject@winrt@@U134@X@impl@winrt@@8 00000001400090d0     TestRuntimeClass.obj
+ 0002:000020f8       ??_R1BA@?0A@EA@?$producers_base@UTestRuntimeClass@implementation@MyProject@winrt@@V?$tuple@UTestRuntimeClass@MyProject@winrt@@@std@@@impl@winrt@@8 00000001400090f8     TestRuntimeClass.obj
+ 0002:00002120       ??_R1A@?0A@EA@?$implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@winrt@@8 0000000140009120     TestRuntimeClass.obj
+ 0002:00002148       ??_R17?0A@EA@?$module_lock_updater@$00@impl@winrt@@8 0000000140009148     TestRuntimeClass.obj
+ 0002:00002170       ??_R17?0A@EA@?$root_implements_composable_inner@UTestRuntimeClass@implementation@MyProject@winrt@@$0A@@impl@winrt@@8 0000000140009170     TestRuntimeClass.obj
+ 0002:00002198       ??_R17?0A@EA@?$root_implements_composing_outer@$0A@@impl@winrt@@8 0000000140009198     TestRuntimeClass.obj
+ 0002:000021c0       ??_R1A@?0A@EA@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@8 00000001400091c0     TestRuntimeClass.obj
+ 0002:000021e8       ??_R1A@?0A@EA@?$root_implements_composable_inner@UTestRuntimeClass@implementation@MyProject@winrt@@$0A@@impl@winrt@@8 00000001400091e8     TestRuntimeClass.obj
+ 0002:00002210       ??_R1A@?0A@EA@?$root_implements_composing_outer@$0A@@impl@winrt@@8 0000000140009210     TestRuntimeClass.obj
+ 0002:00002238       ??_R1A@?0A@EA@?$producers_base@UTestRuntimeClass@implementation@MyProject@winrt@@V?$tuple@UTestRuntimeClass@MyProject@winrt@@@std@@@impl@winrt@@8 0000000140009238     TestRuntimeClass.obj
+ 0002:00002260       ??_R1A@?0A@EA@?$producer_convert@UTestRuntimeClass@implementation@MyProject@winrt@@U134@X@impl@winrt@@8 0000000140009260     TestRuntimeClass.obj
+ 0002:00002288       ??_R1A@?0A@EA@?$producer@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@8 0000000140009288     TestRuntimeClass.obj
+ 0002:000022b0       ??_R1A@?0A@EA@type@?$abi@UITestRuntimeClass@MyProject@winrt@@X@impl@winrt@@8 00000001400092b0     TestRuntimeClass.obj
+ 0002:000022d8       ??_R1A@?0A@EA@IWeakReferenceSource@impl@winrt@@8 00000001400092d8     TestRuntimeClass.obj
+ 0002:00002300       ??_R1A@?0A@EA@IWeakReference@impl@winrt@@8 0000000140009300     TestRuntimeClass.obj
+ 0002:00002328       ??_R1A@?0A@EA@type@?$abi@UIInspectable@Foundation@Windows@winrt@@X@impl@winrt@@8 0000000140009328     TestRuntimeClass.obj
+ 0002:00002350       ??_R3?$weak_source@$00$00@impl@winrt@@8 0000000140009350     TestRuntimeClass.obj
+ 0002:00002368       ??_R3?$heap_implements@UTestRuntimeClass@implementation@MyProject@winrt@@@impl@winrt@@8 0000000140009368     TestRuntimeClass.obj
+ 0002:00002380       ??_R3?$weak_source_producer@$00$00@impl@winrt@@8 0000000140009380     TestRuntimeClass.obj
+ 0002:00002398       ??_R3?$weak_ref@$00$00@impl@winrt@@8 0000000140009398     TestRuntimeClass.obj
+ 0002:000023b0       ??_R3?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@8 00000001400093b0     TestRuntimeClass.obj
+ 0002:000023c8       ??_R3?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@8 00000001400093c8     TestRuntimeClass.obj
+ 0002:000023e0       ??_R3?$TestRuntimeClass_base@UTestRuntimeClass@implementation@MyProject@winrt@@$$V@implementation@MyProject@winrt@@8 00000001400093e0     TestRuntimeClass.obj
+ 0002:000023f8       ??_R3?$implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@winrt@@8 00000001400093f8     TestRuntimeClass.obj
+ 0002:00002410       ??_R3?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@8 0000000140009410     TestRuntimeClass.obj
+ 0002:00002428       ??_R3?$root_implements_composable_inner@UTestRuntimeClass@implementation@MyProject@winrt@@$0A@@impl@winrt@@8 0000000140009428     TestRuntimeClass.obj
+ 0002:00002440       ??_R3?$root_implements_composing_outer@$0A@@impl@winrt@@8 0000000140009440     TestRuntimeClass.obj
+ 0002:00002458       ??_R3?$producer_convert@UTestRuntimeClass@implementation@MyProject@winrt@@U134@X@impl@winrt@@8 0000000140009458     TestRuntimeClass.obj
+ 0002:00002470       ??_R3?$producer@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@8 0000000140009470     TestRuntimeClass.obj
+ 0002:00002488       ??_R3?$producers_base@UTestRuntimeClass@implementation@MyProject@winrt@@V?$tuple@UTestRuntimeClass@MyProject@winrt@@@std@@@impl@winrt@@8 0000000140009488     TestRuntimeClass.obj
+ 0002:000024a0       ??_R3TestRuntimeClass@implementation@MyProject@winrt@@8 00000001400094a0     TestRuntimeClass.obj
+ 0002:000024b8       ??_R3type@?$abi@UITestRuntimeClass@MyProject@winrt@@X@impl@winrt@@8 00000001400094b8     TestRuntimeClass.obj
+ 0002:000024d0       ??_R3IWeakReferenceSource@impl@winrt@@8 00000001400094d0     TestRuntimeClass.obj
+ 0002:000024e8       ??_R3IWeakReference@impl@winrt@@8 00000001400094e8     TestRuntimeClass.obj
+ 0002:00002500       ??_R3type@?$abi@UIInspectable@Foundation@Windows@winrt@@X@impl@winrt@@8 0000000140009500     TestRuntimeClass.obj
+ 0002:00002518       ??_R4?$weak_source@$00$00@impl@winrt@@6B@ 0000000140009518     TestRuntimeClass.obj
+ 0002:00002540       ??_R4?$heap_implements@UTestRuntimeClass@implementation@MyProject@winrt@@@impl@winrt@@6B@ 0000000140009540     TestRuntimeClass.obj
+ 0002:00002568       ??_R4?$weak_ref@$00$00@impl@winrt@@6B@ 0000000140009568     TestRuntimeClass.obj
+ 0002:00002590       ??_R4?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@6B@ 0000000140009590     TestRuntimeClass.obj
+ 0002:000025b8       ??_R1A@?0A@EA@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@23@PEAPEAX@Z@8 00000001400095b8     TestRuntimeClass.obj
+ 0002:000025e0       ??_R2IMarshal@impl@winrt@@8 00000001400095e0     TestRuntimeClass.obj
+ 0002:000025f8       ??_R3IMarshal@impl@winrt@@8 00000001400095f8     TestRuntimeClass.obj
+ 0002:00002610       ??_R1A@?0A@EA@IMarshal@impl@winrt@@8 0000000140009610     TestRuntimeClass.obj
+ 0002:00002638       ??_R2marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@23@PEAPEAX@Z@8 0000000140009638     TestRuntimeClass.obj
+ 0002:00002658       ??_R3marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@23@PEAPEAX@Z@8 0000000140009658     TestRuntimeClass.obj
+ 0002:00002670       ??_R4marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@23@PEAPEAX@Z@6B@ 0000000140009670     TestRuntimeClass.obj
+ 0002:000029e8       __rtc_iaa                  00000001400099e8     MSVCRTD:initsect.obj
+ 0002:000029f0       __rtc_izz                  00000001400099f0     MSVCRTD:initsect.obj
+ 0002:000029f8       __rtc_taa                  00000001400099f8     MSVCRTD:initsect.obj
+ 0002:00002a00       __rtc_tzz                  0000000140009a00     MSVCRTD:initsect.obj
+ 0002:00003268       _CT??_R0?AVbad_array_new_length@std@@@8??0bad_array_new_length@std@@QEAA@AEBV01@@Z24 000000014000a268     main.obj
+ 0002:00003290       _CTA3?AVbad_array_new_length@std@@ 000000014000a290     main.obj
+ 0002:000032b0       _TI3?AVbad_array_new_length@std@@ 000000014000a2b0     main.obj
+ 0002:000032d0       _CT??_R0?AUhresult_access_denied@winrt@@@8??0hresult_access_denied@winrt@@QEAA@AEBU01@@Z24 000000014000a2d0     main.obj
+ 0002:000032f8       _CTA2?AUhresult_access_denied@winrt@@ 000000014000a2f8     main.obj
+ 0002:00003310       _TI2?AUhresult_access_denied@winrt@@ 000000014000a310     main.obj
+ 0002:00003330       _CT??_R0?AUhresult_wrong_thread@winrt@@@8??0hresult_wrong_thread@winrt@@QEAA@AEBU01@@Z24 000000014000a330     main.obj
+ 0002:00003358       _CTA2?AUhresult_wrong_thread@winrt@@ 000000014000a358     main.obj
+ 0002:00003370       _TI2?AUhresult_wrong_thread@winrt@@ 000000014000a370     main.obj
+ 0002:00003390       _CT??_R0?AUhresult_not_implemented@winrt@@@8??0hresult_not_implemented@winrt@@QEAA@AEBU01@@Z24 000000014000a390     main.obj
+ 0002:000033b8       _CTA2?AUhresult_not_implemented@winrt@@ 000000014000a3b8     main.obj
+ 0002:000033d0       _TI2?AUhresult_not_implemented@winrt@@ 000000014000a3d0     main.obj
+ 0002:000033f0       _CT??_R0?AUhresult_invalid_argument@winrt@@@8??0hresult_invalid_argument@winrt@@QEAA@AEBU01@@Z24 000000014000a3f0     main.obj
+ 0002:00003418       _CTA2?AUhresult_invalid_argument@winrt@@ 000000014000a418     main.obj
+ 0002:00003430       _TI2?AUhresult_invalid_argument@winrt@@ 000000014000a430     main.obj
+ 0002:00003450       _CT??_R0?AUhresult_out_of_bounds@winrt@@@8??0hresult_out_of_bounds@winrt@@QEAA@AEBU01@@Z24 000000014000a450     main.obj
+ 0002:00003478       _CTA2?AUhresult_out_of_bounds@winrt@@ 000000014000a478     main.obj
+ 0002:00003490       _TI2?AUhresult_out_of_bounds@winrt@@ 000000014000a490     main.obj
+ 0002:000034b0       _CT??_R0?AUhresult_no_interface@winrt@@@8??0hresult_no_interface@winrt@@QEAA@AEBU01@@Z24 000000014000a4b0     main.obj
+ 0002:000034d8       _CTA2?AUhresult_no_interface@winrt@@ 000000014000a4d8     main.obj
+ 0002:000034f0       _TI2?AUhresult_no_interface@winrt@@ 000000014000a4f0     main.obj
+ 0002:00003510       _CT??_R0?AUhresult_class_not_available@winrt@@@8??0hresult_class_not_available@winrt@@QEAA@AEBU01@@Z24 000000014000a510     main.obj
+ 0002:00003538       _CTA2?AUhresult_class_not_available@winrt@@ 000000014000a538     main.obj
+ 0002:00003550       _TI2?AUhresult_class_not_available@winrt@@ 000000014000a550     main.obj
+ 0002:00003570       _CT??_R0?AUhresult_class_not_registered@winrt@@@8??0hresult_class_not_registered@winrt@@QEAA@AEBU01@@Z24 000000014000a570     main.obj
+ 0002:00003598       _CTA2?AUhresult_class_not_registered@winrt@@ 000000014000a598     main.obj
+ 0002:000035b0       _TI2?AUhresult_class_not_registered@winrt@@ 000000014000a5b0     main.obj
+ 0002:000035d0       _CT??_R0?AUhresult_changed_state@winrt@@@8??0hresult_changed_state@winrt@@QEAA@AEBU01@@Z24 000000014000a5d0     main.obj
+ 0002:000035f8       _CTA2?AUhresult_changed_state@winrt@@ 000000014000a5f8     main.obj
+ 0002:00003610       _TI2?AUhresult_changed_state@winrt@@ 000000014000a610     main.obj
+ 0002:00003630       _CT??_R0?AUhresult_illegal_method_call@winrt@@@8??0hresult_illegal_method_call@winrt@@QEAA@AEBU01@@Z24 000000014000a630     main.obj
+ 0002:00003658       _CTA2?AUhresult_illegal_method_call@winrt@@ 000000014000a658     main.obj
+ 0002:00003670       _TI2?AUhresult_illegal_method_call@winrt@@ 000000014000a670     main.obj
+ 0002:00003690       _CT??_R0?AUhresult_illegal_state_change@winrt@@@8??0hresult_illegal_state_change@winrt@@QEAA@AEBU01@@Z24 000000014000a690     main.obj
+ 0002:000036b8       _CTA2?AUhresult_illegal_state_change@winrt@@ 000000014000a6b8     main.obj
+ 0002:000036d0       _TI2?AUhresult_illegal_state_change@winrt@@ 000000014000a6d0     main.obj
+ 0002:000036f0       _CT??_R0?AUhresult_illegal_delegate_assignment@winrt@@@8??0hresult_illegal_delegate_assignment@winrt@@QEAA@AEBU01@@Z24 000000014000a6f0     main.obj
+ 0002:00003718       _CTA2?AUhresult_illegal_delegate_assignment@winrt@@ 000000014000a718     main.obj
+ 0002:00003730       _TI2?AUhresult_illegal_delegate_assignment@winrt@@ 000000014000a730     main.obj
+ 0002:00003750       _CT??_R0?AUhresult_canceled@winrt@@@8??0hresult_canceled@winrt@@QEAA@AEBU01@@Z24 000000014000a750     main.obj
+ 0002:00003778       _CTA2?AUhresult_canceled@winrt@@ 000000014000a778     main.obj
+ 0002:00003790       _TI2?AUhresult_canceled@winrt@@ 000000014000a790     main.obj
+ 0002:000037b0       _CT??_R0?AVinvalid_argument@std@@@8??0invalid_argument@std@@QEAA@AEBV01@@Z24 000000014000a7b0     main.obj
+ 0002:000037d8       _CT??_R0?AVlogic_error@std@@@8??0logic_error@std@@QEAA@AEBV01@@Z24 000000014000a7d8     main.obj
+ 0002:00003800       _CTA3?AVinvalid_argument@std@@ 000000014000a800     main.obj
+ 0002:00003820       _TI3?AVinvalid_argument@std@@ 000000014000a820     main.obj
+ 0002:00003840       _CT??_R0?AVbad_alloc@std@@@8??0bad_alloc@std@@QEAA@AEBV01@@Z24 000000014000a840     main.obj
+ 0002:00003868       _CT??_R0?AVexception@std@@@8??0exception@std@@QEAA@AEBV01@@Z24 000000014000a868     main.obj
+ 0002:00003890       _CTA2?AVbad_alloc@std@@    000000014000a890     main.obj
+ 0002:000038a8       _TI2?AVbad_alloc@std@@     000000014000a8a8     main.obj
+ 0002:000038c8       _CT??_R0?AUhresult_error@winrt@@@8??0hresult_error@winrt@@QEAA@AEBU01@@Z24 000000014000a8c8     main.obj
+ 0002:000038f0       _CTA1?AUhresult_error@winrt@@ 000000014000a8f0     main.obj
+ 0002:00003900       _TI1?AUhresult_error@winrt@@ 000000014000a900     main.obj
+ 0002:0000391c       __IMPORT_DESCRIPTOR_MSVCP140D 000000014000a91c     msvcprtd:MSVCP140D.dll
+ 0002:00003930       __IMPORT_DESCRIPTOR_VCRUNTIME140_1D 000000014000a930     vcruntimed:VCRUNTIME140_1D.dll
+ 0002:00003944       __IMPORT_DESCRIPTOR_VCRUNTIME140D 000000014000a944     vcruntimed:VCRUNTIME140D.dll
+ 0002:00003958       __IMPORT_DESCRIPTOR_ucrtbased 000000014000a958     ucrtd:ucrtbased.dll
+ 0002:0000396c       __IMPORT_DESCRIPTOR_KERNEL32 000000014000a96c     kernel32:KERNEL32.dll
+ 0002:00003980       __IMPORT_DESCRIPTOR_OLEAUT32 000000014000a980     WindowsApp:OLEAUT32.dll
+ 0002:00003994       __IMPORT_DESCRIPTOR_api-ms-win-core-com-l1-1-0 000000014000a994     WindowsApp:api-ms-win-core-com-l1-1-0.dll
+ 0002:000039a8       __NULL_IMPORT_DESCRIPTOR   000000014000a9a8     msvcprtd:MSVCP140D.dll
+ 0003:00000000       __security_cookie_complement 000000014000c000     MSVCRTD:gs_cookie.obj
+ 0003:00000008       __security_cookie          000000014000c008     MSVCRTD:gs_cookie.obj
+ 0003:00000010       __scrt_native_dllmain_reason 000000014000c010     MSVCRTD:utility.obj
+ 0003:00000014       __scrt_default_matherr     000000014000c014     MSVCRTD:matherr.obj
+ 0003:00000018       __isa_available            000000014000c018     MSVCRTD:cpu_disp.obj
+ 0003:0000001c       __isa_enabled              000000014000c01c     MSVCRTD:cpu_disp.obj
+ 0003:00000020       __memcpy_nt_iters          000000014000c020     MSVCRTD:cpu_disp.obj
+ 0003:00000028       __memset_nt_iters          000000014000c028     MSVCRTD:cpu_disp.obj
+ 0003:00000030       __scrt_ucrt_dll_is_in_use  000000014000c030     MSVCRTD:ucrt_stubs.obj
+ 0003:00000038       WINRT_abi_val              000000014000c038     pch.obj
+ 0003:00000040       WINRT_get_val              000000014000c040     pch.obj
+ 0003:00000050       ??_R0?AVtype_info@@@8      000000014000c050     MSVCRTD:std_type_info_static.obj
+ 0003:00000070       ??_R0?AVbad_array_new_length@std@@@8 000000014000c070     main.obj
+ 0003:000000a0       ??_R0?AUhresult_access_denied@winrt@@@8 000000014000c0a0     main.obj
+ 0003:000000d8       ??_R0?AUhresult_wrong_thread@winrt@@@8 000000014000c0d8     main.obj
+ 0003:00000110       ??_R0?AUhresult_not_implemented@winrt@@@8 000000014000c110     main.obj
+ 0003:00000148       ??_R0?AUhresult_invalid_argument@winrt@@@8 000000014000c148     main.obj
+ 0003:00000180       ??_R0?AUhresult_out_of_bounds@winrt@@@8 000000014000c180     main.obj
+ 0003:000001b8       ??_R0?AUhresult_no_interface@winrt@@@8 000000014000c1b8     main.obj
+ 0003:000001f0       ??_R0?AUhresult_class_not_available@winrt@@@8 000000014000c1f0     main.obj
+ 0003:00000228       ??_R0?AUhresult_class_not_registered@winrt@@@8 000000014000c228     main.obj
+ 0003:00000268       ??_R0?AUhresult_changed_state@winrt@@@8 000000014000c268     main.obj
+ 0003:000002a0       ??_R0?AUhresult_illegal_method_call@winrt@@@8 000000014000c2a0     main.obj
+ 0003:000002d8       ??_R0?AUhresult_illegal_state_change@winrt@@@8 000000014000c2d8     main.obj
+ 0003:00000320       ??_R0?AUhresult_illegal_delegate_assignment@winrt@@@8 000000014000c320     main.obj
+ 0003:00000360       ??_R0?AUhresult_canceled@winrt@@@8 000000014000c360     main.obj
+ 0003:00000390       ??_R0?AUerror_info_fallback@impl@winrt@@@8 000000014000c390     main.obj
+ 0003:000003c8       ??_R0?AUIErrorInfo@impl@winrt@@@8 000000014000c3c8     main.obj
+ 0003:000003f8       ??_R0?AUIRestrictedErrorInfo@impl@winrt@@@8 000000014000c3f8     main.obj
+ 0003:00000430       ??_R0?AUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@impl@winrt@@@8 000000014000c430     main.obj
+ 0003:00000488       ??_R0?AU?$module_lock_updater@$00@impl@winrt@@@8 000000014000c488     main.obj
+ 0003:000004c8       ??_R0?AVinvalid_argument@std@@@8 000000014000c4c8     main.obj
+ 0003:000004f8       ??_R0?AVlogic_error@std@@@8 000000014000c4f8     main.obj
+ 0003:00000520       ??_R0?AVbad_alloc@std@@@8  000000014000c520     main.obj
+ 0003:00000548       ??_R0?AVexception@std@@@8  000000014000c548     main.obj
+ 0003:00000570       ??_R0?AUhresult_error@winrt@@@8 000000014000c570     main.obj
+ 0003:000005a0       ??_R0?AU?$weak_source@$00$00@impl@winrt@@@8 000000014000c5a0     TestRuntimeClass.obj
+ 0003:000005e0       ??_R0?AU?$heap_implements@UTestRuntimeClass@implementation@MyProject@winrt@@@impl@winrt@@@8 000000014000c5e0     TestRuntimeClass.obj
+ 0003:00000648       ??_R0?AU?$weak_source_producer@$00$00@impl@winrt@@@8 000000014000c648     TestRuntimeClass.obj
+ 0003:00000688       ??_R0?AU?$weak_ref@$00$00@impl@winrt@@@8 000000014000c688     TestRuntimeClass.obj
+ 0003:000006c0       ??_R0?AU?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@@8 000000014000c6c0     TestRuntimeClass.obj
+ 0003:00000740       ??_R0?AU?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@@8 000000014000c740     TestRuntimeClass.obj
+ 0003:000007c0       ??_R0?AU?$TestRuntimeClass_base@UTestRuntimeClass@implementation@MyProject@winrt@@$$V@implementation@MyProject@winrt@@@8 000000014000c7c0     TestRuntimeClass.obj
+ 0003:00000850       ??_R0?AU?$implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@winrt@@@8 000000014000c850     TestRuntimeClass.obj
+ 0003:000008c0       ??_R0?AU?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@@8 000000014000c8c0     TestRuntimeClass.obj
+ 0003:00000930       ??_R0?AU?$root_implements_composable_inner@UTestRuntimeClass@implementation@MyProject@winrt@@$0A@@impl@winrt@@@8 000000014000c930     TestRuntimeClass.obj
+ 0003:000009b0       ??_R0?AU?$root_implements_composing_outer@$0A@@impl@winrt@@@8 000000014000c9b0     TestRuntimeClass.obj
+ 0003:00000a00       ??_R0?AU?$producer_convert@UTestRuntimeClass@implementation@MyProject@winrt@@U134@X@impl@winrt@@@8 000000014000ca00     TestRuntimeClass.obj
+ 0003:00000a70       ??_R0?AU?$producer@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@@8 000000014000ca70     TestRuntimeClass.obj
+ 0003:00000af0       ??_R0?AU?$producers_base@UTestRuntimeClass@implementation@MyProject@winrt@@V?$tuple@UTestRuntimeClass@MyProject@winrt@@@std@@@impl@winrt@@@8 000000014000caf0     TestRuntimeClass.obj
+ 0003:00000b90       ??_R0?AUTestRuntimeClass@implementation@MyProject@winrt@@@8 000000014000cb90     TestRuntimeClass.obj
+ 0003:00000be0       ??_R0?AUtype@?$abi@UITestRuntimeClass@MyProject@winrt@@X@impl@winrt@@@8 000000014000cbe0     TestRuntimeClass.obj
+ 0003:00000c38       ??_R0?AUIWeakReferenceSource@impl@winrt@@@8 000000014000cc38     TestRuntimeClass.obj
+ 0003:00000c70       ??_R0?AUIWeakReference@impl@winrt@@@8 000000014000cc70     TestRuntimeClass.obj
+ 0003:00000ca0       ??_R0?AUtype@?$abi@UIInspectable@Foundation@Windows@winrt@@X@impl@winrt@@@8 000000014000cca0     TestRuntimeClass.obj
+ 0003:00000d00       ??_R0?AUmarshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@23@PEAPEAX@Z@@8 000000014000cd00     TestRuntimeClass.obj
+ 0003:00000d88       ??_R0?AUIMarshal@impl@winrt@@@8 000000014000cd88     TestRuntimeClass.obj
+ 0003:00000db8       ??_R0?AVout_of_range@std@@@8 000000014000cdb8     TestRuntimeClass.obj
+ 0003:00001350       __scrt_current_native_startup_state 000000014000d350     MSVCRTD:utility.obj
+ 0003:00001358       __scrt_native_startup_lock 000000014000d358     MSVCRTD:utility.obj
+ 0003:000013a0       ?__type_info_root_node@@3U__type_info_node@@A 000000014000d3a0     MSVCRTD:tncleanup.obj
+ 0003:000013b0       ?_OptionsStorage@?1??__local_stdio_scanf_options@@9@4_KA 000000014000d3b0     MSVCRTD:default_local_stdio_options.obj
+ 0003:000013b8       __scrt_debugger_hook_flag  000000014000d3b8     MSVCRTD:utility_desktop.obj
+ 0003:000013bc       __favor                    000000014000d3bc     MSVCRTD:cpu_disp.obj
+ 0003:000013c0       ?winrt_to_hresult_handler@@3P6AHPEAX@_EEA 000000014000d3c0     main.obj
+ 0003:000013c8       ?_OptionsStorage@?1??__local_stdio_printf_options@@9@4_KA 000000014000d3c8     main.obj
+ 0003:000013d0       ??$factory_cache_entry_v@UUri@Foundation@Windows@winrt@@UIUriRuntimeClassFactory@234@@impl@winrt@@3U?$factory_cache_entry@UUri@Foundation@Windows@winrt@@UIUriRuntimeClassFactory@234@@12@A 000000014000d3d0     main.obj
+ 0003:000013f0       ?winrt_activation_handler@@3P6AHPEAXAEBUguid@winrt@@PEAPEAX@_EEA 000000014000d3f0     main.obj
+ 0003:000013f8       ?handler@?1???$get_runtime_activation_factory_impl@$0A@@impl@winrt@@YA?AUhresult@2@AEBUhstring@param@2@AEBUguid@2@PEAPEAX@Z@4P6AHPEAX12@_EEA 000000014000d3f8     main.obj
+ 0003:00001400       ?cache@?1??get_factory_cache@impl@winrt@@YAAEAUfactory_cache@23@XZ@4U423@A 000000014000d400     main.obj
+ 0003:00001410       ?winrt_throw_hresult_handler@@3P6AXIPEBD0PEAXUhresult@winrt@@@_EEA 000000014000d410     main.obj
+ 0003:00001418       ?s_lock@?1??get_module_lock@winrt@@YAAEAUatomic_ref_count@impl@2@XZ@4U342@A 000000014000d418     main.obj
+ 0003:00001420       ?handler@?1??originate@hresult_error@winrt@@AEAAXUhresult@3@PEAX@Z@4P6AHH11@_EEA 000000014000d420     main.obj
+ 0003:00001428       __@@_PchSym_@00@UfhvihUzfhgrUhlfixvUivklhUhravyvmxsRmvgxlivUhravyvmxseCOzmzobhrhvmtrmvOgvhghOxkkdrmigUcGEUwvyftUkxsOlyq@4B2008FD98C1DD4 000000014000d428     pch.obj
+ 0003:0000142c       __DebuggerCurrentSteppingThreadId 000000014000d42c     <common>
+ 0003:00001430       __dyn_tls_dtor_callback    000000014000d430     <common>
+ 0003:00001438       __dyn_tls_init_callback    000000014000d438     <common>
+
+ entry point at        0001:000043b0
+
+ Static symbols
+
+ 0000:fffee000       .debug$S                   0000000140000000     msvcprtd:MSVCP140D.dll
+ 0000:fffee000       .debug$S                   0000000140000000     msvcprtd:MSVCP140D.dll
+ 0000:fffee000       .debug$S                   0000000140000000     msvcprtd:MSVCP140D.dll
+ 0000:fffee000       .debug$S                   0000000140000000     vcruntimed:VCRUNTIME140D.dll
+ 0000:fffee000       .debug$S                   0000000140000000     vcruntimed:VCRUNTIME140D.dll
+ 0000:fffee000       .debug$S                   0000000140000000     vcruntimed:VCRUNTIME140D.dll
+ 0000:fffee000       .debug$S                   0000000140000000     vcruntimed:VCRUNTIME140D.dll
+ 0000:fffee000       .debug$S                   0000000140000000     vcruntimed:VCRUNTIME140D.dll
+ 0000:fffee000       .debug$S                   0000000140000000     vcruntimed:VCRUNTIME140D.dll
+ 0000:fffee000       .debug$S                   0000000140000000     vcruntimed:VCRUNTIME140D.dll
+ 0000:fffee000       .debug$S                   0000000140000000     vcruntimed:VCRUNTIME140D.dll
+ 0000:fffee000       .debug$S                   0000000140000000     vcruntimed:VCRUNTIME140D.dll
+ 0000:fffee000       .debug$S                   0000000140000000     vcruntimed:VCRUNTIME140D.dll
+ 0000:fffee000       .debug$S                   0000000140000000     vcruntimed:VCRUNTIME140D.dll
+ 0000:fffee000       .debug$S                   0000000140000000     vcruntimed:VCRUNTIME140D.dll
+ 0000:fffee000       .debug$S                   0000000140000000     vcruntimed:VCRUNTIME140_1D.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     ucrtd:ucrtbased.dll
+ 0000:fffee000       .debug$S                   0000000140000000     WindowsApp:OLEAUT32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     WindowsApp:OLEAUT32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     WindowsApp:OLEAUT32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     WindowsApp:OLEAUT32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     WindowsApp:OLEAUT32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     WindowsApp:api-ms-win-core-com-l1-1-0.dll
+ 0000:fffee000       .debug$S                   0000000140000000     WindowsApp:api-ms-win-core-com-l1-1-0.dll
+ 0000:fffee000       .debug$S                   0000000140000000     WindowsApp:api-ms-win-core-com-l1-1-0.dll
+ 0000:fffee000       .debug$S                   0000000140000000     WindowsApp:api-ms-win-core-com-l1-1-0.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0000:fffee000       .debug$S                   0000000140000000     kernel32:KERNEL32.dll
+ 0001:00003ee0       $$000000                   0000000140004ee0     MSVCRTD:amdsecgs.obj
+ 0001:00004030       ?pre_c_initialization@@YAHXZ 0000000140005030 f   MSVCRTD:exe_main.obj
+ 0001:000040f0       ?post_pgo_initialization@@YAHXZ 00000001400050f0 f   MSVCRTD:exe_main.obj
+ 0001:00004100       ?pre_cpp_initialization@@YAXXZ 0000000140005100 f   MSVCRTD:exe_main.obj
+ 0001:00004120       ?__scrt_common_main@@YAHXZ 0000000140005120 f   MSVCRTD:exe_main.obj
+ 0001:00004140       ?__scrt_common_main_seh@@YAHXZ 0000000140005140 f   MSVCRTD:exe_main.obj
+ 0001:00004310       ?invoke_main@@YAHXZ        0000000140005310 f   MSVCRTD:exe_main.obj
+ 0001:000044e0       capture_previous_context   00000001400054e0 f   MSVCRTD:gs_report.obj
+ 0001:00004620       ?find_pe_section@@YAPEAU_IMAGE_SECTION_HEADER@@QEAE_K@Z 0000000140005620 f   MSVCRTD:utility.obj
+ 0001:000046f0       ?is_potentially_valid_image_base@@YA_NQEAX@Z 00000001400056f0 f   MSVCRTD:utility.obj
+ 0001:00004b20       __get_entropy              0000000140005b20 f   MSVCRTD:gs_support.obj
+ 0001:000058c0       $$000000                   00000001400068c0     MSVCRTD:guard_dispatch.obj
+ 0001:000058e0       $$000000                   00000001400068e0     MSVCRTD:guard_xfg_dispatch.obj
+ 0001:00005900       ?dtor$0@?0???$call@AEAV<lambda_0a61d549bec6c444b35123f4c9509ca7>@@@?$factory_cache_entry@UUri@Foundation@Windows@winrt@@UIUriRuntimeClassFactory@234@@impl@winrt@@QEAA?AUUri@Foundation@Windows@2@AEAV<lambda_0a61d549bec6c444b35123f4c9509ca7>@@@Z@4HA 0000000140006900 f   main.obj
+ 0001:00005900       main$dtor$0                0000000140006900 f   main.obj
+ 0001:00005910       main$dtor$2                0000000140006910 f   main.obj
+ 0001:00005920       main$dtor$10               0000000140006920 f   main.obj
+ 0001:00005930       ?dtor$3@?0???$call@AEAV<lambda_0a61d549bec6c444b35123f4c9509ca7>@@@?$factory_cache_entry@UUri@Foundation@Windows@winrt@@UIUriRuntimeClassFactory@234@@impl@winrt@@QEAA?AUUri@Foundation@Windows@2@AEAV<lambda_0a61d549bec6c444b35123f4c9509ca7>@@@Z@4HA 0000000140006930 f   main.obj
+ 0001:00005940       ?dtor$0@?0??put_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAX@Z@4HA 0000000140006940 f   TestRuntimeClass.obj
+ 0001:00005950       ?catch$10@?0??put_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAX@Z@4HA 0000000140006950 f   TestRuntimeClass.obj
+ 0001:0000595d       __catch$?put_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAX@Z$0 000000014000695d f   TestRuntimeClass.obj
+ 0001:00005980       ?dtor$0@?0??get_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAPEAX@Z@4HA 0000000140006980 f   TestRuntimeClass.obj
+ 0001:00005990       ?catch$1@?0??NonDelegatingGetTrustLevel@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAW4TrustLevel@Foundation@Windows@3@@Z@4HA 0000000140006990 f   TestRuntimeClass.obj
+ 0001:00005990       ?catch$20@?0??get_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAPEAX@Z@4HA 0000000140006990 f   TestRuntimeClass.obj
+ 0001:00005990       ?catch$7@?0??NonDelegatingGetRuntimeClassName@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAPEAX@Z@4HA 0000000140006990 f   TestRuntimeClass.obj
+ 0001:0000599d       __catch$?NonDelegatingGetRuntimeClassName@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAPEAX@Z$0 000000014000699d f   TestRuntimeClass.obj
+ 0001:0000599d       __catch$?NonDelegatingGetTrustLevel@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAW4TrustLevel@Foundation@Windows@3@@Z$0 000000014000699d f   TestRuntimeClass.obj
+ 0001:0000599d       __catch$?get_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAPEAX@Z$0 000000014000699d f   TestRuntimeClass.obj
+ 0001:000059c0       ?catch$134@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 00000001400069c0 f   TestRuntimeClass.obj
+ 0001:000059cd       __catch$?to_hresult@winrt@@YA?AUhresult@1@XZ$0 00000001400069cd f   TestRuntimeClass.obj
+ 0001:000059f0       ?catch$135@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 00000001400069f0 f   TestRuntimeClass.obj
+ 0001:000059fd       __catch$?to_hresult@winrt@@YA?AUhresult@1@XZ$1 00000001400069fd f   TestRuntimeClass.obj
+ 0001:00005a20       ?catch$136@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 0000000140006a20 f   TestRuntimeClass.obj
+ 0001:00005a32       __catch$?to_hresult@winrt@@YA?AUhresult@1@XZ$2 0000000140006a32 f   TestRuntimeClass.obj
+ 0001:00005b90       ?catch$137@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 0000000140006b90 f   TestRuntimeClass.obj
+ 0001:00005ba2       __catch$?to_hresult@winrt@@YA?AUhresult@1@XZ$3 0000000140006ba2 f   TestRuntimeClass.obj
+ 0001:00005d00       ?catch$138@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 0000000140006d00 f   TestRuntimeClass.obj
+ 0001:00005d12       __catch$?to_hresult@winrt@@YA?AUhresult@1@XZ$4 0000000140006d12 f   TestRuntimeClass.obj
+ 0001:00005e70       ?catch$0@?0???2@YAPEAX_KAEBUnothrow_t@std@@@Z@4HA 0000000140006e70 f   MSVCRTD:new_scalar_nothrow.obj
+ 0001:00005e7d       __catch$??2@YAPEAX_KAEBUnothrow_t@std@@@Z$0 0000000140006e7d f   MSVCRTD:new_scalar_nothrow.obj
+ 0001:00005ea0       ?filt$0@?0??__scrt_common_main_seh@@YAHXZ@4HA 0000000140006ea0 f   MSVCRTD:exe_main.obj
+ 0001:00005ed0       __scrt_is_nonwritable_in_current_image$filt$0 0000000140006ed0 f   MSVCRTD:utility.obj
+ 0002:00000300       ?pre_cpp_initializer@@3P6AXXZEA 0000000140007300     MSVCRTD:exe_main.obj
+ 0002:00000318       ?pre_c_initializer@@3P6AHXZEA 0000000140007318     MSVCRTD:exe_main.obj
+ 0002:00000320       ?post_pgo_initializer@@3P6AHXZEA 0000000140007320     MSVCRTD:exe_main.obj
+ 0002:00000368       GS_ExceptionPointers       0000000140007368     MSVCRTD:gs_report.obj
+ 0002:00002a08       $unwind$main               0000000140009a08     main.obj
+ 0002:00002a28       $cppxdata$main             0000000140009a28     main.obj
+ 0002:00002a31       $stateUnwindMap$main       0000000140009a31     main.obj
+ 0002:00002a45       $ip2state$main             0000000140009a45     main.obj
+ 0002:00002a5c       $unwind$?_Xlen_string@std@@YAXXZ 0000000140009a5c     main.obj
+ 0002:00002a5c       $unwind$__local_stdio_printf_options 0000000140009a5c     main.obj
+ 0002:00002a5c       $unwind$?__scrt_common_main@@YAHXZ 0000000140009a5c     MSVCRTD:exe_main.obj
+ 0002:00002a5c       $unwind$?configure_argv@__scrt_narrow_argv_policy@@SAHXZ 0000000140009a5c     MSVCRTD:exe_main.obj
+ 0002:00002a5c       $unwind$?initialize_environment@__scrt_narrow_environment_policy@@SAHXZ 0000000140009a5c     MSVCRTD:exe_main.obj
+ 0002:00002a5c       $unwind$?post_pgo_initialization@@YAHXZ 0000000140009a5c     MSVCRTD:exe_main.obj
+ 0002:00002a5c       $unwind$?pre_c_initialization@@YAHXZ 0000000140009a5c     MSVCRTD:exe_main.obj
+ 0002:00002a5c       $unwind$?pre_cpp_initialization@@YAXXZ 0000000140009a5c     MSVCRTD:exe_main.obj
+ 0002:00002a5c       $unwind$?set_app_type@__scrt_main_policy@@SAXXZ 0000000140009a5c     MSVCRTD:exe_main.obj
+ 0002:00002a5c       $unwind$?set_fmode@__scrt_file_policy@@SAXXZ 0000000140009a5c     MSVCRTD:exe_main.obj
+ 0002:00002a5c       $unwind$mainCRTStartup     0000000140009a5c     MSVCRTD:exe_main.obj
+ 0002:00002a5c       $unwind$?__scrt_initialize_type_info@@YAXXZ 0000000140009a5c     MSVCRTD:tncleanup.obj
+ 0002:00002a5c       $unwind$__scrt_initialize_mta 0000000140009a5c     MSVCRTD:utility_desktop.obj
+ 0002:00002a5c       $unwind$__scrt_set_unhandled_exception_filter 0000000140009a5c     MSVCRTD:utility_desktop.obj
+ 0002:00002a64       $unwind$printf             0000000140009a64     main.obj
+ 0002:00002a70       $unwind$??$is_guid_of@UIWeakReferenceSource@impl@winrt@@@winrt@@YA_NAEBUguid@0@@Z 0000000140009a70     TestRuntimeClass.obj
+ 0002:00002a70       $unwind$?AddRef@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAIXZ 0000000140009a70     TestRuntimeClass.obj
+ 0002:00002a70       $unwind$?AddRef@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@QEAAIXZ 0000000140009a70     TestRuntimeClass.obj
+ 0002:00002a70       $unwind$?AddRef@?$weak_ref@$00$00@impl@winrt@@UEAAIXZ 0000000140009a70     TestRuntimeClass.obj
+ 0002:00002a70       $unwind$?AddRef@?$weak_source@$00$00@impl@winrt@@UEAAIXZ 0000000140009a70     TestRuntimeClass.obj
+ 0002:00002a70       $unwind$?AddRef@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAIXZ 0000000140009a70     TestRuntimeClass.obj
+ 0002:00002a70       $unwind$?Release@?$weak_source@$00$00@impl@winrt@@UEAAIXZ 0000000140009a70     TestRuntimeClass.obj
+ 0002:00002a70       $unwind$?find_inspectable@?$implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@winrt@@UEBAPEAUtype@?$abi@UIInspectable@Foundation@Windows@winrt@@X@impl@2@XZ 0000000140009a70     TestRuntimeClass.obj
+ 0002:00002a70       $unwind$?get_local_iids@?$implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@winrt@@UEBA?AU?$pair@IPEBUguid@winrt@@@std@@XZ 0000000140009a70     TestRuntimeClass.obj
+ 0002:00002a70       $unwind$?get_unknown@?$implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@winrt@@EEBAPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@impl@2@XZ 0000000140009a70     TestRuntimeClass.obj
+ 0002:00002a70       $unwind$?unconditional_release_ref@?$com_ptr@U?$weak_ref@$00$00@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a70     TestRuntimeClass.obj
+ 0002:00002a70       $unwind$?unconditional_release_ref@?$com_ptr@UIMarshal@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a70     TestRuntimeClass.obj
+ 0002:00002a70       $unwind$?unconditional_release_ref@?$com_ptr@Utype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a70     TestRuntimeClass.obj
+ 0002:00002a70       $unwind$??$is_guid_of@UIUnknown@Foundation@Windows@winrt@@@winrt@@YA_NAEBUguid@0@@Z 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$??0bad_alloc@std@@QEAA@XZ 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$??0bad_array_new_length@std@@QEAA@XZ 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$??0hresult_access_denied@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$??0hresult_canceled@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$??0hresult_changed_state@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$??0hresult_class_not_available@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$??0hresult_class_not_registered@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$??0hresult_illegal_delegate_assignment@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$??0hresult_illegal_method_call@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$??0hresult_illegal_state_change@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$??0hresult_invalid_argument@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$??0hresult_no_interface@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$??0hresult_not_implemented@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$??0hresult_out_of_bounds@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$??0hresult_wrong_thread@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$??1factory_count_guard@impl@winrt@@QEAA@XZ 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$?AddRef@error_info_fallback@impl@winrt@@UEAAIXZ 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$?GetGUID@error_info_fallback@impl@winrt@@UEAAHPEAUguid@3@@Z 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$?GetHelpContext@error_info_fallback@impl@winrt@@UEAAHPEAI@Z 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$?GetHelpFile@error_info_fallback@impl@winrt@@UEAAHPEAPEA_W@Z 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$?GetReference@error_info_fallback@impl@winrt@@UEAAHPEAPEA_W@Z 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$?GetSource@error_info_fallback@impl@winrt@@UEAAHPEAPEA_W@Z 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$?fallback_RoGetActivationFactory@impl@winrt@@YAHPEAXAEBUguid@2@PEAPEAX@Z 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$?unconditional_release_ref@?$com_ptr@UIAgileObject@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$?unconditional_release_ref@?$com_ptr@UIErrorInfo@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$?unconditional_release_ref@?$com_ptr@UILanguageExceptionErrorInfo2@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$?unconditional_release_ref@?$com_ptr@UIRestrictedErrorInfo@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$?unconditional_release_ref@?$com_ptr@Utype@?$abi@UIActivationFactory@Foundation@Windows@winrt@@X@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a70     main.obj
+ 0002:00002a70       $unwind$?unconditional_release_ref@IUnknown@Foundation@Windows@winrt@@AEAAXXZ 0000000140009a70     main.obj
+ 0002:00002a80       $cppxdata$??$is_guid_of@UIWeakReferenceSource@impl@winrt@@@winrt@@YA_NAEBUguid@0@@Z 0000000140009a80     TestRuntimeClass.obj
+ 0002:00002a80       $cppxdata$?AddRef@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAIXZ 0000000140009a80     TestRuntimeClass.obj
+ 0002:00002a80       $cppxdata$?AddRef@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@QEAAIXZ 0000000140009a80     TestRuntimeClass.obj
+ 0002:00002a80       $cppxdata$?AddRef@?$weak_ref@$00$00@impl@winrt@@UEAAIXZ 0000000140009a80     TestRuntimeClass.obj
+ 0002:00002a80       $cppxdata$?AddRef@?$weak_source@$00$00@impl@winrt@@UEAAIXZ 0000000140009a80     TestRuntimeClass.obj
+ 0002:00002a80       $cppxdata$?AddRef@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAIXZ 0000000140009a80     TestRuntimeClass.obj
+ 0002:00002a80       $cppxdata$?Release@?$weak_source@$00$00@impl@winrt@@UEAAIXZ 0000000140009a80     TestRuntimeClass.obj
+ 0002:00002a80       $cppxdata$?find_inspectable@?$implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@winrt@@UEBAPEAUtype@?$abi@UIInspectable@Foundation@Windows@winrt@@X@impl@2@XZ 0000000140009a80     TestRuntimeClass.obj
+ 0002:00002a80       $cppxdata$?get_local_iids@?$implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@winrt@@UEBA?AU?$pair@IPEBUguid@winrt@@@std@@XZ 0000000140009a80     TestRuntimeClass.obj
+ 0002:00002a80       $cppxdata$?get_unknown@?$implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@winrt@@EEBAPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@impl@2@XZ 0000000140009a80     TestRuntimeClass.obj
+ 0002:00002a80       $cppxdata$?unconditional_release_ref@?$com_ptr@U?$weak_ref@$00$00@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a80     TestRuntimeClass.obj
+ 0002:00002a80       $cppxdata$?unconditional_release_ref@?$com_ptr@UIMarshal@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a80     TestRuntimeClass.obj
+ 0002:00002a80       $cppxdata$?unconditional_release_ref@?$com_ptr@Utype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a80     TestRuntimeClass.obj
+ 0002:00002a80       $cppxdata$??$is_guid_of@UIUnknown@Foundation@Windows@winrt@@@winrt@@YA_NAEBUguid@0@@Z 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$??0bad_alloc@std@@QEAA@XZ 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$??0bad_array_new_length@std@@QEAA@XZ 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$??0hresult_access_denied@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$??0hresult_canceled@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$??0hresult_changed_state@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$??0hresult_class_not_available@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$??0hresult_class_not_registered@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$??0hresult_illegal_delegate_assignment@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$??0hresult_illegal_method_call@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$??0hresult_illegal_state_change@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$??0hresult_invalid_argument@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$??0hresult_no_interface@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$??0hresult_not_implemented@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$??0hresult_out_of_bounds@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$??0hresult_wrong_thread@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$??1factory_count_guard@impl@winrt@@QEAA@XZ 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$?AddRef@error_info_fallback@impl@winrt@@UEAAIXZ 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$?GetGUID@error_info_fallback@impl@winrt@@UEAAHPEAUguid@3@@Z 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$?GetHelpContext@error_info_fallback@impl@winrt@@UEAAHPEAI@Z 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$?GetHelpFile@error_info_fallback@impl@winrt@@UEAAHPEAPEA_W@Z 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$?GetReference@error_info_fallback@impl@winrt@@UEAAHPEAPEA_W@Z 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$?GetSource@error_info_fallback@impl@winrt@@UEAAHPEAPEA_W@Z 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$?fallback_RoGetActivationFactory@impl@winrt@@YAHPEAXAEBUguid@2@PEAPEAX@Z 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$?unconditional_release_ref@?$com_ptr@UIAgileObject@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$?unconditional_release_ref@?$com_ptr@UIErrorInfo@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$?unconditional_release_ref@?$com_ptr@UILanguageExceptionErrorInfo2@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$?unconditional_release_ref@?$com_ptr@UIRestrictedErrorInfo@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$?unconditional_release_ref@?$com_ptr@Utype@?$abi@UIActivationFactory@Foundation@Windows@winrt@@X@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a80     main.obj
+ 0002:00002a80       $cppxdata$?unconditional_release_ref@IUnknown@Foundation@Windows@winrt@@AEAAXXZ 0000000140009a80     main.obj
+ 0002:00002a85       $ip2state$??$is_guid_of@UIWeakReferenceSource@impl@winrt@@@winrt@@YA_NAEBUguid@0@@Z 0000000140009a85     TestRuntimeClass.obj
+ 0002:00002a85       $ip2state$?AddRef@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAIXZ 0000000140009a85     TestRuntimeClass.obj
+ 0002:00002a85       $ip2state$?AddRef@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@QEAAIXZ 0000000140009a85     TestRuntimeClass.obj
+ 0002:00002a85       $ip2state$?AddRef@?$weak_ref@$00$00@impl@winrt@@UEAAIXZ 0000000140009a85     TestRuntimeClass.obj
+ 0002:00002a85       $ip2state$?AddRef@?$weak_source@$00$00@impl@winrt@@UEAAIXZ 0000000140009a85     TestRuntimeClass.obj
+ 0002:00002a85       $ip2state$?AddRef@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAIXZ 0000000140009a85     TestRuntimeClass.obj
+ 0002:00002a85       $ip2state$?Release@?$weak_source@$00$00@impl@winrt@@UEAAIXZ 0000000140009a85     TestRuntimeClass.obj
+ 0002:00002a85       $ip2state$?find_inspectable@?$implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@winrt@@UEBAPEAUtype@?$abi@UIInspectable@Foundation@Windows@winrt@@X@impl@2@XZ 0000000140009a85     TestRuntimeClass.obj
+ 0002:00002a85       $ip2state$?get_local_iids@?$implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@winrt@@UEBA?AU?$pair@IPEBUguid@winrt@@@std@@XZ 0000000140009a85     TestRuntimeClass.obj
+ 0002:00002a85       $ip2state$?get_unknown@?$implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@winrt@@EEBAPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@impl@2@XZ 0000000140009a85     TestRuntimeClass.obj
+ 0002:00002a85       $ip2state$?unconditional_release_ref@?$com_ptr@U?$weak_ref@$00$00@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a85     TestRuntimeClass.obj
+ 0002:00002a85       $ip2state$?unconditional_release_ref@?$com_ptr@UIMarshal@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a85     TestRuntimeClass.obj
+ 0002:00002a85       $ip2state$?unconditional_release_ref@?$com_ptr@Utype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a85     TestRuntimeClass.obj
+ 0002:00002a85       $ip2state$??$is_guid_of@UIUnknown@Foundation@Windows@winrt@@@winrt@@YA_NAEBUguid@0@@Z 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$??0bad_alloc@std@@QEAA@XZ 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$??0bad_array_new_length@std@@QEAA@XZ 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$??0hresult_access_denied@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$??0hresult_canceled@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$??0hresult_changed_state@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$??0hresult_class_not_available@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$??0hresult_class_not_registered@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$??0hresult_illegal_delegate_assignment@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$??0hresult_illegal_method_call@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$??0hresult_illegal_state_change@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$??0hresult_invalid_argument@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$??0hresult_no_interface@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$??0hresult_not_implemented@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$??0hresult_out_of_bounds@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$??0hresult_wrong_thread@winrt@@QEAA@Utake_ownership_from_abi_t@1@@Z 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$??1factory_count_guard@impl@winrt@@QEAA@XZ 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$?AddRef@error_info_fallback@impl@winrt@@UEAAIXZ 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$?GetGUID@error_info_fallback@impl@winrt@@UEAAHPEAUguid@3@@Z 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$?GetHelpContext@error_info_fallback@impl@winrt@@UEAAHPEAI@Z 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$?GetHelpFile@error_info_fallback@impl@winrt@@UEAAHPEAPEA_W@Z 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$?GetReference@error_info_fallback@impl@winrt@@UEAAHPEAPEA_W@Z 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$?GetSource@error_info_fallback@impl@winrt@@UEAAHPEAPEA_W@Z 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$?fallback_RoGetActivationFactory@impl@winrt@@YAHPEAXAEBUguid@2@PEAPEAX@Z 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$?unconditional_release_ref@?$com_ptr@UIAgileObject@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$?unconditional_release_ref@?$com_ptr@UIErrorInfo@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$?unconditional_release_ref@?$com_ptr@UILanguageExceptionErrorInfo2@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$?unconditional_release_ref@?$com_ptr@UIRestrictedErrorInfo@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$?unconditional_release_ref@?$com_ptr@Utype@?$abi@UIActivationFactory@Foundation@Windows@winrt@@X@impl@winrt@@@winrt@@AEAAXXZ 0000000140009a85     main.obj
+ 0002:00002a85       $ip2state$?unconditional_release_ref@IUnknown@Foundation@Windows@winrt@@AEAAXXZ 0000000140009a85     main.obj
+ 0002:00002a88       $unwind$??$assign@Uhstring@winrt@@$0A@@?$basic_string@_WU?$char_traits@_W@std@@V?$allocator@_W@2@@std@@QEAAAEAV01@AEBUhstring@winrt@@@Z 0000000140009a88     main.obj
+ 0002:00002aa0       $unwind$?append@?$basic_string@_WU?$char_traits@_W@std@@V?$allocator@_W@2@@std@@QEAAAEAV12@QEB_W_K@Z 0000000140009aa0     main.obj
+ 0002:00002ab4       $chain$1$?append@?$basic_string@_WU?$char_traits@_W@std@@V?$allocator@_W@2@@std@@QEAAAEAV12@QEB_W_K@Z 0000000140009ab4     main.obj
+ 0002:00002acc       $chain$3$?append@?$basic_string@_WU?$char_traits@_W@std@@V?$allocator@_W@2@@std@@QEAAAEAV12@QEB_W_K@Z 0000000140009acc     main.obj
+ 0002:00002ae0       $chain$4$?append@?$basic_string@_WU?$char_traits@_W@std@@V?$allocator@_W@2@@std@@QEAAAEAV12@QEB_W_K@Z 0000000140009ae0     main.obj
+ 0002:00002af0       $unwind$??$_Allocate@$0BA@U_Default_allocate_traits@std@@$0A@@std@@YAPEAX_K@Z 0000000140009af0     main.obj
+ 0002:00002af8       $unwind$??0hstring@winrt@@QEAA@PEB_W@Z 0000000140009af8     TestRuntimeClass.obj
+ 0002:00002af8       $unwind$??_Gbad_alloc@std@@UEAAPEAXI@Z 0000000140009af8     main.obj
+ 0002:00002af8       $unwind$??_Gbad_array_new_length@std@@UEAAPEAXI@Z 0000000140009af8     main.obj
+ 0002:00002af8       $unwind$??_Gexception@std@@UEAAPEAXI@Z 0000000140009af8     main.obj
+ 0002:00002af8       $unwind$??_Ginvalid_argument@std@@UEAAPEAXI@Z 0000000140009af8     main.obj
+ 0002:00002af8       $unwind$??_Glogic_error@std@@UEAAPEAXI@Z 0000000140009af8     main.obj
+ 0002:00002af8       $unwind$_RTC_Initialize    0000000140009af8     MSVCRTD:initsect.obj
+ 0002:00002af8       $unwind$_RTC_Terminate     0000000140009af8     MSVCRTD:initsect.obj
+ 0002:00002b04       $unwind$?GetRuntimeClassName@?$TestRuntimeClass_base@UTestRuntimeClass@implementation@MyProject@winrt@@$$V@implementation@MyProject@winrt@@UEBA?AUhstring@4@XZ 0000000140009b04     TestRuntimeClass.obj
+ 0002:00002b04       $unwind$??0bad_alloc@std@@QEAA@AEBV01@@Z 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??0bad_array_new_length@std@@QEAA@AEBV01@@Z 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??0hresult_access_denied@winrt@@QEAA@AEBU01@@Z 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??0hresult_canceled@winrt@@QEAA@AEBU01@@Z 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??0hresult_changed_state@winrt@@QEAA@AEBU01@@Z 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??0hresult_class_not_available@winrt@@QEAA@AEBU01@@Z 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??0hresult_class_not_registered@winrt@@QEAA@AEBU01@@Z 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??0hresult_illegal_delegate_assignment@winrt@@QEAA@AEBU01@@Z 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??0hresult_illegal_method_call@winrt@@QEAA@AEBU01@@Z 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??0hresult_illegal_state_change@winrt@@QEAA@AEBU01@@Z 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??0hresult_invalid_argument@winrt@@QEAA@AEBU01@@Z 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??0hresult_no_interface@winrt@@QEAA@AEBU01@@Z 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??0hresult_not_implemented@winrt@@QEAA@AEBU01@@Z 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??0hresult_out_of_bounds@winrt@@QEAA@AEBU01@@Z 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??0hresult_wrong_thread@winrt@@QEAA@AEBU01@@Z 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??0invalid_argument@std@@QEAA@AEBV01@@Z 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??0logic_error@std@@QEAA@AEBV01@@Z 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??1hresult_access_denied@winrt@@QEAA@XZ 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??1hresult_canceled@winrt@@QEAA@XZ 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??1hresult_changed_state@winrt@@QEAA@XZ 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??1hresult_class_not_available@winrt@@QEAA@XZ 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??1hresult_class_not_registered@winrt@@QEAA@XZ 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??1hresult_error@winrt@@QEAA@XZ 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??1hresult_illegal_delegate_assignment@winrt@@QEAA@XZ 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??1hresult_illegal_method_call@winrt@@QEAA@XZ 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??1hresult_illegal_state_change@winrt@@QEAA@XZ 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??1hresult_invalid_argument@winrt@@QEAA@XZ 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??1hresult_no_interface@winrt@@QEAA@XZ 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??1hresult_not_implemented@winrt@@QEAA@XZ 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??1hresult_out_of_bounds@winrt@@QEAA@XZ 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$??1hresult_wrong_thread@winrt@@QEAA@XZ 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$?duplicate_hstring@impl@winrt@@YAPEAUhstring_header@12@PEAU312@@Z 0000000140009b04     main.obj
+ 0002:00002b04       $unwind$?what@exception@std@@UEBAPEBDXZ 0000000140009b04     main.obj
+ 0002:00002b0c       $unwind$?_Throw_bad_array_new_length@std@@YAXXZ 0000000140009b0c     main.obj
+ 0002:00002b0c       $unwind$?invoke_main@@YAHXZ 0000000140009b0c     MSVCRTD:exe_main.obj
+ 0002:00002b0c       $unwind$?__scrt_throw_std_bad_alloc@@YAXXZ 0000000140009b0c     MSVCRTD:throw_bad_alloc.obj
+ 0002:00002b0c       $unwind$?__scrt_throw_std_bad_array_new_length@@YAXXZ 0000000140009b0c     MSVCRTD:throw_bad_alloc.obj
+ 0002:00002b0c       $unwind$__scrt_acquire_startup_lock 0000000140009b0c     MSVCRTD:utility.obj
+ 0002:00002b14       $unwind$?_Orphan_all@_Container_base12@std@@QEAAXXZ 0000000140009b14     main.obj
+ 0002:00002b28       $cppxdata$?QueryInterface@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAHAEBUguid@3@PEAPEAX@Z 0000000140009b28     TestRuntimeClass.obj
+ 0002:00002b28       $cppxdata$?QueryInterface@?$weak_ref@$00$00@impl@winrt@@UEAAHAEBUguid@3@PEAPEAX@Z 0000000140009b28     TestRuntimeClass.obj
+ 0002:00002b28       $cppxdata$?QueryInterface@?$weak_source@$00$00@impl@winrt@@UEAAHAEBUguid@3@PEAPEAX@Z 0000000140009b28     TestRuntimeClass.obj
+ 0002:00002b28       $cppxdata$?QueryInterface@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHAEBUguid@4@1@Z 0000000140009b28     TestRuntimeClass.obj
+ 0002:00002b28       $cppxdata$?QueryInterface@error_info_fallback@impl@winrt@@UEAAHAEBUguid@3@PEAPEAX@Z 0000000140009b28     main.obj
+ 0002:00002b28       $cppxdata$?_Orphan_all@_Container_base12@std@@QEAAXXZ 0000000140009b28     main.obj
+ 0002:00002b2d       $ip2state$?QueryInterface@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAHAEBUguid@3@PEAPEAX@Z 0000000140009b2d     TestRuntimeClass.obj
+ 0002:00002b2d       $ip2state$?QueryInterface@?$weak_ref@$00$00@impl@winrt@@UEAAHAEBUguid@3@PEAPEAX@Z 0000000140009b2d     TestRuntimeClass.obj
+ 0002:00002b2d       $ip2state$?QueryInterface@?$weak_source@$00$00@impl@winrt@@UEAAHAEBUguid@3@PEAPEAX@Z 0000000140009b2d     TestRuntimeClass.obj
+ 0002:00002b2d       $ip2state$?QueryInterface@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHAEBUguid@4@1@Z 0000000140009b2d     TestRuntimeClass.obj
+ 0002:00002b2d       $ip2state$?QueryInterface@error_info_fallback@impl@winrt@@UEAAHAEBUguid@3@PEAPEAX@Z 0000000140009b2d     main.obj
+ 0002:00002b2d       $ip2state$?_Orphan_all@_Container_base12@std@@QEAAXXZ 0000000140009b2d     main.obj
+ 0002:00002b30       $unwind$??$_Deallocate@$0BA@$0A@@std@@YAXPEAX_K@Z 0000000140009b30     main.obj
+ 0002:00002b4c       $cppxdata$??$_Deallocate@$0BA@$0A@@std@@YAXPEAX_K@Z 0000000140009b4c     main.obj
+ 0002:00002b51       $ip2state$??$_Deallocate@$0BA@$0A@@std@@YAXPEAX_K@Z 0000000140009b51     main.obj
+ 0002:00002b54       $unwind$??$_Reallocate_grow_by@V<lambda_a3050a43f3157934f354774ab3dd2e02>@@_K_W@?$basic_string@_WU?$char_traits@_W@std@@V?$allocator@_W@2@@std@@AEAAAEAV01@_KV<lambda_a3050a43f3157934f354774ab3dd2e02>@@_K_W@Z 0000000140009b54     main.obj
+ 0002:00002b64       $chain$1$??$_Reallocate_grow_by@V<lambda_a3050a43f3157934f354774ab3dd2e02>@@_K_W@?$basic_string@_WU?$char_traits@_W@std@@V?$allocator@_W@2@@std@@AEAAAEAV01@_KV<lambda_a3050a43f3157934f354774ab3dd2e02>@@_K_W@Z 0000000140009b64     main.obj
+ 0002:00002b7c       $chain$2$??$_Reallocate_grow_by@V<lambda_a3050a43f3157934f354774ab3dd2e02>@@_K_W@?$basic_string@_WU?$char_traits@_W@std@@V?$allocator@_W@2@@std@@AEAAAEAV01@_KV<lambda_a3050a43f3157934f354774ab3dd2e02>@@_K_W@Z 0000000140009b7c     main.obj
+ 0002:00002b90       $chain$3$??$_Reallocate_grow_by@V<lambda_a3050a43f3157934f354774ab3dd2e02>@@_K_W@?$basic_string@_WU?$char_traits@_W@std@@V?$allocator@_W@2@@std@@AEAAAEAV01@_KV<lambda_a3050a43f3157934f354774ab3dd2e02>@@_K_W@Z 0000000140009b90     main.obj
+ 0002:00002ba0       $chain$5$??$_Reallocate_grow_by@V<lambda_a3050a43f3157934f354774ab3dd2e02>@@_K_W@?$basic_string@_WU?$char_traits@_W@std@@V?$allocator@_W@2@@std@@AEAAAEAV01@_KV<lambda_a3050a43f3157934f354774ab3dd2e02>@@_K_W@Z 0000000140009ba0     main.obj
+ 0002:00002bb8       $chain$6$??$_Reallocate_grow_by@V<lambda_a3050a43f3157934f354774ab3dd2e02>@@_K_W@?$basic_string@_WU?$char_traits@_W@std@@V?$allocator@_W@2@@std@@AEAAAEAV01@_KV<lambda_a3050a43f3157934f354774ab3dd2e02>@@_K_W@Z 0000000140009bb8     main.obj
+ 0002:00002bc8       $unwind$??$get_runtime_activation_factory_impl@$0A@@impl@winrt@@YA?AUhresult@1@AEBUhstring@param@1@AEBUguid@1@PEAPEAX@Z 0000000140009bc8     main.obj
+ 0002:00002bec       $cppxdata$??$get_runtime_activation_factory_impl@$0A@@impl@winrt@@YA?AUhresult@1@AEBUhstring@param@1@AEBUguid@1@PEAPEAX@Z 0000000140009bec     main.obj
+ 0002:00002bf1       $ip2state$??$get_runtime_activation_factory_impl@$0A@@impl@winrt@@YA?AUhresult@1@AEBUhstring@param@1@AEBUguid@1@PEAPEAX@Z 0000000140009bf1     main.obj
+ 0002:00002bf4       $unwind$??R<lambda_0a61d549bec6c444b35123f4c9509ca7>@@QEBA?AUUri@Foundation@Windows@winrt@@AEBUIUriRuntimeClassFactory@234@@Z 0000000140009bf4     main.obj
+ 0002:00002c08       $unwind$??$call@AEAV<lambda_0a61d549bec6c444b35123f4c9509ca7>@@@?$factory_cache_entry@UUri@Foundation@Windows@winrt@@UIUriRuntimeClassFactory@234@@impl@winrt@@QEAA?AUUri@Foundation@Windows@2@AEAV<lambda_0a61d549bec6c444b35123f4c9509ca7>@@@Z 0000000140009c08     main.obj
+ 0002:00002c28       $cppxdata$??$call@AEAV<lambda_0a61d549bec6c444b35123f4c9509ca7>@@@?$factory_cache_entry@UUri@Foundation@Windows@winrt@@UIUriRuntimeClassFactory@234@@impl@winrt@@QEAA?AUUri@Foundation@Windows@2@AEAV<lambda_0a61d549bec6c444b35123f4c9509ca7>@@@Z 0000000140009c28     main.obj
+ 0002:00002c31       $stateUnwindMap$??$call@AEAV<lambda_0a61d549bec6c444b35123f4c9509ca7>@@@?$factory_cache_entry@UUri@Foundation@Windows@winrt@@UIUriRuntimeClassFactory@234@@impl@winrt@@QEAA?AUUri@Foundation@Windows@2@AEAV<lambda_0a61d549bec6c444b35123f4c9509ca7>@@@Z 0000000140009c31     main.obj
+ 0002:00002c3e       $ip2state$??$call@AEAV<lambda_0a61d549bec6c444b35123f4c9509ca7>@@@?$factory_cache_entry@UUri@Foundation@Windows@winrt@@UIUriRuntimeClassFactory@234@@impl@winrt@@QEAA?AUUri@Foundation@Windows@2@AEAV<lambda_0a61d549bec6c444b35123f4c9509ca7>@@@Z 0000000140009c3e     main.obj
+ 0002:00002c4c       $unwind$?GetRuntimeClassName@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAHPEAPEAX@Z 0000000140009c4c     TestRuntimeClass.obj
+ 0002:00002c4c       $unwind$?GetTrustLevel@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAHPEAW4TrustLevel@Foundation@Windows@3@@Z 0000000140009c4c     TestRuntimeClass.obj
+ 0002:00002c4c       $unwind$?GetWeakReference@?$weak_source@$00$00@impl@winrt@@UEAAHPEAPEAUIWeakReference@23@@Z 0000000140009c4c     TestRuntimeClass.obj
+ 0002:00002c4c       $unwind$?ReleaseMarshalData@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHPEAX@Z 0000000140009c4c     TestRuntimeClass.obj
+ 0002:00002c4c       $unwind$?find_interface@?$implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@winrt@@UEBAPEAXAEBUguid@2@@Z 0000000140009c4c     TestRuntimeClass.obj
+ 0002:00002c4c       $unwind$??0exception@std@@QEAA@AEBV01@@Z 0000000140009c4c     main.obj
+ 0002:00002c4c       $unwind$??0hresult_error@winrt@@QEAA@AEBU01@@Z 0000000140009c4c     main.obj
+ 0002:00002c4c       $unwind$?GetDescription@error_info_fallback@impl@winrt@@UEAAHPEAPEA_W@Z 0000000140009c4c     main.obj
+ 0002:00002c60       $cppxdata$?GetRuntimeClassName@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAHPEAPEAX@Z 0000000140009c60     TestRuntimeClass.obj
+ 0002:00002c60       $cppxdata$?GetTrustLevel@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAHPEAW4TrustLevel@Foundation@Windows@3@@Z 0000000140009c60     TestRuntimeClass.obj
+ 0002:00002c60       $cppxdata$?GetWeakReference@?$weak_source@$00$00@impl@winrt@@UEAAHPEAPEAUIWeakReference@23@@Z 0000000140009c60     TestRuntimeClass.obj
+ 0002:00002c60       $cppxdata$?ReleaseMarshalData@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHPEAX@Z 0000000140009c60     TestRuntimeClass.obj
+ 0002:00002c60       $cppxdata$?find_interface@?$implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@winrt@@UEBAPEAXAEBUguid@2@@Z 0000000140009c60     TestRuntimeClass.obj
+ 0002:00002c60       $cppxdata$??0exception@std@@QEAA@AEBV01@@Z 0000000140009c60     main.obj
+ 0002:00002c60       $cppxdata$??0hresult_error@winrt@@QEAA@AEBU01@@Z 0000000140009c60     main.obj
+ 0002:00002c60       $cppxdata$?GetDescription@error_info_fallback@impl@winrt@@UEAAHPEAPEA_W@Z 0000000140009c60     main.obj
+ 0002:00002c65       $ip2state$?GetRuntimeClassName@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAHPEAPEAX@Z 0000000140009c65     TestRuntimeClass.obj
+ 0002:00002c65       $ip2state$?GetTrustLevel@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAHPEAW4TrustLevel@Foundation@Windows@3@@Z 0000000140009c65     TestRuntimeClass.obj
+ 0002:00002c65       $ip2state$?GetWeakReference@?$weak_source@$00$00@impl@winrt@@UEAAHPEAPEAUIWeakReference@23@@Z 0000000140009c65     TestRuntimeClass.obj
+ 0002:00002c65       $ip2state$?NonDelegatingGetTrustLevel@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAW4TrustLevel@Foundation@Windows@3@@Z 0000000140009c65     TestRuntimeClass.obj
+ 0002:00002c65       $ip2state$?ReleaseMarshalData@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHPEAX@Z 0000000140009c65     TestRuntimeClass.obj
+ 0002:00002c65       $ip2state$?find_interface@?$implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@winrt@@UEBAPEAXAEBUguid@2@@Z 0000000140009c65     TestRuntimeClass.obj
+ 0002:00002c65       $ip2state$??0exception@std@@QEAA@AEBV01@@Z 0000000140009c65     main.obj
+ 0002:00002c65       $ip2state$??0hresult_error@winrt@@QEAA@AEBU01@@Z 0000000140009c65     main.obj
+ 0002:00002c65       $ip2state$?GetDescription@error_info_fallback@impl@winrt@@UEAAHPEAPEA_W@Z 0000000140009c65     main.obj
+ 0002:00002c68       $unwind$?QueryInterface@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAHAEBUguid@3@PEAPEAX@Z 0000000140009c68     TestRuntimeClass.obj
+ 0002:00002c68       $unwind$?QueryInterface@?$weak_ref@$00$00@impl@winrt@@UEAAHAEBUguid@3@PEAPEAX@Z 0000000140009c68     TestRuntimeClass.obj
+ 0002:00002c68       $unwind$?QueryInterface@?$weak_source@$00$00@impl@winrt@@UEAAHAEBUguid@3@PEAPEAX@Z 0000000140009c68     TestRuntimeClass.obj
+ 0002:00002c68       $unwind$?QueryInterface@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHAEBUguid@4@1@Z 0000000140009c68     TestRuntimeClass.obj
+ 0002:00002c68       $unwind$?QueryInterface@error_info_fallback@impl@winrt@@UEAAHAEBUguid@3@PEAPEAX@Z 0000000140009c68     main.obj
+ 0002:00002c80       $unwind$?Release@error_info_fallback@impl@winrt@@UEAAIXZ 0000000140009c80     main.obj
+ 0002:00002c98       $cppxdata$?Release@error_info_fallback@impl@winrt@@UEAAIXZ 0000000140009c98     main.obj
+ 0002:00002c9d       $ip2state$?Release@error_info_fallback@impl@winrt@@UEAAIXZ 0000000140009c9d     main.obj
+ 0002:00002ca0       $unwind$?GetErrorDetails@error_info_fallback@impl@winrt@@UEAAHPEAPEA_WPEAH00@Z 0000000140009ca0     main.obj
+ 0002:00002cc0       $cppxdata$?GetErrorDetails@error_info_fallback@impl@winrt@@UEAAHPEAPEA_WPEAH00@Z 0000000140009cc0     main.obj
+ 0002:00002cc5       $ip2state$?GetErrorDetails@error_info_fallback@impl@winrt@@UEAAHPEAPEA_WPEAH00@Z 0000000140009cc5     main.obj
+ 0002:00002cc8       $chain$1$?duplicate_hstring@impl@winrt@@YAPEAUhstring_header@12@PEAU312@@Z 0000000140009cc8     main.obj
+ 0002:00002ce0       $chain$3$?duplicate_hstring@impl@winrt@@YAPEAUhstring_header@12@PEAU312@@Z 0000000140009ce0     main.obj
+ 0002:00002ce0       $chain$5$?duplicate_hstring@impl@winrt@@YAPEAUhstring_header@12@PEAU312@@Z 0000000140009ce0     main.obj
+ 0002:00002cf8       $unwind$??0invalid_argument@std@@QEAA@PEBD@Z 0000000140009cf8     main.obj
+ 0002:00002d08       $unwind$?precreate_hstring_on_heap@impl@winrt@@YAPEAUshared_hstring_header@12@I@Z 0000000140009d08     main.obj
+ 0002:00002d18       $unwind$?close@?$handle_type@Uhstring_traits@impl@winrt@@@winrt@@QEAAXXZ 0000000140009d18     main.obj
+ 0002:00002d2c       $cppxdata$?Release@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAIXZ 0000000140009d2c     TestRuntimeClass.obj
+ 0002:00002d2c       $cppxdata$?Release@?$weak_ref@$00$00@impl@winrt@@UEAAIXZ 0000000140009d2c     TestRuntimeClass.obj
+ 0002:00002d2c       $cppxdata$?Release@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAIXZ 0000000140009d2c     TestRuntimeClass.obj
+ 0002:00002d2c       $cppxdata$?decrement_strong@?$weak_ref@$00$00@impl@winrt@@QEAAIXZ 0000000140009d2c     TestRuntimeClass.obj
+ 0002:00002d2c       $cppxdata$?close@?$handle_type@Uhstring_traits@impl@winrt@@@winrt@@QEAAXXZ 0000000140009d2c     main.obj
+ 0002:00002d31       $ip2state$?Release@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAIXZ 0000000140009d31     TestRuntimeClass.obj
+ 0002:00002d31       $ip2state$?Release@?$weak_ref@$00$00@impl@winrt@@UEAAIXZ 0000000140009d31     TestRuntimeClass.obj
+ 0002:00002d31       $ip2state$?Release@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAIXZ 0000000140009d31     TestRuntimeClass.obj
+ 0002:00002d31       $ip2state$?decrement_strong@?$weak_ref@$00$00@impl@winrt@@QEAAIXZ 0000000140009d31     TestRuntimeClass.obj
+ 0002:00002d31       $ip2state$?close@?$handle_type@Uhstring_traits@impl@winrt@@@winrt@@QEAAXXZ 0000000140009d31     main.obj
+ 0002:00002d34       $unwind$?fallback_RoOriginateLanguageException@hresult_error@winrt@@CAHHPEAX0@Z 0000000140009d34     main.obj
+ 0002:00002d58       $cppxdata$?fallback_RoOriginateLanguageException@hresult_error@winrt@@CAHHPEAX0@Z 0000000140009d58     main.obj
+ 0002:00002d61       $stateUnwindMap$?fallback_RoOriginateLanguageException@hresult_error@winrt@@CAHHPEAX0@Z 0000000140009d61     main.obj
+ 0002:00002d6c       $ip2state$?fallback_RoOriginateLanguageException@hresult_error@winrt@@CAHHPEAX0@Z 0000000140009d6c     main.obj
+ 0002:00002d78       $unwind$?originate@hresult_error@winrt@@AEAAXUhresult@2@PEAX@Z 0000000140009d78     main.obj
+ 0002:00002d98       $cppxdata$?originate@hresult_error@winrt@@AEAAXUhresult@2@PEAX@Z 0000000140009d98     main.obj
+ 0002:00002d9d       $ip2state$?originate@hresult_error@winrt@@AEAAXUhresult@2@PEAX@Z 0000000140009d9d     main.obj
+ 0002:00002da0       $unwind$??0hresult_error@winrt@@QEAA@Uhresult@1@Utake_ownership_from_abi_t@1@@Z 0000000140009da0     main.obj
+ 0002:00002dc8       $cppxdata$??0hresult_error@winrt@@QEAA@Uhresult@1@Utake_ownership_from_abi_t@1@@Z 0000000140009dc8     main.obj
+ 0002:00002dd1       $stateUnwindMap$??0hresult_error@winrt@@QEAA@Uhresult@1@Utake_ownership_from_abi_t@1@@Z 0000000140009dd1     main.obj
+ 0002:00002dd7       $ip2state$??0hresult_error@winrt@@QEAA@Uhresult@1@Utake_ownership_from_abi_t@1@@Z 0000000140009dd7     main.obj
+ 0002:00002de0       $unwind$?throw_hresult@winrt@@YAXUhresult@1@@Z 0000000140009de0     main.obj
+ 0002:00002dec       $unwind$?abi_val@natvis@impl@winrt@@SA@PEAXPEB_WH@Z 0000000140009dec     pch.obj
+ 0002:00002dec       $unwind$?get_val@natvis@impl@winrt@@SA?ATvariant@?1??abi_val@123@SA@PEAXPEB_WH@Z@PEAUIInspectable@Foundation@Windows@3@1H@Z 0000000140009dec     pch.obj
+ 0002:00002e04       $unwind$??_G?$heap_implements@UTestRuntimeClass@implementation@MyProject@winrt@@@impl@winrt@@UEAAPEAXI@Z 0000000140009e04     TestRuntimeClass.obj
+ 0002:00002e10       $unwind$??1abi_guard@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@QEAA@XZ 0000000140009e10     TestRuntimeClass.obj
+ 0002:00002e10       $unwind$?GetTrustLevel@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@MEBA?AW4TrustLevel@Foundation@Windows@3@XZ 0000000140009e10     TestRuntimeClass.obj
+ 0002:00002e10       $unwind$?query_interface_tearoff@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@MEBAHAEBUguid@3@PEAPEAX@Z 0000000140009e10     TestRuntimeClass.obj
+ 0002:00002e20       $cppxdata$??1abi_guard@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@QEAA@XZ 0000000140009e20     TestRuntimeClass.obj
+ 0002:00002e20       $cppxdata$?GetTrustLevel@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@MEBA?AW4TrustLevel@Foundation@Windows@3@XZ 0000000140009e20     TestRuntimeClass.obj
+ 0002:00002e20       $cppxdata$?query_interface_tearoff@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@MEBAHAEBUguid@3@PEAPEAX@Z 0000000140009e20     TestRuntimeClass.obj
+ 0002:00002e25       $ip2state$??1abi_guard@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@QEAA@XZ 0000000140009e25     TestRuntimeClass.obj
+ 0002:00002e25       $ip2state$?GetTrustLevel@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@MEBA?AW4TrustLevel@Foundation@Windows@3@XZ 0000000140009e25     TestRuntimeClass.obj
+ 0002:00002e25       $ip2state$?query_interface_tearoff@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@MEBAHAEBUguid@3@PEAPEAX@Z 0000000140009e25     TestRuntimeClass.obj
+ 0002:00002e28       $unwind$?put_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAX@Z 0000000140009e28     TestRuntimeClass.obj
+ 0002:00002e3c       $cppxdata$?put_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAX@Z 0000000140009e3c     TestRuntimeClass.obj
+ 0002:00002e49       $stateUnwindMap$?put_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAX@Z 0000000140009e49     TestRuntimeClass.obj
+ 0002:00002e52       $tryMap$?put_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAX@Z 0000000140009e52     TestRuntimeClass.obj
+ 0002:00002e5a       $handlerMap$?put_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAX@Z 0000000140009e5a     TestRuntimeClass.obj
+ 0002:00002e62       $ip2state$?put_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAX@Z 0000000140009e62     TestRuntimeClass.obj
+ 0002:00002e68       $unwind$?catch$10@?0??put_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAX@Z@4HA 0000000140009e68     TestRuntimeClass.obj
+ 0002:00002e68       $unwind$?catch$1@?0??NonDelegatingGetTrustLevel@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAW4TrustLevel@Foundation@Windows@3@@Z@4HA 0000000140009e68     TestRuntimeClass.obj
+ 0002:00002e68       $unwind$?catch$20@?0??get_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAPEAX@Z@4HA 0000000140009e68     TestRuntimeClass.obj
+ 0002:00002e68       $unwind$?catch$7@?0??NonDelegatingGetRuntimeClassName@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAPEAX@Z@4HA 0000000140009e68     TestRuntimeClass.obj
+ 0002:00002e78       $cppxdata$?catch$10@?0??put_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAX@Z@4HA 0000000140009e78     TestRuntimeClass.obj
+ 0002:00002e78       $cppxdata$?catch$1@?0??NonDelegatingGetTrustLevel@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAW4TrustLevel@Foundation@Windows@3@@Z@4HA 0000000140009e78     TestRuntimeClass.obj
+ 0002:00002e78       $cppxdata$?catch$20@?0??get_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAPEAX@Z@4HA 0000000140009e78     TestRuntimeClass.obj
+ 0002:00002e78       $cppxdata$?catch$7@?0??NonDelegatingGetRuntimeClassName@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAPEAX@Z@4HA 0000000140009e78     TestRuntimeClass.obj
+ 0002:00002e82       $stateUnwindMap$?catch$10@?0??put_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAX@Z@4HA 0000000140009e82     TestRuntimeClass.obj
+ 0002:00002e82       $stateUnwindMap$?catch$134@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 0000000140009e82     TestRuntimeClass.obj
+ 0002:00002e82       $stateUnwindMap$?catch$135@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 0000000140009e82     TestRuntimeClass.obj
+ 0002:00002e82       $stateUnwindMap$?catch$136@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 0000000140009e82     TestRuntimeClass.obj
+ 0002:00002e82       $stateUnwindMap$?catch$137@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 0000000140009e82     TestRuntimeClass.obj
+ 0002:00002e82       $stateUnwindMap$?catch$138@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 0000000140009e82     TestRuntimeClass.obj
+ 0002:00002e82       $stateUnwindMap$?catch$1@?0??NonDelegatingGetTrustLevel@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAW4TrustLevel@Foundation@Windows@3@@Z@4HA 0000000140009e82     TestRuntimeClass.obj
+ 0002:00002e82       $stateUnwindMap$?catch$20@?0??get_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAPEAX@Z@4HA 0000000140009e82     TestRuntimeClass.obj
+ 0002:00002e82       $stateUnwindMap$?catch$7@?0??NonDelegatingGetRuntimeClassName@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAPEAX@Z@4HA 0000000140009e82     TestRuntimeClass.obj
+ 0002:00002e82       $stateUnwindMap$?catch$0@?0???2@YAPEAX_KAEBUnothrow_t@std@@@Z@4HA 0000000140009e82     MSVCRTD:new_scalar_nothrow.obj
+ 0002:00002e84       $ip2state$?catch$10@?0??put_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAX@Z@4HA 0000000140009e84     TestRuntimeClass.obj
+ 0002:00002e84       $ip2state$?catch$134@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 0000000140009e84     TestRuntimeClass.obj
+ 0002:00002e84       $ip2state$?catch$135@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 0000000140009e84     TestRuntimeClass.obj
+ 0002:00002e84       $ip2state$?catch$1@?0??NonDelegatingGetTrustLevel@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAW4TrustLevel@Foundation@Windows@3@@Z@4HA 0000000140009e84     TestRuntimeClass.obj
+ 0002:00002e84       $ip2state$?catch$20@?0??get_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAPEAX@Z@4HA 0000000140009e84     TestRuntimeClass.obj
+ 0002:00002e84       $ip2state$?catch$7@?0??NonDelegatingGetRuntimeClassName@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAPEAX@Z@4HA 0000000140009e84     TestRuntimeClass.obj
+ 0002:00002e88       $unwind$?get_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAPEAX@Z 0000000140009e88     TestRuntimeClass.obj
+ 0002:00002ea0       $cppxdata$?get_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAPEAX@Z 0000000140009ea0     TestRuntimeClass.obj
+ 0002:00002ead       $stateUnwindMap$?get_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAPEAX@Z 0000000140009ead     TestRuntimeClass.obj
+ 0002:00002eb6       $tryMap$?get_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAPEAX@Z 0000000140009eb6     TestRuntimeClass.obj
+ 0002:00002ebe       $handlerMap$?get_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAPEAX@Z 0000000140009ebe     TestRuntimeClass.obj
+ 0002:00002ec6       $ip2state$?get_Name@?$produce@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@@impl@winrt@@UEAAHPEAPEAX@Z 0000000140009ec6     TestRuntimeClass.obj
+ 0002:00002ecc       $unwind$?GetIids@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAHPEAIPEAPEAUguid@3@@Z 0000000140009ecc     TestRuntimeClass.obj
+ 0002:00002ee8       $cppxdata$?GetIids@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAHPEAIPEAPEAUguid@3@@Z 0000000140009ee8     TestRuntimeClass.obj
+ 0002:00002ee8       $cppxdata$?to_abi@hresult_error@winrt@@QEBA?AUhresult@2@XZ 0000000140009ee8     TestRuntimeClass.obj
+ 0002:00002eed       $ip2state$?GetIids@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAHPEAIPEAPEAUguid@3@@Z 0000000140009eed     TestRuntimeClass.obj
+ 0002:00002eed       $ip2state$?to_abi@hresult_error@winrt@@QEBA?AUhresult@2@XZ 0000000140009eed     TestRuntimeClass.obj
+ 0002:00002ef0       $unwind$?Release@?$produce_base@UTestRuntimeClass@implementation@MyProject@winrt@@UITestRuntimeClass@34@X@impl@winrt@@UEAAIXZ 0000000140009ef0     TestRuntimeClass.obj
+ 0002:00002ef0       $unwind$?Release@?$weak_ref@$00$00@impl@winrt@@UEAAIXZ 0000000140009ef0     TestRuntimeClass.obj
+ 0002:00002ef0       $unwind$?Release@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAIXZ 0000000140009ef0     TestRuntimeClass.obj
+ 0002:00002ef0       $unwind$?decrement_strong@?$weak_ref@$00$00@impl@winrt@@QEAAIXZ 0000000140009ef0     TestRuntimeClass.obj
+ 0002:00002f04       $unwind$?Resolve@?$weak_ref@$00$00@impl@winrt@@UEAAHAEBUguid@3@PEAPEAX@Z 0000000140009f04     TestRuntimeClass.obj
+ 0002:00002f04       $unwind$?query_interface@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@AEAAHAEBUguid@3@PEAPEAX@Z 0000000140009f04     TestRuntimeClass.obj
+ 0002:00002f18       $cppxdata$?Resolve@?$weak_ref@$00$00@impl@winrt@@UEAAHAEBUguid@3@PEAPEAX@Z 0000000140009f18     TestRuntimeClass.obj
+ 0002:00002f18       $cppxdata$?query_interface@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@AEAAHAEBUguid@3@PEAPEAX@Z 0000000140009f18     TestRuntimeClass.obj
+ 0002:00002f1d       $ip2state$?Resolve@?$weak_ref@$00$00@impl@winrt@@UEAAHAEBUguid@3@PEAPEAX@Z 0000000140009f1d     TestRuntimeClass.obj
+ 0002:00002f1d       $ip2state$?query_interface@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@AEAAHAEBUguid@3@PEAPEAX@Z 0000000140009f1d     TestRuntimeClass.obj
+ 0002:00002f20       $unwind$?NonDelegatingGetTrustLevel@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAW4TrustLevel@Foundation@Windows@3@@Z 0000000140009f20     TestRuntimeClass.obj
+ 0002:00002f34       $cppxdata$?NonDelegatingGetTrustLevel@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAW4TrustLevel@Foundation@Windows@3@@Z 0000000140009f34     TestRuntimeClass.obj
+ 0002:00002f41       $stateUnwindMap$?NonDelegatingGetRuntimeClassName@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAPEAX@Z 0000000140009f41     TestRuntimeClass.obj
+ 0002:00002f41       $stateUnwindMap$?NonDelegatingGetTrustLevel@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAW4TrustLevel@Foundation@Windows@3@@Z 0000000140009f41     TestRuntimeClass.obj
+ 0002:00002f41       $stateUnwindMap$?to_hresult@winrt@@YA?AUhresult@1@XZ 0000000140009f41     TestRuntimeClass.obj
+ 0002:00002f41       $stateUnwindMap$??2@YAPEAX_KAEBUnothrow_t@std@@@Z 0000000140009f41     MSVCRTD:new_scalar_nothrow.obj
+ 0002:00002f44       $tryMap$?NonDelegatingGetTrustLevel@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAW4TrustLevel@Foundation@Windows@3@@Z 0000000140009f44     TestRuntimeClass.obj
+ 0002:00002f4c       $handlerMap$?NonDelegatingGetTrustLevel@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAW4TrustLevel@Foundation@Windows@3@@Z 0000000140009f4c     TestRuntimeClass.obj
+ 0002:00002f54       $unwind$?NonDelegatingGetRuntimeClassName@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAPEAX@Z 0000000140009f54     TestRuntimeClass.obj
+ 0002:00002f68       $cppxdata$?NonDelegatingGetRuntimeClassName@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAPEAX@Z 0000000140009f68     TestRuntimeClass.obj
+ 0002:00002f75       $tryMap$?NonDelegatingGetRuntimeClassName@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAPEAX@Z 0000000140009f75     TestRuntimeClass.obj
+ 0002:00002f7d       $handlerMap$?NonDelegatingGetRuntimeClassName@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAPEAX@Z 0000000140009f7d     TestRuntimeClass.obj
+ 0002:00002f85       $ip2state$?NonDelegatingGetRuntimeClassName@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@IEAAHPEAPEAX@Z 0000000140009f85     TestRuntimeClass.obj
+ 0002:00002f8c       $unwind$?make_weak_ref@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@AEAAPEAUIWeakReferenceSource@23@XZ 0000000140009f8c     TestRuntimeClass.obj
+ 0002:00002fa8       $cppxdata$?make_weak_ref@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@AEAAPEAUIWeakReferenceSource@23@XZ 0000000140009fa8     TestRuntimeClass.obj
+ 0002:00002fad       $ip2state$?make_weak_ref@?$root_implements@UTestRuntimeClass@implementation@MyProject@winrt@@U134@@impl@winrt@@AEAAPEAUIWeakReferenceSource@23@XZ 0000000140009fad     TestRuntimeClass.obj
+ 0002:00002fb0       $unwind$??$copy@PEBUguid@winrt@@PEAU12@@std@@YAPEAUguid@winrt@@PEBU12@0PEAU12@@Z 0000000140009fb0     TestRuntimeClass.obj
+ 0002:00002fbc       $unwind$?GetMarshalSizeMax@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHAEBUguid@4@PEAXI3IPEAI@Z 0000000140009fbc     TestRuntimeClass.obj
+ 0002:00002fbc       $unwind$?GetUnmarshalClass@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHAEBUguid@4@PEAXI3IPEAU74@@Z 0000000140009fbc     TestRuntimeClass.obj
+ 0002:00002fbc       $unwind$?MarshalInterface@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHPEAXAEBUguid@4@2I2I@Z 0000000140009fbc     TestRuntimeClass.obj
+ 0002:00002fd8       $cppxdata$?GetMarshalSizeMax@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHAEBUguid@4@PEAXI3IPEAI@Z 0000000140009fd8     TestRuntimeClass.obj
+ 0002:00002fd8       $cppxdata$?GetUnmarshalClass@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHAEBUguid@4@PEAXI3IPEAU74@@Z 0000000140009fd8     TestRuntimeClass.obj
+ 0002:00002fd8       $cppxdata$?MarshalInterface@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHPEAXAEBUguid@4@2I2I@Z 0000000140009fd8     TestRuntimeClass.obj
+ 0002:00002fd8       $cppxdata$?UnmarshalInterface@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHPEAXAEBUguid@4@1@Z 0000000140009fd8     TestRuntimeClass.obj
+ 0002:00002fdd       $ip2state$?GetMarshalSizeMax@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHAEBUguid@4@PEAXI3IPEAI@Z 0000000140009fdd     TestRuntimeClass.obj
+ 0002:00002fdd       $ip2state$?GetUnmarshalClass@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHAEBUguid@4@PEAXI3IPEAU74@@Z 0000000140009fdd     TestRuntimeClass.obj
+ 0002:00002fdd       $ip2state$?MarshalInterface@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHPEAXAEBUguid@4@2I2I@Z 0000000140009fdd     TestRuntimeClass.obj
+ 0002:00002fdd       $ip2state$?UnmarshalInterface@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHPEAXAEBUguid@4@1@Z 0000000140009fdd     TestRuntimeClass.obj
+ 0002:00002fe0       $unwind$?UnmarshalInterface@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHPEAXAEBUguid@4@1@Z 0000000140009fe0     TestRuntimeClass.obj
+ 0002:00002ffc       $unwind$?DisconnectObject@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHI@Z 0000000140009ffc     TestRuntimeClass.obj
+ 0002:00003010       $cppxdata$?DisconnectObject@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHI@Z 000000014000a010     TestRuntimeClass.obj
+ 0002:00003015       $ip2state$?DisconnectObject@marshaler@?1??make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@34@PEAPEAX@Z@UEAAHI@Z 000000014000a015     TestRuntimeClass.obj
+ 0002:00003018       $unwind$?make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@12@PEAPEAX@Z 000000014000a018     TestRuntimeClass.obj
+ 0002:0000303c       $cppxdata$?make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@12@PEAPEAX@Z 000000014000a03c     TestRuntimeClass.obj
+ 0002:00003041       $ip2state$?make_marshaler@impl@winrt@@YAHPEAUtype@?$abi@UIUnknown@Foundation@Windows@winrt@@X@12@PEAPEAX@Z 000000014000a041     TestRuntimeClass.obj
+ 0002:00003044       $unwind$?to_abi@hresult_error@winrt@@QEBA?AUhresult@2@XZ 000000014000a044     TestRuntimeClass.obj
+ 0002:00003060       $unwind$?to_hresult@winrt@@YA?AUhresult@1@XZ 000000014000a060     TestRuntimeClass.obj
+ 0002:00003074       $cppxdata$?to_hresult@winrt@@YA?AUhresult@1@XZ 000000014000a074     TestRuntimeClass.obj
+ 0002:00003081       $tryMap$?to_hresult@winrt@@YA?AUhresult@1@XZ 000000014000a081     TestRuntimeClass.obj
+ 0002:00003089       $handlerMap$?to_hresult@winrt@@YA?AUhresult@1@XZ 000000014000a089     TestRuntimeClass.obj
+ 0002:000030c5       $ip2state$?to_hresult@winrt@@YA?AUhresult@1@XZ 000000014000a0c5     TestRuntimeClass.obj
+ 0002:000030cc       $unwind$?catch$134@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 000000014000a0cc     TestRuntimeClass.obj
+ 0002:000030cc       $unwind$?catch$135@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 000000014000a0cc     TestRuntimeClass.obj
+ 0002:000030dc       $cppxdata$?catch$134@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 000000014000a0dc     TestRuntimeClass.obj
+ 0002:000030dc       $cppxdata$?catch$135@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 000000014000a0dc     TestRuntimeClass.obj
+ 0002:000030e8       $unwind$?catch$136@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 000000014000a0e8     TestRuntimeClass.obj
+ 0002:000030e8       $unwind$?catch$137@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 000000014000a0e8     TestRuntimeClass.obj
+ 0002:000030e8       $unwind$?catch$138@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 000000014000a0e8     TestRuntimeClass.obj
+ 0002:00003100       $cppxdata$?catch$136@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 000000014000a100     TestRuntimeClass.obj
+ 0002:00003100       $cppxdata$?catch$137@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 000000014000a100     TestRuntimeClass.obj
+ 0002:00003100       $cppxdata$?catch$138@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 000000014000a100     TestRuntimeClass.obj
+ 0002:0000310a       $ip2state$?catch$136@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 000000014000a10a     TestRuntimeClass.obj
+ 0002:0000310a       $ip2state$?catch$137@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 000000014000a10a     TestRuntimeClass.obj
+ 0002:0000310a       $ip2state$?catch$138@?0??to_hresult@winrt@@YA?AUhresult@1@XZ@4HA 000000014000a10a     TestRuntimeClass.obj
+ 0002:00003110       $xdatasym                  000000014000a110     MSVCRTD:amdsecgs.obj
+ 0002:00003114       $unwind$??_Gtype_info@@UEAAPEAXI@Z 000000014000a114     MSVCRTD:std_type_info_static.obj
+ 0002:0000311c       $unwind$??3@YAXPEAX_K@Z    000000014000a11c     MSVCRTD:delete_scalar_size.obj
+ 0002:00003124       $unwind$??2@YAPEAX_KAEBUnothrow_t@std@@@Z 000000014000a124     MSVCRTD:new_scalar_nothrow.obj
+ 0002:00003134       $cppxdata$??2@YAPEAX_KAEBUnothrow_t@std@@@Z 000000014000a134     MSVCRTD:new_scalar_nothrow.obj
+ 0002:00003141       $tryMap$??2@YAPEAX_KAEBUnothrow_t@std@@@Z 000000014000a141     MSVCRTD:new_scalar_nothrow.obj
+ 0002:00003149       $handlerMap$??2@YAPEAX_KAEBUnothrow_t@std@@@Z 000000014000a149     MSVCRTD:new_scalar_nothrow.obj
+ 0002:00003150       $ip2state$??2@YAPEAX_KAEBUnothrow_t@std@@@Z 000000014000a150     MSVCRTD:new_scalar_nothrow.obj
+ 0002:0000315c       $unwind$?catch$0@?0???2@YAPEAX_KAEBUnothrow_t@std@@@Z@4HA 000000014000a15c     MSVCRTD:new_scalar_nothrow.obj
+ 0002:0000316c       $cppxdata$?catch$0@?0???2@YAPEAX_KAEBUnothrow_t@std@@@Z@4HA 000000014000a16c     MSVCRTD:new_scalar_nothrow.obj
+ 0002:00003176       $ip2state$?catch$0@?0???2@YAPEAX_KAEBUnothrow_t@std@@@Z@4HA 000000014000a176     MSVCRTD:new_scalar_nothrow.obj
+ 0002:00003180       $unwind$__CheckForDebuggerJustMyCode 000000014000a180     MSVCRTD:debugger_jmc.obj
+ 0002:00003180       $unwind$__report_gsfailure 000000014000a180     MSVCRTD:gs_report.obj
+ 0002:00003180       $unwind$??2@YAPEAX_K@Z     000000014000a180     MSVCRTD:new_scalar.obj
+ 0002:00003180       $unwind$atexit             000000014000a180     MSVCRTD:utility.obj
+ 0002:00003180       $unwind$__scrt_unhandled_exception_filter 000000014000a180     MSVCRTD:utility_desktop.obj
+ 0002:00003188       $unwind$__scrt_initialize_default_local_stdio_options 000000014000a188     MSVCRTD:default_local_stdio_options.obj
+ 0002:00003188       $unwind$?set_commode@__scrt_file_policy@@SAXXZ 000000014000a188     MSVCRTD:exe_main.obj
+ 0002:00003188       $unwind$__security_init_cookie 000000014000a188     MSVCRTD:gs_support.obj
+ 0002:00003188       $unwind$__scrt_is_managed_app 000000014000a188     MSVCRTD:utility_desktop.obj
+ 0002:00003190       $unwind$?__scrt_common_main_seh@@YAHXZ 000000014000a190     MSVCRTD:exe_main.obj
+ 0002:000031b0       $unwind$?filt$0@?0??__scrt_common_main_seh@@YAHXZ@4HA 000000014000a1b0     MSVCRTD:exe_main.obj
+ 0002:000031b0       $unwind$__scrt_is_nonwritable_in_current_image$filt$0 000000014000a1b0     MSVCRTD:utility.obj
+ 0002:000031b8       $unwind$capture_previous_context 000000014000a1b8     MSVCRTD:gs_report.obj
+ 0002:000031c0       $unwind$??3@YAXPEAX@Z      000000014000a1c0     MSVCRTD:delete_scalar.obj
+ 0002:000031c0       $unwind$__raise_securityfailure 000000014000a1c0     MSVCRTD:gs_report.obj
+ 0002:000031c0       $unwind$?is_potentially_valid_image_base@@YA_NQEAX@Z 000000014000a1c0     MSVCRTD:utility.obj
+ 0002:000031c8       $unwind$_onexit            000000014000a1c8     MSVCRTD:utility.obj
+ 0002:000031d0       $unwind$__scrt_is_nonwritable_in_current_image 000000014000a1d0     MSVCRTD:utility.obj
+ 0002:000031f0       $unwind$__scrt_initialize_crt 000000014000a1f0     MSVCRTD:utility.obj
+ 0002:000031f0       $unwind$__scrt_release_startup_lock 000000014000a1f0     MSVCRTD:utility.obj
+ 0002:000031f8       $unwind$__scrt_uninitialize_crt 000000014000a1f8     MSVCRTD:utility.obj
+ 0002:00003200       $unwind$__scrt_initialize_onexit_tables 000000014000a200     MSVCRTD:utility.obj
+ 0002:0000320c       $unwind$?find_pe_section@@YAPEAU_IMAGE_SECTION_HEADER@@QEAE_K@Z 000000014000a20c     MSVCRTD:utility.obj
+ 0002:00003214       $unwind$__get_entropy      000000014000a214     MSVCRTD:gs_support.obj
+ 0002:0000321c       $unwind$__scrt_is_user_matherr_present 000000014000a21c     MSVCRTD:matherr_detection.obj
+ 0002:0000321c       $unwind$__scrt_is_ucrt_dll_in_use 000000014000a21c     MSVCRTD:ucrt_detection.obj
+ 0002:00003224       $unwind$__scrt_fastfail    000000014000a224     MSVCRTD:utility_desktop.obj
+ 0002:00003230       $unwind$__isa_available_init 000000014000a230     MSVCRTD:cpu_disp.obj
+ 0002:00003240       $xdatasym                  000000014000a240     MSVCRTD:guard_dispatch.obj
+ 0002:00003248       $xdatasym                  000000014000a248     MSVCRTD:guard_xfg_dispatch.obj
+ 0002:0000324c       $unwind$__GSHandlerCheckCommon 000000014000a24c     MSVCRTD:gshandler.obj
+ 0002:00003254       $unwind$__GSHandlerCheck   000000014000a254     MSVCRTD:gshandler.obj
+ 0002:0000325c       $unwind$__GSHandlerCheck_EH4 000000014000a25c     MSVCRTD:gshandlereh4.obj
+ 0002:00003ce8       .idata$6                   000000014000ace8     msvcprtd:MSVCP140D.dll
+ 0002:00003db2       .idata$6                   000000014000adb2     vcruntimed:VCRUNTIME140_1D.dll
+ 0002:00003dc6       .idata$6                   000000014000adc6     vcruntimed:VCRUNTIME140D.dll
+ 0002:0000404a       .idata$6                   000000014000b04a     ucrtd:ucrtbased.dll
+ 0002:000041b6       .idata$6                   000000014000b1b6     kernel32:KERNEL32.dll
+ 0002:000042c6       .idata$6                   000000014000b2c6     WindowsApp:OLEAUT32.dll
+ 0002:000042d4       .idata$6                   000000014000b2d4     WindowsApp:api-ms-win-core-com-l1-1-0.dll
+ 0003:00000de0       GS_ExceptionRecord         000000014000cde0     MSVCRTD:gs_report.obj
+ 0003:00000e80       GS_ContextRecord           000000014000ce80     MSVCRTD:gs_report.obj
+ 0003:00001360       ?is_initialized_as_dll@@3_NA 000000014000d360     MSVCRTD:utility.obj
+ 0003:00001361       ?module_local_atexit_table_initialized@@3_NA 000000014000d361     MSVCRTD:utility.obj
+ 0003:00001368       ?module_local_atexit_table@@3U_onexit_table_t@@A 000000014000d368     MSVCRTD:utility.obj
+ 0003:00001380       ?module_local_at_quick_exit_table@@3U_onexit_table_t@@A 000000014000d380     MSVCRTD:utility.obj
+ 0005:00000000       __40A0E6E6_pch@h           000000014000f000     main.obj
+ 0005:00000001       __E216D43F_pch@pch         000000014000f001     main.obj
+ 0005:00000002       __36E77527_xutility        000000014000f002     main.obj
+ 0005:00000003       __E2008001_TestRuntimeClass@h 000000014000f003     main.obj
+ 0005:00000004       __21F8C8DC_array           000000014000f004     main.obj
+ 0005:00000005       __421B3AB3_MyProject@TestRuntimeClass@g@h 000000014000f005     main.obj
+ 0005:00000006       __6DFAE8B8_stdio@h         000000014000f006     main.obj
+ 0005:00000007       __A2143F22_corecrt_stdio_config@h 000000014000f007     main.obj
+ 0005:00000008       __3222B4AC_pch@cpp         000000014000f008     main.obj
+ 0005:00000009       __5E219BC0_limits          000000014000f009     main.obj
+ 0005:0000000a       __93DC0B45_wchar@h         000000014000f00a     main.obj
+ 0005:0000000b       __0C99713E_xmemory         000000014000f00b     main.obj
+ 0005:0000000c       __FC8B975D_vcruntime_new@h 000000014000f00c     main.obj
+ 0005:0000000d       __911385EF_xstddef         000000014000f00d     main.obj
+ 0005:0000000e       __B236D4B0_type_traits     000000014000f00e     main.obj
+ 0005:0000000f       __784AF7A2_xstring         000000014000f00f     main.obj
+ 0005:00000010       __FA5F0309_Windows@Foundation@1@h 000000014000f010     main.obj
+ 0005:00000011       __F819BD50_Windows@Foundation@2@h 000000014000f011     main.obj
+ 0005:00000012       __1BC79FBD_main@cpp        000000014000f012     main.obj
+ 0005:00000013       __C5AA2B9E_MyProject@h     000000014000f013     main.obj
+ 0005:00000014       __9A4C86E5_stdexcept       000000014000f014     main.obj
+ 0005:00000015       __E3AEEED2_WindowsNumerics@inl 000000014000f015     main.obj
+ 0005:00000016       __1302BCB8_exception       000000014000f016     main.obj
+ 0005:00000017       __18D87206_vcruntime_exception@h 000000014000f017     main.obj
+ 0005:00000018       __1FEB9909_corecrt_memcpy_s@h 000000014000f018     main.obj
+ 0005:00000019       __190E306E_xatomic@h       000000014000f019     main.obj
+ 0005:0000001a       __3514C702_atomic          000000014000f01a     main.obj
+ 0005:0000001b       __1B820B1A_Windows@Foundation@h 000000014000f01b     main.obj
+ 0005:0000001c       __7623DC84_MyProject@2@h   000000014000f01c     main.obj
+ 0005:0000001d       __0F04070D_base@h          000000014000f01d     main.obj
+ 0005:0000001e       __660C12FD_utility         000000014000f01e     main.obj
+ 0005:0000001f       __746562DD_MyProject@1@h   000000014000f01f     main.obj
+ 0005:00000020       __E216D43F_pch@pch         000000014000f020     pch.obj
+ 0005:00000021       __FC8B975D_vcruntime_new@h 000000014000f021     pch.obj
+ 0005:00000022       __741AE07E_corecrt_math@h  000000014000f022     pch.obj
+ 0005:00000023       __B49664B7_stdlib@h        000000014000f023     pch.obj
+ 0005:00000024       __51019776_cstdlib         000000014000f024     pch.obj
+ 0005:00000025       __A2143F22_corecrt_stdio_config@h 000000014000f025     pch.obj
+ 0005:00000026       __829E1958_corecrt_wstdio@h 000000014000f026     pch.obj
+ 0005:00000027       __6DFAE8B8_stdio@h         000000014000f027     pch.obj
+ 0005:00000028       __1FEB9909_corecrt_memcpy_s@h 000000014000f028     pch.obj
+ 0005:00000029       __C6E16F6F_corecrt_wconio@h 000000014000f029     pch.obj
+ 0005:0000002a       __6D390390_corecrt_wio@h   000000014000f02a     pch.obj
+ 0005:0000002b       __9200769A_corecrt_wstring@h 000000014000f02b     pch.obj
+ 0005:0000002c       __1157D6BA_corecrt_wtime@h 000000014000f02c     pch.obj
+ 0005:0000002d       __1DC1E279_stat@h          000000014000f02d     pch.obj
+ 0005:0000002e       __93DC0B45_wchar@h         000000014000f02e     pch.obj
+ 0005:0000002f       __F4CA4DDB_cstddef         000000014000f02f     pch.obj
+ 0005:00000030       __5E219BC0_limits          000000014000f030     pch.obj
+ 0005:00000031       __B236D4B0_type_traits     000000014000f031     pch.obj
+ 0005:00000032       __20BB4341_malloc@h        000000014000f032     pch.obj
+ 0005:00000033       __18D87206_vcruntime_exception@h 000000014000f033     pch.obj
+ 0005:00000034       __1302BCB8_exception       000000014000f034     pch.obj
+ 0005:00000035       __A751F051_corecrt_memory@h 000000014000f035     pch.obj
+ 0005:00000036       __32E5F013_string@h        000000014000f036     pch.obj
+ 0005:00000037       __36E77527_xutility        000000014000f037     pch.obj
+ 0005:00000038       __0C99713E_xmemory         000000014000f038     pch.obj
+ 0005:00000039       __F9CEFE6C_algorithm       000000014000f039     pch.obj
+ 0005:0000003a       __3514C702_atomic          000000014000f03a     pch.obj
+ 0005:0000003b       __B61308A0_xcharconv@h     000000014000f03b     pch.obj
+ 0005:0000003c       __E6D8EB3A_xcharconv_ryu@h 000000014000f03c     pch.obj
+ 0005:0000003d       __660C12FD_utility         000000014000f03d     pch.obj
+ 0005:0000003e       __29681B41_charconv        000000014000f03e     pch.obj
+ 0005:0000003f       __7C949E14_ratio           000000014000f03f     pch.obj
+ 0005:00000040       __A0B61CF9_time@h          000000014000f040     pch.obj
+ 0005:00000041       __3ACC9D4A_chrono          000000014000f041     pch.obj
+ 0005:00000042       __B6041EFB_tuple           000000014000f042     pch.obj
+ 0005:00000043       __190EFBB8_xtree           000000014000f043     pch.obj
+ 0005:00000044       __04937CFC_xpolymorphic_allocator@h 000000014000f044     pch.obj
+ 0005:00000045       __7B3ADE64_vcruntime_typeinfo@h 000000014000f045     pch.obj
+ 0005:00000046       __4638863E_typeinfo        000000014000f046     pch.obj
+ 0005:00000047       __E28F974E_memory          000000014000f047     pch.obj
+ 0005:00000048       __5F33D926_optional        000000014000f048     pch.obj
+ 0005:00000049       __784AF7A2_xstring         000000014000f049     pch.obj
+ 0005:0000004a       __9A4C86E5_stdexcept       000000014000f04a     pch.obj
+ 0005:0000004b       __B2D2BA86_ctype@h         000000014000f04b     pch.obj
+ 0005:0000004c       __965C11D2_string          000000014000f04c     pch.obj
+ 0005:0000004d       __A183D124_xthreads@h      000000014000f04d     pch.obj
+ 0005:0000004e       __39C2EFF8_thread          000000014000f04e     pch.obj
+ 0005:0000004f       __102707BA_cmath           000000014000f04f     pch.obj
+ 0005:00000050       __14898519_xbit_ops@h      000000014000f050     pch.obj
+ 0005:00000051       __7F88C7DC_xhash           000000014000f051     pch.obj
+ 0005:00000052       __5BA31C28_DirectXMathConvert@inl 000000014000f052     pch.obj
+ 0005:00000053       __F4305117_DirectXMathVector@inl 000000014000f053     pch.obj
+ 0005:00000054       __FFD58CB0_DirectXMathMatrix@inl 000000014000f054     pch.obj
+ 0005:00000055       __6E26B7A1_DirectXMathMisc@inl 000000014000f055     pch.obj
+ 0005:00000056       __3709A89F_directxmath@h   000000014000f056     pch.obj
+ 0005:00000057       __49FDC024_resumable       000000014000f057     pch.obj
+ 0005:00000058       __E3AEEED2_WindowsNumerics@inl 000000014000f058     pch.obj
+ 0005:00000059       __2B52F1C5_WindowsNumerics@impl@h 000000014000f059     pch.obj
+ 0005:0000005a       __21F8C8DC_array           000000014000f05a     pch.obj
+ 0005:0000005b       __0F04070D_base@h          000000014000f05b     pch.obj
+ 0005:0000005c       __75E12D61_Windows@Foundation@Collections@1@h 000000014000f05c     pch.obj
+ 0005:0000005d       __77A79338_Windows@Foundation@Collections@2@h 000000014000f05d     pch.obj
+ 0005:0000005e       __FA5F0309_Windows@Foundation@1@h 000000014000f05e     pch.obj
+ 0005:0000005f       __F819BD50_Windows@Foundation@2@h 000000014000f05f     pch.obj
+ 0005:00000060       __1B820B1A_Windows@Foundation@h 000000014000f060     pch.obj
+ 0005:00000061       __3701FF9D_Windows@Foundation@Collections@h 000000014000f061     pch.obj
+ 0005:00000062       __911385EF_xstddef         000000014000f062     pch.obj
+ 0005:00000063       __5F9BC604_initializer_list 000000014000f063     pch.obj
+ 0005:00000064       __190E306E_xatomic@h       000000014000f064     pch.obj
+ 0005:00000065       __3222B4AC_pch@cpp         000000014000f065     pch.obj
+ 0005:00000066       __40A0E6E6_pch@h           000000014000f066     TestRuntimeClass.obj
+ 0005:00000067       __E216D43F_pch@pch         000000014000f067     TestRuntimeClass.obj
+ 0005:00000068       __911385EF_xstddef         000000014000f068     TestRuntimeClass.obj
+ 0005:00000069       __36E77527_xutility        000000014000f069     TestRuntimeClass.obj
+ 0005:0000006a       __B236D4B0_type_traits     000000014000f06a     TestRuntimeClass.obj
+ 0005:0000006b       __C5AA2B9E_MyProject@h     000000014000f06b     TestRuntimeClass.obj
+ 0005:0000006c       __3222B4AC_pch@cpp         000000014000f06c     TestRuntimeClass.obj
+ 0005:0000006d       __21F8C8DC_array           000000014000f06d     TestRuntimeClass.obj
+ 0005:0000006e       __784AF7A2_xstring         000000014000f06e     TestRuntimeClass.obj
+ 0005:0000006f       __421B3AB3_MyProject@TestRuntimeClass@g@h 000000014000f06f     TestRuntimeClass.obj
+ 0005:00000070       __9A4C86E5_stdexcept       000000014000f070     TestRuntimeClass.obj
+ 0005:00000071       __E3AEEED2_WindowsNumerics@inl 000000014000f071     TestRuntimeClass.obj
+ 0005:00000072       __1302BCB8_exception       000000014000f072     TestRuntimeClass.obj
+ 0005:00000073       __18D87206_vcruntime_exception@h 000000014000f073     TestRuntimeClass.obj
+ 0005:00000074       __1FEB9909_corecrt_memcpy_s@h 000000014000f074     TestRuntimeClass.obj
+ 0005:00000075       __87CCB74A_TestRuntimeClass@cpp 000000014000f075     TestRuntimeClass.obj
+ 0005:00000076       __190E306E_xatomic@h       000000014000f076     TestRuntimeClass.obj
+ 0005:00000077       __3514C702_atomic          000000014000f077     TestRuntimeClass.obj
+ 0005:00000078       __E2008001_TestRuntimeClass@h 000000014000f078     TestRuntimeClass.obj
+ 0005:00000079       __7A8B81F9_MyProject@TestRuntimeClass@g@cpp 000000014000f079     TestRuntimeClass.obj
+ 0005:0000007a       __3701FF9D_Windows@Foundation@Collections@h 000000014000f07a     TestRuntimeClass.obj
+ 0005:0000007b       __7623DC84_MyProject@2@h   000000014000f07b     TestRuntimeClass.obj
+ 0005:0000007c       __0F04070D_base@h          000000014000f07c     TestRuntimeClass.obj
+ 0005:0000007d       __660C12FD_utility         000000014000f07d     TestRuntimeClass.obj
+ 0005:0000007e       __746562DD_MyProject@1@h   000000014000f07e     TestRuntimeClass.obj
+ 0006:00000060       $R000000                   0000000140010060     * linker generated manifest res *
+
+ Exports
+
+  ordinal    name
+

@@ -77,7 +77,9 @@ StyleCopReport.xml
 *.obj
 *.iobj
 *.pch
-*.pdb
+#*.pdb
+!src/TestPEs/*.pdb
+!src/TestPEs/External/x64/*.pdb
 *.ipdb
 *.pgc
 *.pgd

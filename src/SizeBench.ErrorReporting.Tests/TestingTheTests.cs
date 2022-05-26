@@ -5,8 +5,7 @@ namespace SizeBench.ErrorReporting.Tests;
 [TestClass]
 public sealed class TestingTheTests
 {
-    // Yo dawg, I heard you like testing, so now I'm gonna test your tests.
-    // But for real, this is a protection against some stupid mistakes made in testing in the past where test classes were marked as "internal"
+    // This is a protection against some mistakes made in testing in the past where test classes were marked as "internal"
     // which silently prevents them from running in MSTest.  It's never expected that someone would go to the work of writing a test class only
     // to have it not run - so if we find any tests marked as internal, fail this test to signal that there's problems elsewhere.
 

@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IncludeDbgXAssets>true</IncludeDbgXAssets>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Castle.Windsor" Version="5.1.1" />
+    <PackageReference Include="Microsoft.Debugging.DataModel.DbgModelApiXtn" Version="20220505.1011.0" />
+    <PackageReference Include="Microsoft.Debugging.Platform.DbgX" Version="20220510.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SizeBench.AsyncInfrastructure\SizeBench.AsyncInfrastructure.csproj" />
+    <ProjectReference Include="..\SizeBench.Logging\SizeBench.Logging.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Dia2Lib">
+      <HintPath>..\ExternalDependencies\DIA\Dia2Lib.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  
+  <PropertyGroup>
+    <!-- NuGet publishing needs more work before it's ready, commenting this out for now. -->
+    <!--<NuspecFile>SizeBench.AnalysisEngine.nuspec</NuspecFile>-->
+    <NuspecProperties>$(NuspecProperties);version=$(PackageVersion)$(VersionSuffix)</NuspecProperties>
+  </PropertyGroup>
+  
+</Project>

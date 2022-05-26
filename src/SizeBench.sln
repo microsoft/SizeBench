@@ -144,6 +144,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SizeBenchV2.AnalysisEngine.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SizeBenchV2.AnalysisEngine.Tests.ForceIntegrityBit", "TestPEProjects\SizeBenchV2.AnalysisEngine.Tests.ForceIntegrityBit\SizeBenchV2.AnalysisEngine.Tests.ForceIntegrityBit.vcxproj", "{AE50A1BE-117A-465A-B782-2BCEBB6074C7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SizeBench.AnalysisEngine", "SizeBench.AnalysisEngine\SizeBench.AnalysisEngine.csproj", "{486D1119-0570-4551-BAD3-CB4C7A03A7C1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SizeBench.AnalysisEngine.Tests", "SizeBench.AnalysisEngine.Tests\SizeBench.AnalysisEngine.Tests.csproj", "{C6030731-9CC2-4FE0-B2BB-C7F62C0E46BD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SizeBench.TestDataCommon", "SizeBench.TestDataCommon\SizeBench.TestDataCommon.csproj", "{1B091758-7467-4B4C-A31B-466BEE413624}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SizeBench.AnalysisEngine.RealPETests", "SizeBench.AnalysisEngine.RealPETests\SizeBench.AnalysisEngine.RealPETests.csproj", "{F17FD7D7-4E57-4499-99AB-45C5C9B6ED94}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -220,6 +228,22 @@ Global
 		{FFC2E6D1-26DE-43E6-AC0F-4A0DCDBC1549}.Release|x64.ActiveCfg = Debug|x64
 		{AE50A1BE-117A-465A-B782-2BCEBB6074C7}.Debug|x64.ActiveCfg = Debug|x64
 		{AE50A1BE-117A-465A-B782-2BCEBB6074C7}.Release|x64.ActiveCfg = Debug|x64
+		{486D1119-0570-4551-BAD3-CB4C7A03A7C1}.Debug|x64.ActiveCfg = Debug|x64
+		{486D1119-0570-4551-BAD3-CB4C7A03A7C1}.Debug|x64.Build.0 = Debug|x64
+		{486D1119-0570-4551-BAD3-CB4C7A03A7C1}.Release|x64.ActiveCfg = Release|x64
+		{486D1119-0570-4551-BAD3-CB4C7A03A7C1}.Release|x64.Build.0 = Release|x64
+		{C6030731-9CC2-4FE0-B2BB-C7F62C0E46BD}.Debug|x64.ActiveCfg = Debug|x64
+		{C6030731-9CC2-4FE0-B2BB-C7F62C0E46BD}.Debug|x64.Build.0 = Debug|x64
+		{C6030731-9CC2-4FE0-B2BB-C7F62C0E46BD}.Release|x64.ActiveCfg = Release|x64
+		{C6030731-9CC2-4FE0-B2BB-C7F62C0E46BD}.Release|x64.Build.0 = Release|x64
+		{1B091758-7467-4B4C-A31B-466BEE413624}.Debug|x64.ActiveCfg = Debug|x64
+		{1B091758-7467-4B4C-A31B-466BEE413624}.Debug|x64.Build.0 = Debug|x64
+		{1B091758-7467-4B4C-A31B-466BEE413624}.Release|x64.ActiveCfg = Release|x64
+		{1B091758-7467-4B4C-A31B-466BEE413624}.Release|x64.Build.0 = Release|x64
+		{F17FD7D7-4E57-4499-99AB-45C5C9B6ED94}.Debug|x64.ActiveCfg = Debug|x64
+		{F17FD7D7-4E57-4499-99AB-45C5C9B6ED94}.Debug|x64.Build.0 = Debug|x64
+		{F17FD7D7-4E57-4499-99AB-45C5C9B6ED94}.Release|x64.ActiveCfg = Release|x64
+		{F17FD7D7-4E57-4499-99AB-45C5C9B6ED94}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -256,6 +280,10 @@ Global
 		{48C85EF3-56E1-4E53-9AC9-00753AA506E7} = {DCE07710-61B5-4730-BF3D-1488D637807D}
 		{FFC2E6D1-26DE-43E6-AC0F-4A0DCDBC1549} = {DCE07710-61B5-4730-BF3D-1488D637807D}
 		{AE50A1BE-117A-465A-B782-2BCEBB6074C7} = {DCE07710-61B5-4730-BF3D-1488D637807D}
+		{486D1119-0570-4551-BAD3-CB4C7A03A7C1} = {91DD9AE7-E9BE-4382-BF3B-797418B4907D}
+		{C6030731-9CC2-4FE0-B2BB-C7F62C0E46BD} = {91DD9AE7-E9BE-4382-BF3B-797418B4907D}
+		{1B091758-7467-4B4C-A31B-466BEE413624} = {5E7F622A-2164-45BD-94F2-682AD964C057}
+		{F17FD7D7-4E57-4499-99AB-45C5C9B6ED94} = {91DD9AE7-E9BE-4382-BF3B-797418B4907D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {936F9790-BC54-416C-9C26-BB58BA16D33E}

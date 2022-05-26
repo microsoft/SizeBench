@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <SizeBenchTestCode>true</SizeBenchTestCode>
+        <IncludeDbgXAssets>true</IncludeDbgXAssets>
+        <UseWPF>true</UseWPF>
+
+        <!-- We want this assembly to produce a separate PDB file since one of the tests tries to load this managed 
+         assembly/pdb to verify managed assemblies are not supported, so it needs a real PDB file on-disk. -->
+        <DebugType>portable</DebugType>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Content Include="..\TestPEs\**\*">
+            <Link>Test PEs\%(RecursiveDir)%(Filename)%(Extension)</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Include="Single Binary\Disassemblies\*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Castle.Windsor" Version="5.1.1" />
+        <PackageReference Include="Microsoft.Debugging.DataModel.DbgModelApiXtn" Version="20220505.1011.0" />
+        <PackageReference Include="Microsoft.Debugging.Platform.DbgX" Version="20220510.3.0" />
+        <PackageReference Include="Nito.AsyncEx" Version="5.1.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\SizeBench.AnalysisEngine\SizeBench.AnalysisEngine.csproj" />
+        <ProjectReference Include="..\SizeBench.Logging\SizeBench.Logging.csproj" />
+        <ProjectReference Include="..\SizeBench.TestDataCommon\SizeBench.TestDataCommon.csproj" />
+        <ProjectReference Include="..\SizeBench.TestInfrastructure\SizeBench.TestInfrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="Dia2Lib">
+            <HintPath>..\ExternalDependencies\DIA\Dia2Lib.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+</Project>

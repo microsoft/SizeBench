@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <SizeBenchTestCode>true</SizeBenchTestCode>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Castle.Windsor" Version="5.1.1" />
+        <PackageReference Include="Microsoft.Debugging.DataModel.DbgModelApiXtn" Version="20220505.1011.0" />
+        <PackageReference Include="Microsoft.Debugging.Platform.DbgX" Version="20220510.3.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\SizeBench.AnalysisEngine\SizeBench.AnalysisEngine.csproj" />
+        <ProjectReference Include="..\SizeBench.Logging\SizeBench.Logging.csproj" />
+        <ProjectReference Include="..\SizeBench.TestDataCommon\SizeBench.TestDataCommon.csproj" />
+        <ProjectReference Include="..\SizeBench.TestInfrastructure\SizeBench.TestInfrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="Dia2Lib">
+            <HintPath>..\ExternalDependencies\DIA\Dia2Lib.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+</Project>

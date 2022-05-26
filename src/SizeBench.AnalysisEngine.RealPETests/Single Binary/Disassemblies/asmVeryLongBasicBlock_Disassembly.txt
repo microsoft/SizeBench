@@ -1,0 +1,106 @@
+﻿prefetchw   [rcx]
+
+asmVeryLongBasicBlock+0x3 [C:\Users\austi\source\repos\SizeBench-NetCore\TestPEProjects\SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore\LongBasicBlockTest.asm @ 13]:
+push        rbx
+mov         eax,7
+add         eax,8
+lock inc    dword ptr [eax+4]
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+
+asmVeryLongBasicBlock+0xE3 [C:\Users\austi\source\repos\SizeBench-NetCore\TestPEProjects\SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore\LongBasicBlockTest.asm @ 101]:
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+add         eax,8
+lock cmpxchg16b oword ptr [r10]
+jne         SizeBenchV2_AnalysisEngine_Tests_CppTestCasesBefore!asmVeryLongBasicBlock+0xe3 (1800045a3)
+
+asmVeryLongBasicBlock+0x126 [C:\Users\austi\source\repos\SizeBench-NetCore\TestPEProjects\SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore\LongBasicBlockTest.asm @ 127]:
+mov         rax,r8
+pop         rbx
+ret

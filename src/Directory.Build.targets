@@ -39,6 +39,13 @@
 
 
 
+  <!-- This is all the stuff necessary to use DbgX at runtime, it's needed in multiple projects, so it's centralized here -->
+  <ItemGroup Condition="'$(IncludeDbgXAssets)'=='true'">
+    <Content Include="..\ExternalDependencies\DIA\msdia140.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="$(MicrosoftDebuggingDataModelDbgModelApiXtnPath)\**\*" CopyToOutputDirectory="PreserveNewest" Visible="False" Link="%(RecursiveDir)%(FileName)%(Extension)"/>
+  </ItemGroup>
 
   <!-- Embed the git hash in the assembly informational version -->
   <Target Name="InitializeSourceControlInformation" BeforeTargets="AddSourceRevisionToInformationalVersion">

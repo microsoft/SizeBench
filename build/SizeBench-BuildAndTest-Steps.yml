@@ -86,6 +86,10 @@ steps:
       publishTestResults: true
   
 
+- script: dir /s
+  workingDirectory: $(Agent.BuildDirectory)
+  displayName: 'List build directory contents on failure'
+  condition: failed()
 
 - task: CopyFiles@2
   displayName: 'Copy failure dumps'

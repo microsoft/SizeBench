@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <SizeBenchTestCode>true</SizeBenchTestCode>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SizeBench.AnalysisEngine\SizeBench.AnalysisEngine.csproj" />
+    <ProjectReference Include="..\SizeBench.ExcelExporter\SizeBench.ExcelExporter.csproj" />
+  </ItemGroup>
+
+</Project>

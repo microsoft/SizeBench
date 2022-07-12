@@ -28,6 +28,12 @@
   </PropertyGroup>
   <ItemGroup Condition="'$(SizeBenchTestCode)'=='true' And '$(MSBuildProjectExtension)'=='.csproj'">
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
+    <!--
+      Explicitly depending on a newer version of Newtonsoft.Json, since Microsoft.NET.Test.Sdk depends on Microsoft.TestPlatform.TestHost
+      that in turn depends on a vulnerable Newtonsoft.Json version.
+      It's possible this could be removed when moving to a newer Microsoft.NET.Test.Sdk, leaving the implicit dependency.
+    -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.2.10" />
     <PackageReference Include="MSTest.TestFramework" Version="2.2.10" />
     <PackageReference Include="Moq" Version="4.17.2" />

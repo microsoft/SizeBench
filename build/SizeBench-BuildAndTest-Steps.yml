@@ -66,6 +66,9 @@ steps:
     inputs:
       targetType: inline
       script: |
+        # Make downloads faster by not reporting progress that we can't see in the ADO UI anyway (https://github.com/Azure/powershell/issues/48)
+        $ProgressPreference = 'SilentlyContinue';
+
         # Install Procdump
         Write-Host "Starting ProcDump install to capture test crashes if they happen"
         if (-Not (Test-Path "$(Agent.TempDirectory)\procdump")) {
@@ -87,12 +90,7 @@ steps:
       arguments: '--no-restore --configuration $(buildConfiguration) --blame-crash --settings src\RunSettings.runsettings $(codeCoverageArgs)'
       testRunTitle: 'Tests for $(buildConfiguration)'
       publishTestResults: true
-  
 
-- script: dir /s
-  workingDirectory: $(Agent.BuildDirectory)
-  displayName: 'List build directory contents on failure'
-  condition: failed()
 
 - task: CopyFiles@2
   displayName: 'Copy failure dumps'

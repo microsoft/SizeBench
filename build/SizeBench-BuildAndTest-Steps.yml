@@ -5,6 +5,9 @@ parameters:
   runTests: true
 
 steps:
+- checkout: self
+  lfs: true # We use LFS to store the checked-in PDBs used as test collateral, at least for now
+
 - task: PowerShell@2
   displayName: 'Establish version number'
   inputs:

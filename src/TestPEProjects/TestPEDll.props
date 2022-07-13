@@ -16,7 +16,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)src\TestPEs_Staging\</OutDir>
+    <OutDir>$(SolutionDir)\TestPEs_Staging\</OutDir>
     <IntDir>src\TestPEs\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup>

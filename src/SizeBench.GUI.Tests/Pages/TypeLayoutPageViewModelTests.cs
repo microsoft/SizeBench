@@ -2,11 +2,10 @@
 using SizeBench.AnalysisEngine.DIAInterop;
 using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.ExcelExporter;
-using SizeBench.GUI.Pages;
 using SizeBench.GUI.Core;
 using SizeBench.GUI.Tests;
 
-namespace SizeBenchV2.ViewModels.Tests;
+namespace SizeBench.GUI.Pages.Tests;
 
 [TestClass]
 public sealed class TypeLayoutPageViewModelTests

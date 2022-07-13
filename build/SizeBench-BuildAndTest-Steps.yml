@@ -23,6 +23,22 @@ steps:
       Write-Host Setting versionRelease variable to $versionRelease
       Write-Host "##vso[task.setvariable variable=versionRelease]$versionRelease"
 
+- ${{ if eq(parameters.packageMSIX, true) }}:
+    # Update appxmanifest. This must be done before the build.
+    - task: PowerShell@2
+      displayName: 'Version Package Manifest'
+      inputs:
+        targetType: inline
+        script: |
+          $outputFilename = "$(Agent.TempDirectory)\Package.appxmanifest"
+          $newVersion = "$(versionRelease)"
+          [xml]$manifest = get-content ".\src\SizeBench.GUI.Packaging\Package.appxmanifest"
+          $manifest.Package.Identity.Version = $newVersion
+          Write-Host Setting Package Identity Version to $newVersion
+          $manifest.save($outputFilename)
+          Write-Host "Setting AppxManifestPathOverride to $outputFilename"
+          Write-Host "##vso[task.setvariable variable=AppxManifestPathOverride]$outputFilename"
+
 - task: UseDotNet@2
   displayName: 'Use .NET 6 SDK'
   inputs:
@@ -90,6 +106,27 @@ steps:
       arguments: '--no-restore --configuration $(buildConfiguration) --blame-crash --settings src\RunSettings.runsettings $(codeCoverageArgs)'
       testRunTitle: 'Tests for $(buildConfiguration)'
       publishTestResults: true
+
+
+- ${{ if eq(parameters.packageMSIX, true) }}:
+  - task: MSBuild@1
+    displayName: 'Publish MSIX'
+    condition: and(succeeded(), eq(variables['buildConfiguration'], 'Release'))
+    inputs:
+      solution: src/SizeBench.GUI.Packaging/SizeBench.GUI.Packaging.wapproj
+      msbuildArguments: '/p:AppxPackageDir="$(Build.ArtifactStagingDirectory)\MSIX\$(buildConfiguration)" /p:Version=$(versionRelease) /p:UapAppxPackageBuildMode=StoreAndSideload /p:AppxManifestPathOverride="$(AppxManifestPathOverride)" /bl:logfile="$(Build.ArtifactStagingDirectory)\MSIX\$(buildConfiguration)\wap.binlog"'
+      configuration: $(buildConfiguration)
+      platform: $(buildPlatform)
+      maximumCpuCount: true
+
+  - task: PowerShell@2
+    displayName: 'Check MSIX for common regressions'
+    condition: and(succeeded(), eq(variables['buildConfiguration'], 'Release'))
+    inputs:
+      targetType: inline
+      script: |
+        $Package = Get-ChildItem -Recurse -Path "$(Build.ArtifactStagingDirectory)\MSIX\$(buildConfiguration)" -Filter "SizeBench.GUI*.appx"
+        .\build\Test-SizeBenchPackage.ps1 -Verbose -Path $Package.FullName
 
 
 - task: CopyFiles@2

@@ -13,6 +13,6 @@ name: 'SizeBench_$(versionMajor).$(pipelineYearMonth).$(pipelineDay)_$(revision)
 jobs:
   - template: ./SizeBench-BuildAndTest-Job.yml
     parameters:
-      packageMSIX: false
+      packageMSIX: true
       packageNugets: false
       publishNugets: false

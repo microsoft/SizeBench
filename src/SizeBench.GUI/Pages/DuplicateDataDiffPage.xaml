@@ -1,0 +1,109 @@
+﻿<navigation:SizeBenchPage x:Class="SizeBench.GUI.Pages.DuplicateDataDiffPage"
+                          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                          xmlns:analysisEngine="clr-namespace:SizeBench.AnalysisEngine;assembly=SizeBench.AnalysisEngine"
+                          xmlns:commands="clr-namespace:SizeBench.GUI.Commands"
+                          xmlns:navigation="clr-namespace:SizeBench.GUI.Controls.Navigation"
+                          xmlns:converters="clr-namespace:SizeBench.GUI.Converters"
+                          mc:Ignorable="d" 
+      d:DesignHeight="300" d:DesignWidth="450"
+      Title="{Binding DuplicateDataItemDiff.SymbolName, StringFormat='Duplicate Data Diff: {0}'}">
+    <Grid Margin="6,6,6,0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <!-- 0: label -->
+            <ColumnDefinition Width="Auto"/>
+            <!-- 1: before -->
+            <ColumnDefinition Width="Auto"/>
+            <!-- 2: after -->
+            <ColumnDefinition Width="Auto"/>
+            <!-- 3: diff -->
+            <ColumnDefinition Width="*"/>
+            <!-- last column, to allow 'referenced in' to get very wide with long filenames -->
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- 0: Heading -->
+            <RowDefinition Height="Auto"/>
+            <!-- 1: Separator Line -->
+            <RowDefinition Height="Auto"/>
+            <!-- 2: Symbol Name -->
+            <RowDefinition Height="Auto"/>
+            <!-- 3: before / after / diff column headers -->
+            <RowDefinition Height="Auto"/>
+            <!-- 4: Size of each copy -->
+            <RowDefinition Height="Auto"/>
+            <!-- 5: Wasted Size -->
+            <RowDefinition Height="Auto"/>
+            <!-- 6: separator line -->
+            <RowDefinition Height="Auto"/>
+            <!-- 7: Referenced In Header -->
+            <RowDefinition Height="*"/>
+            <!-- 8: Referenced In (data) -->
+        </Grid.RowDefinitions>
+        <TextBlock Grid.ColumnSpan="5" TextWrapping="Wrap">
+            <Run>This symbol is duplicated between multiple compilands - the most common cause of this is that it is marked as 'static const' </Run>
+            <Run>and would be better off marked as 'const' or 'extern __declspec(selectany) const'.  With the way it is defined now, it is </Run>
+            <Run>wasting space in the binary with the same data in multpiple locations.</Run>
+        </TextBlock>
+        <Rectangle Grid.Row="1" Grid.ColumnSpan="5" Margin="-6,3,-6,0" HorizontalAlignment="Stretch"  VerticalAlignment="Center" Fill="Black" Height="1"/>
+
+        <TextBlock Grid.Row="2" Margin="0,3,0,0" Text="Symbol Name"/>
+        <TextBlock Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" Margin="0,3,0,0">
+            <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}"
+                       CommandParameter="{Binding DuplicateDataItemDiff.SymbolDiff}">
+                <TextBlock Text="{Binding DuplicateDataItemDiff.SymbolDiff.Name}"/>
+            </Hyperlink>
+        </TextBlock>
+
+        <TextBlock Grid.Row="3" Grid.Column="1" Margin="5,5,5,0" HorizontalAlignment="Right" Text="Before"/>
+        <TextBlock Grid.Row="3" Grid.Column="2" Margin="5,5,5,0" HorizontalAlignment="Right" Text="After"/>
+        <TextBlock Grid.Row="3" Grid.Column="3" Margin="5,5,5,0" HorizontalAlignment="Right" Text="Diff"/>
+
+        <TextBlock Grid.Row="4" Margin="5" Text="Size of each copy"/>
+        <TextBlock Grid.Row="4" Grid.Column="1" Margin="5" HorizontalAlignment="Right" Text="{Binding DuplicateDataItemDiff.BeforeDuplicate.Symbol.Size, FallbackValue=0, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"/>
+        <TextBlock Grid.Row="4" Grid.Column="2" Margin="5" HorizontalAlignment="Right" Text="{Binding DuplicateDataItemDiff.AfterDuplicate.Symbol.Size, FallbackValue=0, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"/>
+        <TextBlock Grid.Row="4" Grid.Column="3" Margin="5" HorizontalAlignment="Right" Text="{Binding DuplicateDataItemDiff.SymbolDiff.SizeDiff, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"/>
+
+        <TextBlock Grid.Row="5" Margin="5" Text="Wasted Size Diff"/>
+        <TextBlock Grid.Row="5" Grid.Column="1" Margin="5" HorizontalAlignment="Right" Text="{Binding DuplicateDataItemDiff.BeforeDuplicate.WastedSize, FallbackValue=0, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"/>
+        <TextBlock Grid.Row="5" Grid.Column="2" Margin="5" HorizontalAlignment="Right" Text="{Binding DuplicateDataItemDiff.AfterDuplicate.WastedSize, FallbackValue=0, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"/>
+        <TextBlock Grid.Row="5" Grid.Column="3" Margin="5" HorizontalAlignment="Right" Text="{Binding DuplicateDataItemDiff.WastedSizeDiff, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"/>
+
+        <Rectangle Grid.Row="6" Grid.ColumnSpan="5" Margin="-6,3,-6,0" HorizontalAlignment="Stretch"  VerticalAlignment="Center" Fill="Black" Height="1"/>
+
+        <TextBlock Grid.Row="7" Margin="0,3,0,0" Text="Referenced In"/>
+        <Grid Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Before"/>
+            <ItemsControl Grid.Row="1" Margin="0,3,0,0" ItemsSource="{Binding DuplicateDataItemDiff.BeforeDuplicate.ReferencedIn}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type analysisEngine:Compiland}">
+                        <!-- This is not a hyperlink yet because that would require thinking about how the deeplink URI would resolve
+                             for a 'before' or 'after' thing in a BinaryDiffTab, which is more work than it's worth to enable this
+                             to be a link now.  Maybe someday. -->
+                        <TextBlock Text="{Binding Name}" TextWrapping="Wrap"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock Grid.Column="1" Text="After"/>
+            <ItemsControl Grid.Row="1" Grid.Column="1" Margin="0,3,0,0" ItemsSource="{Binding DuplicateDataItemDiff.AfterDuplicate.ReferencedIn}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type analysisEngine:Compiland}">
+                        <TextBlock Text="{Binding Name}" TextWrapping="Wrap"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
+    </Grid>
+</navigation:SizeBenchPage>

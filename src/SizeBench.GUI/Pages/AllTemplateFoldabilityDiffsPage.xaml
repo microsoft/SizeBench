@@ -1,0 +1,42 @@
+﻿<navigation:SizeBenchPage x:Class="SizeBench.GUI.Pages.AllTemplateFoldabilityDiffsPage"
+                          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                          xmlns:local="clr-namespace:SizeBench.GUI.Pages"
+                          xmlns:controls="clr-namespace:SizeBench.GUI.Controls"
+                          xmlns:navigation="clr-namespace:SizeBench.GUI.Controls.Navigation"
+                          xmlns:converters="clr-namespace:SizeBench.GUI.Converters"
+                          xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+                          mc:Ignorable="d" 
+      d:DesignHeight="300" d:DesignWidth="300"
+      Title="All Template Foldability Diffs">
+    <navigation:SizeBenchPage.Resources>
+        <CollectionViewSource x:Key="templateFoldabilityDiffsCVS" Source="{Binding TemplateFoldabilityItemDiffs}">
+            <CollectionViewSource.SortDescriptions>
+                <componentModel:SortDescription PropertyName="WastedSizeDiff" Direction="Ascending"/>
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+    </navigation:SizeBenchPage.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Button Style="{StaticResource ExportToExcelButtonStyle}" Command="{Binding ExportToExcelCommand}"/>
+        <DataGrid ItemsSource="{Binding Source={StaticResource templateFoldabilityDiffsCVS}}" Grid.Row="1">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Size Diff" Binding="{Binding SizeDiff, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"
+                                    ElementStyle="{StaticResource RightAlignedTextStyle}"/>
+                <DataGridTextColumn Header="Wasted Size Diff"
+                                    Binding="{Binding WastedSizeDiff, Mode=OneWay, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"
+                                    ElementStyle="{StaticResource RightAlignedTextStyle}"
+                                    SortDirection="Descending"/>
+                <DataGridTextColumn Header="Wasted Size Remaining" Binding="{Binding WastedSizeRemaining, Mode=OneWay, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"
+                                    ElementStyle="{StaticResource RightAlignedTextStyle}"/>
+                <controls:SizeBenchDataGridHyperlinkColumn Header="Name"
+                                                           HyperlinkTextBinding="{Binding TemplateName}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</navigation:SizeBenchPage>

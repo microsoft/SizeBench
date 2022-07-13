@@ -1,0 +1,39 @@
+﻿<navigation:SizeBenchPage x:Class="SizeBench.GUI.Pages.AllUserDefinedTypesPage"
+                          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                          xmlns:controls="clr-namespace:SizeBench.GUI.Controls"
+                          xmlns:navigation="clr-namespace:SizeBench.GUI.Controls.Navigation"
+                          xmlns:converters="clr-namespace:SizeBench.GUI.Converters"
+                          xmlns:core="clr-namespace:SizeBench.GUI.Core"
+                          mc:Ignorable="d" d:DesignHeight="300" d:DesignWidth="300"
+                          Title="All User Defined Types">
+    <Grid>
+        <Grid.Resources>
+            <core:BindingProxy x:Key="proxy" Data="{Binding}" />
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <CheckBox IsChecked="{Binding ShowEachTemplateExpansionSeparately}" Content="Show each template instantiation separately"/>
+        <Button Style="{StaticResource ExportToExcelButtonStyle}" Command="{Binding ExportToExcelCommand}" Grid.Row="1"/>
+        <DataGrid ItemsSource="{Binding UDTGroupings}" Grid.Row="2">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="# Types" Binding="{Binding CountOfTypes}"
+                                    Visibility="{Binding Data.ShowEachTemplateExpansionSeparately, Source={StaticResource proxy}, ConverterParameter=Reverse, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}}"/>
+                <DataGridTextColumn Binding="{Binding TotalSizeOfFunctions, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"
+                                    SortDirection="Descending">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Text="Total Size of Member Functions" TextWrapping="Wrap" MaxWidth="100"/>
+                    </DataGridTextColumn.Header>
+                </DataGridTextColumn>
+                <controls:SizeBenchDataGridHyperlinkColumn Header="Name"
+                                                           HyperlinkTextBinding="{Binding Name}"
+                                                           CommandParameterBinding="{Binding LinkTarget}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</navigation:SizeBenchPage>

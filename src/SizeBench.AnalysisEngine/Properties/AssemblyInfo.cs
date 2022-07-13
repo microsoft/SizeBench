@@ -3,7 +3,7 @@
 [assembly: CLSCompliant(false)]
 
 [assembly: InternalsVisibleTo("SizeBench.TestDataCommon")]
-[assembly: InternalsVisibleTo("SizeBench.Views.Tests")]
+[assembly: InternalsVisibleTo("SizeBench.GUI.Tests")]
 [assembly: InternalsVisibleTo("SizeBench.AnalysisEngine.Tests")]
 [assembly: InternalsVisibleTo("SizeBench.AnalysisEngine.RealPETests")]
 

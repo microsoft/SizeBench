@@ -1,0 +1,83 @@
+﻿<Window x:Class="SizeBench.GUI.Windows.AboutBox"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:navigationControls="clr-namespace:SizeBench.GUI.Controls.Navigation"
+        xmlns:navigation="clr-namespace:SizeBench.GUI.Navigation"
+        xmlns:local="clr-namespace:SizeBench.GUI.Windows"
+        mc:Ignorable="d"
+        d:DesignHeight="500" d:DesignWidth="500"
+        Style="{StaticResource SizeBenchWindowStyle}"
+        Title="About SizeBench"
+        Height="500" Width="500" SizeToContent="Height"
+        ShowInTaskbar="False" ResizeMode="NoResize" WindowStyle="SingleBorderWindow">
+    <Window.Resources>
+        <Style TargetType="Label">
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style x:Key="LinkLabelStyle">
+            <Setter Property="Control.Padding" Value="0" />
+            <Setter Property="Control.VerticalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="ReadOnlyDescStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="MinLines" Value="10"/>
+            <Setter Property="MaxLines" Value="10"/>
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="TextWrapping" Value="WrapWithOverflow" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+        </Style>
+        <Style x:Key="OkButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="MinWidth" Value="75" />
+            <Setter Property="Margin" Value="0,5" />
+            <Setter Property="DockPanel.Dock" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Bottom"/>
+            <Setter Property="IsDefault" Value="True" />
+            <Setter Property="IsCancel" Value="True" />
+        </Style>
+    </Window.Resources>
+    <StackPanel>
+        <StackPanel Margin="10,10,10,5"
+                    DataContext="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}, Mode=OneTime}">
+            <Label Content="{x:Static local:AboutBox.Product}" />
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Version - " />
+                <Label Content="{x:Static local:AboutBox.Version}" />
+                <Label Content="{x:Static local:AboutBox.InformationalVersion}" />
+            </StackPanel>
+            <Label Content="{x:Static local:AboutBox.Copyright}"  />
+            <Label Content="{x:Static local:AboutBox.Company}" />
+            <Label Content="All Rights Reserved." />
+            <Label Padding="0,10,0,0" Content="Product details:" />
+            <!-- I don't know why this one has to be Binding instead of x:Static, but if I use x:Static it causes a weird blank line to appear in the
+                 TextBox before the contents, so Binding it is.
+            -->
+            <TextBox Text="{Binding Description, Mode=OneWay}"
+                     Style="{StaticResource ReadOnlyDescStyle}"/>
+            <DockPanel Margin="0,10,0,0">
+                <Button Style="{StaticResource OkButtonStyle}" Content="OK" />
+                <StackPanel>
+                    <Label Style="{StaticResource LinkLabelStyle}">
+                        <Hyperlink NavigateUri="{x:Static navigation:WellKnownPages.HelpStartingPage}"
+                                   Style="{StaticResource LinkLabelStyle}">
+                            <i:Interaction.Behaviors>
+                                <navigationControls:ExternalHyperlinkNavigationBehavior/>
+                            </i:Interaction.Behaviors>
+                            <TextBlock Text="SizeBench Documentation"/>
+                        </Hyperlink>
+                    </Label>
+                    <Label Style="{StaticResource LinkLabelStyle}">
+                        <Hyperlink NavigateUri="https://msblox.visualstudio.com/_git/SizeBench?path=%2FDocs%2FContributing.md"
+                                   Style="{StaticResource LinkLabelStyle}">
+                            <i:Interaction.Behaviors>
+                                <navigationControls:ExternalHyperlinkNavigationBehavior/>
+                            </i:Interaction.Behaviors>
+                            <TextBlock Text="How to contribute (MS internal only for now)"/>
+                        </Hyperlink>
+                    </Label>
+                </StackPanel>
+            </DockPanel>
+        </StackPanel>
+    </StackPanel>
+</Window>

@@ -1,0 +1,97 @@
+﻿<navigation:SizeBenchPage x:Class="SizeBench.GUI.Pages.WastefulVirtualPage"
+                          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                          xmlns:analysisEngine="clr-namespace:SizeBench.AnalysisEngine;assembly=SizeBench.AnalysisEngine"
+                          xmlns:commands="clr-namespace:SizeBench.GUI.Commands"
+                          xmlns:navigation="clr-namespace:SizeBench.GUI.Controls.Navigation"
+                          xmlns:converters="clr-namespace:SizeBench.GUI.Converters"
+                          mc:Ignorable="d" 
+      d:DesignHeight="300" d:DesignWidth="500"
+      Title="{Binding WastefulVirtualItem.UserDefinedType.Name, StringFormat='Wasteful Virtuals: {0}'}">
+    <Grid Margin="6" DataContext="{Binding WastefulVirtualItem}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.ColumnSpan="2" TextWrapping="Wrap">
+            <Run>This type contains some functions declared as 'virtual' which could be more efficient for binary size.</Run>
+            <LineBreak/>
+            <LineBreak/>
+            <Run>Despite being marked as virtual, this function is either pure and overridden only one time, or is not pure and is overridden zero times.  In both cases, removing 'virtual' would save a vtable slot in this type and all derived types, as well as reloc entries, CFG checks at the callsites, and so on.</Run>
+            <LineBreak/>
+            <LineBreak/>
+            <Run>Devirtualizing this function will never hurt CPU performance, and can often help - especially in hot functions.  So this can benefit you in more than just binary size.</Run>
+        </TextBlock>
+        <Rectangle Grid.Row="1" Grid.ColumnSpan="2" Margin="-6,3,-6,0" HorizontalAlignment="Stretch"  VerticalAlignment="Center" Fill="Black" Height="1"/>
+
+        <TextBlock Grid.Row="2" Margin="0,3,0,0" Text="Type:"/>
+        <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,3,0,0" DataContext="{Binding UserDefinedType}">
+            <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}"
+                       CommandParameter="{Binding}">
+                <TextBlock Text="{Binding Name, Converter={x:Static converters:SymbolNameToFriendlyNameConverter.Instance}}" />
+            </Hyperlink>
+        </TextBlock>
+
+        <TextBlock Grid.Row="3" Margin="0,3,8,0" TextWrapping="Wrap" Text="Waste Per VTable Slot:"/>
+        <TextBlock Grid.Row="3" Grid.Column="1"  Margin="0,3,0,0" Text="{Binding WastePerSlot, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"/>
+
+        <TextBlock Grid.Row="4" Margin="0,3,0,0" TextWrapping="Wrap" Text="Waste Total:"/>
+        <TextBlock Grid.Row="4" Grid.Column="1" Margin="0,3,0,0" Text="{Binding WastedSize, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"/>
+
+        <Grid Grid.Row="5" Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Column="0" Margin="0,3,0,0" Text="Virtual functions with no overrides:" TextWrapping="Wrap"/>
+            <TextBlock Grid.Column="1" Margin="0,3,0,0" Text="Pure virtual functions with exactly one override:" TextWrapping="Wrap"/>
+
+            <ScrollViewer Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding WastedOverridesNonPureWithNoOverrides}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Margin="0,3,0,0">
+                                <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}"
+                                           CommandParameter="{Binding}">
+                                    <TextBlock Text="{Binding Converter={x:Static converters:FunctionToFormattedNameConverter.Instance},
+                                                              ConverterParameter={x:Static analysisEngine:WastefulVirtualItem.NameFormattingForWastedOverrides}}" />
+                                </Hyperlink>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <ScrollViewer Grid.Row="1" Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding WastedOverridesPureWithExactlyOneOverride}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Margin="0,3,0,0">
+                                <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}"
+                                           CommandParameter="{Binding}">
+                                    <TextBlock Text="{Binding Converter={x:Static converters:FunctionToFormattedNameConverter.Instance},
+                                                              ConverterParameter={x:Static analysisEngine:WastefulVirtualItem.NameFormattingForWastedOverrides}}" />
+                                </Hyperlink>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</navigation:SizeBenchPage>

@@ -1,0 +1,151 @@
+﻿<navigation:SizeBenchPage
+      x:Class="SizeBench.GUI.Pages.Symbols.BlockSymbolPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:commands="clr-namespace:SizeBench.GUI.Commands"
+      xmlns:navigation="clr-namespace:SizeBench.GUI.Controls.Navigation"
+      xmlns:converters="clr-namespace:SizeBench.GUI.Converters"
+      xmlns:symbols="clr-namespace:SizeBench.AnalysisEngine.Symbols;assembly=SizeBench.AnalysisEngine"
+      mc:Ignorable="d" 
+      d:DesignHeight="800" d:DesignWidth="800"
+      Title="{Binding PageTitle}">
+    <Grid Margin="5">
+        <Grid.Resources>
+            <Style TargetType="{x:Type TextBlock}">
+                <Setter Property="Margin" Value="0,0,5,3"/>
+            </Style>
+        </Grid.Resources>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,5">
+            <TextBlock TextWrapping="Wrap" Visibility="{Binding IsSeparatedBlock, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}}">
+                <Run>This is a block of code that has been separated from its containing function (also called its parent function), usually due to something like </Run>
+                <Hyperlink NavigateUri="https://docs.microsoft.com/cpp/build/profile-guided-optimizations?view=msvc-160">
+                    <i:Interaction.Behaviors>
+                        <navigation:ExternalHyperlinkNavigationBehavior/>
+                    </i:Interaction.Behaviors>
+                    <TextBlock Text="Profile Guided Optimization (PGO)"/>
+                </Hyperlink>
+            </TextBlock>
+            <TextBlock TextWrapping="Wrap" Visibility="{Binding IsSeparatedBlock, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}, ConverterParameter=Reverse}">
+                <Run>This is the first or "primary" block of code at the start of a function which is composed of multiple blocks, usually due to something like </Run>
+                <Hyperlink NavigateUri="https://docs.microsoft.com/cpp/build/profile-guided-optimizations?view=msvc-160">
+                    <i:Interaction.Behaviors>
+                        <navigation:ExternalHyperlinkNavigationBehavior/>
+                    </i:Interaction.Behaviors>
+                    <TextBlock Text="Profile Guided Optimization (PGO)"/>
+                </Hyperlink>
+            </TextBlock>
+            <TextBlock TextWrapping="Wrap">
+                Below, you can see what range of bytes in the binary this block is in - clicking on the Parent Function will take you to the function that
+                generated this block, which may be composed of multiple blocks in different COFF Groups as part of how PGO will heat up or cool down code to improve disk I/O.
+            </TextBlock>
+        </StackPanel>
+
+        <TextBlock Grid.Column="0" Grid.Row="1" Text="Block is in Binary Section: "/>
+        <TextBlock Grid.Column="1" Grid.Row="1">
+            <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}"
+                        CommandParameter="{Binding BinarySection}">
+                <TextBlock Text="{Binding BinarySection.Name}" />
+            </Hyperlink>
+            <Run Text="{Binding BinarySection, Mode=OneWay, Converter={x:Static converters:BinarySectionToDescriptionConverter.Instance}, StringFormat=({0})}"/>
+        </TextBlock>
+
+        <TextBlock Grid.Column="0" Grid.Row="2" Text="Block is in COFF Group: "/>
+        <TextBlock Grid.Column="1" Grid.Row="2">
+            <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}"
+                        CommandParameter="{Binding COFFGroup}">
+                <TextBlock Text="{Binding COFFGroup.Name}" />
+            </Hyperlink>
+            <Run Text="{Binding COFFGroup, Mode=OneWay, Converter={x:Static converters:COFFGroupToDescriptionConverter.Instance}, StringFormat=({0})}"/>
+        </TextBlock>
+
+        <TextBlock Grid.Column="0" Grid.Row="3" Text="Block is in Lib: "/>
+        <TextBlock Grid.Column="1" Grid.Row="3">
+            <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}"
+                        CommandParameter="{Binding Lib}"
+                        ToolTip="{Binding Lib.Name}">
+                <TextBlock Text="{Binding Lib.ShortName}" />
+            </Hyperlink>
+        </TextBlock>
+
+        <TextBlock Grid.Column="0" Grid.Row="4" Text="Block is in Compiland: "/>
+        <TextBlock Grid.Column="1" Grid.Row="4">
+            <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}"
+                        CommandParameter="{Binding Compiland}"
+                        ToolTip="{Binding Compiland.Name}">
+                <TextBlock Text="{Binding Compiland.ShortName}" />
+            </Hyperlink>
+        </TextBlock>
+
+        <TextBlock Grid.Column="0" Grid.Row="5" Text="Block is in Source File: "/>
+        <TextBlock Grid.Column="1" Grid.Row="5">
+            <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}"
+                        CommandParameter="{Binding SourceFile}"
+                        ToolTip="{Binding SourceFile.Name}">
+                <TextBlock Text="{Binding SourceFile.ShortName}" />
+            </Hyperlink>
+        </TextBlock>
+
+        <TextBlock Grid.Column="0" Grid.Row="6" Text="Name:"/>
+        <TextBlock Grid.Column="1" Grid.Row="6" Text="{Binding Block.Name, Mode=OneWay, Converter={x:Static converters:SymbolNameToFriendlyNameConverter.Instance}}"/>
+
+        <TextBlock Grid.Column="0" Grid.Row="7" Text="Parent Function:"/>
+        <TextBlock Grid.Column="1" Grid.Row="7">
+            <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}"
+                        CommandParameter="{Binding ParentFunction}">
+                <TextBlock TextWrapping="Wrap" Text="{Binding ParentFunction.FullName}" />
+            </Hyperlink>
+        </TextBlock>
+
+        <TextBlock Grid.Column="0" Grid.Row="8" Text="RVA (Start-End):"/>
+        <TextBlock Grid.Column="1" Grid.Row="8" FontFamily="Consolas">
+            <Run Text="{Binding Block.RVA, Mode=OneWay, StringFormat=0x{0:X}}"/><Run Text=" - "/><Run Text="{Binding Block.RVAEnd, Mode=OneWay, StringFormat=0x{0:X}}"/>
+        </TextBlock>
+
+        <TextBlock Grid.Column="0" Grid.Row="9" Text="Size on Disk and in Memory:"/>
+        <TextBlock Grid.Column="1" Grid.Row="9" Text="{Binding Block.Size, Mode=OneWay,Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"/>
+
+        <StackPanel Grid.ColumnSpan="2" Grid.Row="10" Visibility="{Binding IsBlockCodeUsedForMultipleBlocks, Mode=OneWay, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}}">
+            <TextBlock TextWrapping="Wrap" Margin="0,10,0,0">
+                This block of code is used for multiple functions due to Identical COMDAT Folding (ICF).  The linker determined that all these blocks contained identical bytes of code,
+                so they were folded together to improve performance and disk footprint.  This is a good thing!  But it can make names confusing sometimes, as well as understanding
+                what source file, compiland, or lib contributed this code to the binary.
+                <LineBreak/>
+                <LineBreak/>
+                Note that the linker has thrown away information by the time SizeBench sees things, so the compiland, lib, and source file that the bytes are attributed to is
+                essentially random among the list of blocks shown below.  So don't be surprised or confused if foo.obj is where the bytes are attributed, even though the parent function
+                is clearly in a different translation unit - SizeBench is doing the best it can, but the point is these bytes folded together and the cost needs to be attributed somewhere.
+                <LineBreak/>
+                <LineBreak/>
+                This is the list of the <Run Text="{Binding FoldedBlocks.Count, Mode=OneWay}"/> blocks that all share these bytes of code, in alphabetical order:
+            </TextBlock>
+
+            <ItemsControl Margin="0,3,0,0" ItemsSource="{Binding FoldedBlocks}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type symbols:CodeBlockSymbol}">
+                        <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </Grid>
+</navigation:SizeBenchPage>

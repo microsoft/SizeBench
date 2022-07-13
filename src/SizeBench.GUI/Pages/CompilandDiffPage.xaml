@@ -1,0 +1,124 @@
+﻿<navigation:SizeBenchPage x:Class="SizeBench.GUI.Pages.CompilandDiffPage"
+                          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                          xmlns:local="clr-namespace:SizeBench.GUI.Pages"
+                          xmlns:commands="clr-namespace:SizeBench.GUI.Commands"
+                          xmlns:controls="clr-namespace:SizeBench.GUI.Controls"
+                          xmlns:navigation="clr-namespace:SizeBench.GUI.Controls.Navigation"
+                          xmlns:converters="clr-namespace:SizeBench.GUI.Converters"
+                          xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+                          mc:Ignorable="d" 
+      d:DesignHeight="300" d:DesignWidth="600"
+      Title="{Binding CompilandDiff.Name, StringFormat='Compiland Diff: {0}'}">
+    <navigation:SizeBenchPage.Resources>
+        <CollectionViewSource x:Key="coffGroupsCVS" Source="{Binding CompilandDiff.COFFGroupContributionDiffs}">
+            <CollectionViewSource.SortDescriptions>
+                <componentModel:SortDescription PropertyName="Value.SizeDiff" Direction="Descending"/>
+                <componentModel:SortDescription PropertyName="Value.VirtualSizeDiff" Direction="Descending"/>
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+        <CollectionViewSource x:Key="sectionCVS" Source="{Binding CompilandDiff.SectionContributionDiffs}">
+            <CollectionViewSource.SortDescriptions>
+                <componentModel:SortDescription PropertyName="Value.SizeDiff" Direction="Descending"/>
+                <componentModel:SortDescription PropertyName="Value.VirtualSizeDiff" Direction="Descending"/>
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+        <CollectionViewSource x:Key="symbolsCVS" Source="{Binding SymbolDiffs}">
+            <CollectionViewSource.SortDescriptions>
+                <componentModel:SortDescription PropertyName="SizeDiff" Direction="Descending"/>
+                <componentModel:SortDescription PropertyName="VirtualSizeDiff" Direction="Descending"/>
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+    </navigation:SizeBenchPage.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- 0: compiland name -->
+            <RowDefinition Height="Auto"/> <!-- 1: compiland size -->
+            <RowDefinition Height="Auto"/> <!-- 2: Lib link -->
+            <RowDefinition Height="Auto"/> <!-- 3: headings for first set of tables -->
+            <RowDefinition Height="*"/>    <!-- 4: first set of tables -->
+            <RowDefinition Height="Auto"/> <!-- 5: headings for second set of tables -->
+            <RowDefinition Height="*"/>    <!-- 6: second set of tables -->
+        </Grid.RowDefinitions>
+        <TextBlock Text="{Binding CompilandDiff.ShortName, StringFormat='Compiland Diff: {0}'}" Grid.ColumnSpan="2"/>
+        <TextBlock Grid.Row="1" Grid.ColumnSpan="2" DataContext="{Binding CompilandDiff}">
+            <Run>Size on Disk Diff:</Run>
+            <Run Text="{Binding SizeDiff, Mode=OneWay, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"/>
+            <Run>, Size in Memory Diff: </Run>
+            <Run Text="{Binding VirtualSizeDiff, Mode=OneWay, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"/>
+        </TextBlock>
+        <TextBlock Grid.Row="2" Grid.ColumnSpan="2" DataContext="{Binding CompilandDiff.LibDiff}">
+            <Run>Lib: </Run>
+            <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}"
+                       CommandParameter="{Binding}">
+                <TextBlock Text="{Binding ShortName}" />
+            </Hyperlink>
+        </TextBlock>
+
+        <!-- Binary Section Contributions -->
+        <TextBlock Text="Binary Section Contributions:" Grid.Row="3"/>
+        <DataGrid Grid.Row="4" ItemsSource="{Binding Source={StaticResource sectionCVS}}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Size on Disk Diff"
+                                    Binding="{Binding Value.SizeDiff, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"
+                                    SortDirection="Descending"
+                                    ElementStyle="{StaticResource RightAlignedTextStyle}"/>
+
+                <DataGridTextColumn Header="Size in Memory Diff" Binding="{Binding Value.VirtualSizeDiff, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"
+                                    ElementStyle="{StaticResource RightAlignedTextStyle}"/>
+
+                <controls:SizeBenchDataGridHyperlinkColumn Header="Name"
+                                                           CommandParameterBinding="{Binding Value}"
+                                                           HyperlinkTextBinding="{Binding Key.Name}"/>
+                <DataGridTextColumn Header="Description" CanUserSort="False"
+                                    Binding="{Binding Key, Converter={x:Static converters:BinarySectionToDescriptionConverter.Instance}}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- COFF Group Contributions -->
+        <TextBlock Text="COFF Group Contributions:" Grid.Row="3" Grid.Column="1"/>
+        <DataGrid Grid.Row="4" Grid.Column="1" ItemsSource="{Binding Source={StaticResource coffGroupsCVS}}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Size on Disk Diff"
+                                    Binding="{Binding Value.SizeDiff, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"
+                                    SortDirection="Descending"
+                                    ElementStyle="{StaticResource RightAlignedTextStyle}"/>
+
+                <DataGridTextColumn Header="Size in Memory Diff" Binding="{Binding Value.VirtualSizeDiff, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"
+                                    ElementStyle="{StaticResource RightAlignedTextStyle}"/>
+
+                <controls:SizeBenchDataGridHyperlinkColumn Header="Name"
+                                                           CommandParameterBinding="{Binding Value}"
+                                                           HyperlinkTextBinding="{Binding Key.Name}"/>
+                <DataGridTextColumn Header="Description"
+                                    Binding="{Binding Key, Converter={x:Static converters:COFFGroupToDescriptionConverter.Instance}}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Symbols -->
+        <StackPanel Orientation="Vertical" Grid.Row="5" Grid.ColumnSpan="2">
+            <TextBlock Text="Symbols in this compiland:"/>
+            <Button Style="{StaticResource ExportToExcelButtonStyle}" Command="{Binding ExportSymbolsToExcelCommand}"/>
+        </StackPanel>
+        <DataGrid Grid.Row="6" Grid.ColumnSpan="2" ItemsSource="{Binding Source={StaticResource symbolsCVS}}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Size on Disk Diff"
+                                    Binding="{Binding SizeDiff, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"
+                                    SortDirection="Descending"
+                                    ElementStyle="{StaticResource RightAlignedTextStyle}"/>
+
+                <DataGridTextColumn Header="Size in Memory Diff" Binding="{Binding VirtualSizeDiff, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"
+                                    ElementStyle="{StaticResource RightAlignedTextStyle}"/>
+
+                <controls:SizeBenchDataGridHyperlinkColumn Header="Name"
+                                                           HyperlinkTextBinding="{Binding Name, Converter={x:Static converters:SymbolNameToFriendlyNameConverter.Instance}}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</navigation:SizeBenchPage>

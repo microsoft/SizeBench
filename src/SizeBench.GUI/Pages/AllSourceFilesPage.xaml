@@ -1,0 +1,70 @@
+﻿<navigation:SizeBenchPage x:Class="SizeBench.GUI.Pages.AllSourceFilesPage"
+                          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                          xmlns:behaviors="clr-namespace:SizeBench.GUI.Behaviors"
+                          xmlns:local="clr-namespace:SizeBench.GUI.Pages"
+                          xmlns:controls="clr-namespace:SizeBench.GUI.Controls"
+                          xmlns:navigation="clr-namespace:SizeBench.GUI.Controls.Navigation"
+                          xmlns:converters="clr-namespace:SizeBench.GUI.Converters"
+                          xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+                          mc:Ignorable="d" 
+      d:DesignHeight="300" d:DesignWidth="600"
+      Title="All Source Files">
+    <navigation:SizeBenchPage.Resources>
+        <CollectionViewSource x:Key="sourceFilesBySizeCVS" Source="{Binding SourceFiles}">
+            <CollectionViewSource.SortDescriptions>
+                <componentModel:SortDescription PropertyName="Size" Direction="Descending"/>
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+        <CollectionViewSource x:Key="sourceFilesByVirtualSizeCVS" Source="{Binding SourceFiles}">
+            <CollectionViewSource.SortDescriptions>
+                <componentModel:SortDescription PropertyName="VirtualSize" Direction="Descending"/>
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+        <CompositeCollection x:Key="sizeColumns">
+            <DataGridTextColumn Header="Size on Disk"
+                                Binding="{Binding Size, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"
+                                ElementStyle="{StaticResource RightAlignedTextStyle}"
+                                SortDirection="Descending"/>
+            <controls:SizeBenchDataGridHyperlinkColumn Header="Name"
+                                                       HyperlinkTextBinding="{Binding ShortName}"
+                                                       HyperlinkToolTipBinding="{Binding Name}"/>
+            <CollectionContainer Collection="{Binding DataContext.DataGridSizeColumnDescriptions, Source={x:Reference LayoutRoot}, Converter={x:Static converters:DataGridColumnDescriptionsToDataGridColumnsConverter.Instance}}"/>
+        </CompositeCollection>
+        <CompositeCollection x:Key="virtualSizeColumns">
+            <DataGridTextColumn Header="Size in Memory"
+                                Binding="{Binding VirtualSize, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"
+                                ElementStyle="{StaticResource RightAlignedTextStyle}"
+                                SortDirection="Descending"/>
+            <controls:SizeBenchDataGridHyperlinkColumn Header="Name"
+                                                       HyperlinkTextBinding="{Binding ShortName}"
+                                                       HyperlinkToolTipBinding="{Binding Name}"/>
+            <controls:SizeBenchDataGridHyperlinkColumn Header="Lib Name"
+                                                       CommandParameterBinding="{Binding Lib}"
+                                                       HyperlinkTextBinding="{Binding Lib.ShortName}"
+                                                       HyperlinkToolTipBinding="{Binding Lib.Name}"/>
+            <CollectionContainer Collection="{Binding DataContext.DataGridVirtualSizeColumnDescriptions, Source={x:Reference LayoutRoot}, Converter={x:Static converters:DataGridColumnDescriptionsToDataGridColumnsConverter.Instance}}"/>
+        </CompositeCollection>
+    </navigation:SizeBenchPage.Resources>
+    <Grid x:Name="LayoutRoot">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal">
+            <Button Style="{StaticResource ExportToExcelButtonStyle}" Command="{Binding ExportToExcelCommand}"/>
+            <Label Content="Display:" Target="{Binding ElementName=displayModeComboBox}" Margin="5,0,0,0"/>
+            <ComboBox x:Name="displayModeComboBox" ItemsSource="{Binding DisplayModes, Mode=OneWay}" SelectedIndex="{Binding SelectedDisplayModeIndex}" VerticalAlignment="Center"/>
+        </StackPanel>
+        <DataGrid Grid.Row="1"
+                  Visibility="{Binding ShouldDisplaySize, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}}"
+                  ItemsSource="{Binding Source={StaticResource sourceFilesBySizeCVS}}"
+                  behaviors:DataGridExtension.Columns="{StaticResource sizeColumns}"/>
+        <DataGrid Grid.Row="1"
+                  Visibility="{Binding ShouldDisplayVirtualSize, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}}"
+                  ItemsSource="{Binding Source={StaticResource sourceFilesByVirtualSizeCVS}}"
+                  behaviors:DataGridExtension.Columns="{StaticResource virtualSizeColumns}"/>
+    </Grid>
+</navigation:SizeBenchPage>

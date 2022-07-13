@@ -1,0 +1,81 @@
+﻿<UserControl x:Class="SizeBench.GUI.Controls.TypeLayoutTreeView.TypeLayoutTreeView"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SizeBench.GUI.Controls.TypeLayoutTreeView"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid x:Name="LayoutRoot">
+        <Grid.Resources>
+            <Style TargetType="TreeViewItem" x:Key="MemberContainerStyle">
+                <Setter Property="IsExpanded" Value="{Binding Expanded, Mode=TwoWay}"/>
+            </Style>
+            <HierarchicalDataTemplate x:Key="ClassTemplate"
+                                      ItemsSource="{Binding BaseTypesAndMembers}"
+                                      ItemTemplateSelector="{x:Static local:TypeLayoutDataTemplateSelector.Instance}"
+                                      ItemContainerStyle="{StaticResource MemberContainerStyle}">
+                <TextBlock>
+                    <TextBlock.Inlines>
+                        <Run Text="{Binding TypeLayoutItem.UserDefinedType.Name, Mode=OneWay}"/>
+                        <Run Text="(size:"/>
+                        <Run Text="{Binding TypeLayoutItem.UserDefinedType.InstanceSize, Mode=OneWay}"/>
+                        <Run Text=", waste exclusive:"/>
+                        <Run Text="{Binding TypeLayoutItem.AlignmentWasteExclusive, Mode=OneWay}"/>
+                        <Run Text=", waste incl. base types:"/>
+                        <Run Text="{Binding TypeLayoutItem.AlignmentWasteIncludingBaseTypes, Mode=OneWay}"/>
+                        <Run Text=")"/>
+                    </TextBlock.Inlines>
+                </TextBlock>
+            </HierarchicalDataTemplate>
+
+            <DataTemplate x:Key="MemberTemplate">
+                <TextBlock FontWeight="{Binding Member.IsAlignmentMember, Mode=OneWay, Converter={x:Static local:IsAlignmentMemberToFontWeightConverter.Instance}}">
+                    <TextBlock.Inlines>
+                        <Run Text="this+"/><Run Text="{Binding OffsetExcludingBitfield, Mode=OneWay, StringFormat=D3}"/>
+                        <Run Text="{Binding Member.Type, Mode=OneWay, Converter={x:Static local:TypeSymbolToDisplayTypeNameConverter.Instance}}"
+                             ToolTipService.ToolTip="{Binding Member.Type.Name, Mode=OneWay, Converter={x:Static local:FullTypeNameToToolTipTypeNameConverter.Instance}}"/>
+                        <Run Text="{Binding Member.Name, Mode=OneWay}"/>
+                        <Run Text="{Binding Path=., Converter={x:Static local:MemberToBitsOrBytesSuffixConverter.Instance}, Mode=OneWay, StringFormat=({0})}"/>
+                        <Run Text="{Binding Path=., Converter={x:Static local:MemberToBitfieldSuffixConverter.Instance}}"/>
+                    </TextBlock.Inlines>
+                </TextBlock>
+            </DataTemplate>
+
+            <HierarchicalDataTemplate x:Key="MemberWithLinkedTypeTemplate"
+                                      ItemsSource="{Binding ChildrenOfThisType}"
+                                      ItemTemplateSelector="{x:Static local:TypeLayoutDataTemplateSelector.Instance}"
+                                      ItemContainerStyle="{StaticResource MemberContainerStyle}">
+                <TextBlock FontWeight="{Binding Member.IsAlignmentMember, Mode=OneWay, Converter={x:Static local:IsAlignmentMemberToFontWeightConverter.Instance}}">
+                    <TextBlock.Inlines>
+                        <Run Text="this+"/><Run Text="{Binding OffsetExcludingBitfield, Mode=OneWay, StringFormat=D3}"/>
+                        <Hyperlink ToolTipService.ToolTip="{Binding Member.Type.Name, Mode=OneWay, Converter={x:Static local:FullTypeNameToToolTipTypeNameConverter.Instance}}"
+                                   Command="{Binding DataContext.TypeLinkClickedCommand, ElementName=LayoutRoot}"
+                                   CommandParameter="{Binding Member.Type, Mode=OneWay}"
+                                   Focusable="False">
+                            <Run Text="{Binding Member.Type, Mode=OneWay, Converter={x:Static local:TypeSymbolToDisplayTypeNameConverter.Instance}}"/>
+                        </Hyperlink>
+                        <Run Text="{Binding Member.Name, Mode=OneWay}"/>
+                        <Run Text="("/><Run Text="{Binding Path=., Converter={x:Static local:MemberToBitsOrBytesSuffixConverter.Instance}, Mode=OneWay}"/><Run Text=")"/>
+                        <Run Text="{Binding Path=., Converter={x:Static local:MemberToBitfieldSuffixConverter.Instance}}"/>
+                    </TextBlock.Inlines>
+                </TextBlock>
+            </HierarchicalDataTemplate>
+
+            <DataTemplate x:Key="LoadingItemTemplate">
+                <TextBlock Text="loading..." FontStyle="Italic"/>
+            </DataTemplate>
+        </Grid.Resources>
+        <TreeView FontFamily="Consolas"
+                  VirtualizingStackPanel.IsVirtualizing="True"
+                  ItemsSource="{Binding ItemsSourceAsViewModel, Mode=OneWay}"
+                  ItemTemplate="{StaticResource ClassTemplate}">
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="TreeViewItem">
+                    <Setter Property="IsExpanded" Value="{Binding Expanded, Mode=TwoWay}"/>
+                </Style>
+            </TreeView.ItemContainerStyle>
+        </TreeView>
+    </Grid>
+</UserControl>

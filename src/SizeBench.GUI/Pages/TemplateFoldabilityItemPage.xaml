@@ -1,0 +1,123 @@
+﻿<navigation:SizeBenchPage x:Class="SizeBench.GUI.Pages.TemplateFoldabilityItemPage"
+                          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                          xmlns:symbols="clr-namespace:SizeBench.AnalysisEngine.Symbols;assembly=SizeBench.AnalysisEngine"
+                          xmlns:navigation="clr-namespace:SizeBench.GUI.Controls.Navigation"
+                          xmlns:converters="clr-namespace:SizeBench.GUI.Converters"
+                          mc:Ignorable="d" 
+      d:DesignHeight="500" d:DesignWidth="700"
+      Title="{Binding TemplateFoldabilityItem.TemplateName, StringFormat='Template Foldability: {0}'}">
+    <navigation:SizeBenchPage.Resources>
+        <CompositeCollection x:Key="symbolsCompositeCollection">
+            <x:Null/>
+            <CollectionContainer Collection="{Binding DataContext.UniqueSymbols, Source={x:Reference LayoutRoot}}"/>
+        </CompositeCollection>
+    </navigation:SizeBenchPage.Resources>
+    <Grid x:Name="LayoutRoot">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Margin="10,10,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Margin="0,0,0,2" Text="Template:"/>
+            <TextBlock Grid.Column="1" Margin="0,0,0,2" TextWrapping="Wrap" Text="{Binding TemplateFoldabilityItem.TemplateName}"/>
+
+            <TextBlock Grid.Row="1" Margin="0,0,0,2" Text="Total Size:"/>
+            <TextBlock Grid.Row="1" Margin="0,0,0,2" Grid.Column="1" Text="{Binding TemplateFoldabilityItem.TotalSize, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"/>
+
+            <TextBlock Grid.Row="2" Margin="0,0,5,2" Text="# Symbols:"/>
+            <TextBlock Grid.Row="2" Margin="0,0,0,2" Grid.Column="1" TextWrapping="Wrap">
+                <Run Text="{Binding TemplateFoldabilityItem.Symbols.Count, Mode=OneWay}"/> (of which <Run Text="{Binding TemplateFoldabilityItem.UniqueSymbols.Count, Mode=OneWay}"/> are unique)
+            </TextBlock>
+            
+            <TextBlock Grid.Row="3" Grid.ColumnSpan="2" TextWrapping="Wrap">
+                Pick two instantiations of the template below to see a diff'd disassembly of them. Note that functions that are already folded together are omitted from these lists.<LineBreak/>
+                <LineBreak/>
+                In general, it's easiest to pick two that are the same size in bytes, or nearly so.<LineBreak/>
+            </TextBlock>
+
+            <Grid Grid.Row="4" Grid.ColumnSpan="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <!-- It may look like these have the same ItemTemplate - but they're different in one small place, the SharedSizeGroup on the ColumnDefinition.  That way each
+                 ComboBox aligns the items inside itself, but not between them which might look weird visually in some cases. -->
+                <ComboBox Grid.Column="0" Margin="0,0,5,0"
+                          ItemsSource="{StaticResource symbolsCompositeCollection}" SelectedItem="{Binding Disassembly1Symbol, Mode=TwoWay}">
+                    <ComboBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel/>
+                        </ItemsPanelTemplate>
+                    </ComboBox.ItemsPanel>
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate DataType="symbols:IFunctionCodeSymbol">
+                            <Grid MaxWidth="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ComboBox}}, Path=ActualWidth}">
+                                <Grid.ToolTip>
+                                    <ToolTip Content="{Binding Name}"/>
+                                </Grid.ToolTip>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="SymbolSizeSSG1" />
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding Size, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}" Width="50" TextAlignment="Right"/>
+                                <Rectangle Grid.Column="1" Visibility="{Binding Converter={x:Static converters:NullToCollapsedConverter.Instance}}" Width="1" Height="Auto" VerticalAlignment="Stretch" Fill="Black" Margin="5,0"/>
+                                <TextBlock Grid.Column="2" Text="{Binding FormattedName.UniqueSignatureWithNoPrefixes}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <ComboBox Grid.Column="1" Margin="5,0"
+                          ItemsSource="{StaticResource symbolsCompositeCollection}" SelectedItem="{Binding Disassembly2Symbol, Mode=TwoWay}">
+                    <ComboBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel/>
+                        </ItemsPanelTemplate>
+                    </ComboBox.ItemsPanel>
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate DataType="symbols:IFunctionCodeSymbol">
+                            <Grid MaxWidth="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ComboBox}}, Path=ActualWidth}">
+                                <Grid.ToolTip>
+                                    <ToolTip Content="{Binding Name}"/>
+                                </Grid.ToolTip>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="SymbolSizeSSG2" />
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding Size, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}" Width="50" TextAlignment="Right"/>
+                                <Rectangle Grid.Column="1" Visibility="{Binding Converter={x:Static converters:NullToCollapsedConverter.Instance}}" Width="1" Height="Auto" VerticalAlignment="Stretch" Fill="Black" Margin="5,0"/>
+                                <TextBlock Grid.Column="2" Text="{Binding FormattedName.UniqueSignatureWithNoPrefixes}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </Grid>
+        </Grid>
+
+        <ContentPresenter Grid.Row="1">
+            <ContentPresenter.Content>
+                <MultiBinding Converter="{x:Static converters:TwoStringsToDiffViewerUIConverter.Instance}" Mode="OneWay">
+                    <Binding Path="Disassembly1" Mode="OneWay"/>
+                    <Binding Path="Disassembly2" Mode="OneWay"/>
+                </MultiBinding>
+            </ContentPresenter.Content>
+        </ContentPresenter>
+    </Grid>
+</navigation:SizeBenchPage>

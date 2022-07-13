@@ -1,0 +1,67 @@
+﻿<navigation:SizeBenchPage x:Class="SizeBench.GUI.Pages.Symbols.UserDefinedTypeSymbolPage"
+                          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                          xmlns:local="clr-namespace:SizeBench.GUI.Pages.Symbols"
+                          xmlns:controls="clr-namespace:SizeBench.GUI.Controls"
+                          xmlns:navigation="clr-namespace:SizeBench.GUI.Controls.Navigation"
+                          xmlns:TypeLayoutTreeView="clr-namespace:SizeBench.GUI.Controls.TypeLayoutTreeView"
+                          xmlns:converters="clr-namespace:SizeBench.GUI.Converters"
+                          mc:Ignorable="d" 
+                          d:DesignHeight="300" d:DesignWidth="300"
+                          Title="{Binding PageTitle}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <!-- Type Name -->
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+            <TextBlock Text="Type Name: " FontSize="16"/>
+            <controls:SelectableTextBlock Text="{Binding UDT.Name, Mode=OneWay}" FontSize="16"/>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- Type Layout TreeView -->
+                <Expander Header="Type layout in memory" IsExpanded="True">
+                    <TypeLayoutTreeView:TypeLayoutTreeView SessionForTypeExpansion="{Binding Session}"
+                                                           InitiallyExpanded="True"
+                                                           ItemsSource="{Binding TypeLayoutItems}"/>
+                </Expander>
+
+                <!-- Functions -->
+                <Expander Header="Functions in this type" IsExpanded="True">
+                    <StackPanel>
+                        <TextBlock TextWrapping="Wrap" Margin="5">
+                            These are all the functions in this type.  Not all of them may have survived through to the final linked binary - they may have been removed by
+                            dead code removal (/OPT:REF), or folded with another function elsewhere via COMDAT folding (/OPT:ICF), or inlined at every usage site.  The
+                            'In final binary?' column tells you if this function still exists by the time this linked binary came out.
+                        </TextBlock>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Total size of all functions in this type: "/>
+                            <TextBlock Text="{Binding TotalSizeOfAllFunctions, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"/>
+                        </StackPanel>
+                        <DataGrid ItemsSource="{Binding Functions}" MaxHeight="300">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Size" Binding="{Binding FunctionCodeSymbol.Size, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"
+                                                    SortDirection="Descending"/>
+                                <DataGridTextColumn Header="In final binary?" Binding="{Binding IsInFinalBinary}"/>
+                                <controls:SizeBenchDataGridHyperlinkColumn Header="Function Name" 
+                                                                           HyperlinkTextBinding="{Binding FunctionCodeSymbol,
+                                                                                                          Converter={x:Static converters:FunctionToFormattedNameConverter.Instance},
+                                                                                                          ConverterParameter={x:Static local:UserDefinedTypeSymbolPageViewModel.FunctionNameFormatting}}"
+                                                                           CommandParameterBinding="{Binding FunctionCodeSymbol}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Wasteful Virtuals -->
+
+                <!-- Base Types / Derived Types? -->
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</navigation:SizeBenchPage>

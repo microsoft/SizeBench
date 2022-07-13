@@ -61,7 +61,7 @@ This is where the GUI comes in, as the name suggests - this is where the WPF vis
 data from the Analysis Engine exist.  Individual controls, pages, dialogs, and
 so on.
 
-##### GUI\SizeBenchV2.Packaging Project
+##### GUI\SizeBench.Packaging Project
 This project packages up the GUI exe into an MSIX/Centennial package so it
 can be put in the Windows Store for distribution and updates.
 

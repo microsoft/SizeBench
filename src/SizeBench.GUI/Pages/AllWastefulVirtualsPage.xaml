@@ -1,0 +1,73 @@
+﻿<navigation:SizeBenchPage x:Class="SizeBench.GUI.Pages.AllWastefulVirtualsPage"
+                          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                          xmlns:analysisEngine="clr-namespace:SizeBench.AnalysisEngine;assembly=SizeBench.AnalysisEngine"
+                          xmlns:controls="clr-namespace:SizeBench.GUI.Controls"
+                          xmlns:navigation="clr-namespace:SizeBench.GUI.Controls.Navigation"
+                          xmlns:converters="clr-namespace:SizeBench.GUI.Converters"
+                          mc:Ignorable="d" 
+                          d:DesignHeight="300" d:DesignWidth="300"
+                          Title="All Wasteful Virtuals">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBlock Margin="4" TextWrapping="Wrap">
+            <Run>These functions are marked virtual, but they have only zero or one overrides - this can cost a lot in terms of </Run>
+            <Run>vtables in the binary, reloc entries, and so on.  It's often much more efficient to devirtualize these. </Run>
+        </TextBlock>
+        <CheckBox Grid.Row="1" IsChecked="{Binding ExcludeCOMTypes}" Content="Exclude COM Types"/>
+        <Button Style="{StaticResource ExportToExcelButtonStyle}" Command="{Binding ExportToExcelCommand}" Grid.Row="2"/>
+        <DataGrid ItemsSource="{Binding WastefulVirtualItems}" Grid.Row="3">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Waste Per Slot" Binding="{Binding WastePerSlot, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"
+                                    ElementStyle="{StaticResource RightAlignedTextStyle}"/>
+                <DataGridTextColumn Header="Wasted Size"
+                                    Binding="{Binding WastedSize, Mode=OneWay, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"
+                                    ElementStyle="{StaticResource RightAlignedTextStyle}"
+                                    SortDirection="Descending"/>
+                <controls:SizeBenchDataGridHyperlinkColumn Header="Type Name" Width="400"
+                                                           HyperlinkTextBinding="{Binding UserDefinedType.Name}"/>
+                <DataGridTemplateColumn Width="400" CanUserSort="False">
+                    <DataGridTemplateColumn.Header>
+                        <TextBlock Text="Virtuals With No Overrides" TextWrapping="Wrap"/>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ItemsControl ItemsSource="{Binding WastedOverridesNonPureWithNoOverrides}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Converter={x:Static converters:FunctionToFormattedNameConverter.Instance},
+                                                                  ConverterParameter={x:Static analysisEngine:WastefulVirtualItem.NameFormattingForWastedOverrides}}"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Width="400" CanUserSort="False">
+                    <DataGridTemplateColumn.Header>
+                        <TextBlock Text="Pure Virtuals With Exactly One Override" TextWrapping="Wrap"/>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ItemsControl ItemsSource="{Binding WastedOverridesPureWithExactlyOneOverride}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Converter={x:Static converters:FunctionToFormattedNameConverter.Instance},
+                                                                  ConverterParameter={x:Static analysisEngine:WastefulVirtualItem.NameFormattingForWastedOverrides}}"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</navigation:SizeBenchPage>

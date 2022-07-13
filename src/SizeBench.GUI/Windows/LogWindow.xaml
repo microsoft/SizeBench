@@ -1,0 +1,28 @@
+﻿<Window x:Class="SizeBench.GUI.Windows.LogWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:SizeBench.GUI.ViewModels"
+        Title="SizeBench Log"
+        Style="{StaticResource SizeBenchWindowStyle}"
+        ShowInTaskbar="True" Width="800" Height="400" ResizeMode="CanResizeWithGrip">
+    <Grid Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" Margin="5">
+        <Grid.Resources>
+            <local:LogEntryToLogWindowTreeViewDisplayConverter x:Key="LogEntryToLogWindowTreeViewDisplayConverter"/>
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
+            <TextBlock Text="Scope:"/>
+            <ComboBox ItemsSource="{Binding LogScopes}" DisplayMemberPath="Name" IsSynchronizedWithCurrentItem="True"/>
+        </StackPanel>
+        <TreeView Grid.Row="1" ItemsSource="{Binding LogScopes.CurrentItem.Entries}">
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate ItemsSource="{Binding Entries}">
+                    <TextBlock Text="{Binding Converter={StaticResource LogEntryToLogWindowTreeViewDisplayConverter}}"/>
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
+    </Grid>
+</Window>

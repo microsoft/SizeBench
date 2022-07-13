@@ -1,0 +1,75 @@
+﻿<navigation:SizeBenchPage x:Class="SizeBench.GUI.Pages.Symbols.COMDATFoldedSymbolPage"
+                          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                          xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                          xmlns:commands="clr-namespace:SizeBench.GUI.Commands"
+                          xmlns:controls="clr-namespace:SizeBench.GUI.Controls"
+                          xmlns:navigation="clr-namespace:SizeBench.GUI.Controls.Navigation"
+                          xmlns:converters="clr-namespace:SizeBench.GUI.Converters"
+                          mc:Ignorable="d" 
+      d:DesignHeight="300" d:DesignWidth="300"
+      Title="{Binding PageTitle}">
+    <StackPanel>
+        <StackPanel.Resources>
+            <Style TargetType="{x:Type TextBlock}">
+                <Setter Property="Margin" Value="0,0,5,3"/>
+            </Style>
+        </StackPanel.Resources>
+
+        <StackPanel Orientation="Horizontal">
+            <TextBlock Text="Name:"/>
+            <controls:SelectableTextBlock TextWrapping="Wrap" Text="{Binding Symbol.Name, Mode=OneWay, Converter={x:Static converters:SymbolNameToFriendlyNameConverter.Instance}}"/>
+        </StackPanel>
+
+        <TextBlock TextWrapping="Wrap" Margin="0,10,0,0">
+            <Run>This symbol has been folded together with other symbols in the binary thanks to</Run>
+            <Hyperlink NavigateUri="https://docs.microsoft.com/cpp/build/reference/opt-optimizations?view=msvc-160">
+                <i:Interaction.Behaviors>
+                    <navigation:ExternalHyperlinkNavigationBehavior/>
+                </i:Interaction.Behaviors>
+                <TextBlock Text="Identical COMDAT Folding (ICF)."/>
+            </Hyperlink>
+            <Run> The linker determined that all these symbols
+            contained identical bytes, so they were folded together to improve performance and disk footprint.  This is a good thing!  But it can make names confusing sometimes,
+            as well as understanding what source file, compiland, or lib contributed these bytes to the binary.</Run>
+            <LineBreak/>
+            <LineBreak/>
+            <Run>Below is a list of the </Run>
+            <Run Text="{Binding FoldedSymbols.Count, Mode=OneWay}"/>
+            <Run> symbols that all share these bytes, in alphabetical order.  Of all these, the symbol that SizeBench has attributed all of the bytes to is this one:</Run>
+        </TextBlock>
+
+        <TextBlock>
+            <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}"
+                       CommandParameter="{Binding CanonicalSymbol}">
+                <TextBlock DataContext="{Binding CanonicalSymbol}" TextWrapping="Wrap">
+                    <TextBlock.Text>
+                        <PriorityBinding>
+                            <!-- If we have a function we'd prefer to show the UniqueSignature, but if we don't then we'll fall back to the Name on things like data -->
+                            <Binding Path="UniqueSignature"/>
+                            <Binding Path="Name"/>
+                        </PriorityBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </Hyperlink>
+        </TextBlock>
+        
+        <ItemsControl Margin="0,5,0,0" ItemsSource="{Binding FoldedSymbols}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock TextTrimming="CharacterEllipsis">
+                        <TextBlock.Text>
+                            <PriorityBinding>
+                                <!-- If we have a function we'd prefer to show the UniqueSignature, but if we don't then we'll fall back to the Name on things like data -->
+                                <Binding Path="UniqueSignature"/>
+                                <Binding Path="Name"/>
+                            </PriorityBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+</navigation:SizeBenchPage>

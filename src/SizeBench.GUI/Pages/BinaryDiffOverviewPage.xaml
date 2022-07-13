@@ -1,0 +1,110 @@
+﻿<navigationControls:SizeBenchPage 
+    x:Class="SizeBench.GUI.Pages.BinaryDiffOverviewPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:commands="clr-namespace:SizeBench.GUI.Commands"
+    xmlns:controls="clr-namespace:SizeBench.GUI.Controls"
+    xmlns:navigationControls="clr-namespace:SizeBench.GUI.Controls.Navigation"
+    xmlns:navigation="clr-namespace:SizeBench.GUI.Navigation"
+    mc:Ignorable="d" d:DesignHeight="600" d:DesignWidth="800"
+    Title="Binary Diff Overview">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Border BorderBrush="Black" BorderThickness="2" CornerRadius="2" Background="AliceBlue" Margin="10" Padding="5">
+            <StackPanel>
+                <TextBlock FontSize="14" FontWeight="Bold" Text="Now analyzing a diff between"/>
+                <controls:SelectableTextBlock Text="{Binding DiffSession.BeforeSession.BinaryPath, FallbackValue=BinaryPath}" Margin="5,5,0,0"/>
+                <controls:SelectableTextBlock Text="{Binding DiffSession.BeforeSession.PdbPath, FallbackValue=PDBPath}" Margin="5,5,0,5"/>
+                <TextBlock Text="vs."/>
+                <controls:SelectableTextBlock Text="{Binding DiffSession.AfterSession.BinaryPath, FallbackValue=BinaryPath}" Margin="5,5,0,0"/>
+                <controls:SelectableTextBlock Text="{Binding DiffSession.AfterSession.PdbPath, FallbackValue=PDBPath}" Margin="5,5,0,5"/>
+            </StackPanel>
+        </Border>
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <Grid Margin="18,0,10,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Row="0" Grid.Column="0">
+                    <TextBlock Text="Start Exploring By..." FontSize="20" FontWeight="Bold" Margin="0,0,0,3"/>
+
+                    <TextBlock FontSize="14" Margin="10,5,0,5" TextWrapping="Wrap">
+                        <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}" CommandParameter="{x:Static navigation:WellKnownPages.AllBinarySectionDiffsPageUri}">Binary Sections</Hyperlink>
+                    </TextBlock>
+                    <TextBlock FontSize="14" Margin="10,5,0,5" TextWrapping="Wrap">
+                        <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}" CommandParameter="{x:Static navigation:WellKnownPages.AllLibDiffsPageUri}">Static Libraries</Hyperlink>
+                    </TextBlock>
+                    <TextBlock FontSize="14" Margin="10,5,0,5" TextWrapping="Wrap">
+                        <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}" CommandParameter="{x:Static navigation:WellKnownPages.AllCompilandDiffsPageUri}">Compilands (OBJs)</Hyperlink>
+                    </TextBlock>
+                    <TextBlock FontSize="14" Margin="10,5,0,5" TextWrapping="Wrap" Text="Source Files (Coming Soon!)"/>
+                    <!-- Some day also put here: Dynamic Initializers, Functions, VTables -->
+                </StackPanel>
+
+                <StackPanel Grid.Row="0" Grid.Column="1">
+                    <TextBlock Text="Analyze For Waste" FontSize="20" FontWeight="Bold" Margin="0,0,0,3"/>
+                    <TextBlock FontSize="14" Margin="10,5,0,5" TextWrapping="Wrap">
+                        <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}" CommandParameter="{x:Static navigation:WellKnownPages.AllWastefulVirtualDiffsPageUri}">Wasteful Virtuals</Hyperlink>
+                    </TextBlock>
+                    <TextBlock FontSize="14" Margin="10,5,0,5" TextWrapping="Wrap">
+                        <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}" CommandParameter="{x:Static navigation:WellKnownPages.AllDuplicateDataDiffsPageUri}">Duplicate Data</Hyperlink>
+                    </TextBlock>
+                    <TextBlock FontSize="14" Margin="10,5,0,5" TextWrapping="Wrap">
+                        <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}" CommandParameter="{x:Static navigation:WellKnownPages.AllTemplateFoldabilityDiffsPageUri}">Template Foldability</Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="0">
+                    <TextBlock Text="Object Size" FontSize="20" FontWeight="Bold" Margin="0,25,0,3"/>
+                    <TextBlock FontSize="14" Margin="10,5,0,5" TextWrapping="Wrap">
+                        <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}" CommandParameter="{x:Static navigation:WellKnownPages.TypeLayoutDiffPageUri}">Type Layout</Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+
+        <Border Grid.Row="2" BorderBrush="Black" BorderThickness="2" CornerRadius="2" Background="AliceBlue" Margin="10" Padding="5">
+            <StackPanel>
+                <TextBlock FontSize="14" FontWeight="Bold" Text="Want help with your binary size?"/>
+                <TextBlock TextWrapping="Wrap">
+                    <Run Text="If you want help digging into your binaries, understanding what's going on, why they're so big, or find something confusing - please consult"/>
+                    <Hyperlink NavigateUri="{x:Static navigation:WellKnownPages.HelpStartingPage}">
+                        <i:Interaction.Behaviors>
+                                <navigationControls:ExternalHyperlinkNavigationBehavior/>
+                            </i:Interaction.Behaviors>
+                        <TextBlock Text="the documentation"/>
+                    </Hyperlink>
+                    <Run Text="or reach out to"/>
+                    <Hyperlink NavigateUri="mailto:SizeBenchTeam@microsoft.com">
+                        <i:Interaction.Behaviors>
+                                <navigationControls:ExternalHyperlinkNavigationBehavior/>
+                            </i:Interaction.Behaviors>
+                        <TextBlock Text="SizeBenchTeam@microsoft.com"/>
+                    </Hyperlink>
+                    <Run Text="for assistance."/>
+                    <LineBreak/>
+                    <LineBreak/>
+                    <Run Text="If you work at Microsoft, there are additional internal resources including training available"/>
+                    <Hyperlink NavigateUri="https://aka.ms/sizebench-ms-internal-training-resources">
+                        <i:Interaction.Behaviors>
+                                <navigationControls:ExternalHyperlinkNavigationBehavior/>
+                            </i:Interaction.Behaviors>
+                        <TextBlock Text="here"/>
+                    </Hyperlink>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+    </Grid>
+</navigationControls:SizeBenchPage>

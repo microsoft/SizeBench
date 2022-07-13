@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <SizeBenchTestCode>true</SizeBenchTestCode>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Castle.Windsor" Version="5.1.2" />
+    <!--
+      Explicitly depending on a newer version of Newtonsoft.Json, since Windsor depends on an old version that in turn depends on a vulnerable Newtonsoft.Json version.
+      It's possible this could be removed when moving to a newer Castle.Windsor, leaving the implicit dependency.
+    -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SizeBench.AnalysisEngine\SizeBench.AnalysisEngine.csproj" />
+    <ProjectReference Include="..\SizeBench.ExcelExporter\SizeBench.ExcelExporter.csproj" />
+    <ProjectReference Include="..\SizeBench.LocalBuild\SizeBench.LocalBuild.csproj" />
+    <ProjectReference Include="..\SizeBench.Logging\SizeBench.Logging.csproj" />
+    <ProjectReference Include="..\SizeBench.PathLocators\SizeBench.PathLocators.csproj" />
+    <ProjectReference Include="..\SizeBench.TestDataCommon\SizeBench.TestDataCommon.csproj" />
+    <ProjectReference Include="..\SizeBench.TestInfrastructure\SizeBench.TestInfrastructure.csproj" />
+    <ProjectReference Include="..\SizeBench.GUI\SizeBench.GUI.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Dia2Lib">
+      <HintPath>..\ExternalDependencies\DIA\Dia2Lib.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

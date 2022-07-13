@@ -1,0 +1,209 @@
+﻿<navigation:SizeBenchPage x:Class="SizeBench.GUI.Pages.Symbols.FunctionCodeSymbolDiffPage"
+                          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                          xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                          xmlns:symbols="clr-namespace:SizeBench.AnalysisEngine.Symbols;assembly=SizeBench.AnalysisEngine"
+                          xmlns:navigation="clr-namespace:SizeBench.GUI.Controls.Navigation"
+                          xmlns:converters="clr-namespace:SizeBench.GUI.Converters"
+                          xmlns:drawing="clr-namespace:System.Drawing;assembly=System.Drawing"
+                          mc:Ignorable="d" 
+      d:DesignHeight="800" d:DesignWidth="800"
+      Title="{Binding PageTitle}">
+    <Grid Grid.IsSharedSizeScope="True">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Possible explanatory text about the different types of functions -->
+            <RowDefinition Height="Auto"/> <!-- Basic info shared between before and after, like name, full name, parent type -->
+            <RowDefinition Height="Auto"/> <!-- Headings "Function in 'before' binary" and "Function in 'after' binary" -->
+            <RowDefinition Height="*"/>    <!-- The scrollable region containing all the details -->
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="3" TextWrapping="Wrap" Margin="0,10,0,10"
+                   Visibility="{Binding ExplanatoryText, Converter={x:Static converters:NullToCollapsedConverter.Instance}}"
+                   Text="{Binding ExplanatoryText, Mode=OneWay}"/>
+
+        <Grid x:Name="BasicInfo" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3">
+            <Grid>
+                <Grid.Resources>
+                    <Style TargetType="{x:Type TextBlock}">
+                        <Setter Property="Margin" Value="0,0,5,3"/>
+                    </Style>
+                </Grid.Resources>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Column="0" Grid.Row="0" Text="Function Short Name:"/>
+                <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding FunctionDiff.FormattedName.IncludeParentType, Mode=OneWay}" TextWrapping="Wrap"/>
+
+                <TextBlock Grid.Column="0" Grid.Row="1" Text="Function Full Name:"/>
+                <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding FunctionDiff.FullName, Mode=OneWay}" TextWrapping="Wrap"/>
+
+                <TextBlock Grid.Column="0" Grid.Row="2" Text="Size Diff:"/>
+                <TextBlock Grid.Column="1" Grid.Row="2" Text="{Binding FunctionDiff.SizeDiff, Mode=OneWay,Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"/>
+
+                <StackPanel Grid.Row="3" Grid.ColumnSpan="2">
+                    <TextBlock TextWrapping="Wrap">
+                        <Run>Functions can be complex and composed of multiple things - the code in them, of course, but functions also create data in many
+                        cases.  This page shows only the function's code.</Run>
+                        <LineBreak/>
+                        <Run>SizeBench currently does not attempt to account for the size of inlines - so if this function was inlined at multiple callsites,
+                        those costs are not added up here.  Thus, you can think of the total size shown, and the list of blocks of code below, as a lower
+                        bound for the total cost of this function if you were able to delete it in its entirety.</Run>
+                    </TextBlock>
+
+                    <TextBlock TextWrapping="Wrap" Margin="5">
+                        <InlineUIContainer>
+                            <Image Source="{Binding Source={x:Static drawing:SystemIcons.Information},
+                                                    Converter={x:Static converters:IconToImageSourceConverter.Instance},
+                                                    Mode=OneWay}" Width="15" />                                
+                        </InlineUIContainer>
+                        <Run>Tip: Hover over a section or COFF Group name in the tables for a more human-readable description of what it is.</Run>
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <TextBlock Grid.Column="0" Grid.Row="2" Text="Function in 'Before' binary" FontSize="20"/>
+
+        <Rectangle Fill="Black" Width="2" Margin="5" VerticalAlignment="Stretch" Grid.Row="2" Grid.RowSpan="2" Grid.Column="1"/>
+
+        <TextBlock Grid.Column="2" Grid.Row="2" Text="Function in 'After' binary" FontSize="20"/>
+
+        <ScrollViewer x:Name="beforeDetailsScrollViewer" Grid.Column="0" Grid.Row="3" ScrollChanged="detailsScrollViewer_ScrollChanged">
+            <Grid>
+                <Grid Visibility="{Binding DoesBeforeSymbolExist, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}, ConverterParameter=Reverse}"
+                      d:Visibility="Collapsed">
+                    <TextBlock TextWrapping="Wrap" Text="This function does not exist in the 'before' binary."/>
+                </Grid>
+                <Grid Visibility="{Binding DoesBeforeSymbolExist, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" SharedSizeGroup="FunctionAttributesRow"/>
+                        <RowDefinition Height="Auto" SharedSizeGroup="NonContiguousBlocksExplanationRow"/>
+                        <RowDefinition Height="Auto" SharedSizeGroup="BlocksDataGridRow"/>
+                        <RowDefinition Height="Auto" SharedSizeGroup="ICFRow"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Row 0: Attributes -->
+                    <TextBlock Grid.Row="0" TextWrapping="Wrap" Margin="0,10,0,10" Text="{Binding BeforeAttributes, Mode=OneWay}"/>
+
+                    <!-- Rows 1 and 2: Blocks -->
+                    <TextBlock Grid.Row="1" TextWrapping="Wrap" Margin="0,0,0,10"
+                               Visibility="{Binding BeforeFunctionContainsMultipleCodeBlocks, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}}">
+                        <Run>This function has multiple noncontiguous blocks of code, separated across different parts of the binary - this is usually caused by </Run>
+                        <Hyperlink NavigateUri="https://docs.microsoft.com/cpp/build/profile-guided-optimizations?view=msvc-160">
+                            <i:Interaction.Behaviors>
+                                <navigation:ExternalHyperlinkNavigationBehavior/>
+                            </i:Interaction.Behaviors>
+                            Profile Guided Optimization (PGO)
+                        </Hyperlink>
+                        <Run> to help improve code locality and thus Disk I/O.</Run>
+                    </TextBlock>
+
+                    <DataGrid Grid.Row="2" ItemsSource="{Binding BeforeBlockPlacements, Mode=OneWay}" Style="{StaticResource SymbolPlacementDataGridStyle}"/>
+
+                    <!-- Row 3: ICF info -->
+                    <StackPanel Grid.Row="3" Visibility="{Binding IsBeforeFunctionCodeUsedForMultipleFunctions, Mode=OneWay, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}}">
+                        <TextBlock TextWrapping="Wrap" Margin="0,10,0,0">
+                            <Run>This code is used for multiple functions due to Identical COMDAT Folding (ICF).  The linker determined that all these functions contained identical bytes of code,
+                            so they were folded together to improve performance and disk footprint.  This is a good thing!  But it can make names confusing sometimes, as well as understanding
+                            what source file, compiland, or lib contributed this code to the binary.</Run>
+                            <LineBreak/>
+                            <LineBreak/>
+                            <Run>Note that the linker has thrown away information by the time SizeBench sees things, so the compiland, lib, and source file that the bytes are attributed to is
+                            essentially random among the list of functions shown below.  So don't be surprised or confused if foo.obj is where the bytes are attributed, even though the function
+                            is clearly in a different translation unit - SizeBench is doing the best it can, but the point is these bytes folded together and the cost needs to be attributed somewhere.</Run>
+                            <LineBreak/>
+                            <LineBreak/>
+                            <Run>This is the list of the </Run>
+                            <Run Text="{Binding BeforeFoldedFunctions.Count, Mode=OneWay}"/>
+                            <Run> functions that all share these bytes of code, in alphabetical order:</Run>
+                        </TextBlock>
+
+                        <ItemsControl Margin="0,3,0,0" ItemsSource="{Binding BeforeFoldedFunctions}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type symbols:IFunctionCodeSymbol}">
+                                    <TextBlock Text="{Binding FullName}" TextTrimming="CharacterEllipsis"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </ScrollViewer>
+
+        <ScrollViewer x:Name="afterDetailsScrollViewer" Grid.Column="2" Grid.Row="3" ScrollChanged="detailsScrollViewer_ScrollChanged">
+            <Grid>
+                <Grid Visibility="{Binding DoesAfterSymbolExist, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}, ConverterParameter=Reverse}"
+                      d:Visibility="Collapsed">
+                    <TextBlock TextWrapping="Wrap" Text="This function does not exist in the 'after' binary."/>
+                </Grid>
+                <Grid Visibility="{Binding DoesAfterSymbolExist, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" SharedSizeGroup="FunctionAttributesRow"/>
+                        <RowDefinition Height="Auto" SharedSizeGroup="NonContiguousBlocksExplanationRow"/>
+                        <RowDefinition Height="Auto" SharedSizeGroup="BlocksDataGridRow"/>
+                        <RowDefinition Height="Auto" SharedSizeGroup="ICFRow"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Row 0: Attributes -->
+                    <TextBlock Grid.Row="0" TextWrapping="Wrap" Margin="0,10,0,10" Text="{Binding AfterAttributes, Mode=OneWay}"/>
+
+                    <!-- Rows 1 and 2: Blocks -->
+                    <TextBlock Grid.Row="1" TextWrapping="Wrap" Margin="0,0,0,10"
+                               Visibility="{Binding AfterFunctionContainsMultipleCodeBlocks, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}}">
+                        <Run>This function has multiple noncontiguous blocks of code, separated across different parts of the binary - this is usually caused by </Run>
+                        <Hyperlink NavigateUri="https://docs.microsoft.com/cpp/build/profile-guided-optimizations?view=msvc-160">
+                            <i:Interaction.Behaviors>
+                                <navigation:ExternalHyperlinkNavigationBehavior/>
+                            </i:Interaction.Behaviors>
+                            Profile Guided Optimization (PGO)
+                        </Hyperlink>
+                        <Run> to help improve code locality and thus Disk I/O.</Run>
+                    </TextBlock>
+
+                    <DataGrid Grid.Row="2" ItemsSource="{Binding AfterBlockPlacements, Mode=OneWay}" Style="{StaticResource SymbolPlacementDataGridStyle}"/>
+
+                    <!-- Row 3: ICF info -->
+                    <StackPanel Grid.Row="3" Visibility="{Binding IsAfterFunctionCodeUsedForMultipleFunctions, Mode=OneWay, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}}">
+                        <TextBlock TextWrapping="Wrap" Margin="0,10,0,0">
+                            <Run>This code is used for multiple functions due to Identical COMDAT Folding (ICF).  The linker determined that all these functions contained identical bytes of code,
+                            so they were folded together to improve performance and disk footprint.  This is a good thing!  But it can make names confusing sometimes, as well as understanding
+                            what source file, compiland, or lib contributed this code to the binary.</Run>
+                            <LineBreak/>
+                            <LineBreak/>
+                            <Run>Note that the linker has thrown away information by the time SizeBench sees things, so the compiland, lib, and source file that the bytes are attributed to is
+                            essentially random among the list of functions shown below.  So don't be surprised or confused if foo.obj is where the bytes are attributed, even though the function
+                            is clearly in a different translation unit - SizeBench is doing the best it can, but the point is these bytes folded together and the cost needs to be attributed somewhere.</Run>
+                            <LineBreak/>
+                            <LineBreak/>
+                            <Run>This is the list of the </Run>
+                            <Run Text="{Binding AfterFoldedFunctions.Count, Mode=OneWay}"/>
+                            <Run> functions that all share these bytes of code, in alphabetical order:</Run>
+                        </TextBlock>
+
+                        <ItemsControl Margin="0,3,0,0" ItemsSource="{Binding AfterFoldedFunctions}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type symbols:IFunctionCodeSymbol}">
+                                    <TextBlock Text="{Binding FullName}" TextTrimming="CharacterEllipsis"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</navigation:SizeBenchPage>

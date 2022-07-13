@@ -1,0 +1,58 @@
+﻿<navigation:SizeBenchPage x:Class="SizeBench.GUI.Pages.DuplicateDataPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:SizeBench.GUI.Pages"
+      xmlns:commands="clr-namespace:SizeBench.GUI.Commands"
+      xmlns:core="clr-namespace:SizeBench.GUI.Core"
+      xmlns:analysisEngine="clr-namespace:SizeBench.AnalysisEngine;assembly=SizeBench.AnalysisEngine"
+      xmlns:navigation="clr-namespace:SizeBench.GUI.Controls.Navigation"
+      mc:Ignorable="d" 
+      d:DesignHeight="300" d:DesignWidth="450"
+      Title="{Binding DuplicateDataItem.Symbol.Name, StringFormat='Duplicate Data: {0}'}">
+    <Grid Margin="6,6,6,0">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.ColumnSpan="2" TextWrapping="Wrap">
+            <Run>This symbol is duplicated between multiple compilands - the most common cause of this is that it is marked as 'static const' </Run>
+            <Run>and would be better off marked as 'const' or 'extern __declspec(selectany) const'.  With the way it is defined now, it is </Run>
+            <Run>wasting space in the binary with the same data in multpiple locations.</Run>
+        </TextBlock>
+        <Rectangle Grid.Row="1" Grid.ColumnSpan="2" Margin="-6,3,-6,0" HorizontalAlignment="Stretch"  VerticalAlignment="Center" Fill="Black" Height="1"/>
+        <TextBlock Grid.Row="2" Margin="0,3,0,0" Text="Symbol Name"/>
+        <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,3,0,0">
+            <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}"
+                       CommandParameter="{Binding DuplicateDataItem.Symbol}">
+                <TextBlock Text="{Binding DuplicateDataItem.Symbol.Name}"/>
+            </Hyperlink>
+        </TextBlock>
+        <TextBlock Grid.Row="3" Margin="0,3,8,0" Text="Size of each copy"/>
+        <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,3,0,0" Text="{Binding DuplicateDataItem.Symbol.Size}"/>
+        <TextBlock Grid.Row="4" Margin="0,3,0,0" Text="Wasted Size"/>
+        <TextBlock Grid.Row="4" Grid.Column="1" Margin="0,3,0,0" Text="{Binding DuplicateDataItem.WastedSize}"/>
+        <TextBlock Grid.Row="5" Margin="0,3,0,0" Text="Referenced In"/>
+        <ItemsControl Grid.Row="5" Grid.Column="1" Margin="0,3,0,0" ItemsSource="{Binding DuplicateDataItem.ReferencedIn}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type analysisEngine:DuplicateDataItem}">
+                    <TextBlock>
+                        <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}"
+                                   CommandParameter="{Binding}">
+                            <TextBlock Text="{Binding Name}"/>
+                        </Hyperlink>
+                    </TextBlock>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Grid>
+</navigation:SizeBenchPage>

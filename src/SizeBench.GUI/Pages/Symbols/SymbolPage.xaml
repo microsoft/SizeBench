@@ -1,0 +1,109 @@
+﻿<navigation:SizeBenchPage
+      x:Class="SizeBench.GUI.Pages.Symbols.SymbolPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:converters="clr-namespace:SizeBench.GUI.Converters"
+      xmlns:commands="clr-namespace:SizeBench.GUI.Commands"
+      xmlns:controls="clr-namespace:SizeBench.GUI.Controls"
+      xmlns:navigation="clr-namespace:SizeBench.GUI.Controls.Navigation"
+      mc:Ignorable="d" 
+      d:DesignHeight="300" d:DesignWidth="300"
+      Title="{Binding PageTitle}">
+    <Grid>
+        <Grid Visibility="{Binding DoesSymbolExist, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}, ConverterParameter=Reverse}" d:Visibility="Collapsed">
+            <TextBlock TextWrapping="Wrap">
+                <Run>Symbol: </Run><Run Text="{Binding NameOfNonexistentSymbol, Mode=OneWay}"/><LineBreak/>
+                <LineBreak/>
+                <Run>This symbol could not be located - this can happen for a number of reasons.  Examples include:</Run><LineBreak/>
+                <LineBreak/>
+                <Run>&#x2981; The symbol was stripped out as dead by /OPT:REF or /Gw</Run><LineBreak/>
+                <Run>&#x2981; The symbol was inlined in all cases, so it doesn't exist on its own anywhere directly</Run>
+            </TextBlock>
+        </Grid>
+        <Grid Visibility="{Binding DoesSymbolExist, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}}">
+            <Grid>
+                <Grid.Resources>
+                    <Style TargetType="{x:Type TextBlock}">
+                        <Setter Property="Margin" Value="0,0,5,3"/>
+                    </Style>
+                </Grid.Resources>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Column="0" Grid.Row="0" Text="Symbol is in Binary Section: "/>
+                <TextBlock Grid.Column="1" Grid.Row="0">
+                    <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}"
+                               CommandParameter="{Binding BinarySection}">
+                        <TextBlock Text="{Binding BinarySection.Name}" />
+                    </Hyperlink>
+                    <Run Text="{Binding BinarySection, Mode=OneWay, Converter={x:Static converters:BinarySectionToDescriptionConverter.Instance}, StringFormat=({0})}"/>
+                </TextBlock>
+
+                <TextBlock Grid.Column="0" Grid.Row="1" Text="Symbol is in COFF Group: "/>
+                <TextBlock Grid.Column="1" Grid.Row="1">
+                    <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}"
+                               CommandParameter="{Binding COFFGroup}">
+                        <TextBlock Text="{Binding COFFGroup.Name}" />
+                    </Hyperlink>
+                    <Run Text="{Binding COFFGroup, Mode=OneWay, Converter={x:Static converters:COFFGroupToDescriptionConverter.Instance}, StringFormat=({0})}"/>
+                </TextBlock>
+
+                <TextBlock Grid.Column="0" Grid.Row="2" Text="Symbol is in Lib: "/>
+                <TextBlock Grid.Column="1" Grid.Row="2">
+                    <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}"
+                               CommandParameter="{Binding Lib}"
+                               ToolTip="{Binding Lib.Name}">
+                        <TextBlock Text="{Binding Lib.ShortName}" />
+                    </Hyperlink>
+                </TextBlock>
+
+                <TextBlock Grid.Column="0" Grid.Row="3" Text="Symbol is in Compiland: "/>
+                <TextBlock Grid.Column="1" Grid.Row="3">
+                    <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}"
+                               CommandParameter="{Binding Compiland}"
+                               ToolTip="{Binding Compiland.Name}">
+                        <TextBlock Text="{Binding Compiland.ShortName}" />
+                    </Hyperlink>
+                </TextBlock>
+
+                <TextBlock Grid.Column="0" Grid.Row="4" Text="Symbol is in Source File: "/>
+                <TextBlock Grid.Column="1" Grid.Row="4">
+                    <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}"
+                               CommandParameter="{Binding SourceFile}"
+                               ToolTip="{Binding SourceFile.Name}">
+                        <TextBlock Text="{Binding SourceFile.ShortName}" />
+                    </Hyperlink>
+                </TextBlock>
+                
+                <TextBlock Grid.Column="0" Grid.Row="5" Text="Name:"/>
+                <controls:SelectableTextBlock Grid.Column="1" Grid.Row="5" TextWrapping="Wrap" Text="{Binding Symbol.Name, Mode=OneWay, Converter={x:Static converters:SymbolNameToFriendlyNameConverter.Instance}}"/>
+
+                <TextBlock Grid.Column="0" Grid.Row="6" Text="RVA (Start-End):"/>
+                <TextBlock Grid.Column="1" Grid.Row="6" FontFamily="Consolas">
+                    <Run Text="{Binding Symbol.RVA, Mode=OneWay, StringFormat=0x{0:X}}"/><Run Text=" - "/><Run Text="{Binding Symbol.RVAEnd, Mode=OneWay, StringFormat=0x{0:X}}"/>
+                </TextBlock>
+
+                <TextBlock Grid.Column="0" Grid.Row="7" Text="Size on Disk:"/>
+                <TextBlock Grid.Column="1" Grid.Row="7" Text="{Binding Symbol.Size, Mode=OneWay,Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"/>
+
+                <TextBlock Grid.Column="0" Grid.Row="8" Text="Size in Memory:"/>
+                <TextBlock Grid.Column="1" Grid.Row="8" Text="{Binding Symbol.VirtualSize, Mode=OneWay,Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"/>
+            </Grid>
+        </Grid>
+    </Grid>
+</navigation:SizeBenchPage>

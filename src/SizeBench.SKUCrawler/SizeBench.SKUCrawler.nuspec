@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>SizeBench.SKUCrawler</id>
+    <version>$version$</version>
+    <authors>Microsoft</authors>
+    <owners>SizeBenchTeam@microsoft.com</owners>
+    <projectUrl>https://msblox.visualstudio.com/SizeBench</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>The SizeBench SKUCrawler is a tool to crawl through a folder or Windows SKU, collecting up a SQLite database with interesting data about binary size.</description>
+    <copyright>Microsoft Corp</copyright>
+  </metadata>
+  <files>
+    <file src="bin\x64\Release\net6.0-windows10.0.17763\win-x64\publish\**" target="tools\SizeBench.SKUCrawler"/>
+  </files>
+</package>

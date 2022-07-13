@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IncludeDbgXAssets>true</IncludeDbgXAssets>
+    <StartupObject>BinaryBytes.Program</StartupObject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Debugging.DataModel.DbgModelApiXtn" Version="20220617.1556.0" />
+    <PackageReference Include="Microsoft.Debugging.Platform.DbgX" Version="20220619.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SizeBench.AnalysisEngine\SizeBench.AnalysisEngine.csproj" />
+    <ProjectReference Include="..\SizeBench.ErrorReporting\SizeBench.ErrorReporting.csproj" />
+    <ProjectReference Include="..\SizeBench.Logging\SizeBench.Logging.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <NuspecFile>BinaryBytes.nuspec</NuspecFile>
+    <NuspecProperties>$(NuspecProperties);version=$(PackageVersion)$(VersionSuffix)</NuspecProperties>
+  </PropertyGroup>
+</Project>

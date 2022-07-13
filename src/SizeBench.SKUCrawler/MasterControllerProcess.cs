@@ -56,8 +56,11 @@ internal class MasterControllerProcess : IDisposable
 
         Console.WriteLine($"Starting batch process, command line: {commandLineForBatch}");
 
-        var batchProcess = new Process() { StartInfo = psi };
-        batchProcess.EnableRaisingEvents = true;
+        var batchProcess = new Process()
+        {
+            StartInfo = psi,
+            EnableRaisingEvents = true
+        };
         batchProcess.OutputDataReceived += BatchProcess_OutputDataReceived;
         batchProcess.ErrorDataReceived += BatchProcess_ErrorDataReceived;
         this.BatchProcesses.Add(batchProcess);

@@ -2,7 +2,8 @@
 
 # Welcome to the SizeBench repo
 
-This repository contains the SizeBench tool for doing size analysis of PE files typically used on Windows.  It's intended to help with questions like:
+This repository contains the SizeBench tool for doing size analysis of [PE files](https://docs.microsoft.com/en-us/windows/win32/debug/pe-format) (Portable Executables such as DLL, EXE,
+and SYS files) typically used on Windows.  It's intended to help with questions like:
 
 * Why is this binary so big?
 * What can be done to make it smaller?

@@ -1,3 +1,5 @@
+[![Build Status](https://dev.azure.com/ms/SizeBench/_apis/build/status/microsoft.SizeBench?branchName=main)](https://dev.azure.com/ms/SizeBench/_build/latest?definitionId=581&branchName=main)
+
 # Welcome to the SizeBench repo
 
 This repository contains the SizeBench tool for doing size analysis of PE files typically used on Windows.  It's intended to help with questions like:
@@ -31,5 +33,8 @@ Any use of third-party trademarks or logos are subject to those third-party's po
 
 ## Project Road Maps
 
-__TODO_add_roadmap__
-...
+The next expected work should be roughly this:
+
+1. Support LLD-linked binaries, to the degree they can be given LLD's PDBs.
+1. Support diffing of SourceFiles
+1. Improved support for binaries containing Rust code.

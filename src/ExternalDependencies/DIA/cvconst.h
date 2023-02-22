@@ -134,6 +134,7 @@ enum SymTagEnum
     SymTagHeapAllocationSite,
     SymTagCoffGroup,
     SymTagInlinee,
+    SymTagTaggedUnionCase, // a case of a tagged union UDT type
     SymTagMax
 };
 
@@ -173,7 +174,8 @@ enum UdtKind
     UdtStruct,
     UdtClass,
     UdtUnion,
-    UdtInterface
+    UdtInterface,
+    UdtTaggedUnion
 };
 
 enum BasicType

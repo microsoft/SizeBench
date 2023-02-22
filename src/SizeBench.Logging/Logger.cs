@@ -150,11 +150,8 @@ public sealed class Logger : ILogger
 
             if (disposing)
             {
-                if (this._parentApplicationLogger != null)
-                {
-                    this._parentApplicationLogger.RemoveSessionLog(this);
-                    // Despite the application logger being IDisposable, we don't want to dispose it here - it has a lifetime that explicitly exceeds the SessionLoggers that it creates.
-                }
+                this._parentApplicationLogger?.RemoveSessionLog(this);
+                // Despite the application logger being IDisposable, we don't want to dispose it here - it has a lifetime that explicitly exceeds the SessionLoggers that it creates.
             }
 
             this.IsDisposed = true;

@@ -13,6 +13,8 @@ Dllx64CustomAlign - for testing link.exe /ALIGN usage
 FortranDll - a DLL built using Intel's FORTRAN compiler (ifort).  This is not in the VS solution because I don't want users to have to have the Intel Fortran extensions installed
              to open the solution in VS to work on SizeBench, and the likelihood is that this will very rarely change.  This project can be opened in Intel's Visual Studio extension
              manually if you really need to rebuild it later.
+Rust - for testing Rust code, for scenarios like "enums with methods" that can't be emitted into PDBs by C/C++.
+       To build this use "cargo build --release" and get the DLL and PDB out of the target\release folder.
 
 Diff Testing
 ------------

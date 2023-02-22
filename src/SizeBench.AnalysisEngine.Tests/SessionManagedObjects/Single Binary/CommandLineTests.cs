@@ -102,33 +102,78 @@ public sealed class CommandLineTests
     }
 
     [TestMethod]
-    public void LTCGIncrementalDetectionWorks()
+    public void IncrementalLinkingDetectionWorks()
     {
-        var noLTCGSpecified = (LinkerCommandLine)CommandLine.FromLanguageAndToolName(CompilandLanguage.CV_CFL_LINK, "Microsoft (R) LINK", new Version(19, 28), new Version(19, 28), " / ERRORREPORT:QUEUE");
-        Assert.IsFalse(noLTCGSpecified.LTCGIsIncremental);
-
-        // LTCG is implied by /GL
-        var GLCountsAsLTCG = (LinkerCommandLine)CommandLine.FromLanguageAndToolName(CompilandLanguage.CV_CFL_LINK, "Microsoft (R) LINK", new Version(19, 28), new Version(19, 28), "/ltcg:INCREMENTAL /GL");
-        Assert.IsFalse(GLCountsAsLTCG.LTCGIsIncremental);
+        var noLTCGSpecified = MSVCLinkerFromArgs(" / ERRORREPORT:QUEUE");
+        Assert.IsFalse(noLTCGSpecified.IncrementallyLinked);
 
         // /DEBUG implies LTCGIncremental
-        var DebugCountsAsIncremental = (LinkerCommandLine)CommandLine.FromLanguageAndToolName(CompilandLanguage.CV_CFL_LINK, "Microsoft (R) LINK", new Version(19, 28), new Version(19, 28), "/DEBUG");
-        Assert.IsTrue(DebugCountsAsIncremental.LTCGIsIncremental);
+        var DebugCountsAsIncremental = MSVCLinkerFromArgs("/DEBUG");
+        Assert.IsTrue(DebugCountsAsIncremental.IncrementallyLinked);
 
         // /DEBUG still gets overridden by /incremental:no
-        var DebugGetsOverriddenByIncrementalNo = (LinkerCommandLine)CommandLine.FromLanguageAndToolName(CompilandLanguage.CV_CFL_LINK, "Microsoft (R) LINK", new Version(19, 28), new Version(19, 28), "/incremental:no /debug");
-        Assert.IsFalse(DebugGetsOverriddenByIncrementalNo.LTCGIsIncremental);
+        var DebugGetsOverriddenByIncrementalNo = MSVCLinkerFromArgs("/incremental:no /debug");
+        Assert.IsFalse(DebugGetsOverriddenByIncrementalNo.IncrementallyLinked);
 
-        var plainIncrementalCountsAsIncremental = (LinkerCommandLine)CommandLine.FromLanguageAndToolName(CompilandLanguage.CV_CFL_LINK, "Microsoft (R) LINK", new Version(19, 28), new Version(19, 28), "/ERRORREPORT:QUEUE /PDB:\"foo.pdb\" /ltcg:INCREMENTAL");
-        Assert.IsTrue(plainIncrementalCountsAsIncremental.LTCGIsIncremental);
+        var plainIncrementalCountsAsIncremental = MSVCLinkerFromArgs("/ERRORREPORT:QUEUE /PDB:\"foo.pdb\" /ltcg:INCREMENTAL");
+        Assert.IsTrue(plainIncrementalCountsAsIncremental.IncrementallyLinked);
 
-        var ltcgOverridesLtcgIncrementalIfLast = (LinkerCommandLine)CommandLine.FromLanguageAndToolName(CompilandLanguage.CV_CFL_LINK, "Microsoft (R) LINK", new Version(19, 28), new Version(19, 28), "/ERRORREPORT:QUEUE /PDB:\"foo.pdb\" /ltcg:INCREMENTAL /DEBUG /LTcG");
-        Assert.IsFalse(ltcgOverridesLtcgIncrementalIfLast.LTCGIsIncremental);
+        var ltcgOverridesLtcgIncrementalIfLast = MSVCLinkerFromArgs("/ERRORREPORT:QUEUE /PDB:\"foo.pdb\" /ltcg:INCREMENTAL /DEBUG /LTcG");
+        Assert.IsFalse(ltcgOverridesLtcgIncrementalIfLast.IncrementallyLinked);
 
-        var ltcgIncrementalOverridesIfLast = (LinkerCommandLine)CommandLine.FromLanguageAndToolName(CompilandLanguage.CV_CFL_LINK, "Microsoft (R) LINK", new Version(19, 28), new Version(19, 28), "/ERRORREPORT:QUEUE /PDB:\"foo.pdb\" /ltcg:INCREMENTAL /DEBUG /LTcG /debugType:pdata /ltcg:InCREMEntal");
-        Assert.IsTrue(ltcgIncrementalOverridesIfLast.LTCGIsIncremental);
+        var ltcgIncrementalOverridesIfLast = MSVCLinkerFromArgs("/ERRORREPORT:QUEUE /PDB:\"foo.pdb\" /ltcg:INCREMENTAL /DEBUG /LTcG /debugType:pdata /ltcg:InCREMEntal");
+        Assert.IsTrue(ltcgIncrementalOverridesIfLast.IncrementallyLinked);
 
-        var incrementalNoOverridesAll = (LinkerCommandLine)CommandLine.FromLanguageAndToolName(CompilandLanguage.CV_CFL_LINK, "Microsoft (R) LINK", new Version(19, 28), new Version(19, 28), "/ERRORREPORT:QUEUE /PDB:\"foo.pdb\" /ltcg:INCREMENTAL /DEBUG /LTcG /debugType:pdata /ltcg:InCREMEntal /incremental:NO");
-        Assert.IsFalse(incrementalNoOverridesAll.LTCGIsIncremental);
+        var incrementalNoOverridesAll = MSVCLinkerFromArgs("/ERRORREPORT:QUEUE /PDB:\"foo.pdb\" /ltcg:INCREMENTAL /DEBUG /LTcG /debugType:pdata /ltcg:InCREMEntal /incremental:NO");
+        Assert.IsFalse(incrementalNoOverridesAll.IncrementallyLinked);
+
+        // /debug:none overrides /debug
+        var debugNone = MSVCLinkerFromArgs("/debug /deBUG:NONE");
+        Assert.IsFalse(debugNone.IncrementallyLinked);
+
+        // Between opt:noX and opt:X, last one wins
+        var optRef = MSVCLinkerFromArgs("/debug /opt:ref");
+        Assert.IsFalse(optRef.IncrementallyLinked);
+        var optNoRefOverrides = MSVCLinkerFromArgs("/debug /opt:ref /opt:noicf,noref");
+        Assert.IsTrue(optNoRefOverrides.IncrementallyLinked);
+        var optRefOverridesFurther = MSVCLinkerFromArgs("/debug /opt:ref -opt:noref /opt:ref");
+        Assert.IsFalse(optRefOverridesFurther.IncrementallyLinked);
+
+        var optIcf = MSVCLinkerFromArgs("/debug /opt:ICF");
+        Assert.IsFalse(optIcf.IncrementallyLinked);
+        var optNoIcfOverrides = MSVCLinkerFromArgs("/debug /opt:icf /opt:noref,NOicf");
+        Assert.IsTrue(optNoIcfOverrides.IncrementallyLinked);
+        var optIcfOverridesFurther = MSVCLinkerFromArgs("/debug /opt:icf /opt:noicf -opt:ICF");
+        Assert.IsFalse(optIcfOverridesFurther.IncrementallyLinked);
+
+        var optLbr = MSVCLinkerFromArgs("/debug /opt:lbR");
+        Assert.IsFalse(optLbr.IncrementallyLinked);
+        var optNoLbrOverrides = MSVCLinkerFromArgs("/debug /opt:lbr /opt:noicf,nolbr");
+        Assert.IsTrue(optNoLbrOverrides.IncrementallyLinked);
+        var optLbrOverridesFurther = MSVCLinkerFromArgs("/debug -opt:LBR /opt:nolbr /opt:lbr");
+        Assert.IsFalse(optLbrOverridesFurther.IncrementallyLinked);
+
+        // order:, stub:, force, profile, release, winmd:only and the various clrimagetype flags all disable incremental linking, even if specified early (ordering does not matter)
+        var order = MSVCLinkerFromArgs("/orDER:@foo.ord /incremental");
+        Assert.IsFalse(order.IncrementallyLinked);
+        var stub = MSVCLinkerFromArgs("/stub:stub.exe /incremental");
+        Assert.IsFalse(stub.IncrementallyLinked);
+        var force = MSVCLinkerFromArgs("/FORCE /INCREMENTAL");
+        Assert.IsFalse(force.IncrementallyLinked);
+        var profile = MSVCLinkerFromArgs("-PROFILE /INCREMENTAL");
+        Assert.IsFalse(profile.IncrementallyLinked);
+        var release = MSVCLinkerFromArgs("/release /incremental");
+        Assert.IsFalse(release.IncrementallyLinked);
+        var winmdOnly = MSVCLinkerFromArgs("/winmd:only /debug /incremental");
+        Assert.IsFalse(winmdOnly.IncrementallyLinked);
+        var clrimageType = MSVCLinkerFromArgs("/clrimagetype:safe /incremental /debug");
+        Assert.IsFalse(clrimageType.IncrementallyLinked);
+        clrimageType = MSVCLinkerFromArgs("/clrimagetype:SAFE32BITPREFERRED /debug /incremental");
+        Assert.IsFalse(clrimageType.IncrementallyLinked);
+        clrimageType = MSVCLinkerFromArgs("-clrimagetype:PUre /debug /incremental");
+        Assert.IsFalse(clrimageType.IncrementallyLinked);
     }
+
+    private static LinkerCommandLine MSVCLinkerFromArgs(string args)
+        => (LinkerCommandLine)CommandLine.FromLanguageAndToolName(CompilandLanguage.CV_CFL_LINK, "Microsoft (R) LINK", new Version(19, 28), new Version(19, 28), args);
 }

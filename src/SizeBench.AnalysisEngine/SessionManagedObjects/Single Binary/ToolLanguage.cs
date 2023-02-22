@@ -17,13 +17,16 @@ public enum ToolLanguage
     COBOL = 0x06,
     Linker = 0x07,
     CVTRES = 0x08,
+    CVTPGD = 0x09,
 
     [Display(Name = "C#")]
     CSharp = 0x0A,  // C#
 
     VisualBasic = 0x0B,  // Visual Basic
+    ILASM = 0x0C,
     Java = 0x0D,
     JScript = 0x0E,
+    MSIL = 0x0F,  // Unknown MSIL (LTCG of .NETMODULE)
     HLSL = 0x10,  // High Level Shader Language
 
     [Display(Name = "Objective C")]
@@ -33,5 +36,9 @@ public enum ToolLanguage
     ObjectiveCPlusPlus = 0x12,  // Objective-C++
 
     Swift = 0x13,  // Swift
+
+    ALIASOBJ = 0x14,
+
+    Rust = 0x15, // Rust
     Unknown = Int32.MaxValue
 }

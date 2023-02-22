@@ -287,7 +287,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             throw new PDBNotSuitableForAnalysisException($"This binary was linked with '{linkerCommandLine.ToolName}'.  Currently, SizeBench requires linking with Microsoft's link.exe as only those PDBs contain sufficient information.  Note that when using clang/lld-link, you can continue to compile with clang, just the link must be done with Microsoft's linker.");
         }
 
-        if (linkerCommandLine.LTCGIsIncremental)
+        if (linkerCommandLine.IncrementallyLinked)
         {
             throw new PDBNotSuitableForAnalysisException("This binary is using incremental linking (such as /ltcg:incremental, or /debug without specifying /incremental:no).  This is not valid for SizeBench's static analysis purposes - please use /ltcg or /incremental:no or otherwise ensure a full link happens.");
         }
@@ -838,7 +838,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         var primaryBlockLength = GetSymbolLength(primaryBlockSymbol, symbolName);
         var functionType = primaryBlockSymbol.type;
         var functionClassParent = primaryBlockSymbol.classParent;
-        UserDefinedTypeSymbol? classParentUDT = null;
+        TypeSymbol? parentType = null;
 
         List<uint>? symIndexIdsOfBlockOverlappingPrimaryBlock = null;
         var separatedBlocks = ParseSeparatedBlocksFromFunction(primaryBlockSymbol, RVARange.FromRVAAndSize(primaryBlockRVA, primaryBlockLength),
@@ -847,7 +847,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
 
         if (functionClassParent != null)
         {
-            classParentUDT = GetOrCreateTypeSymbol<UserDefinedTypeSymbol>(functionClassParent, cancellationToken);
+            parentType = GetOrCreateTypeSymbol<TypeSymbol>(functionClassParent, cancellationToken);
         }
 
         // The assembler can generate function types that are empty.  This is also the true for compiler-generated functions (like "*filt$0*" functions), so we need to
@@ -870,7 +870,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         if (separatedBlocks is null)
         {
             return new SimpleFunctionCodeSymbol(this.DataCache, symbolName ?? "<unknown name>", primaryBlockRVA, primaryBlockLength, primaryBlockSymbol.symIndexId,
-                                                functionTypeSymbol, argumentNames, classParentUDT, (AccessModifier)primaryBlockSymbol.access,
+                                                functionTypeSymbol, argumentNames, parentType, (AccessModifier)primaryBlockSymbol.access,
                                                 isIntroVirtual: isIntroVirtual,
                                                 isPure: isPure,
                                                 isStatic: isStatic,
@@ -894,7 +894,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             }
 
             return new ComplexFunctionCodeSymbol(this.DataCache, symbolName ?? "<unknown name>", primaryBlock, separatedBlocks,
-                                                 functionTypeSymbol, argumentNames, classParentUDT, (AccessModifier)primaryBlockSymbol.access,
+                                                 functionTypeSymbol, argumentNames, parentType, (AccessModifier)primaryBlockSymbol.access,
                                                  isIntroVirtual: isIntroVirtual,
                                                  isPure: isPure,
                                                  isStatic: isStatic,
@@ -1805,10 +1805,11 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             }
 
             var functionClassParent = diaSymbol.classParent;
-            UserDefinedTypeSymbol? classParentUDT = null;
+            TypeSymbol? parentType = null;
             if (functionClassParent != null)
             {
-                classParentUDT = GetOrCreateTypeSymbol<UserDefinedTypeSymbol>(functionClassParent, cancellationToken);
+                // This could be a UserDefinedTypeSymbol in C and C++, in Rust it could also be an EnumTypeSymbol
+                parentType = GetOrCreateTypeSymbol<TypeSymbol>(functionClassParent, cancellationToken);
             }
 
             var functionType = diaSymbol.type;
@@ -1819,7 +1820,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                                                                     isStatic: false /* unused here for this type of name */,
                                                                     isIntroVirtual: false /* unused here for this type of name */,
                                                                     functionTypeSymbol,
-                                                                    classParentUDT,
+                                                                    parentType,
                                                                     GetSymbolName(diaSymbol)!,
                                                                     argumentNames: null /* unused here for this type of name */,
                                                                     isVirtual: false /* unused here for this type of name */,
@@ -2152,7 +2153,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
 
         if (returnValue is null)
         {
-            throw new InvalidOperationException($"We were asked to parse a {typeof(TSymbol).Name}, but we got back a {parsedSymbol?.GetType().Name ?? "null"} instead, that seems like a mistake.");
+            throw new InvalidOperationException($"We were asked to parse a {typeof(TSymbol).Name} for {diaSymbol.name ?? "<unknown name>"}, but we got back a {parsedSymbol?.GetType().Name ?? "null"} instead, that seems like a mistake.");
         }
 
         return returnValue;
@@ -2634,10 +2635,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             // Don't preallocate this to the size of enumBaseClasses, because enumBaseClasses.count ends up traversing the entire
             // list in DIA.  This is painfully slow.  Just guess that a class will have 4 base types, and let Dictionary resize
             // if needed, it's still faster that way.
-            if (BaseTypeIDs is null)
-            {
-                BaseTypeIDs = new Dictionary<uint, uint>(4);
-            }
+            BaseTypeIDs ??= new Dictionary<uint, uint>(4);
 
             if (baseClass.offset < 0)
             {

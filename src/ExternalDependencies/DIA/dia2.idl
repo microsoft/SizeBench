@@ -1468,6 +1468,47 @@ interface IDiaSymbol10 : IDiaSymbol9
         [out, size_is(cb)] BYTE *pb);
 };
 
+// Holds a numeric value obtained from a UdtTaggedUnion which can be 8, 16, 32, 64 or 128 bits in size.
+// The valueSizeBytes field contains the size of the data stored in the value field in bytes.
+// This can also viewed as:
+// struct DiaTagValue
+// {
+//     union
+//     {
+//         uint8 data8;
+//         uint16 data16;
+//         uint32 data32;
+//         uint64 data64;
+//         uint128 data128;
+//     };
+//     BYTE data_size;
+// };
+struct DiaTagValue
+{
+    BYTE value[16];
+    BYTE valueSizeBytes;
+};
+
+[
+    object,
+    uuid(b6f54fcd-05e3-433d-b305-b0c1437d2d16),
+    local,
+    helpstring("IDiaSymbol11 Interface"),
+    pointer_default(unique)
+]
+interface IDiaSymbol11 : IDiaSymbol10
+{
+    HRESULT get_discriminatedUnionTag(
+        [out] IDiaSymbol **ppTagType,
+        [out] DWORD *pTagOffset,
+        [out] struct DiaTagValue *pTagMask);
+
+    HRESULT get_tagRanges(
+        [in] DWORD count,
+        [out] DWORD *pcRangeValues,
+        [out, size_is(count)] struct DiaTagValue *rangeValues);
+};
+
 
 //
 //  SourceFiles
@@ -1820,7 +1861,7 @@ library Dia2Lib
 
     interface IDiaSectionContrib;
     interface IDiaEnumSectionContribs;
-    interface IDiaSymbol10;
+    interface IDiaSymbol11;
     interface IDiaEnumSymbolsByAddr2;
 };
 

@@ -23,7 +23,7 @@ public sealed class ComplexFunctionCodeSymbol : IFunctionCodeSymbol
 
     // For member functions, this will be set to the type they belong to.
     // This can be null, such as for free functions.
-    public UserDefinedTypeSymbol? ParentType { get; }
+    public TypeSymbol? ParentType { get; }
     public bool IsMemberFunction => this.ParentType != null;
 
     public CodeBlockSymbol PrimaryBlock { get; }
@@ -44,7 +44,7 @@ public sealed class ComplexFunctionCodeSymbol : IFunctionCodeSymbol
                                        List<SeparatedCodeBlockSymbol> separatedBlocks,
                                        FunctionTypeSymbol? functionType = null,
                                        ParameterDataSymbol[]? argumentNames = null,
-                                       UserDefinedTypeSymbol? parentType = null,
+                                       TypeSymbol? parentType = null,
                                        AccessModifier accessModifier = 0,
                                        bool isIntroVirtual = false,
                                        bool isPure = false,

@@ -27,7 +27,9 @@ public sealed class SimpleFunctionCodeSymbol : CodeBlockSymbol, IFunctionCodeSym
 
     // For member functions, this will be set to the type they belong to.
     // This can be null, such as for free functions.
-    public UserDefinedTypeSymbol? ParentType { get; }
+    // Note that this can be an EnumTypeSymbol in Rust - in C and C++ it's a UserDefinedType if it's non-null,
+    // but you can't assume that across all languages
+    public TypeSymbol? ParentType { get; }
     public bool IsMemberFunction => this.ParentType != null;
 
     public CodeBlockSymbol PrimaryBlock => this;
@@ -47,7 +49,7 @@ public sealed class SimpleFunctionCodeSymbol : CodeBlockSymbol, IFunctionCodeSym
                                       uint symIndexId,
                                       FunctionTypeSymbol? functionType = null,
                                       ParameterDataSymbol[]? argumentNames = null,
-                                      UserDefinedTypeSymbol? parentType = null,
+                                      TypeSymbol? parentType = null,
                                       AccessModifier accessModifier = 0,
                                       bool isIntroVirtual = false,
                                       bool isPure = false,

@@ -22,5 +22,7 @@ internal enum CompilandLanguage
     CV_CFL_OBJC = 0x11,  // Objective-C
     CV_CFL_OBJCXX = 0x12,  // Objective-C++
     CV_CFL_SWIFT = 0x13,  // Swift
+    CV_CFL_ALIASOBJ = 0x14,
+    CV_CFL_RUST = 0x15,  // Rust
     Unknown = Int32.MaxValue
 }

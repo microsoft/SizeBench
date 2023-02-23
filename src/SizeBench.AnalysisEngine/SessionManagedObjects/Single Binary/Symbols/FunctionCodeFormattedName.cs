@@ -81,7 +81,7 @@ public sealed class FunctionCodeFormattedName
                                             bool isStatic,
                                             bool isIntroVirtual,
                                             FunctionTypeSymbol? functionType,
-                                            UserDefinedTypeSymbol? parentType,
+                                            TypeSymbol? parentType,
                                             string functionName,
                                             IReadOnlyList<ParameterDataSymbol>? argumentNames,
                                             bool isVirtual,

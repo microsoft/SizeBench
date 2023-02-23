@@ -36,7 +36,7 @@ public sealed class UserDefinedTypeSymbol_STATests
 
             var vector_Reallocate = (SimpleFunctionCodeSymbol)textSymbols.Single(sym => sym.Name == "std::vector<xstack<int> *,std::allocator<xstack<int> *> >::_Reallocate(unsigned int64)");
 
-            var udt = vector_Reallocate.ParentType!;
+            var udt = (UserDefinedTypeSymbol)vector_Reallocate.ParentType!;
 
             // Simply accessing the Functions before anything else on the DIA thread has done so, should force them to lazy-load without deadlocking
             var functions = await udt.GetFunctionsAsync(this.CancellationToken);

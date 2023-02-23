@@ -144,10 +144,7 @@ internal class CommandLine
     {
         get
         {
-            if (this._splitArgs is null)
-            {
-                this._splitArgs = ArgumentSplitter.CommandLineToArgvW(this.Raw);
-            }
+            this._splitArgs ??= ArgumentSplitter.CommandLineToArgvW(this.Raw);
 
             return this._splitArgs;
         }
@@ -283,7 +280,7 @@ internal sealed class MSVC_CXX_CommandLine : CompilerCommandLine
 
 internal class LinkerCommandLine : CommandLine
 {
-    internal virtual bool LTCGIsIncremental { get; }
+    internal virtual bool IncrementallyLinked { get; }
     internal virtual bool IsPGInstrumented { get; }
 
     internal LinkerCommandLine(string rawCommandLine, CompilandLanguage language, string toolName, Version frontEndVersion, Version backEndVersion)
@@ -310,40 +307,167 @@ internal sealed class MSVC_LINK_CommandLine : LinkerCommandLine
         LTCGIncremental
     }
 
-    internal override bool LTCGIsIncremental
+    // See very similar code in BinSkim here: https://github.com/microsoft/binskim/pull/667/files#diff-355f6f7e5a5a3381ffa2c1d2bd33a41003ce1b09f036c818b913f64f8d235da1
+    internal override bool IncrementallyLinked
     {
         get
         {
-            LTCGStatus? ltcgStatus = null;
-            var incrementalNoSeen = false;
-            foreach (var arg in this.SplitArguments)
-            {
-                if (IsCommandLineOption(arg))
-                {
-                    var realArg = arg.TrimStart(switchPrefix);
+            var debugSet = false;
+            var optRef = false;
+            var optIcf = false;
+            var optLbr = false;
+            var order = false;
+            var explicitlyEnabled = false;
+            var explicitlyDisabled = false;
+            var ltcg = false;
+            bool? ltcgIncremental = false;
+            var winmdOnly = false;
+            var guardXfg = false;
+            var profile = false;
+            var stub = false;
+            var force = false;
+            var release = false;
+            var clrImageType = false;
 
-                    // According to MSDN, "/GL" implies LTCG
-                    if (String.Equals(realArg, "ltcg", StringComparison.OrdinalIgnoreCase) ||
-                        String.Equals(realArg, "GL", StringComparison.Ordinal))
+            foreach (var argumentWithPrefix in this.SplitArguments)
+            {
+                if (IsCommandLineOption(argumentWithPrefix))
+                {
+                    var argument = argumentWithPrefix.TrimStart(switchPrefix);
+
+                    // There are multiple /debug options so use StartsWith
+                    // Also according to MSDN, "/DEBUG" implies incremental link unless /INCREMENTAL:NO overrides it later, unless
+                    // it is debug:none
+                    if (argument.StartsWith("debug", StringComparison.OrdinalIgnoreCase))
                     {
-                        ltcgStatus = LTCGStatus.LTCG;
+                        debugSet = !argument.Contains(":none", StringComparison.OrdinalIgnoreCase);
                     }
-                    // Also according to MSDN, "/DEBUG" implies incremental link unless /INCREMENTAL:NO overrides it later
-                    else if (String.Equals(realArg, "ltcg:incremental", StringComparison.OrdinalIgnoreCase) ||
-                             String.Equals(realArg, "debug", StringComparison.OrdinalIgnoreCase))
+                    else if (argument.StartsWith("opt:", StringComparison.OrdinalIgnoreCase))
                     {
-                        ltcgStatus = LTCGStatus.LTCGIncremental;
+                        // Assume that if specified multiple times the last wins.  It is possible to specify arguments like
+                        // "/opt:icf <other args> /opt:ref,noicf" and end up with REF on and ICF off.
+                        if (argument.Contains("noref", StringComparison.OrdinalIgnoreCase))
+                        {
+                            optRef = false;
+                        }
+                        else if (argument.Contains("ref", StringComparison.OrdinalIgnoreCase))
+                        {
+                            optRef = true;
+                        }
+
+                        if (argument.Contains("noicf", StringComparison.OrdinalIgnoreCase))
+                        {
+                            optIcf = false;
+                        }
+                        else if (argument.Contains("icf", StringComparison.OrdinalIgnoreCase))
+                        {
+                            optIcf = true;
+                        }
+
+                        if (argument.Contains("nolbr", StringComparison.OrdinalIgnoreCase))
+                        {
+                            optLbr = false;
+                        }
+                        else if (argument.Contains("lbr", StringComparison.OrdinalIgnoreCase))
+                        {
+                            optLbr = true;
+                        }
                     }
-                    else if (String.Equals(realArg, "incremental:no", StringComparison.OrdinalIgnoreCase))
+                    else if (argument.StartsWith("order:", StringComparison.OrdinalIgnoreCase))
                     {
-                        incrementalNoSeen = true;
+                        order = true;
+                    }
+                    else if (String.Equals(argument, "incremental", StringComparison.OrdinalIgnoreCase) ||
+                             String.Equals(argument, "incremental:yes", StringComparison.OrdinalIgnoreCase))
+                    {
+                        explicitlyEnabled = true;
+                        explicitlyDisabled = false; // Assume that if specified multiple times the last wins
+                    }
+                    else if (String.Equals(argument, "incremental:no", StringComparison.OrdinalIgnoreCase))
+                    {
+                        explicitlyDisabled = true;
+                        explicitlyEnabled = false; // Assume that if specified multiple times the last wins
+                    }
+                    else if (String.Equals(argument, "ltcg", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ltcg = true;
+                        ltcgIncremental = false;
+                    }
+                    else if (String.Equals(argument, "ltcg:off", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ltcg = false;
+                        ltcgIncremental = false;
+                    }
+                    else if (String.Equals(argument, "ltcg:incremental", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ltcgIncremental = true;
+                    }
+                    else if (argument.StartsWith("guard:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (argument.Contains("noxfg", StringComparison.OrdinalIgnoreCase))
+                        {
+                            guardXfg = false;
+                        }
+                        else if (argument.Contains("xfg", StringComparison.OrdinalIgnoreCase))
+                        {
+                            guardXfg = true;
+                        }
+                    }
+                    else if (String.Equals(argument, "winmd:only", StringComparison.OrdinalIgnoreCase))
+                    {
+                        winmdOnly = true;
+                    }
+                    else if (String.Equals(argument, "profile", StringComparison.OrdinalIgnoreCase))
+                    {
+                        profile = true;
+                    }
+                    else if (argument.StartsWith("stub:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        stub = true;
+                    }
+                    else if (String.Equals(argument, "force", StringComparison.OrdinalIgnoreCase))
+                    {
+                        force = true;
+                    }
+                    else if (String.Equals(argument, "release", StringComparison.OrdinalIgnoreCase))
+                    {
+                        release = true;
+                    }
+                    else if (argument.StartsWith("clrimagetype:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        clrImageType = true;
                     }
                 }
             }
 
-            // If we see "/incremental:no" that always wins and we assume LTCG is not incremental.
-            // If we did not see "/incremental:no" then we need to see what the last thing was that we saw - "/ltcg" or "/ltcg:incremental"
-            return !incrementalNoSeen && ltcgStatus == LTCGStatus.LTCGIncremental;
+            if (!ltcgIncremental.HasValue && debugSet)
+            {
+                ltcgIncremental = true;
+            }
+
+            // If any of these flags are set, they explicitly disable incremental linking even if /incremental was also explicitly specified (with a linker warning)
+            if (winmdOnly || guardXfg || profile || stub || force || optIcf || optRef || optLbr || order || release || clrImageType)
+            {
+                return false;
+            }
+            // If /debug is set then incremental is implied unless certain other flags convert it back to false
+            // If nothing is specified then it is disabled.
+            else if (explicitlyEnabled)
+            {
+                return true;
+            }
+            else if (explicitlyDisabled)
+            {
+                return false;
+            }
+            else if (debugSet)
+            {
+                return (!ltcg || ltcgIncremental.Value);
+            }
+            else
+            {
+                return ltcgIncremental.Value;
+            }
         }
     }
 

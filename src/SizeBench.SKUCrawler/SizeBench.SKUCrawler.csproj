@@ -3,8 +3,16 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <IncludeDbgXAssets>true</IncludeDbgXAssets>
+    <IsPackable>true</IsPackable>
     <StartupObject>SizeBench.SKUCrawler.Program</StartupObject>
-    <PublishProfile>Properties\PublishProfiles\WinX64.pubxml</PublishProfile>
+      
+    <!-- Publishing Properties-->
+    <PublishProtocol>FileSystem</PublishProtocol>
+    <PublishDir>bin\$(Platform)\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\publish\</PublishDir>
+    <SelfContained>true</SelfContained>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishReadyToRunEmitSymbols>true</PublishReadyToRunEmitSymbols>
+    <PublishReadyToRunComposite>true</PublishReadyToRunComposite>
   </PropertyGroup>
 
   <ItemGroup>

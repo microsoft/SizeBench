@@ -5,9 +5,9 @@
     <version>$version$</version>
     <authors>Microsoft</authors>
     <owners>SizeBenchTeam@microsoft.com</owners>
-    <projectUrl>https://msblox.visualstudio.com/SizeBench</projectUrl>
+    <projectUrl>https://github.com/microsoft/SizeBench</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>The SizeBench SKUCrawler is a tool to crawl through a folder or Windows SKU, collecting up a SQLite database with interesting data about binary size.</description>
+    <description>The SizeBench SKUCrawler is a tool to crawl through a folder, collecting up a SQLite database with interesting data about binary size.</description>
     <copyright>Microsoft Corp</copyright>
   </metadata>
   <files>

@@ -1,6 +1,5 @@
 parameters:
   packageMSIX: false
-  packageNuGets: false
   publishNuGets: false
   runTests: true
 
@@ -127,6 +126,27 @@ steps:
       script: |
         $Package = Get-ChildItem -Recurse -Path "$(Build.ArtifactStagingDirectory)\MSIX\$(buildConfiguration)" -Filter "SizeBench.GUI*.appx"
         .\build\Test-SizeBenchPackage.ps1 -Verbose -Path $Package.FullName
+
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet publish SKUCrawler'
+  condition: and(succeeded(), eq(variables['buildConfiguration'], 'Release'))
+  inputs:
+    command: publish
+    publishWebProjects: false
+    modifyOutputPath: false
+    zipAfterPublish: false
+    projects: 'src\SizeBench.SKUCrawler\SizeBench.SKUCrawler.csproj'
+    arguments: '-c $(buildConfiguration)'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet pack SKUCrawler'
+  condition: and(succeeded(), eq(variables['buildConfiguration'], 'Release'))
+  inputs:
+    command: custom
+    projects: 'src\SizeBench.SKUCrawler\SizeBench.SKUCrawler.csproj'
+    custom: pack
+    arguments: '--no-build --output "$(Build.ArtifactStagingDirectory)\NuGets" /p:Configuration=$(BuildConfiguration) /p:PackageVersion=$(versionRelease)'
 
 
 - task: CopyFiles@2

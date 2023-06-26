@@ -16,8 +16,14 @@
 
   <!-- These properties and items apply only to product code. -->
   <ItemGroup Condition="'$(SizeBenchTestCode)'!='true'">
-    <!-- Enable SourceLink for product code only (don't need it for tests) -->
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
+    <PackageReference Include="DotNet.ReproducibleBuilds" Version="1.1.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="DotNet.ReproducibleBuilds.Isolated" Version="1.1.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
 
@@ -46,7 +52,7 @@
 
 
   <!-- This is all the stuff necessary to use DbgX at runtime, it's needed in multiple projects, so it's centralized here -->
-  <ItemGroup Condition="'$(IncludeDbgXAssets)'=='true'">
+  <ItemGroup Condition="'$(IncludeDbgXAssets)'=='true' and '$(MicrosoftDebuggingDataModelDbgModelApiXtnPath)' != ''">
     <Content Include="..\ExternalDependencies\DIA\msdia140.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

@@ -1,6 +1,5 @@
 parameters:
   packageMSIX: false
-  packageNuGets: false
   publishNuGets: false
 
 jobs:
@@ -18,5 +17,4 @@ jobs:
   - template: ./SizeBench-BuildAndTest-Steps.yml
     parameters:
       packageMSIX: ${{parameters.packageMSIX}}
-      packageNuGets: ${{parameters.packageNuGets}}
       publishNuGets: ${{parameters.publishNuGets}}

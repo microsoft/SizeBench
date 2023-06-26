@@ -9,8 +9,9 @@
   <PropertyGroup>
     <Company>Microsoft Corporation</Company>
     <Product>SizeBench</Product>
-    <Copyright>Copyright ©  2015-2022</Copyright>
+    <Copyright>Copyright ©  2015-2023</Copyright>
     <AssemblyTitle>SizeBench</AssemblyTitle>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -22,17 +23,9 @@
     <TargetFramework>net6.0-windows10.0.17763</TargetFramework>
     <Platforms>x64</Platforms>
     <PlatformTarget>x64</PlatformTarget>
+    <Platform>x64</Platform>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
-
-    <!-- Publish the repository URL in the built .nupkg (in the NuSpec <Repository> element) -->
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-
-    <!-- Embed source files that are not tracked by the source control manager in the PDB -->
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-
-    <!-- This is necessary for the VS profiler to work, it can't seem to load symbols when this is set to 'embedded' -->
-    <DebugType>full</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -41,16 +34,5 @@
     <Using Include="System.Linq"/>
     <Using Include="System.Threading"/>
     <Using Include="System.Threading.Tasks"/>
-  </ItemGroup>
-    
-  <!--
-    Deterministic build support for Source Link, which should only be done during CI builds.  TF_BUILD is set in Azure DevOps Pipelines.
-    See this blog post: https://devblogs.microsoft.com/dotnet/producing-packages-with-source-link/
-  -->
-  <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
-    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-  </PropertyGroup>
-  <ItemGroup>
-    <SourceRoot Include="$(MSBuildThisFileDirectory)/"/>
   </ItemGroup>
 </Project>

@@ -8,6 +8,10 @@ and SYS files) typically used on Windows.  It's intended to help with questions 
 * Why is this binary so big?
 * What can be done to make it smaller?
 
+<p align="center">
+    <img alt="Screenshot of SizeBench, showing wasted virtuals analysis" src="https://github.com/microsoft/SizeBench/blob/main/EndUserDocs/Images/WastefulVirtuals_Overview.png?raw=true" width="600" />
+</p>
+
 ### If you're a user of the tool
 You can get help by opening SizeBench and going to Help > Show Help.  Or, in this repo the usage docs are in the [EndUserDocs](/EndUserDocs) folder.
 

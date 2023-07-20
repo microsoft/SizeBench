@@ -10,7 +10,7 @@ namespace SizeBench.AnalysisEngine.RealPETests.Single_Binary;
 public class RustEnumTests
 {
     public TestContext? TestContext { get; set; }
-    private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory, filename);
+    private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory!, filename);
 
     private string BinaryPath => MakePath("SizeBenchV2_AnalysisEngine_Tests_Rust.dll");
     private string PDBPath => MakePath("SizeBenchV2_AnalysisEngine_Tests_Rust.pdb");

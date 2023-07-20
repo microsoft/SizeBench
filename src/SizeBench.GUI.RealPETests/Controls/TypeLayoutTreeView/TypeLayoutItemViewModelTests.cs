@@ -11,7 +11,7 @@ namespace SizeBench.GUI.Controls.TypeLayoutTreeView.Tests;
 public class TypeLayoutItemViewModelTests
 {
     public TestContext? TestContext { get; set; }
-    private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory, filename);
+    private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory!, filename);
 
     private string BinaryPath => MakePath("SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.dll");
     private string PDBPath => MakePath("SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.pdb");

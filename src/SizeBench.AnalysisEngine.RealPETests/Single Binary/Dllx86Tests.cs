@@ -11,7 +11,7 @@ public class Dllx86Tests
 {
     public TestContext? TestContext { get; set; }
     private CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
-    private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory, filename);
+    private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory!, filename);
 
     private string BinaryPath => MakePath("PEParser.Tests.Dllx86.dll");
     private string PDBPath => MakePath("PEParser.Tests.Dllx86.pdb");

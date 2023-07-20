@@ -9,7 +9,7 @@ namespace SizeBench.AnalysisEngine.Tests;
 public sealed class Session_EnumerateSymbolsInCOFFGroupTests
 {
     public TestContext? TestContext { get; set; }
-    private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory, filename);
+    private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory!, filename);
 
     private string BinaryPath => MakePath("SizeBenchV2.AnalysisEngine.Tests.CppDll.dll");
 

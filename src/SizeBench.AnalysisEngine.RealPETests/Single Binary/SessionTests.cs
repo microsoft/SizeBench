@@ -12,13 +12,13 @@ public class SessionTests
 {
     public TestContext? TestContext { get; set; }
 
-    private string CppDllBinaryPath => Path.Combine(this.TestContext!.DeploymentDirectory, "SizeBenchV2.AnalysisEngine.Tests.CppDll.dll");
+    private string CppDllBinaryPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.CppDll.dll");
 
-    private string CppDllPDBPath => Path.Combine(this.TestContext!.DeploymentDirectory, "SizeBenchV2.AnalysisEngine.Tests.CppDll.pdb");
+    private string CppDllPDBPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.CppDll.pdb");
 
-    private string Cpp32BitDllBinaryPath => Path.Combine(this.TestContext!.DeploymentDirectory, "SizeBenchV2.AnalysisEngine.Tests.Cpp32BitDll.dll");
+    private string Cpp32BitDllBinaryPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.Cpp32BitDll.dll");
 
-    private string Cpp32BitDllPDBPath => Path.Combine(this.TestContext!.DeploymentDirectory, "SizeBenchV2.AnalysisEngine.Tests.Cpp32BitDll.pdb");
+    private string Cpp32BitDllPDBPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.Cpp32BitDll.pdb");
 
     [TestMethod]
     public async Task BytesPerWordIsCorrectFor64Bit()

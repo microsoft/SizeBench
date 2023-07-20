@@ -26,8 +26,8 @@ public sealed class UserDefinedTypeSymbol_STATests
     {
         AsyncContext.Run(async () =>
         {
-            await using var session = await Session.Create(Path.Combine(this.TestContext!.DeploymentDirectory, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.dll"),
-                                                           Path.Combine(this.TestContext!.DeploymentDirectory, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.pdb"),
+            await using var session = await Session.Create(Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.dll"),
+                                                           Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.pdb"),
                                                            new NoOpLogger());
 
             var sections = await session.EnumerateBinarySectionsAndCOFFGroups(this.CancellationToken);

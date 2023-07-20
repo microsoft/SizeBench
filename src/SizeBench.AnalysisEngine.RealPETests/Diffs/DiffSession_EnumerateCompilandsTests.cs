@@ -12,13 +12,13 @@ public sealed class DiffSession_EnumerateCompilandsTests
 {
     public TestContext? TestContext { get; set; }
 
-    private string BeforeBinaryPath => Path.Combine(this.TestContext!.DeploymentDirectory, "CppTestCases_BasicDiffObjectsBefore.dll");
+    private string BeforeBinaryPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "CppTestCases_BasicDiffObjectsBefore.dll");
 
-    private string BeforePDBPath => Path.Combine(this.TestContext!.DeploymentDirectory, "CppTestCases_BasicDiffObjectsBefore.pdb");
+    private string BeforePDBPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "CppTestCases_BasicDiffObjectsBefore.pdb");
 
-    private string AfterBinaryPath => Path.Combine(this.TestContext!.DeploymentDirectory, "CppTestCases_BasicDiffObjectsAfter.dll");
+    private string AfterBinaryPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "CppTestCases_BasicDiffObjectsAfter.dll");
 
-    private string AfterPDBPath => Path.Combine(this.TestContext!.DeploymentDirectory, "CppTestCases_BasicDiffObjectsAfter.pdb");
+    private string AfterPDBPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "CppTestCases_BasicDiffObjectsAfter.pdb");
 
     [TestMethod]
     public async Task DiffWithSelfHasZeroSizeDiff()

@@ -11,7 +11,7 @@ namespace SizeBench.AnalysisEngine.Tests;
 public sealed class Session_BinarySectionsTests
 {
     public TestContext? TestContext { get; set; }
-    private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory, filename);
+    private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory!, filename);
 
     private string CppDllBinaryPath => MakePath("SizeBenchV2.AnalysisEngine.Tests.CppDll.dll");
 

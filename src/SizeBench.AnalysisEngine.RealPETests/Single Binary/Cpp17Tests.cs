@@ -12,8 +12,8 @@ public class Cpp17Tests
 {
     public TestContext? TestContext { get; set; }
 
-    public string Cpp17BinaryPath => Path.Combine(this.TestContext!.DeploymentDirectory, "SizeBenchV2.AnalysisEngine.Tests.Cpp17.dll");
-    public string Cpp17PdbPath => Path.Combine(this.TestContext!.DeploymentDirectory, "SizeBenchV2.AnalysisEngine.Tests.Cpp17.pdb");
+    public string Cpp17BinaryPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.Cpp17.dll");
+    public string Cpp17PdbPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.Cpp17.pdb");
 
     [TestMethod]
     public async Task Cpp17XDATACanBeParsed()

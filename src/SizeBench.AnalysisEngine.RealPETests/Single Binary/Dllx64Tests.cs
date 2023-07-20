@@ -11,7 +11,7 @@ namespace PEParser.Tests;
 public class Dllx64Tests
 {
     public TestContext? TestContext { get; set; }
-    private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory, filename);
+    private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory!, filename);
 
     private string BinaryPath => MakePath("PEParser.Tests.Dllx64.dll");
     private string PDBPath => MakePath("PEParser.Tests.Dllx64.pdb");

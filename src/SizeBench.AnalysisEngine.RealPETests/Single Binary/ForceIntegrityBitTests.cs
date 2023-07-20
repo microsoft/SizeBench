@@ -9,7 +9,7 @@ namespace SizeBench.AnalysisEngine.RealPETests.Single_Binary;
 public class ForceIntegrityBitTests
 {
     public TestContext? TestContext { get; set; }
-    private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory, filename);
+    private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory!, filename);
 
     private string BinaryPath => MakePath("SizeBenchV2.AnalysisEngine.Tests.ForceIntegrityBit.dll");
 

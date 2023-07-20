@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using SizeBench.Logging;
 using SizeBench.SKUCrawler.CrawlFolder;
 using SizeBench.Threading.Tasks.Schedulers;
@@ -7,7 +8,7 @@ namespace SizeBench.SKUCrawler;
 
 internal class MasterControllerProcess : IDisposable
 {
-    private readonly List<Process> BatchProcesses = new List<Process>();
+    private readonly ConcurrentBag<Process> BatchProcesses = new ConcurrentBag<Process>();
     //TODO: SKUCrawler: check if Parallel.ForEachAsync might be a simpler way of writing this code, once moved to .NET 6
     //TODO: SKUCrawler: 3 seems like a reasonable number of batch processes to run at once, since each one tries to soak all the CPU cores already, so this just
     //                  has a few running to interleave CPU work as they wait on disk I/O and such.
@@ -15,9 +16,9 @@ internal class MasterControllerProcess : IDisposable
     private readonly TaskFactory _taskFactory;
     private readonly List<Task> _batchTasks = new List<Task>();
     private readonly object _outputSyncObject = new object();
-    private readonly Dictionary<int, List<string>> _errorsFromBatchesByPID = new Dictionary<int, List<string>>();
-    private readonly Dictionary<int, string> _batchCommandLinesByPID = new Dictionary<int, string>();
-    private readonly Dictionary<int, int> _batchNumbersByPID = new Dictionary<int, int>();
+    private readonly ConcurrentDictionary<int, ConcurrentBag<string>> _errorsFromBatchesByPID = new ConcurrentDictionary<int, ConcurrentBag<string>>();
+    private readonly ConcurrentDictionary<int, string> _batchCommandLinesByPID = new ConcurrentDictionary<int, string>();
+    private readonly ConcurrentDictionary<int, int> _batchNumbersByPID = new ConcurrentDictionary<int, int>();
 
     public MasterControllerProcess()
     {
@@ -67,8 +68,8 @@ internal class MasterControllerProcess : IDisposable
         batchProcess.Start();
         batchProcess.BeginOutputReadLine();
         batchProcess.BeginErrorReadLine();
-        this._batchCommandLinesByPID.Add(batchProcess.Id, commandLineForBatch);
-        this._batchNumbersByPID.Add(batchProcess.Id, batchNumber);
+        this._batchCommandLinesByPID.TryAdd(batchProcess.Id, commandLineForBatch);
+        this._batchNumbersByPID.TryAdd(batchProcess.Id, batchNumber);
         batchProcess.WaitForExit(); //TODO: is there a way to use WaitForExitAsync to make this code cleaner and more correctly async?
     }
 
@@ -79,12 +80,7 @@ internal class MasterControllerProcess : IDisposable
             lock (this._outputSyncObject)
             {
                 var batchProcess = (Process)sender;
-                if (!this._errorsFromBatchesByPID.TryGetValue(batchProcess.Id, out var errorsFromThisBatch))
-                {
-                    errorsFromThisBatch = new List<string>();
-                    this._errorsFromBatchesByPID.Add(batchProcess.Id, errorsFromThisBatch);
-                }
-
+                var errorsFromThisBatch = this._errorsFromBatchesByPID.GetOrAdd(batchProcess.Id, (_) => new ConcurrentBag<string>());
                 errorsFromThisBatch.Add(e.Data);
             }
         }
@@ -136,7 +132,7 @@ internal class MasterControllerProcess : IDisposable
             }
         }
 
-        if (this._errorsFromBatchesByPID.Count > 0)
+        if (!this._errorsFromBatchesByPID.IsEmpty)
         {
             throw new InvalidOperationException($"{this._errorsFromBatchesByPID.Count} batches (of {this.BatchProcesses.Count} batches total) had at least one error emitted.");
         }

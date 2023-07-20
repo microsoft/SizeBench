@@ -10,7 +10,7 @@ public sealed class Session_EnumerateAnnotationsTests
 {
     public TestContext? TestContext { get; set; }
 
-    public string MakePath(string binary) => Path.Combine(this.TestContext!.DeploymentDirectory, binary);
+    public string MakePath(string binary) => Path.Combine(this.TestContext!.DeploymentDirectory!, binary);
 
     private string BinaryPath => MakePath("SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.dll");
     private string PDBPath => MakePath("SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.pdb");

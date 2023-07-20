@@ -13,7 +13,7 @@ public sealed class DiffRegressionTests
 {
     public TestContext? TestContext { get; set; }
 
-    public string MakePath(string binary) => Path.Combine(this.TestContext!.DeploymentDirectory, binary);
+    public string MakePath(string binary) => Path.Combine(this.TestContext!.DeploymentDirectory!, binary);
 
     [TestMethod]
     public async Task SymbolDiffsForArraysWorkWhenArrayElementCountChanges()

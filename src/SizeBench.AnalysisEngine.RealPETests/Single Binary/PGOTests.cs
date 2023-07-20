@@ -23,8 +23,8 @@ public sealed class PGOTests
         ArgumentNullException.ThrowIfNull(testContext);
 
         SessionLogger = new NoOpLogger();
-        MUXSession = await Session.Create(Path.Combine(testContext.DeploymentDirectory, "Microsoft.UI.Xaml.dll"),
-                                          Path.Combine(testContext.DeploymentDirectory, "Microsoft.UI.Xaml.pdb"),
+        MUXSession = await Session.Create(Path.Combine(testContext.DeploymentDirectory!, "Microsoft.UI.Xaml.dll"),
+                                          Path.Combine(testContext.DeploymentDirectory!, "Microsoft.UI.Xaml.pdb"),
                                           SessionLogger);
     }
 

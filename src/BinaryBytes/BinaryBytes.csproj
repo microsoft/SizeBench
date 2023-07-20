@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Debugging.DataModel.DbgModelApiXtn" Version="20220617.1556.0" />
     <PackageReference Include="Microsoft.Debugging.Platform.DbgX" Version="20220619.1.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.9" />
   </ItemGroup>
 
   <ItemGroup>

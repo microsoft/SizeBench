@@ -1,12 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="Castle.Windsor" Version="5.1.2" />
-    <!--
-      Explicitly depending on a newer version of Newtonsoft.Json, since Windsor depends on an old version that in turn depends on a vulnerable Newtonsoft.Json version.
-      It's possible this could be removed when moving to a newer Castle.Windsor, leaving the implicit dependency.
-    -->
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Castle.Windsor" Version="6.0.0" />
     <PackageReference Include="ClosedXML" Version="0.96.0" />
   </ItemGroup>
 

@@ -12,7 +12,7 @@ public sealed class Session_EnumerateWastefulVirtualsTests
 {
     public TestContext? TestContext { get; set; }
 
-    private string MakePath(string binary) => Path.Combine(this.TestContext!.DeploymentDirectory, binary);
+    private string MakePath(string binary) => Path.Combine(this.TestContext!.DeploymentDirectory!, binary);
 
     private string BinaryPath => MakePath("SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.dll");
     private string PDBPath => MakePath("SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.pdb");

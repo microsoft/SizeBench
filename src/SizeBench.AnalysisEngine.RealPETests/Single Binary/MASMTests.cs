@@ -16,7 +16,7 @@ public sealed class MASMTests
 
     private string PDBPath => MakePath("SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.pdb");
 
-    public string MakePath(string binary) => Path.Combine(this.TestContext!.DeploymentDirectory, binary);
+    public string MakePath(string binary) => Path.Combine(this.TestContext!.DeploymentDirectory!, binary);
 
     [TestMethod]
     public async Task MASMProcPointersCanBeParsedAndAreNotInRVARangesWhenOverlappingOtherSymbols()

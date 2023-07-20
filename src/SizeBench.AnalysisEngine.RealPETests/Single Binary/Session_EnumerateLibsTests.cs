@@ -13,7 +13,7 @@ public sealed class Session_EnumerateLibsTests
 {
     public TestContext? TestContext { get; set; }
     public CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
-    private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory, filename);
+    private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory!, filename);
 
     private string CppDllBinaryPath => MakePath("SizeBenchV2.AnalysisEngine.Tests.CppDll.dll");
 

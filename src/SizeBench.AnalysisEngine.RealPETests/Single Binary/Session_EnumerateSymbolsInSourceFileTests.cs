@@ -11,9 +11,9 @@ public sealed class Session_EnumerateSymbolsInSourceFileTests
 {
     public TestContext? TestContext { get; set; }
 
-    private string BinaryPath => Path.Combine(this.TestContext!.DeploymentDirectory, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.dll");
+    private string BinaryPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.dll");
 
-    private string PDBPath => Path.Combine(this.TestContext!.DeploymentDirectory, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.pdb");
+    private string PDBPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.pdb");
 
     private CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
 

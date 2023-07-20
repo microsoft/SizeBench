@@ -22,8 +22,8 @@ public sealed class DllArmTests
         ArgumentNullException.ThrowIfNull(testContext);
 
         SessionLogger = new NoOpLogger();
-        DllArm32Session = await Session.Create(Path.Combine(testContext.DeploymentDirectory, "PEParser.Tests.Dllarm32.dll"),
-                                               Path.Combine(testContext.DeploymentDirectory, "PEParser.Tests.Dllarm32.pdb"),
+        DllArm32Session = await Session.Create(Path.Combine(testContext.DeploymentDirectory!, "PEParser.Tests.Dllarm32.dll"),
+                                               Path.Combine(testContext.DeploymentDirectory!, "PEParser.Tests.Dllarm32.pdb"),
                                                SessionLogger);
     }
 

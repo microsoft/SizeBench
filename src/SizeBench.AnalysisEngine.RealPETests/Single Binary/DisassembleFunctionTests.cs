@@ -17,7 +17,7 @@ public sealed class DisassembleFunctionTests
 {
     public TestContext? TestContext { get; set; }
 
-    private string MakePath(string binary) => Path.Combine(this.TestContext!.DeploymentDirectory, binary);
+    private string MakePath(string binary) => Path.Combine(this.TestContext!.DeploymentDirectory!, binary);
 
     private CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
 

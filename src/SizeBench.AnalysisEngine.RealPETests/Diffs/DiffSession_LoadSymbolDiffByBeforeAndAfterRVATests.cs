@@ -17,13 +17,13 @@ public sealed class DiffSession_LoadSymbolDiffByBeforeAndAfterRVATests
 {
     public TestContext? TestContext { get; set; }
 
-    private string BeforeBinaryPath => Path.Combine(this.TestContext!.DeploymentDirectory, "CppTestCases_BasicDiffObjectsBefore.dll");
+    private string BeforeBinaryPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "CppTestCases_BasicDiffObjectsBefore.dll");
 
-    private string BeforePDBPath => Path.Combine(this.TestContext!.DeploymentDirectory, "CppTestCases_BasicDiffObjectsBefore.pdb");
+    private string BeforePDBPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "CppTestCases_BasicDiffObjectsBefore.pdb");
 
-    private string AfterBinaryPath => Path.Combine(this.TestContext!.DeploymentDirectory, "CppTestCases_BasicDiffObjectsAfter.dll");
+    private string AfterBinaryPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "CppTestCases_BasicDiffObjectsAfter.dll");
 
-    private string AfterPDBPath => Path.Combine(this.TestContext!.DeploymentDirectory, "CppTestCases_BasicDiffObjectsAfter.pdb");
+    private string AfterPDBPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "CppTestCases_BasicDiffObjectsAfter.pdb");
 
     [TestMethod]
     public async Task SymbolDiffsCanBeLoadedByRVAs()
@@ -60,10 +60,10 @@ public sealed class DiffSession_LoadSymbolDiffByBeforeAndAfterRVATests
     public async Task SymbolDiffsCanBeLoadedByRVAsInRSRC()
     {
         using var logger = new NoOpLogger();
-        await using var diffSession = await DiffSession.Create(Path.Combine(this.TestContext!.DeploymentDirectory, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.dll"),
-                                                               Path.Combine(this.TestContext!.DeploymentDirectory, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.pdb"),
-                                                               Path.Combine(this.TestContext!.DeploymentDirectory, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesAfter.dll"),
-                                                               Path.Combine(this.TestContext!.DeploymentDirectory, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesAfter.pdb"),
+        await using var diffSession = await DiffSession.Create(Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.dll"),
+                                                               Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.pdb"),
+                                                               Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesAfter.dll"),
+                                                               Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesAfter.pdb"),
                                                                logger);
 
         var cursorDiff = await diffSession.LoadSymbolDiffByBeforeAndAfterRVA(0xB310, 0x7240, CancellationToken.None);

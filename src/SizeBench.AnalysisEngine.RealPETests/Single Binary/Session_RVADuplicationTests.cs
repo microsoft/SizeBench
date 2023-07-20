@@ -23,8 +23,8 @@ public sealed class Session_RVADuplicationTests
         ArgumentNullException.ThrowIfNull(testContext);
 
         SessionLogger = new NoOpLogger();
-        ReactNativeXamlSession = await Session.Create(Path.Combine(testContext.DeploymentDirectory, "ReactNativeXaml.dll"),
-                                                      Path.Combine(testContext.DeploymentDirectory, "ReactNativeXaml.pdb"),
+        ReactNativeXamlSession = await Session.Create(Path.Combine(testContext.DeploymentDirectory!, "ReactNativeXaml.dll"),
+                                                      Path.Combine(testContext.DeploymentDirectory!, "ReactNativeXaml.pdb"),
                                                       SessionLogger);
     }
 

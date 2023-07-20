@@ -10,7 +10,7 @@ namespace SizeBench.AnalysisEngine.RealPETests.Single_Binary;
 public class DllCxxFrameHandler4Tests
 {
     public TestContext? TestContext { get; set; }
-    private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory, filename);
+    private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory!, filename);
 
     private string BinaryPath => MakePath("PEParser.Tests.DllCxxFrameHandler4.dll");
     private string PDBPath => MakePath("PEParser.Tests.DllCxxFrameHandler4.pdb");

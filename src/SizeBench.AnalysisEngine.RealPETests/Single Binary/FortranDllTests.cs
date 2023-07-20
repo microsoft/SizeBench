@@ -10,7 +10,7 @@ namespace SizeBench.AnalysisEngine.RealPETests.Single_Binary;
 public class FortranDllTests
 {
     public TestContext? TestContext { get; set; }
-    private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory, filename);
+    private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory!, filename);
 
     private string BinaryPath => MakePath("FortranDll.dll");
     private string PDBPath => MakePath("FortranDll.pdb");

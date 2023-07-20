@@ -20,7 +20,7 @@ public sealed class DiffSession_EnumerateSymbolsInCOFFGroupTests
     public TestContext? TestContext { get; set; }
     private CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
 
-    public string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory, filename);
+    public string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory!, filename);
 
     private string BeforeBinaryPath => MakePath("CppTestCases_BasicDiffObjectsBefore.dll");
 

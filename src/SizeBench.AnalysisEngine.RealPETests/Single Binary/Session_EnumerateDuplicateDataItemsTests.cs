@@ -14,7 +14,7 @@ public sealed class Session_EnumerateDuplicateDataItemsTests
 
     private string PDBPath => MakePath("SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.pdb");
 
-    public string MakePath(string binary) => Path.Combine(this.TestContext!.DeploymentDirectory, binary);
+    public string MakePath(string binary) => Path.Combine(this.TestContext!.DeploymentDirectory!, binary);
 
     [TestMethod]
     public async Task CppTestCasesBeforeDuplicateDataCanBeEnumerated()

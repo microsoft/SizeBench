@@ -9,7 +9,7 @@ namespace SizeBench.AnalysisEngine.RealPETests;
 public class MiniPDBTests
 {
     public TestContext? TestContext { get; set; }
-    private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory, filename);
+    private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory!, filename);
 
     private string BinaryPath => MakePath("SizeBenchV2.AnalysisEngine.Tests.Dllx64MinimalPDB.dll");
 

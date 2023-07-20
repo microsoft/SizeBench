@@ -12,13 +12,13 @@ public sealed class DiffSession_EnumerateDuplicateDataItemDiffsTests
 {
     public TestContext? TestContext { get; set; }
 
-    private string BeforeBinaryPath => Path.Combine(this.TestContext!.DeploymentDirectory, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.dll");
+    private string BeforeBinaryPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.dll");
 
-    private string BeforePDBPath => Path.Combine(this.TestContext!.DeploymentDirectory, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.pdb");
+    private string BeforePDBPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.pdb");
 
-    private string AfterBinaryPath => Path.Combine(this.TestContext!.DeploymentDirectory, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesAfter.dll");
+    private string AfterBinaryPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesAfter.dll");
 
-    private string AfterPDBPath => Path.Combine(this.TestContext!.DeploymentDirectory, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesAfter.pdb");
+    private string AfterPDBPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesAfter.pdb");
 
     [TestMethod]
     public async Task DiffWithSelfHasZeroSizeDiff()

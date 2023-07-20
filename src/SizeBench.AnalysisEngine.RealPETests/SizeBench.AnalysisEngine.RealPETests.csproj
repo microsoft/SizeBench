@@ -21,12 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Castle.Windsor" Version="5.1.2" />
-        <!--
-          Explicitly depending on a newer version of Newtonsoft.Json, since Windsor depends on an old version that in turn depends on a vulnerable Newtonsoft.Json version.
-          It's possible this could be removed when moving to a newer Castle.Windsor, leaving the implicit dependency.
-        -->
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+        <PackageReference Include="Castle.Windsor" Version="6.0.0" />
         <PackageReference Include="Microsoft.Debugging.DataModel.DbgModelApiXtn" Version="20220617.1556.0" />
         <PackageReference Include="Microsoft.Debugging.Platform.DbgX" Version="20220619.1.0" />
         <PackageReference Include="Nito.AsyncEx" Version="5.1.2" />

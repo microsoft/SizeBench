@@ -16,6 +16,10 @@ internal partial class MainWindow : Window
         {
             viewModel.TryResolveDeeplink(Program.Deeplink);
         }
+        else if (Program.CommandLineArgs != null)
+        {
+            viewModel.TryResolveCommandLineArgs(Program.CommandLineArgs);
+        }
 #pragma warning restore CS4014
         InitializeComponent();
     }

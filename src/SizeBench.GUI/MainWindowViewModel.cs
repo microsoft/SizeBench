@@ -144,6 +144,82 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
 
     #region Deeplinking
 
+    static bool PathAvailable(string? path)
+    {
+        return (path is not null) && File.Exists(path);
+    }
+
+    public async Task TryResolveCommandLineArgs(string[] args)
+    {
+        using var commandLineLog = this._applicationLogger.StartTaskLog("Trying to resolve command line");
+        string beforeBinaryPath = null;
+        string beforePdbPath = null;
+        string binaryPath = null;
+        string pdbPath = null;
+
+        // The command line patterns supported are:
+        //
+        // sizebench.exe <path to dll>
+        // sizebench.exe <path to dll> <path to pdb>
+        // sizebench.exe <path to previous dll> <path to dll>
+        // sizebench.exe <path to previous dll> <path to previous pdb> <path to dll> <path to pdb>
+        //
+        if (args.Length == 4)
+        {
+            beforeBinaryPath = args[0];
+            beforePdbPath = args[1];
+            binaryPath = args[2];
+            pdbPath = args[3];
+        }
+        else if (args.Length == 2)
+        {
+            var arg1 = args[0];
+            var arg2 = args[1];
+            if (String.Equals(Path.GetExtension(arg2), ".pdb", StringComparison.OrdinalIgnoreCase))
+            {
+                binaryPath = arg1;
+                pdbPath = arg2;
+            }
+            else
+            {
+                beforeBinaryPath = arg1;
+                beforePdbPath = Path.ChangeExtension(beforeBinaryPath, "pdb");
+                binaryPath = arg2;
+                pdbPath = Path.ChangeExtension(binaryPath, "pdb");
+            }
+        }
+        else if (args.Length == 1)
+        {
+            binaryPath = args[0];
+            pdbPath = Path.ChangeExtension(binaryPath, "pdb");
+        }
+        else
+        {
+            return;
+        }
+
+        if (PathAvailable(beforePdbPath) && PathAvailable(beforeBinaryPath) && PathAvailable(binaryPath) && PathAvailable(pdbPath))
+        {
+            var diffSession = await OpenDiffSessionFromBinaryPathsAndPDBPaths(commandLineLog, beforeBinaryPath, beforePdbPath, binaryPath, pdbPath);
+            if (diffSession is null)
+            {
+                return;
+            }
+
+            CreateNewDiffTab(diffSession);
+        }
+        else if (PathAvailable(binaryPath) && PathAvailable(pdbPath))
+        {
+            var session = await OpenSessionFromBinaryPathAndPDBPath(commandLineLog, binaryPath, pdbPath);
+            if (session is null)
+            {
+                return;
+            }
+
+            CreateNewSingleBinaryTab(session);
+        }
+    }
+
     public async Task TryResolveDeeplink(Uri deeplink)
     {
         using var deeplinkLog = this._applicationLogger.StartTaskLog("Trying to resolve deeplink");

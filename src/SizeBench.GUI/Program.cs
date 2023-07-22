@@ -12,6 +12,7 @@ namespace SizeBench.GUI;
 public static class Program
 {
     internal static Uri? Deeplink { get; private set; }
+    internal static string[]? CommandLineArgs { get; private set; }
     private static readonly WindsorContainer _windsorContainer = new WindsorContainer();
     private static IApplicationLogger? _logger;
 
@@ -78,6 +79,8 @@ public static class Program
                 catch (Exception) { }
 #pragma warning restore CA1031 // Do not catch general exception types
             }
+
+            CommandLineArgs = args;
         }
 
         using var app = _windsorContainer.Resolve<App>();

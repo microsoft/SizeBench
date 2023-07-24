@@ -8,10 +8,20 @@ and SYS files) typically used on Windows.  It's intended to help with questions 
 * Why is this binary so big?
 * What can be done to make it smaller?
 
-### If you're a user of the tool
+## If you're a user of the tool
 You can get help by opening SizeBench and going to Help > Show Help.  Or, in this repo the usage docs are in the [EndUserDocs](/EndUserDocs) folder.
 
 For an introduction to this tool, see the [announcement blog post](https://devblogs.microsoft.com/performance-diagnostics/sizebench-a-new-tool-for-analyzing-windows-binary-size/)
+
+### Quick Start
+
+Install SizeBench [from the Microsoft Store](https://www.microsoft.com/store/productId/9NDF4N1WG7D6).
+
+Launch it from the start menu, then select `Examine a Binary` to pick a PE file and its symbols.  Or select `Start a diff` to pick a "before" PE with its
+symbols and an "after" PE with its symbols.
+
+On the command line, use `sizebench.exe mybinary.exe mysymbols.pdb` to analyze a single binary, or `sizebench.exe ..\baseline\mybinary.exe ..\baseline\pdb\mybinary.exe mybinary.exe .\pdb\mybinary.pdb`
+to start a comparison session.
 
 ## Contributing
 We are excited to work alongside you, our amazing community!

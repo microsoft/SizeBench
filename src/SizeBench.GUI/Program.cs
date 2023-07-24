@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Web;
 using Castle.MicroKernel.Registration;
 using Castle.Windsor;
 using Castle.Windsor.Installer;
@@ -12,7 +14,6 @@ namespace SizeBench.GUI;
 public static class Program
 {
     internal static Uri? Deeplink { get; private set; }
-    internal static string[]? CommandLineArgs { get; private set; }
     private static readonly WindsorContainer _windsorContainer = new WindsorContainer();
     private static IApplicationLogger? _logger;
 
@@ -80,10 +81,73 @@ public static class Program
 #pragma warning restore CA1031 // Do not catch general exception types
             }
 
-            CommandLineArgs = args;
+            // If we haven't gotten one so far, maybe the args list can be composed into one?
+            Deeplink ??= ConvertArgumentsToDeepLink(args);
         }
 
         using var app = _windsorContainer.Resolve<App>();
         app.Run();
+    }
+
+    internal static Uri? ConvertArgumentsToDeepLink(string[] args)
+    {
+        // The command line patterns supported are:
+        //
+        // sizebench.exe <path to dll>
+        // sizebench.exe <path to dll> <path to pdb>
+        // sizebench.exe <path to previous dll> <path to dll>
+        // sizebench.exe <path to previous dll> <path to previous pdb> <path to dll> <path to pdb>
+        //
+
+        var queryBuilder = HttpUtility.ParseQueryString(String.Empty);
+        string path;
+        
+        if (args.Length == 4)
+        {
+            path = "BinaryDiffOverview";
+            queryBuilder.Add("BeforeBinaryPath", args[0]);
+            queryBuilder.Add("BeforePDBPath", args[1]);
+            queryBuilder.Add("BinaryPath", args[2]);
+            queryBuilder.Add("PDBPath", args[3]);
+        }
+        else if (args.Length == 2)
+        {
+            var arg1 = args[0];
+            var arg2 = args[1];
+            if (String.Equals(Path.GetExtension(arg2), ".pdb", StringComparison.OrdinalIgnoreCase))
+            {
+                path = "SingleBinaryOverview";
+                queryBuilder.Add("BinaryPath", arg1);
+                queryBuilder.Add("PDBPath", arg2);
+            }
+            else
+            {
+                path = "BinaryDiffOverview";
+                queryBuilder.Add("BinaryPath", arg1);
+                queryBuilder.Add("PDBPath", Path.ChangeExtension(arg1, "pdb"));
+                queryBuilder.Add("BeforeBinaryPath", arg2);
+                queryBuilder.Add("BeforePDBPath", Path.ChangeExtension(arg1, "pdb"));
+            }
+        }
+        else if (args.Length == 1)
+        {
+            path = "SingleBinaryOverview";
+            queryBuilder.Add("BinaryPath", args[0]);
+            queryBuilder.Add("PDBPath", Path.ChangeExtension(args[0], "pdb"));
+        }
+        else
+        {
+            return null;
+        }
+
+        var builder = new UriBuilder
+        {
+            Host = "2.0",
+            Scheme = "sizebench",
+            Path = path,
+            Query = queryBuilder.ToString()
+        };
+
+        return builder.Uri;
     }
 }

@@ -89,6 +89,19 @@ public static class Program
         app.Run();
     }
 
+    static bool AllPathsExist(params string[] paths)
+    {
+        foreach (var p in paths)
+        {
+            if (!File.Exists(p))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     internal static Uri? ConvertArgumentsToDeepLink(string[] args)
     {
         // The command line patterns supported are:
@@ -104,6 +117,11 @@ public static class Program
         
         if (args.Length == 4)
         {
+            if (!AllPathsExist(args[0], args[1], args[2], args[3]))
+            {
+                return null;
+            }
+
             path = "BinaryDiffOverview";
             queryBuilder.Add("BeforeBinaryPath", args[0]);
             queryBuilder.Add("BeforePDBPath", args[1]);
@@ -116,24 +134,44 @@ public static class Program
             var arg2 = args[1];
             if (String.Equals(Path.GetExtension(arg2), ".pdb", StringComparison.OrdinalIgnoreCase))
             {
+                if (!AllPathsExist(arg1, arg2))
+                {
+                    return null;
+                }
+
                 path = "SingleBinaryOverview";
                 queryBuilder.Add("BinaryPath", arg1);
                 queryBuilder.Add("PDBPath", arg2);
             }
             else
             {
+                var pdbPath = Path.ChangeExtension(arg1, "pdb");
+                var beforePdbPath = Path.ChangeExtension(arg2, "pdb");
+
+                if (!AllPathsExist(arg1, arg2, pdbPath, beforePdbPath))
+                {
+                    return null;
+                }
+
                 path = "BinaryDiffOverview";
                 queryBuilder.Add("BinaryPath", arg1);
-                queryBuilder.Add("PDBPath", Path.ChangeExtension(arg1, "pdb"));
+                queryBuilder.Add("PDBPath", pdbPath);
                 queryBuilder.Add("BeforeBinaryPath", arg2);
-                queryBuilder.Add("BeforePDBPath", Path.ChangeExtension(arg1, "pdb"));
+                queryBuilder.Add("BeforePDBPath", beforePdbPath);
             }
         }
         else if (args.Length == 1)
         {
+            var pdbPath = Path.ChangeExtension(args[0], "pdb");
+
+            if (!AllPathsExist(args[0], pdbPath))
+            {
+                return null;
+            }
+
             path = "SingleBinaryOverview";
             queryBuilder.Add("BinaryPath", args[0]);
-            queryBuilder.Add("PDBPath", Path.ChangeExtension(args[0], "pdb"));
+            queryBuilder.Add("PDBPath", pdbPath);
         }
         else
         {

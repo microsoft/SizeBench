@@ -56,7 +56,7 @@ public class LocalBuildPathLocator : IBinaryLocator
             return true;
         }
 
-        possiblePdbPath += ".pdb";
+        possiblePdbPath = binaryPath + ".pdb";
         if (File.Exists(possiblePdbPath))
         {
             pdbPath = possiblePdbPath;

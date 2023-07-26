@@ -20,7 +20,7 @@ Install SizeBench [from the Microsoft Store](https://www.microsoft.com/store/pro
 Launch it from the start menu, then select `Examine a Binary` to pick a PE file and its symbols.  Or select `Start a diff` to pick a "before" PE with its
 symbols and an "after" PE with its symbols.
 
-On the command line, use `sizebench.exe mybinary.exe mysymbols.pdb` to analyze a single binary, or `sizebench.exe ..\baseline\mybinary.exe ..\baseline\pdb\mybinary.exe mybinary.exe .\pdb\mybinary.pdb`
+On the command line, use `sizebench.exe mybinary.exe mysymbols.pdb` to analyze a single binary, or `sizebench.exe ..\baseline\mybinary.exe ..\baseline\pdb\mybinary.pdb mybinary.exe .\pdb\mybinary.pdb`
 to start a comparison session.
 
 ## Contributing

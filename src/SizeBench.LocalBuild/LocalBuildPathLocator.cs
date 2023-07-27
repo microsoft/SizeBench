@@ -40,4 +40,30 @@ public class LocalBuildPathLocator : IBinaryLocator
         binaryPath = String.Empty;
         return false;
     }
+
+    public bool TryInferPDBPathFromBinaryPath(string binaryPath, out string pdbPath)
+    {
+        if (binaryPath is null)
+        {
+            pdbPath = String.Empty;
+            return false;
+        }
+
+        var possiblePdbPath = Path.ChangeExtension(binaryPath, "pdb");
+        if (File.Exists(possiblePdbPath))
+        {
+            pdbPath = possiblePdbPath;
+            return true;
+        }
+
+        possiblePdbPath = binaryPath + ".pdb";
+        if (File.Exists(possiblePdbPath))
+        {
+            pdbPath = possiblePdbPath;
+            return true;
+        }
+
+        pdbPath = String.Empty;
+        return false;
+    }
 }

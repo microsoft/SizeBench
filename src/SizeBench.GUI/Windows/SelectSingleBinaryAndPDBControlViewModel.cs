@@ -22,7 +22,11 @@ public sealed class SelectSingleBinaryAndPDBControlViewModel : INotifyPropertyCh
         {
             this._pdbPath = value;
             RaiseOnPropertyChanged();
-            InferBinaryPathFromPDBPathIfPossible();
+
+            if (String.IsNullOrEmpty(this._binaryPath))
+            {
+                InferBinaryPathFromPDBPathIfPossible();
+            }
         }
     }
 
@@ -34,6 +38,11 @@ public sealed class SelectSingleBinaryAndPDBControlViewModel : INotifyPropertyCh
         {
             this._binaryPath = value;
             RaiseOnPropertyChanged();
+
+            if (String.IsNullOrEmpty(this._pdbPath))
+            {
+                InferPDBPathFromBinaryIfPossible();
+            }
         }
     }
 
@@ -45,6 +54,18 @@ public sealed class SelectSingleBinaryAndPDBControlViewModel : INotifyPropertyCh
                 File.Exists(binaryPath))
             {
                 this.BinaryPath = binaryPath;
+            }
+        }
+    }
+
+    private void InferPDBPathFromBinaryIfPossible()
+    {
+        foreach (var locator in  this._allLocators)
+        {
+            if (locator.TryInferPDBPathFromBinaryPath(this.BinaryPath, out var pdbPath) &&
+                File.Exists(pdbPath))
+            {
+                this.PDBPath = pdbPath;
             }
         }
     }

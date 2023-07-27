@@ -69,7 +69,15 @@
             <br />
             When you open a binary (whether individually or as a diff) you'll need to point to both the binary itself and its PDB. After you do, a tab gets opened where
             you can dig into more details. If you point to the PDB first, SizeBench will try to locate the binary - for the moment it only looks side-by-side with the
-            PDB, or it knows how to navigate the Windows build shares for Microsoft employees.
+            PDB.<br />
+            <br />
+            You can start SizeBench from the command line as well:<br />
+            <ul>
+                <li><tt>sizebench.exe mybinary.dll</tt> - View one binary, infer the path to mybinary.pdb</li>
+                <li><tt>sizebench.exe mybinary.dll ..\pdb\mybinary.pdb</tt> - View one binary, with a specific pdb</li>
+                <li><tt>sizebench.exe ..\baseline\mybinary.exe mybinary.exe</tt> - Compare two binaries, inferring paths to pdbs</li>
+                <li><tt>sizebench.exe ..\baseline\mybinary.exe ..\baseline\mybinary.pdb mybinary.exe mybinary.pdb</tt> - Compare two binaries, with full paths</li>
+            </ul>
         </p>
 
         <br style="clear:right" />

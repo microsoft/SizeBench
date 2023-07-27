@@ -3,8 +3,10 @@
 <Package
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap5="http://schemas.microsoft.com/appx/manifest/uap/windows10/5"
+  xmlns:desktop4="http://schemas.microsoft.com/appx/manifest/desktop/windows10/4"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  IgnorableNamespaces="uap rescap">
+  IgnorableNamespaces="uap rescap uap5 desktop4">
 
   <Identity
     Name="MicrosoftCorporationII.SizeBench"
@@ -44,6 +46,13 @@
             <uap:DisplayName>SizeBench</uap:DisplayName>
           </uap:Protocol>
         </uap:Extension>
+        <uap5:Extension
+            Category="windows.appExecutionAlias"
+            EntryPoint="Windows.FullTrustApplication">
+            <uap5:AppExecutionAlias desktop4:Subsystem="windows">
+                <uap5:ExecutionAlias Alias="sizebench.exe" />
+            </uap5:AppExecutionAlias>
+        </uap5:Extension>
       </Extensions>
     </Application>
   </Applications>

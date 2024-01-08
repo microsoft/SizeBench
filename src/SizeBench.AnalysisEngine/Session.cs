@@ -642,7 +642,7 @@ public sealed class Session : ISession
         // be properly coded and tested if it's important.
         if (member.Offset != Convert.ToUInt32(member.Offset))
         {
-            throw new ArgumentOutOfRangeException(nameof(member), "member.Offset is not able to be represented as a uint - this is unexpected.  How did this happen?");
+            throw new ArgumentOutOfRangeException(nameof(member), "offset of member is not able to be represented as a uint - this is unexpected.  How did this happen?");
         }
 
         // When loading the layout of a member, if it's a pointer or an array, we'll "chase through" to find the UDT but we don't

@@ -25,3 +25,7 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("CodeQuality", "IDE0079:Remove unnecessary suppression",
                            Justification = "The suppressions that can be removed get too noisy with VS and SDK updates changing the rules over time, and they're harmless to leave in.  Ignoring this to avoid noise in the VS Error List window.",
                            Scope = "namespaceanddescendants", Target = "~N:SizeBench.GUI")]
+
+[assembly: SuppressMessage("Usage", "CA2208:Instantiate argument exceptions correctly", 
+                           Justification = "Argument exceptions ordering isn't that important in the GUI, it's not a library used externally.  Also, there have been some regressions in CA2208 in the .NET 8 SDK where it has false positives (see https://github.com/dotnet/roslyn-analyzers/issues/6863)",
+                           Scope = "namespaceanddescendants", Target = "~N:SizeBench.GUI")]

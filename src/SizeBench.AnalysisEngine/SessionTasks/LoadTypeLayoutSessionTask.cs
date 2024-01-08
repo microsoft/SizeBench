@@ -48,7 +48,7 @@ internal class LoadTypeLayoutSessionTask : SessionTask<List<TypeLayoutItem>>
         }
     }
 
-    private UserDefinedTypeSymbol? ChaseThroughToUDT(TypeSymbol typeSymbol)
+    private static UserDefinedTypeSymbol? ChaseThroughToUDT(TypeSymbol typeSymbol)
     {
         if (typeSymbol is PointerTypeSymbol ptrType)
         {
@@ -327,7 +327,7 @@ internal class LoadTypeLayoutSessionTask : SessionTask<List<TypeLayoutItem>>
         return null;
     }
 
-    private decimal MaxOffsetPlusSizeSeenByAnyBaseType(IEnumerable<TypeLayoutItem>? baseTypeLayouts)
+    private static decimal MaxOffsetPlusSizeSeenByAnyBaseType(IEnumerable<TypeLayoutItem>? baseTypeLayouts)
     {
         if (baseTypeLayouts is null)
         {
@@ -393,7 +393,7 @@ internal class LoadTypeLayoutSessionTask : SessionTask<List<TypeLayoutItem>>
         return baseTypeLayouts;
     }
 
-    private TypeLayoutItemMember? GetLastMemberOffsetFromBaseTypeLayouts(TypeLayoutItem[]? baseTypeLayouts)
+    private static TypeLayoutItemMember? GetLastMemberOffsetFromBaseTypeLayouts(TypeLayoutItem[]? baseTypeLayouts)
     {
         if (baseTypeLayouts is null)
         {
@@ -421,7 +421,7 @@ internal class LoadTypeLayoutSessionTask : SessionTask<List<TypeLayoutItem>>
         return lastFromAnyBaseType;
     }
 
-    private TypeLayoutItemMember? GetLastMemberByOffsetFromItem(TypeLayoutItem type)
+    private static TypeLayoutItemMember? GetLastMemberByOffsetFromItem(TypeLayoutItem type)
     {
         TypeLayoutItemMember? lastFromAnyBaseType = null;
 
@@ -478,7 +478,7 @@ internal class LoadTypeLayoutSessionTask : SessionTask<List<TypeLayoutItem>>
         }
     }
 
-    private bool BaseTypeLayoutsContainVfptrAtOffsetAlready(UserDefinedTypeSymbol udt, IEnumerable<TypeLayoutItem>? baseTypeLayouts, uint offset)
+    private static bool BaseTypeLayoutsContainVfptrAtOffsetAlready(UserDefinedTypeSymbol udt, IEnumerable<TypeLayoutItem>? baseTypeLayouts, uint offset)
     {
         if (udt.VTableCount == 0 || baseTypeLayouts is null)
         {
@@ -496,7 +496,7 @@ internal class LoadTypeLayoutSessionTask : SessionTask<List<TypeLayoutItem>>
         return false;
     }
 
-    private bool ItemContainsVfptrAtOffsetAlready(TypeLayoutItem item, uint offset)
+    private static bool ItemContainsVfptrAtOffsetAlready(TypeLayoutItem item, uint offset)
     {
         if (item.UserDefinedType.VTableCount == 0)
         {

@@ -1442,14 +1442,14 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         }
     }
 
-    private void RecursivelyFindSymbols(IDiaSymbol parentSymbol,
-                                        SymTagEnum[] symTagsToSearchThrough,
-                                        SymTagEnum symTagToProcess,
-                                        CancellationToken cancellationToken,
-                                        Action<IDiaSymbol> processSymbol,
-                                        string? nameFilter = null,
-                                        bool filterWithUndecoratedNames = false,
-                                        uint currentDepthOfRecursion = 0)
+    private static void RecursivelyFindSymbols(IDiaSymbol parentSymbol,
+                                               SymTagEnum[] symTagsToSearchThrough,
+                                               SymTagEnum symTagToProcess,
+                                               CancellationToken cancellationToken,
+                                               Action<IDiaSymbol> processSymbol,
+                                               string? nameFilter = null,
+                                               bool filterWithUndecoratedNames = false,
+                                               uint currentDepthOfRecursion = 0)
     {
         // The reason we pass around 'symTagsToSearchThrough' is that iterating through every symbol in a large binary can be extraordinarily slow and 
         // allocates a ton of very short-lived COM objects, when callers will know what sym tags can ever contain the things they're searching for.

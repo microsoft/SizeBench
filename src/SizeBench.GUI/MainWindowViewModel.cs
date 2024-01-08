@@ -445,7 +445,7 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
         return diffSession;
     }
 
-    private Exception? ExtractExceptionNotWorthErrorReportingIfPossible(Exception ex)
+    private static Exception? ExtractExceptionNotWorthErrorReportingIfPossible(Exception ex)
     {
         if (ex is AggregateException aggregateException)
         {
@@ -472,7 +472,7 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
         return null;
     }
 
-    private Exception UnwrapDegenerateAggregateExceptions(Exception ex)
+    private static Exception UnwrapDegenerateAggregateExceptions(Exception ex)
     {
         if (ex is AggregateException aggregateException &&
             aggregateException.InnerExceptions.Count == 1)

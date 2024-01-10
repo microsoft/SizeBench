@@ -94,7 +94,8 @@ internal abstract unsafe class EHSymbolParser
 
     #endregion
 
-    protected MachineType MachineType { get; }
+    protected PEFile PEFile { get; }
+    protected MachineType MachineType => this.PEFile.MachineType;
     private SortedList<uint, XDataSymbol> XdataSymbols { get; } = new SortedList<uint, XDataSymbol>();
     private readonly IDIAAdapter _diaAdapter;
     protected byte* LibraryBaseAddress { get; }
@@ -114,11 +115,11 @@ internal abstract unsafe class EHSymbolParser
 
     protected EHSymbolParser(IDIAAdapter diaAdapter,
                              byte* libraryBaseAddress,
-                             MachineType machineType)
+                             PEFile peFile)
     {
         this._diaAdapter = diaAdapter;
         this.LibraryBaseAddress = libraryBaseAddress;
-        this.MachineType = machineType;
+        this.PEFile = peFile;
 
         // These handlers are all handlers that don't have language-specific data.  Sometimes called "KnownExceptionHandlers" in some MS-internal tools.
         this.NoLanguageSpecificDataHandlers = new List<uint>()
@@ -152,23 +153,23 @@ internal abstract unsafe class EHSymbolParser
             };
     }
 
-    protected abstract SortedList<uint, PDataSymbol> ParsePDataForArchitecture(uint sectionAlignment, SessionDataCache cache);
-    protected abstract void ParseXDataForArchitecture(uint sectionAlignment, RVARange? XDataRVARange, SessionDataCache cache);
+    protected abstract SortedList<uint, PDataSymbol> ParsePDataForArchitecture(SessionDataCache cache);
+    protected abstract void ParseXDataForArchitecture(RVARange? XDataRVARange, SessionDataCache cache);
     protected abstract uint GetGSDataSizeAdjusted(GS_UNWIND_Flags gsdata);
 
-    internal void Parse(uint sectionAlignment, RVARange? XDataRVARange, SessionDataCache cache, ILogger logger)
+    internal void Parse(RVARange? XDataRVARange, SessionDataCache cache, ILogger logger)
     {
         // First we parse PDATA because we may need it fully completed before we begin wandering into XDATA (such as if the XDATA
         // targets a data symbol and to materialize the data symbol we need to enumerate all libs and compilands, which in turn
         // needs to know the PDATA to establish section and COFF Group contributions)
         using (logger.StartTaskLog("Parsing PDATA"))
         {
-            cache.PDataSymbolsByRVA = ParsePDataForArchitecture(sectionAlignment, cache);
+            cache.PDataSymbolsByRVA = ParsePDataForArchitecture(cache);
         }
 
         using (logger.StartTaskLog("Parsing XDATA"))
         {
-            ParseXDataForArchitecture(sectionAlignment, XDataRVARange, cache);
+            ParseXDataForArchitecture(XDataRVARange, cache);
 
             var xdataRanges = new List<RVARange>();
 
@@ -218,9 +219,12 @@ internal abstract unsafe class EHSymbolParser
         }
     }
 
-    protected static T[] ParsePDATA<T>(byte* libraryBaseAddress, uint sectionAlignment, SessionDataCache cache)
+    protected T[] ParsePDATA<T>(byte* libraryBaseAddress, SessionDataCache cache)
     {
-        //TODO: see if this can be replaced by just looking at the OptionalHeader to avoid a P/Invoke
+        var exceptionDirectory = this.PEFile.ExceptionDirectory;
+
+        // We use the size out of the ExceptionDirectory instead of the one from ImageDirectoryEntryToDataEx, because the one from the P/Invoke
+        // is limited to ushort and the exception directory is often above 64KB in size so it can't be represented appropriately there.
         PInvokes.ImageDirectoryEntryToDataEx(libraryBaseAddress, false, IMAGE_DIRECTORY_ENTRY.Exception, out _ /* size */, out var headerPtr);
 
         // If we don't find an Exception directory, then this binary has no pdata.  An example of this is an apiset DLL like
@@ -236,30 +240,19 @@ internal abstract unsafe class EHSymbolParser
 
         var header = Marshal.PtrToStructure<IMAGE_SECTION_HEADER>(headerPtr);
         var pdataAddress = new IntPtr(libraryBaseAddress + header.VirtualAddress);
-        var arr = new T[header.VirtualSize / Marshal.SizeOf<T>()];
+        var arr = new T[exceptionDirectory.Size / Marshal.SizeOf<T>()];
         var handle = GCHandle.Alloc(arr, GCHandleType.Pinned);
         try
         {
             var arrPtr = handle.AddrOfPinnedObject();
-            PInvokes.memcpy(arrPtr, pdataAddress, new UIntPtr(header.VirtualSize));
+            PInvokes.memcpy(arrPtr, pdataAddress, new UIntPtr(exceptionDirectory.Size));
         }
         finally
         {
             handle.Free();
         }
 
-        // Round the size up to the next section alignment, since pdata is a section and may have padding
-        // on the end.  This way we ensure we capture any PDATA symbols that may extend beyond the virtual
-        // size of the pdata section - it's sort of unclear why this can happen, but Windows.UI.Xaml.dll definitely
-        // has symbols in the very far end of PDATA which are outside the virtual size and it shouldn't hurt anything
-        // to extend a bit too far because we know the binary is padded to this alignment anyway.
-        var sizeWithPadding = header.VirtualSize;
-        if (sizeWithPadding % sectionAlignment != 0)
-        {
-            sizeWithPadding += (sectionAlignment - header.VirtualSize % sectionAlignment);
-        }
-
-        cache.PDataRVARange = RVARange.FromRVAAndSize(header.VirtualAddress, sizeWithPadding);
+        cache.PDataRVARange = RVARange.FromRVAAndSize(exceptionDirectory.VirtualAddress, exceptionDirectory.Size);
         return arr;
     }
 
@@ -435,13 +428,13 @@ internal abstract unsafe class EHSymbolParser
     {
         // The header isn't meant to be read directly, use the properties to get the specific bits
         public byte FuncInfoHeader;
-        public bool isCatch => (this.FuncInfoHeader & 1) != 0; // True if this is a catch funclet, otherwise false
-        public bool isSeparated => (this.FuncInfoHeader & 1 << 1) != 0; // True if this function has separated code segments, false otherwise
-        public bool BBT => (this.FuncInfoHeader & 1 << 2) != 0; // True if set by Basic Block Transformations
-        public bool UnwindMap => (this.FuncInfoHeader & 1 << 3) != 0; // True if there is an Unwind Map RVA
-        public bool TryBlockMap => (this.FuncInfoHeader & 1 << 4) != 0; // True if these is a Try Black Map RVA
-        public bool EHs => (this.FuncInfoHeader & 1 << 5) != 0; // True if EHs flag is set
-        public bool NoExcept => (this.FuncInfoHeader & 1 << 6) != 0; // True if noexcept
+        public readonly bool isCatch => (this.FuncInfoHeader & 1) != 0; // True if this is a catch funclet, otherwise false
+        public readonly bool isSeparated => (this.FuncInfoHeader & 1 << 1) != 0; // True if this function has separated code segments, false otherwise
+        public readonly bool BBT => (this.FuncInfoHeader & 1 << 2) != 0; // True if set by Basic Block Transformations
+        public readonly bool UnwindMap => (this.FuncInfoHeader & 1 << 3) != 0; // True if there is an Unwind Map RVA
+        public readonly bool TryBlockMap => (this.FuncInfoHeader & 1 << 4) != 0; // True if these is a Try Black Map RVA
+        public readonly bool EHs => (this.FuncInfoHeader & 1 << 5) != 0; // True if EHs flag is set
+        public readonly bool NoExcept => (this.FuncInfoHeader & 1 << 6) != 0; // True if noexcept
 
         /* FuncInfoHeader last bit is reserved */
 

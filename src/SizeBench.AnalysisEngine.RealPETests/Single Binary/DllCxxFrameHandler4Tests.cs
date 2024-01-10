@@ -20,15 +20,9 @@ public class DllCxxFrameHandler4Tests
     {
         using var logger = new NoOpLogger();
         await using var session = await Session.Create(this.BinaryPath, this.PDBPath, logger);
-        // These are gotten from "link /dump /headers PEParser.Tests.DllCxxFrameHandler4.dll" and looking at the .pdata section-
-        // "virtual address" and "virtual size"
+        // These are gotten from "link /dump /headers PEParser.Tests.DllCxxFrameHandler4.dll" and looking at the "Exception" directory
         Assert.AreEqual(0x5000u, session.DataCache.PDataRVARange!.RVAStart);
-
-        // Note that the size will be rounded up to the nearest section alignment, so it will be 0x1000
-        // because the next section (.rsrc) doesn't begin until 0x6000
-        // To make this test easier to update as the binary may change, we calculate this as
-        // (beginning of .rsrc - beginning of .pdata)
-        Assert.AreEqual(0x6000u - 0x5000u, session.DataCache.PDataRVARange.Size);
+        Assert.AreEqual(0x2E8u, session.DataCache.PDataRVARange.Size);
 
         Assert.AreEqual(1, session.DataCache.XDataRVARanges!.Count);
 

@@ -679,7 +679,7 @@ internal readonly struct IMAGE_SECTION_HEADER
         get
         {
             var nameString = new string(this.Name);
-            if (nameString.IndexOf('\0', StringComparison.Ordinal) != -1)
+            if (nameString.Contains('\0', StringComparison.Ordinal))
             {
                 nameString = nameString[..nameString.IndexOf('\0', StringComparison.Ordinal)];
             }

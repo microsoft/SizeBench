@@ -38,6 +38,9 @@ internal sealed class PEFile : IDisposable, IBinaryDataLoader
 
     internal PEFileDebugSignature DebugSignature { get; private set; } = new PEFileDebugSignature(Guid.Empty, 0, String.Empty);
 
+    internal IMAGE_DATA_DIRECTORY ExceptionDirectory => this.BytesPerWord == 8 ? this._headers64.OptionalHeader.ExceptionTable : this._headers32.OptionalHeader.ExceptionTable;
+    internal IMAGE_DATA_DIRECTORY DebugDirectory => this.BytesPerWord == 8 ? this._headers64.OptionalHeader.Debug : this._headers32.OptionalHeader.Debug;
+
     public RVARange RsrcRange { get; }
     internal SortedList<uint, RsrcSymbolBase> RsrcSymbols { get; } = new SortedList<uint, RsrcSymbolBase>();
 
@@ -298,7 +301,7 @@ internal sealed class PEFile : IDisposable, IBinaryDataLoader
 
     private unsafe void ParseDebugDirectory(ILogger log)
     {
-        AddDirectorySymbolIfPresent(this.BytesPerWord == 8 ? this._headers64.OptionalHeader.Debug : this._headers32.OptionalHeader.Debug, "Debug");
+        AddDirectorySymbolIfPresent(this.DebugDirectory, "Debug");
 
         //TODO: see if this P/Invoke can be removed and we can just use the OptionalHeader.Debug RVA?
         PInvokes.ImageDirectoryEntryToDataEx(this._libraryBaseAddress, false, IMAGE_DIRECTORY_ENTRY.Debug, out _, out var headerPtr);
@@ -313,7 +316,7 @@ internal sealed class PEFile : IDisposable, IBinaryDataLoader
 
         unsafe
         {
-            var numDirectories = this.BytesPerWord == 8 ? this._headers64.OptionalHeader.Debug.Size / Marshal.SizeOf<IMAGE_DEBUG_DIRECTORY>() : this._headers32.OptionalHeader.Debug.Size / Marshal.SizeOf<IMAGE_DEBUG_DIRECTORY>();
+            var numDirectories = this.DebugDirectory.Size / Marshal.SizeOf<IMAGE_DEBUG_DIRECTORY>();
             this.DebugDirectories.Capacity = (int)numDirectories;
             log.Log($"Found {numDirectories} IMAGE_DEBUG_DIRECTORY entries");
 
@@ -475,7 +478,7 @@ internal sealed class PEFile : IDisposable, IBinaryDataLoader
     {
         unsafe
         {
-            EHSymbolTable.Parse(this._libraryBaseAddress, this.SectionAlignment, session.DataCache, diaAdapter, this._headers32.FileHeader.Machine, XDataRVARange, logger);
+            EHSymbolTable.Parse(this._libraryBaseAddress, session.DataCache, diaAdapter, this, XDataRVARange, logger);
         }
 
         if (session.DataCache.PDataSymbolsByRVA is null || session.DataCache.XDataSymbolsByRVA is null)

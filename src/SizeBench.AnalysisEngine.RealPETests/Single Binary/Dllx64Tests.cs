@@ -36,15 +36,9 @@ public class Dllx64Tests
     {
         using var logger = new NoOpLogger();
         await using var session = await Session.Create(this.BinaryPath, this.PDBPath, logger);
-        // These are gotten from "link /dump /headers PEParser.Tests.Dllx64.dll" and looking at the .pdata section-
-        // "virtual address" and "virtual size"
+        // These are gotten from "link /dump /headers PEParser.Tests.Dllx64.dll" and looking at the "Exception" directory
         Assert.AreEqual(0x7000u, session.DataCache.PDataRVARange!.RVAStart);
-
-        // Note that the size will be rounded up to the nearest section alignment, so it will be 0x1000
-        // because the next section (.gfids) doesn't begin until 0x8000
-        // To make this test easier to update as the binary may change, we calculate this as
-        // (beginning of .gfids - beginning of .pdata)
-        Assert.AreEqual(0x8000u - 0x7000u, session.DataCache.PDataRVARange.Size);
+        Assert.AreEqual(0x3C0u, session.DataCache.PDataRVARange.Size);
 
         // We should be discovering two RVA Ranges for xdata symbols for this binary.
         Assert.AreEqual(2, session.DataCache.XDataRVARanges!.Count);

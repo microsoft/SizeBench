@@ -62,6 +62,9 @@
                 <ModulePath>.*SizeBench.*TestDataCommon\.dll$</ModulePath>
                 <ModulePath>.*moq\.dll$</ModulePath>
                 <ModulePath>.*SizeBench.*TestData.*</ModulePath>
+                <!-- Exclude Test PEs so we don't instrument the checked-in test collateral, which can subtly change it -->
+                <ModulePath>.*Test PEs.*</ModulePath>
+                <ModulePath>.*TestPEs.*</ModulePath>
               </Exclude>
             </ModulePaths>
 

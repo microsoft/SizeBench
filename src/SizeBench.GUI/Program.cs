@@ -32,7 +32,7 @@ public static class Program
                                                     GenericUriParserOptions.DontCompressPath), "sizebench", -1);
         }
 
-        _windsorContainer.Install(FromAssembly.InDirectory(new AssemblyFilter(".", "SizeBench.*")));
+        _windsorContainer.Install(FromAssembly.InDirectory(new AssemblyFilter(".", "SizeBench.*dll")));
         _logger = _windsorContainer.Resolve<IApplicationLogger>();
 
         using (var startupInfoLogs = _logger.StartTaskLog("Launch info"))

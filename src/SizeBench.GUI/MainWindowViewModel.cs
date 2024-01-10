@@ -292,7 +292,7 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
         var container = new WindsorContainer();
         var newTab = new SingleBinaryTab(session, container);
 
-        container.Install(FromAssembly.InDirectory(new AssemblyFilter(".", "SizeBench.*")));
+        container.Install(FromAssembly.InDirectory(new AssemblyFilter(".", "SizeBench.*dll")));
         container.Register(reg.Component.For<ISession, ISessionWithProgress>()
                                         .Instance(session)
                                         .LifestyleSingleton());

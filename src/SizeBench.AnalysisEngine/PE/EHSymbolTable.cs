@@ -6,21 +6,21 @@ namespace SizeBench.AnalysisEngine.PE;
 
 internal static class EHSymbolTable
 {
-    internal static unsafe void Parse(byte* libraryBaseAddress, uint sectionAlignment, SessionDataCache dataCache, IDIAAdapter diaAdapter, MachineType machine, RVARange? XDataRVARange, ILogger logger)
+    internal static unsafe void Parse(byte* libraryBaseAddress, SessionDataCache dataCache, IDIAAdapter diaAdapter, PEFile peFile, RVARange? XDataRVARange, ILogger logger)
     {
         EHSymbolParser ehParser;
-        switch (machine)
+        switch (peFile.MachineType)
         {
             case MachineType.x64:
                 ehParser = new AMD64_EHParser(diaAdapter,
                                               libraryBaseAddress,
-                                              machine);
+                                              peFile);
                 break;
             case MachineType.ARM:
             case MachineType.ARM64:
                 ehParser = new ARM_EHParser(diaAdapter,
                                             libraryBaseAddress,
-                                            machine);
+                                            peFile);
                 break;
             case MachineType.I386:
                 // x86 Exception Handling (EH) does not have pdata and xdata structures the way they exist in other architectures
@@ -30,10 +30,10 @@ internal static class EHSymbolTable
                 dataCache.XDataSymbolsByRVA = new SortedList<uint, XDataSymbol>();
                 return;
             default:
-                throw new ArgumentException($"Unknown machine type to parse xdata for ({machine}).  This is a bug in SizeBench's implementation, not your use of it.", nameof(machine));
+                throw new ArgumentException($"Unknown machine type to parse xdata for ({peFile.MachineType}).  This is a bug in SizeBench's implementation, not your use of it.", nameof(peFile));
         }
 
-        ehParser.Parse(sectionAlignment, XDataRVARange, dataCache, logger);
+        ehParser.Parse(XDataRVARange, dataCache, logger);
     }
 
     internal static uint GetAdjustedRva(uint rva, MachineType machine)

@@ -42,15 +42,9 @@ public sealed class DllArmTests
     {
         Assert.IsNotNull(DllArm32Session);
 
-        // These are gotten from "link /dump /headers PEParser.Tests.Dllarm32.dll" and looking at the .pdata section-
-        // "virtual address" and "virtual size"
+        // These are gotten from "link /dump /headers PEParser.Tests.Dllarm32.dll" and looking at the "Exception" directory
         Assert.AreEqual(0x7000u, DllArm32Session.DataCache.PDataRVARange!.RVAStart);
-
-        // Note that the size will be rounded up to the nearest section alignment, so it will be 0x1000
-        // because the next section (.gfids) doesn't begin until 0x8000
-        // To make this test easier to update as the binary may change, we calculate this as
-        // (beginning of .gfids - beginning of .pdata)
-        Assert.AreEqual(0x8000u - 0x7000u, DllArm32Session.DataCache.PDataRVARange!.Size);
+        Assert.AreEqual(0x318u, DllArm32Session.DataCache.PDataRVARange!.Size);
 
         // We should be discovering a bunch of RVA Ranges that we then coalesce down to just two: cppxdata in .rdata and the .xdata COFF Group
         Assert.AreEqual(2, DllArm32Session.DataCache.XDataRVARanges!.Count);

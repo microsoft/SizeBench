@@ -6,11 +6,12 @@ namespace SizeBench.GUI.Controls.Navigation;
 // This type is excluded from code coverage because it's basically a big copy/paste from the Silverlight SDK and in Silverlight
 // this was extensively tested.  See details at the top of the file for SizeBenchFrame.
 [ExcludeFromCodeCoverage]
-public sealed class UriMapping
+public sealed partial class UriMapping
 {
     #region Fields
 
-    private static readonly Regex _conversionRegex = new Regex("(?<ConversionCapture>{.*?})", RegexOptions.ExplicitCapture);
+    [GeneratedRegex("(?<ConversionCapture>{.*?})", RegexOptions.ExplicitCapture)]
+    private static partial Regex ConversionRegex();
     private Uri? _uri;
     private Uri? _mappedUri;
     private Regex? _uriRegex;
@@ -68,12 +69,12 @@ public sealed class UriMapping
         }
 
         var origString = uri.OriginalString;
-        var matches = _conversionRegex.Matches(origString);
+        var matches = ConversionRegex().Matches(origString);
         this._uriIdentifiers.Clear();
 
-        foreach (Match? m in matches)
+        foreach (var m in matches.Cast<Match>())
         {
-            var valWithoutBraces = m!.Value.Replace("{", String.Empty, StringComparison.Ordinal).Replace("}", String.Empty, StringComparison.Ordinal);
+            var valWithoutBraces = m.Value.Replace("{", String.Empty, StringComparison.Ordinal).Replace("}", String.Empty, StringComparison.Ordinal);
 
             // We've hit the same identifier being used twice.  This isn't valid.
             if (this._uriIdentifiers.Contains(valWithoutBraces))
@@ -85,7 +86,7 @@ public sealed class UriMapping
             this._uriIdentifiers.Add(valWithoutBraces);
         }
 
-        var convertedValue = _conversionRegex.Replace(origString, "(?<$1>.*?)").Replace("{", String.Empty, StringComparison.Ordinal).Replace("}", String.Empty, StringComparison.Ordinal);
+        var convertedValue = ConversionRegex().Replace(origString, "(?<$1>.*?)").Replace("{", String.Empty, StringComparison.Ordinal).Replace("}", String.Empty, StringComparison.Ordinal);
         uriRegex = new Regex("^" + convertedValue + "$");
         return false;
     }
@@ -93,12 +94,12 @@ public sealed class UriMapping
     private void GetIdentifiersForMappedUri(Uri mappedUri)
     {
         var origString = mappedUri.OriginalString;
-        var matches = _conversionRegex.Matches(origString);
+        var matches = ConversionRegex().Matches(origString);
         this._mappedUriIdentifiers.Clear();
 
-        foreach (Match? m in matches)
+        foreach (var m in matches.Cast<Match>())
         {
-            var valWithoutBraces = m!.Value.Replace("{", String.Empty, StringComparison.Ordinal).Replace("}", String.Empty, StringComparison.Ordinal);
+            var valWithoutBraces = m.Value.Replace("{", String.Empty, StringComparison.Ordinal).Replace("}", String.Empty, StringComparison.Ordinal);
             if (!this._mappedUriIdentifiers.Contains(valWithoutBraces))
             {
                 this._mappedUriIdentifiers.Add(valWithoutBraces);

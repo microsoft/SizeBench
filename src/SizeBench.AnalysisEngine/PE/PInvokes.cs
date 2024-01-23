@@ -1573,7 +1573,7 @@ internal readonly struct IMAGE_LOAD_CONFIG_DIRECTORY32_V5
     public readonly uint CastGuardOsDeterminedFailureMode;
 }
 
-internal static class PInvokes
+internal static partial class PInvokes
 {
     #region LoadLibraryEx / FreeLibrary
 
@@ -1592,30 +1592,32 @@ internal static class PInvokes
     }
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [DllImport("Kernelbase.dll", CallingConvention = CallingConvention.Winapi, PreserveSig = true, SetLastError = true, CharSet = CharSet.Unicode)]
-    public static extern IntPtr LoadLibraryExW([In, MarshalAs(UnmanagedType.LPWStr)] string lpFileName, IntPtr reserved, [In] LoadLibraryFlags flags);
+    [LibraryImport("Kernelbase.dll", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+    public static partial IntPtr LoadLibraryExW([MarshalAs(UnmanagedType.LPWStr)] string lpFileName, IntPtr reserved, LoadLibraryFlags flags);
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [DllImport("kernel32.dll", SetLastError = true)]
+    [LibraryImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    internal static extern unsafe bool FreeLibrary(IntPtr hModule);
+    internal static unsafe partial bool FreeLibrary(IntPtr hModule);
 
     #endregion
 
     #region DbgHelp - note we use the copy in SizeBench from DbgX, NOT the OS version
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [DllImport(@"amd64\dbghelp.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "ImageNtHeader")]
+    [LibraryImport(@"amd64\dbghelp.dll", EntryPoint = "ImageNtHeader")]
     [SuppressUnmanagedCodeSecurity]
-    internal static extern unsafe void* ImageNtHeader(void* Base);
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvStdcall)])]
+    internal static unsafe partial void* ImageNtHeader(void* Base);
 
     #endregion
 
     #region MSVCRT
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [DllImport("msvcrt.dll", EntryPoint = "memcpy", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-    public static extern IntPtr memcpy(IntPtr dest, IntPtr src, UIntPtr count);
+    [LibraryImport("msvcrt.dll", EntryPoint = "memcpy", SetLastError = false)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    public static partial IntPtr memcpy(IntPtr dest, IntPtr src, UIntPtr count);
 
     #endregion
 
@@ -1631,8 +1633,9 @@ internal static class PInvokes
     }
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [DllImport("imagehlp.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "MapFileAndCheckSumW")]
-    internal static extern MapFileAndCheckSumWResult MapFileAndCheckSumW([MarshalAs(UnmanagedType.LPWStr)] string filename,
+    [LibraryImport("imagehlp.dll", EntryPoint = "MapFileAndCheckSumW")]
+    [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvStdcall) })]
+    internal static partial MapFileAndCheckSumWResult MapFileAndCheckSumW([MarshalAs(UnmanagedType.LPWStr)] string filename,
                                                                          [MarshalAs(UnmanagedType.U4)] out uint originalHeaderChecksum,
                                                                          [MarshalAs(UnmanagedType.U4)] out uint newChecksum);
 

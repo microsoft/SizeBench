@@ -12,7 +12,7 @@ using SizeBench.Logging;
 
 namespace SizeBench.AnalysisEngine.PE;
 
-internal sealed class PEFile : IPEFile
+internal sealed partial class PEFile : IPEFile
 {
     private readonly IntPtr _library = IntPtr.Zero;
     private readonly unsafe byte* _libraryBaseAddress = null;
@@ -52,9 +52,9 @@ internal sealed class PEFile : IPEFile
     private readonly List<PEDirectorySymbol> _peDirectorySymbols = new List<PEDirectorySymbol>();
     public IReadOnlyList<PEDirectorySymbol> PEDirectorySymbols => this._peDirectorySymbols;
 
-    public IEnumerable<RVARange> DelayLoadImportThunksRVARanges => this._delayLoadImportThunksRVARangeSet ?? (IEnumerable<RVARange>)Array.Empty<RVARange>();
-    public IEnumerable<RVARange> DelayLoadImportStringsRVARanges => this._delayLoadImportStringsRVARangeSet ?? (IEnumerable<RVARange>)Array.Empty<RVARange>();
-    public IEnumerable<RVARange> DelayLoadModuleHandlesRVARanges => this._delayLoadModuleHandlesRVARangeSet ?? (IEnumerable<RVARange>)Array.Empty<RVARange>();
+    public IEnumerable<RVARange> DelayLoadImportThunksRVARanges => this._delayLoadImportThunksRVARangeSet ?? (IEnumerable<RVARange>)[];
+    public IEnumerable<RVARange> DelayLoadImportStringsRVARanges => this._delayLoadImportStringsRVARangeSet ?? (IEnumerable<RVARange>)[];
+    public IEnumerable<RVARange> DelayLoadModuleHandlesRVARanges => this._delayLoadModuleHandlesRVARangeSet ?? (IEnumerable<RVARange>)[];
     public ISymbol? GFIDSTable { get; private set; }
     public ISymbol? GIATSTable { get; private set; }
 
@@ -1093,8 +1093,10 @@ internal sealed class PEFile : IPEFile
     }
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [DllImport("Advapi32", CallingConvention = CallingConvention.Cdecl, EntryPoint = "IsTextUnicode", SetLastError = false, ExactSpelling = true)]
-    private static extern unsafe bool IsTextUnicode(byte* buf, int len, ref IsTextUnicodeFlags opt);
+    [LibraryImport("Advapi32", EntryPoint = "IsTextUnicode", SetLastError = false)]
+    [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static unsafe partial bool IsTextUnicode(byte* buf, int len, ref IsTextUnicodeFlags opt);
 
     public string LoadStringByRVA(long RVA, ulong length, out bool isUnicodeString)
     {

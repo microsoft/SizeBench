@@ -95,6 +95,7 @@ public sealed class COFFGroupToDescriptionConverter : IValueConverter
             { ".xdata$x", "Exception unwinding data" },
         };
 
+#pragma warning disable SYSLIB1045 // Convert to 'GeneratedRegexAttribute'.  These aren't used that often so they're not particularly hot, and they're easier to read this way.
     private static readonly Dictionary<Regex, string> coffGroupRegexDescriptions = new Dictionary<Regex, string>()
         {
             { new Regex(@"\.bss.*"), "Zero-initialized read/write data" },
@@ -121,6 +122,7 @@ public sealed class COFFGroupToDescriptionConverter : IValueConverter
             { new Regex(@"\.text\$lp01.*"), "Code in \"loader phase 1\" from PGO, the second-hottest code after phase 0 from PGO training" },
             { new Regex(@"\.text\$lp.*"), "Code in a \"loader phase\" from PGO, this is warm-to-hot depending on the phase number" },
         };
+#pragma warning restore SYSLIB1045 // Convert to 'GeneratedRegexAttribute'.
 
     public static COFFGroupToDescriptionConverter Instance { get; } = new COFFGroupToDescriptionConverter();
 

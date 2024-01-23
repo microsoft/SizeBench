@@ -111,7 +111,7 @@ internal sealed partial class GuaranteedLocalFile : IDisposable
     private static partial bool PathIsNetworkPath([MarshalAs(UnmanagedType.LPWStr)] string pszPath);
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [LibraryImport("Shlwapi.dll", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+    [LibraryImport("Shlwapi.dll", EntryPoint="PathIsUNCW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static partial bool PathIsUNC([MarshalAs(UnmanagedType.LPWStr)] string pszPath);
 

@@ -44,17 +44,17 @@ public sealed class ClangClTests
 
         // These are gotten from "link /dump /headers SizeBenchV2.AnalysisEngine.Tests.ClangClx64.dll" and looking at the "Exception" directory
         Assert.AreEqual(0x5000u, ClangClx64Session.DataCache.PDataRVARange!.RVAStart);
-        Assert.AreEqual(0x324u, ClangClx64Session.DataCache.PDataRVARange!.Size);
+        Assert.AreEqual(0x348u, ClangClx64Session.DataCache.PDataRVARange!.Size);
 
         // We discover the .xdata COFF Group in the PDB, since Clang doesn't record it in the PE file.  This can be verified with
         // Dia2Dump.exe -compiland "* Linker *" SizeBenchV2.AnalysisEngine.Tests.ClangClx64.pdb
         Assert.AreEqual(1, ClangClx64Session.DataCache.XDataRVARanges!.Count);
         Assert.AreEqual(0x3A18u, ClangClx64Session.DataCache.XDataRVARanges.First().RVAStart);
-        Assert.AreEqual(0x2D4u, ClangClx64Session.DataCache.XDataRVARanges.First().Size);
+        Assert.AreEqual(0x2E4u, ClangClx64Session.DataCache.XDataRVARanges.First().Size);
 
         // [unwind] for _RTC_Initialize, Clang does not seem to generate chain-unwind the way MSVC does
-        var _RTC_InitializeUnwind = (UnwindInfoSymbol)ClangClx64Session.DataCache.XDataSymbolsByRVA![0x3CB4];
-        Assert.AreEqual(0x2570u, _RTC_InitializeUnwind.TargetStartRVA);
+        var _RTC_InitializeUnwind = (UnwindInfoSymbol)ClangClx64Session.DataCache.XDataSymbolsByRVA![0x3CC4];
+        Assert.AreEqual(0x25C0u, _RTC_InitializeUnwind.TargetStartRVA);
         Assert.AreEqual(12u, _RTC_InitializeUnwind.Size);
         Assert.IsTrue(_RTC_InitializeUnwind.Name.Contains("_RTC_Initialize", StringComparison.Ordinal));
         Assert.IsTrue(_RTC_InitializeUnwind.Name.Contains("unwind", StringComparison.Ordinal));
@@ -149,16 +149,16 @@ public sealed class ClangClTests
         var xdataForDebugging = ClangClx64Session.DataCache.XDataSymbolsByRVA.Values.Where(x => x.Name.Contains("Dllx64_CppxdataUsage::MaybeThrow", StringComparison.Ordinal)).ToList();
 
         // This tests an unwind symbol that uses __GSHandlerCheck
-        var isaAvailableInitUnwind = (UnwindInfoSymbol)ClangClx64Session.DataCache.XDataSymbolsByRVA[0x3CC0];
-        Assert.AreEqual(0x2620u, isaAvailableInitUnwind.TargetStartRVA);
+        var isaAvailableInitUnwind = (UnwindInfoSymbol)ClangClx64Session.DataCache.XDataSymbolsByRVA[0x3CD0];
+        Assert.AreEqual(0x2670u, isaAvailableInitUnwind.TargetStartRVA);
         Assert.AreEqual(16u, isaAvailableInitUnwind.Size);
         Assert.IsTrue(isaAvailableInitUnwind.Name.Contains("__isa_available_init", StringComparison.Ordinal));
         Assert.IsTrue(isaAvailableInitUnwind.Name.Contains("unwind", StringComparison.Ordinal));
         Assert.IsFalse(isaAvailableInitUnwind.Name.Contains("chain", StringComparison.Ordinal)); // Should not bea ChainUnwindInfo, just a regular unwind
 
         // This tests an unwind symbol that uses __C_specific_handler
-        var dllMainDispatchUnwind = (UnwindInfoSymbol)ClangClx64Session.DataCache.XDataSymbolsByRVA[0x3C24];
-        Assert.AreEqual(0x1A70u, dllMainDispatchUnwind.TargetStartRVA);
+        var dllMainDispatchUnwind = (UnwindInfoSymbol)ClangClx64Session.DataCache.XDataSymbolsByRVA[0x3C34];
+        Assert.AreEqual(0x1AC0u, dllMainDispatchUnwind.TargetStartRVA);
         Assert.AreEqual(32u, dllMainDispatchUnwind.Size);
         Assert.IsTrue(dllMainDispatchUnwind.Name.Contains("dllmain_dispatch", StringComparison.Ordinal));
         Assert.IsTrue(dllMainDispatchUnwind.Name.Contains("unwind", StringComparison.Ordinal));
@@ -172,7 +172,7 @@ public sealed class ClangClTests
         const int derivedClassVftableRVA = 0x30F8;
         var firstEntry = await ClangClx64Session!.LoadSymbolForVTableSlotAsync(derivedClassVftableRVA, slotIndex: 0);
         Assert.IsNotNull(firstEntry);
-        Assert.AreEqual(0x14C0u, firstEntry.RVA);
+        Assert.AreEqual(0x1510u, firstEntry.RVA);
         Assert.AreEqual(firstEntry.Name, ((Symbol)firstEntry).CanonicalName);
         StringAssert.Contains(firstEntry.Name, "Dllx64_DerivedClass", StringComparison.Ordinal);
         StringAssert.Contains(firstEntry.Name, "AVirtualFunction", StringComparison.Ordinal);
@@ -180,7 +180,7 @@ public sealed class ClangClTests
         // Get an entry that is from the base class (not overridden in the derived class)
         var secondEntry = await ClangClx64Session.LoadSymbolForVTableSlotAsync(derivedClassVftableRVA, slotIndex: 1);
         Assert.IsNotNull(secondEntry);
-        Assert.AreEqual(0x14A0u, secondEntry.RVA);
+        Assert.AreEqual(0x14F0u, secondEntry.RVA);
         Assert.AreEqual(secondEntry.Name, ((Symbol)secondEntry).CanonicalName);
         StringAssert.Contains(secondEntry.Name, "Dllx64_BaseClass", StringComparison.Ordinal);
         StringAssert.Contains(secondEntry.Name, "ASecondVirtualFunction", StringComparison.Ordinal);

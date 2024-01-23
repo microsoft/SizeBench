@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+#if DEBUG
 using System.Diagnostics.CodeAnalysis;
+#endif
 using System.IO;
 
 namespace SizeBench.AnalysisEngine;

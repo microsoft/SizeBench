@@ -194,10 +194,7 @@ internal sealed class DebuggerAdapter : IDebuggerAdapter, IDbgEnginePathCustomiz
     //      during disassembly, so callers can decide what to do if it fails.
     public async Task<string> DisassembleAsync(IFunctionCodeSymbol function, DisassembleFunctionOptions options, ILogger taskLog, CancellationToken token)
     {
-        if (this.IsDisposed)
-        {
-            throw new ObjectDisposedException(GetType().FullName);
-        }
+        ObjectDisposedException.ThrowIf(this.IsDisposed, GetType().Name);
 
         try
         {

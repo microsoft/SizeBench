@@ -1,5 +1,5 @@
-﻿using SizeBench.AnalysisEngine;
-using SizeBench.AnalysisEngine.PE;
+﻿using System.Reflection.PortableExecutable;
+using SizeBench.AnalysisEngine;
 using SizeBench.TestDataCommon;
 
 namespace SizeBench.GUI.Converters.Tests;
@@ -20,8 +20,8 @@ public sealed class CompilandAndCOFFGroupToContributionVirtualSizeConverterTests
     {
         this.DataCache = new SessionDataCache();
 
-        var textSection = new BinarySection(this.DataCache, ".text", size: 0x1000, virtualSize: 0, rva: 0x500, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
-        this.TestCOFFGroup1 = new COFFGroup(this.DataCache, ".text$zz", size: 0x1000, rva: 0x500, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute)
+        var textSection = new BinarySection(this.DataCache, ".text", size: 0x1000, virtualSize: 0, rva: 0x500, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
+        this.TestCOFFGroup1 = new COFFGroup(this.DataCache, ".text$zz", size: 0x1000, rva: 0x500, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute)
         {
             Section = textSection
         };
@@ -30,8 +30,8 @@ public sealed class CompilandAndCOFFGroupToContributionVirtualSizeConverterTests
         this.TestCOFFGroup1.MarkFullyConstructed();
         textSection.MarkFullyConstructed();
 
-        var rdataSection = new BinarySection(this.DataCache, ".rdata", size: 0x0, virtualSize: 0x300, rva: 0x0, fileAlignment: 0, sectionAlignment: 0x1000, characteristics: DataSectionFlags.MemoryRead);
-        this.TestCOFFGroup2 = new COFFGroup(this.DataCache, ".bss", size: 0x300, rva: 0x0, fileAlignment: 0, sectionAlignment: 0x1000, characteristics: DataSectionFlags.MemoryRead | DataSectionFlags.ContentUninitializedData)
+        var rdataSection = new BinarySection(this.DataCache, ".rdata", size: 0x0, virtualSize: 0x300, rva: 0x0, fileAlignment: 0, sectionAlignment: 0x1000, characteristics: SectionCharacteristics.MemRead);
+        this.TestCOFFGroup2 = new COFFGroup(this.DataCache, ".bss", size: 0x300, rva: 0x0, fileAlignment: 0, sectionAlignment: 0x1000, characteristics: SectionCharacteristics.MemRead | SectionCharacteristics.ContainsUninitializedData)
         {
             Section = rdataSection
         };

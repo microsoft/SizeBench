@@ -102,7 +102,7 @@ public sealed class COFFGroupToDescriptionConverter : IValueConverter
             { new Regex(@"\.data\$dk.*"), "PGO 'don't know' (global vars with only reads but not proven const)" },
             { new Regex(@"\.data\$zz.*"), "Read-write data 'dead' from PGO training" },
 
-            { new Regex(@"\.didat.*"), "Delay-loaded Import Address Table (IAT)" },
+            { new Regex(@"\.didat.*"), "Delayload Import data" },
 
             { new Regex(@"\.idata.*"), "Import data" },
 

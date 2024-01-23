@@ -20,10 +20,7 @@ internal sealed class RsrcDataEntrySymbol : RsrcSymbolBase
     internal RsrcDataEntrySymbol(uint rva, uint size, uint depth, string language, Win32ResourceType rsrcType, string rsrcTypeName, string? directoryName, uint entryIndex)
         : base(rva, size, ConjureName(depth, language, rsrcTypeName, directoryName))
     {
-        if (depth > 2)
-        {
-            throw new ArgumentOutOfRangeException(nameof(depth));
-        }
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(depth, 2u);
 
         this._depth = depth;
         this._language = language;

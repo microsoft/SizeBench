@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Reflection.PortableExecutable;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -47,6 +48,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
     private static readonly LibraryModule _diaLibraryModule = LibraryModule.LoadModule(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? ".", @"msdia140.dll"));
     private IDiaDataSource? _diaDataSource;
     private Session? _session;
+    private PEFile? _peFile;
     private SessionDataCache? _cache;
     private IDiaSession? _diaSession;
     private IDiaSymbol? _globalScope;
@@ -97,6 +99,15 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         {
             ThrowIfDisposingOrDisposed();
             return this._session!;
+        }
+    }
+
+    private PEFile PEFile
+    {
+        get
+        {
+            ThrowIfDisposingOrDisposed();
+            return this._peFile!;
         }
     }
 
@@ -161,6 +172,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         ThrowIfOnWrongThread();
         ThrowIfDisposingOrDisposed();
 
+        this._peFile = peFile;
         this._fileAlignment = peFile.FileAlignment;
         this._sectionAlignment = peFile.SectionAlignment;
 
@@ -171,10 +183,10 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         // instead fail out very early here to make this clear.
         if (this.Session.PEFile!.DebugSignature != null)
         {
-            if (this.Session.PEFile.DebugSignature.Guid != this.DiaGlobalScope.guid)
+            if (this.Session.PEFile.DebugSignature.PdbGuid != this.DiaGlobalScope.guid)
             {
                 throw new BinaryAndPDBSignatureMismatchException($"Binary and PDB do not match debug signatures, they appear to be from different builds.  SizeBench requires that a binary and PDB match exactly." + Environment.NewLine +
-                                                                 $"Binary guid={this.Session.PEFile.DebugSignature.Guid}, PDB guid={this.DiaGlobalScope.guid}");
+                                                                 $"Binary guid={this.Session.PEFile.DebugSignature.PdbGuid}, PDB guid={this.DiaGlobalScope.guid}");
             }
 
             if (this.Session.PEFile.DebugSignature.Age != this.DiaGlobalScope.age)
@@ -199,7 +211,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             }
         }
 
-        this.DataCache.RVARangesThatAreOnlyVirtualSize = RVARangeSet.FromListOfRVARanges(fullyVirtualRVARanges, this.Session.PEFile.BytesPerWord);
+        this.DataCache.RVARangesThatAreOnlyVirtualSize = RVARangeSet.FromListOfRVARanges(fullyVirtualRVARanges, this._peFile.BytesPerWord);
 
         // PublicSymbols can be needed at deep parts of the symbol creation callstacks (like getting the length of a vtable).
         // Rather than trying to get it right in every case, we just ensure all PublicSymbols are parsed right here.
@@ -224,17 +236,17 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         // start setting up the DataCache with bad data.
         using (var ehParsingLog = logger.StartTaskLog("Parsing Exception Handling symbols"))
         {
-            this.Session.PEFile.ParseEHSymbols(this.Session, this, xdataRVARangeFromCoffGroupsIfAvailable, ehParsingLog);
+            peFile.ParseEHSymbols(this.Session, this, xdataRVARangeFromCoffGroupsIfAvailable, ehParsingLog);
             ehParsingLog.Log($"Found {this.DataCache.PDataSymbolsByRVA!.Count} PDATA symbols and {this.DataCache.XDataSymbolsByRVA!.Count} XDATA symbols.");
         }
 
         using (logger.StartTaskLog("Parsing Win32 Resources (.rsrc) symbols"))
         {
-            this.DataCache.RsrcSymbolsByRVA = this.Session.PEFile.RsrcSymbols;
+            this.DataCache.RsrcSymbolsByRVA = peFile.RsrcSymbols;
         }
 
-        this.DataCache.OtherPESymbolsByRVA = this.Session.PEFile.OtherPESymbols;
-        this.DataCache.OtherPESymbolsRVARanges = this.Session.PEFile.OtherPESymbolsRVARanges;
+        this.DataCache.OtherPESymbolsByRVA = peFile.OtherPESymbols;
+        this.DataCache.OtherPESymbolsRVARanges = peFile.OtherPESymbolsRVARanges;
     }
 
     private LinkerCommandLine? GetLinkerCommandLine()
@@ -284,7 +296,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
 
         if (linkerCommandLine is not MSVC_LINK_CommandLine)
         {
-            throw new PDBNotSuitableForAnalysisException($"This binary was linked with '{linkerCommandLine.ToolName}'.  Currently, SizeBench requires linking with Microsoft's link.exe as only those PDBs contain sufficient information.  Note that when using clang/lld-link, you can continue to compile with clang, just the link must be done with Microsoft's linker.");
+            throw new PDBNotSuitableForAnalysisException($"This binary was linked with '{linkerCommandLine.ToolName}'.  Currently, SizeBench requires linking with link.exe or lld-link.exe, as only those PDBs contain sufficient information.");
         }
 
         if (linkerCommandLine.IncrementallyLinked)
@@ -331,28 +343,28 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         public uint Size { get; private set; }
         public uint VirtualSize { get; private set; }
         public uint RVAStart { get; }
-        public DataSectionFlags Characteristics { get; }
+        public SectionCharacteristics Characteristics { get; }
 
-        public RawBinarySection(string name, uint rva, uint size, uint virtualSize, DataSectionFlags characteristics)
+        public RawBinarySection(string name, int rva, int size, int virtualSize, SectionCharacteristics characteristics)
         {
             this.Name = name;
-            this.Size = size;
-            this.VirtualSize = virtualSize;
-            this.RVAStart = rva;
+            this.Size = (uint)size;
+            this.VirtualSize = (uint)virtualSize;
+            this.RVAStart = (uint)rva;
             this.Characteristics = characteristics;
         }
 
-        public void ExpandToInclude(uint rva, uint size, uint virtualSize)
+        public void ExpandToInclude(int rva, int size, int virtualSize)
         {
             // There might be padding between these so we can't just add the [virtual]size, we need to calculate the length as (new final RVA - original starting RVA)
             var newSize = rva + size - this.RVAStart;
             var newVirtualSize = rva + virtualSize - this.RVAStart;
-            this.Size = newSize;
-            this.VirtualSize = newVirtualSize;
+            this.Size = (uint)newSize;
+            this.VirtualSize = (uint)newVirtualSize;
         }
     }
 
-    public IEnumerable<BinarySection> FindBinarySections(ILogger parentLogger, CancellationToken token)
+    public IEnumerable<BinarySection> FindBinarySections(IPEFile peFile, ILogger parentLogger, CancellationToken token)
     {
         ThrowIfOnWrongThread();
         ThrowIfDisposingOrDisposed();
@@ -364,7 +376,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
 
         // We need the COFF Group names because some section names are too short due to PE file limitations and the COFF Group contains the full
         // name.  This happens especially with some types of code obfuscation.
-        var coffGroups = FindCompressedRawCOFFGroups(parentLogger, token);
+        var coffGroups = FindCompressedRawCOFFGroups(peFile, parentLogger, token);
 
         var almostFinal = new List<RawBinarySection>(capacity: 20);
 
@@ -377,14 +389,12 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         // allowed, though it does generate the LNK4078 linker warning.  We don't want to merge those sections together because we depend on characteristics
         // sometimes - so if the characteristics differ, we'll conjure up a new name to keep them unique.
         RawBinarySection? pendingSection = null;
-        foreach (var section in this.DiaSession.EnumerateImageSectionHeaders(token)
-                                               .WithCancellation(token)
-                                               .WithLogging(parentLogger, "Binary Sections")
+        foreach (var section in peFile.PEReader.PEHeaders.SectionHeaders
                                                .OrderBy(s => s.VirtualAddress))
         {
             if (pendingSection != null &&
-                pendingSection.Name == section.Section &&
-                pendingSection.Characteristics == section.Characteristics)
+                pendingSection.Name == section.Name &&
+                pendingSection.Characteristics == section.SectionCharacteristics)
             {
                 // If the name is identical to the one before this, merge the length.
                 pendingSection.ExpandToInclude(section.VirtualAddress, section.SizeOfRawData, section.VirtualSize);
@@ -397,7 +407,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                     pendingSection = null;
                 }
 
-                pendingSection = new RawBinarySection(section.Section, section.VirtualAddress, section.SizeOfRawData, section.VirtualSize, section.Characteristics);
+                pendingSection = new RawBinarySection(section.Name, section.VirtualAddress, section.SizeOfRawData, section.VirtualSize, section.SectionCharacteristics);
             }
         }
 
@@ -451,31 +461,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
 
     #region Finding COFF Groups
 
-    private sealed class RawCOFFGroup
-    {
-        public string Name { get; }
-        public uint Length { get; private set; }
-        public uint RVAStart { get; }
-        public DataSectionFlags Characteristics { get; }
-
-        public RawCOFFGroup(string name, uint length, uint rva, DataSectionFlags characteristics)
-        {
-            this.Name = name;
-            this.Length = length;
-            this.RVAStart = rva;
-            this.Characteristics = characteristics;
-        }
-
-        public void ExpandToInclude(uint rva, uint length)
-        {
-            // There might be padding between these so we can't just add the length, we need to calculate the length as (new final RVA - original starting RVA)
-            Debug.Assert(rva > this.RVAStart);
-            var newLength = rva + length - this.RVAStart;
-            this.Length = newLength;
-        }
-    }
-
-    private List<RawCOFFGroup> FindCompressedRawCOFFGroups(ILogger parentLogger, CancellationToken token)
+    private List<RawCOFFGroup> FindCompressedRawCOFFGroups(IPEFile peFile, ILogger parentLogger, CancellationToken token)
     {
         var almostFinal = new List<RawCOFFGroup>();
 
@@ -491,19 +477,18 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         // name since we key off the name in so many places.
         var prefixToMerge = String.Empty;
         RawCOFFGroup? pendingRawCG = null;
-        foreach (var coffGroup in this.DiaSession.EnumerateCoffGroupSymbols(token)
+        foreach (var coffGroup in this.DiaSession.EnumerateCoffGroupSymbols(peFile, token)
                                                  .WithCancellation(token)
                                                  .WithLogging(parentLogger, "COFF Groups")
-                                                 .OrderBy(cg => cg.relativeVirtualAddress))
+                                                 .OrderBy(cg => cg.RVAStart))
         {
-            Debug.Assert((SymTagEnum)coffGroup.symTag == SymTagEnum.SymTagCoffGroup);
-            if (coffGroup.name.Contains("$wbrd", StringComparison.Ordinal) ||
-                coffGroup.name.StartsWith("?g_EncryptedSegment", StringComparison.Ordinal))
+            if (coffGroup.Name.Contains("$wbrd", StringComparison.Ordinal) ||
+                coffGroup.Name.StartsWith("?g_EncryptedSegment", StringComparison.Ordinal))
             {
-                if (coffGroup.name.StartsWith(prefixToMerge, StringComparison.Ordinal) && pendingRawCG != null)
+                if (coffGroup.Name.StartsWith(prefixToMerge, StringComparison.Ordinal) && pendingRawCG != null)
                 {
                     // If this is part of the existing section's wbrd COFF Group chunk, we'll merge it.
-                    pendingRawCG.ExpandToInclude(coffGroup.relativeVirtualAddress, (uint)coffGroup.length);
+                    pendingRawCG.ExpandToInclude(coffGroup.RVAStart, coffGroup.Length);
                 }
                 else
                 {
@@ -518,17 +503,17 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                         prefixToMerge = String.Empty;
                     }
 
-                    if (coffGroup.name.Contains("$wbrd", StringComparison.Ordinal))
+                    if (coffGroup.Name.Contains("$wbrd", StringComparison.Ordinal))
                     {
-                        prefixToMerge = coffGroup.name[..(coffGroup.name.IndexOf("$wbrd", StringComparison.Ordinal) + "$wbrd".Length)];
+                        prefixToMerge = coffGroup.Name[..(coffGroup.Name.IndexOf("$wbrd", StringComparison.Ordinal) + "$wbrd".Length)];
                     }
-                    else if (coffGroup.name.StartsWith("?g_EncryptedSegment", StringComparison.Ordinal))
+                    else if (coffGroup.Name.StartsWith("?g_EncryptedSegment", StringComparison.Ordinal))
                     {
                         // Example:
                         // ?g_EncryptedSegmentSystemCall_160@WarbirdRuntime@@3U_ENCRYPTION_SEGMENT@1@C
-                        prefixToMerge = coffGroup.name[..(coffGroup.name.IndexOf("_", startIndex: "?g_E".Length, StringComparison.Ordinal) + "_".Length)];
+                        prefixToMerge = coffGroup.Name[..(coffGroup.Name.IndexOf("_", startIndex: "?g_E".Length, StringComparison.Ordinal) + "_".Length)];
                     }
-                    pendingRawCG = new RawCOFFGroup(prefixToMerge + "<all>", (uint)coffGroup.length, coffGroup.relativeVirtualAddress, (DataSectionFlags)coffGroup.characteristics);
+                    pendingRawCG = new RawCOFFGroup(prefixToMerge + "<all>", coffGroup.Length, coffGroup.RVAStart, coffGroup.Characteristics);
                 }
             }
             else
@@ -540,7 +525,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                     prefixToMerge = String.Empty;
                 }
 
-                almostFinal.Add(new RawCOFFGroup(coffGroup.name, (uint)coffGroup.length, coffGroup.relativeVirtualAddress, (DataSectionFlags)coffGroup.characteristics));
+                almostFinal.Add(coffGroup);
             }
         }
 
@@ -571,13 +556,13 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         return final;
     }
 
-    public IEnumerable<COFFGroup> FindCOFFGroups(ILogger parentLogger, CancellationToken token)
+    public IEnumerable<COFFGroup> FindCOFFGroups(IPEFile peFile, ILogger parentLogger, CancellationToken token)
     {
         ThrowIfOnWrongThread();
 
         if (this.DataCache.AllCOFFGroups is null)
         {
-            this.DataCache.AllCOFFGroups = FindCompressedRawCOFFGroups(parentLogger, token)
+            this.DataCache.AllCOFFGroups = FindCompressedRawCOFFGroups(peFile, parentLogger, token)
                                            .Select(cg => new COFFGroup(this.DataCache, cg.Name, cg.Length, cg.RVAStart, this._fileAlignment, this._sectionAlignment, cg.Characteristics))
                                            .ToList();
         }
@@ -2420,6 +2405,9 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             case BasicTypes.btFloat:
                 switch (symbolLength)
                 {
+                    case 2:
+                        name.Append("_Float16"); // Clang extension: https://clang.llvm.org/docs/LanguageExtensions.html#half-precision-floating-point
+                        break;
                     case 4:
                         name.Append("float");
                         break;
@@ -3004,10 +2992,10 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         // special cases grows much, prefer an extensibility mechanism for easier testing/maintenance...
         if (String.Equals(symbolName, "`string'", StringComparison.Ordinal))
         {
-            var stringData = this.Session.PEFile!.LoadStringByRVA(symbolRVA, symbolLength, out var isUnicodeString)
-                                                 .Replace("\n", @"\n", StringComparison.Ordinal)
-                                                 .Replace("\r", @"\r", StringComparison.Ordinal)
-                                                 .Replace("\t", @"\t", StringComparison.Ordinal);
+            var stringData = this.PEFile.LoadStringByRVA(symbolRVA, symbolLength, out var isUnicodeString)
+                                        .Replace("\n", @"\n", StringComparison.Ordinal)
+                                        .Replace("\r", @"\r", StringComparison.Ordinal)
+                                        .Replace("\t", @"\t", StringComparison.Ordinal);
 
             return new StringSymbol(this.DataCache,
                                     symbolName,

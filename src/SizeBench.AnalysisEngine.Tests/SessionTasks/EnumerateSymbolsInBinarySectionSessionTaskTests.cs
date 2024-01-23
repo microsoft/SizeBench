@@ -1,4 +1,4 @@
-﻿using SizeBench.AnalysisEngine.PE;
+﻿using System.Reflection.PortableExecutable;
 using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.Logging;
 using SizeBench.TestDataCommon;
@@ -39,7 +39,7 @@ public sealed class EnumerateSymbolsInBinarySectionSessionTaskTests : IDisposabl
     [TestMethod]
     public void CanExecuteWithoutProgressReporting()
     {
-        var section = new BinarySection(this.SessionTaskParameters!.DataCache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
+        var section = new BinarySection(this.SessionTaskParameters!.DataCache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
         section.MarkFullyConstructed();
         var task = new EnumerateSymbolsInBinarySectionSessionTask(this.SessionTaskParameters,
                                                                   CancellationToken.None,
@@ -56,7 +56,7 @@ public sealed class EnumerateSymbolsInBinarySectionSessionTaskTests : IDisposabl
     [TestMethod]
     public void CanCancelInTheMiddleOfEnumerationWhenRVAsAreMonotonicallyIncreasing()
     {
-        var section = new BinarySection(this.SessionTaskParameters!.DataCache, ".text", size: 0x1000, virtualSize: 0, rva: 0x500, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
+        var section = new BinarySection(this.SessionTaskParameters!.DataCache, ".text", size: 0x1000, virtualSize: 0, rva: 0x500, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
         section.MarkFullyConstructed();
         var cancellationTokenSource = new CancellationTokenSource();
 
@@ -94,7 +94,7 @@ public sealed class EnumerateSymbolsInBinarySectionSessionTaskTests : IDisposabl
     public void FiresProgressNotificationsWithoutSpamming()
     {
         const int expectedSymbolCount = 250;
-        var section = new BinarySection(this.SessionTaskParameters!.DataCache, ".text", size: 0x200, virtualSize: expectedSymbolCount, rva: 0x500, fileAlignment: 0x200, sectionAlignment: 0x1000, characteristics: DataSectionFlags.MemoryExecute);
+        var section = new BinarySection(this.SessionTaskParameters!.DataCache, ".text", size: 0x200, virtualSize: expectedSymbolCount, rva: 0x500, fileAlignment: 0x200, sectionAlignment: 0x1000, characteristics: SectionCharacteristics.MemExecute);
         section.MarkFullyConstructed();
         var mockProgress = new Mock<IProgress<SessionTaskProgress>>();
         mockProgress.Setup(p => p.Report(It.IsAny<SessionTaskProgress>())).Verifiable();

@@ -9,3 +9,5 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Test code; don't care about coding style that much here")]
 
 [assembly: SuppressMessage("Usage", "CA2201:Do not raise reserved exception types", Justification = "Not important for test code.")]
+
+[assembly: SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Not important for test code.")]

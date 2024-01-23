@@ -78,7 +78,12 @@ public sealed class DiffSession_EnumerateSectionsAndCOFFGroupsTests
 
         Assert.AreEqual(0, relocSectionDiff.SizeDiff);
         Assert.AreEqual(0, relocSectionDiff.VirtualSizeDiff);
-        Assert.AreEqual(0, relocSectionDiff.COFFGroupDiffs.Count);
+        Assert.AreEqual(1, relocSectionDiff.COFFGroupDiffs.Count);
+        foreach (var cg in relocSectionDiff.COFFGroupDiffs)
+        {
+            Assert.AreEqual(0, cg.SizeDiff);
+            Assert.AreEqual(0, cg.VirtualSizeDiff);
+        }
 
         Assert.AreEqual(0, pdataSectionDiff.SizeDiff);
         Assert.AreEqual(0, pdataSectionDiff.VirtualSizeDiff);

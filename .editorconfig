@@ -52,6 +52,8 @@ dotnet_style_prefer_conditional_expression_over_return = true:silent
 dotnet_style_prefer_simplified_boolean_expressions =true:error
 # Unnecessary code preferences
 dotnet_remove_unnecessary_suppression_exclusions = all:suggestion
+# Collection Initializers
+dotnet_style_collection_initializer = false;
 ###############################
 # Naming Conventions          #
 ###############################
@@ -301,6 +303,7 @@ dotnet_diagnostic.CA1507.severity=error
 dotnet_diagnostic.CA1001.severity=error
 dotnet_diagnostic.CA1065.severity=error
 dotnet_diagnostic.IDE0090.severity=none
+dotnet_diagnostic.IDE0028.severity = none
 csharp_style_namespace_declarations=file_scoped:error
 ###############################
 # VB Coding Conventions       #

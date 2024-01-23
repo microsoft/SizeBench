@@ -107,10 +107,7 @@ public sealed class QueuedTaskScheduler : TaskScheduler, IDisposable
         TaskScheduler targetScheduler,
         int maxConcurrencyLevel)
     {
-        if (maxConcurrencyLevel < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(maxConcurrencyLevel));
-        }
+        ArgumentOutOfRangeException.ThrowIfNegative(maxConcurrencyLevel);
 
         // Initialize only those fields relevant to use an underlying scheduler.  We don't
         // initialize the fields relevant to using our own custom threads.
@@ -330,10 +327,7 @@ public sealed class QueuedTaskScheduler : TaskScheduler, IDisposable
     protected override void QueueTask(Task? task)
     {
         // If we've been disposed, no one should be queueing
-        if (this._disposeCancellation.IsCancellationRequested)
-        {
-            throw new ObjectDisposedException(GetType().Name);
-        }
+        ObjectDisposedException.ThrowIf(this._disposeCancellation.IsCancellationRequested, GetType());
 
         // If the target scheduler is null (meaning we're using our own threads),
         // add the task to the blocking queue
@@ -624,10 +618,7 @@ public sealed class QueuedTaskScheduler : TaskScheduler, IDisposable
         /// <param name="task">The task to be queued.</param>
         protected override void QueueTask(Task task)
         {
-            if (this._disposed)
-            {
-                throw new ObjectDisposedException(GetType().Name);
-            }
+            ObjectDisposedException.ThrowIf(this._disposed, GetType());
 
             // Queue up the task locally to this queue, and then notify
             // the parent scheduler that there's work available

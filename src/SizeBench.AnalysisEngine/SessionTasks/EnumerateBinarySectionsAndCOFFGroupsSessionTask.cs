@@ -44,7 +44,7 @@ internal sealed class EnumerateBinarySectionsAndCOFFGroupsSessionTask : SessionT
 
     private List<BinarySection> EnumerateBinarySections(ILogger parentLogger)
     {
-        var binarySections = this.DIAAdapter.FindBinarySections(parentLogger, this.CancellationToken).ToList();
+        var binarySections = this.DIAAdapter.FindBinarySections(this.Session.PEFile, parentLogger, this.CancellationToken).ToList();
 
         this.DataCache.AllBinarySections = binarySections;
         return binarySections;
@@ -52,7 +52,7 @@ internal sealed class EnumerateBinarySectionsAndCOFFGroupsSessionTask : SessionT
 
     private List<COFFGroup> EnumerateCOFFGroups(ILogger parentLogger)
     {
-        var coffGroups = this.DIAAdapter.FindCOFFGroups(parentLogger, this.CancellationToken).ToList();
+        var coffGroups = this.DIAAdapter.FindCOFFGroups(this.Session.PEFile, parentLogger, this.CancellationToken).ToList();
 
         this.DataCache.AllCOFFGroups = coffGroups;
         return coffGroups;

@@ -21,14 +21,16 @@ public sealed class Session : ISession
     public string PdbPath => this._guaranteedLocalPDBFile?.OriginalPath ?? "No pdb opened yet";
 
     private readonly string _originalBinaryPathMayBeRemote;
-    public string BinaryPath => this.PEFile?.GuaranteedLocalCopyOfBinary.OriginalPath ?? "No binary opened yet";
+    public string BinaryPath => this._peFile?.GuaranteedLocalCopyOfBinary.OriginalPath ?? "No binary opened yet";
 
-    public byte BytesPerWord => this.PEFile!.BytesPerWord;
+    public byte BytesPerWord => this._peFile?.BytesPerWord ?? 0;
 
     private readonly ILogger _logger;
     internal SessionDataCache DataCache { get; } = new SessionDataCache();
 
-    internal PEFile? PEFile { get; private set; }
+    public IPEFile PEFile => this._peFile!;
+
+    private PEFile? _peFile;
 
     #region Progress Reporting
 
@@ -151,23 +153,23 @@ public sealed class Session : ISession
         this._diaAdapter = new DIAAdapter(this, this._guaranteedLocalPDBFile.GuaranteedLocalPath);
         this._taskParameters = new SessionTaskParameters(this, this._diaAdapter, this.DataCache);
 
-        this.PEFile = new PEFile(this._originalBinaryPathMayBeRemote, initializeDiaThreadLog);
-        this.DataCache.BytesPerWord = this.PEFile.BytesPerWord;
-        this.DataCache.RsrcRVARange = this.PEFile.RsrcRange;
+        this._peFile = new PEFile(this._originalBinaryPathMayBeRemote, initializeDiaThreadLog);
+        this.DataCache.BytesPerWord = this._peFile.BytesPerWord;
+        this.DataCache.RsrcRVARange = this._peFile.RsrcRange;
 
-        this._diaAdapter.Initialize(this.PEFile, initializeDiaThreadLog);
+        this._diaAdapter.Initialize(this._peFile, initializeDiaThreadLog);
     }
 
     #endregion
 
     public async Task<ISymbol?> LoadSymbolForVTableSlotAsync(uint vtableRVA, uint slotIndex)
     {
-        var vtableTargetRva = EHSymbolTable.GetAdjustedRva(this.PEFile!.LoadUInt32ByRVAThatIsPreferredBaseRelative(vtableRVA + (this.BytesPerWord * slotIndex)), this.PEFile.MachineType);
+        var vtableTargetRva = EHSymbolTable.GetAdjustedRva(this._peFile!.LoadUInt32ByRVAThatIsPreferredBaseRelative(vtableRVA + (this.BytesPerWord * slotIndex)), this.PEFile.MachineType);
         return await LoadSymbolByRVA(vtableTargetRva).ConfigureAwait(true);
     }
 
     public bool CompareData(long RVA1, long RVA2, uint length)
-        => this.PEFile!.CompareData(RVA1, RVA2, length);
+        => this._peFile!.CompareData(RVA1, RVA2, length);
 
     public float CompareSimilarityOfCodeBytesInBinary(IFunctionCodeSymbol firstSymbol, IFunctionCodeSymbol secondSymbol)
     {
@@ -192,7 +194,7 @@ public sealed class Session : ISession
             return 0.0f;
         }
 
-        return this.PEFile!.CompareSimilarityOfBytesInBinary(firstRanges, secondRanges);
+        return this._peFile!.CompareSimilarityOfBytesInBinary(firstRanges, secondRanges);
     }
 
     #region Debug Helpers
@@ -237,8 +239,8 @@ public sealed class Session : ISession
 
         this._taskScheduler?.Dispose();
 
-        this.PEFile?.Dispose();
-        this.PEFile = null;
+        this._peFile?.Dispose();
+        this._peFile = null;
 
         this.DataCache.Dispose();
 

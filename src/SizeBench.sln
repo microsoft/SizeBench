@@ -177,6 +177,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BinaryBytes", "BinaryBytes"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinaryBytes", "BinaryBytes\BinaryBytes.csproj", "{CB423BCF-0005-41BD-8082-BE0027F38E65}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SizeBenchV2.AnalysisEngine.Tests.ClangClx64", "TestPEProjects\SizeBenchV2.AnalysisEngine.Tests.ClangClx64\SizeBenchV2.AnalysisEngine.Tests.ClangClx64.vcxproj", "{F3B85B36-DE41-48CC-84E5-D7FC9D1CE28D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -303,6 +305,8 @@ Global
 		{CB423BCF-0005-41BD-8082-BE0027F38E65}.Debug|x64.Build.0 = Debug|x64
 		{CB423BCF-0005-41BD-8082-BE0027F38E65}.Release|x64.ActiveCfg = Release|x64
 		{CB423BCF-0005-41BD-8082-BE0027F38E65}.Release|x64.Build.0 = Release|x64
+		{F3B85B36-DE41-48CC-84E5-D7FC9D1CE28D}.Debug|x64.ActiveCfg = Debug|x64
+		{F3B85B36-DE41-48CC-84E5-D7FC9D1CE28D}.Release|x64.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -353,6 +357,7 @@ Global
 		{C5E5AB23-82D4-4CAF-A2AD-83563D7367F4} = {A8CA69E7-93AD-41F6-AED0-BBD7B3B01B7D}
 		{F6E559D0-7001-4B27-AA20-05147E96FFCA} = {9C5136EA-5ED0-4302-BD0E-C3E45B150D54}
 		{CB423BCF-0005-41BD-8082-BE0027F38E65} = {F6E559D0-7001-4B27-AA20-05147E96FFCA}
+		{F3B85B36-DE41-48CC-84E5-D7FC9D1CE28D} = {DCE07710-61B5-4730-BF3D-1488D637807D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {936F9790-BC54-416C-9C26-BB58BA16D33E}

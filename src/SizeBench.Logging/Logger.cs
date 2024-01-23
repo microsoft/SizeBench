@@ -98,12 +98,9 @@ public sealed class Logger : ILogger
         }
     }
 
-    private ILogger StartTaskLogCommon(string taskName, string callingMember)
+    private Logger StartTaskLogCommon(string taskName, string callingMember)
     {
-        if (this.IsDisposed)
-        {
-            throw new ObjectDisposedException(this.Name);
-        }
+        ObjectDisposedException.ThrowIf(this.IsDisposed, this.Name);
 
         IList<LogEntry> taskLogEntries;
         IList<LogEntry> pendingTaskLogEntries;

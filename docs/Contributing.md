@@ -21,6 +21,8 @@ You'll need Visual Studio's Enterprise SKU, and you'll need the C++ and C# clien
 tools, at a minimum. You'll also need to install these additional _Individual components_:
 
  - MSVC v140 - VS 2015 C++ build tools (v14.00) under _Compilers, build tools, and runtimes_
+ - C++ Clang for Windows
+ - MSBuild support for LLVM (lang-cl) toolset
  - Windows 10 SDK (10.0.15063.0) for Desktop C++ [x86 and x64]. This can be downloaded from 
    [here](https://developer.microsoft.com/en-us/windows/downloads/sdk-archive/) if it does not 
    show up in your version of the Visual Studio Installer.

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using SizeBench.AnalysisEngine.PE;
+using System.Reflection.PortableExecutable;
 
 namespace SizeBench.AnalysisEngine;
 
@@ -15,7 +15,7 @@ public sealed class BinarySection
     public string Name { get; }
 
     [Display(AutoGenerateField = false)]
-    public DataSectionFlags Characteristics { get; }
+    public SectionCharacteristics Characteristics { get; }
 
     [DisplayFormat(DataFormatString = "0x{0:X}")]
     public uint RVA { get; }
@@ -158,7 +158,7 @@ public sealed class BinarySection
         MarkFullyConstructed();
     }
 
-    internal BinarySection(SessionDataCache? cache, string name, uint size, uint virtualSize, uint rva, uint fileAlignment, uint sectionAlignment, DataSectionFlags characteristics)
+    internal BinarySection(SessionDataCache? cache, string name, uint size, uint virtualSize, uint rva, uint fileAlignment, uint sectionAlignment, SectionCharacteristics characteristics)
     {
 #if DEBUG
         if (cache?.BinarySectionsConstructedEver.Any(bs => bs.RVA == rva || bs.Name == name) == true)

@@ -1,12 +1,13 @@
-﻿using SizeBench.AnalysisEngine.Symbols;
+﻿using SizeBench.AnalysisEngine.PE;
+using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.Logging;
 
 namespace SizeBench.AnalysisEngine.DIAInterop;
 
 internal interface IDIAAdapter
 {
-    IEnumerable<BinarySection> FindBinarySections(ILogger logger, CancellationToken token);
-    IEnumerable<COFFGroup> FindCOFFGroups(ILogger logger, CancellationToken token);
+    IEnumerable<BinarySection> FindBinarySections(IPEFile peFile, ILogger logger, CancellationToken token);
+    IEnumerable<COFFGroup> FindCOFFGroups(IPEFile peFile, ILogger logger, CancellationToken token);
     IEnumerable<RawSectionContribution> FindSectionContributions(ILogger logger, CancellationToken token);
     IEnumerable<SourceFile> FindSourceFiles(ILogger logger, CancellationToken token);
     IEnumerable<RVARange> FindRVARangesForSourceFileAndCompiland(SourceFile sourceFile, Compiland compiland, CancellationToken token);

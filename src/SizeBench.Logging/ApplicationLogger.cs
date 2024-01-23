@@ -38,10 +38,7 @@ public sealed class ApplicationLogger : IApplicationLogger
 
     public void Log(string message, LogLevel logLevel = LogLevel.Info, [CallerMemberName] string callerMemberName = "")
     {
-        if (this.IsDisposed)
-        {
-            throw new ObjectDisposedException(this.Name);
-        }
+        ObjectDisposedException.ThrowIf(this.IsDisposed, this.Name);
 
         var logEntry = new LogEntry(callerMemberName, message, logLevel);
         LogWithSynchronizationContext(logEntry);

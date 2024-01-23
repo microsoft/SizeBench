@@ -1,4 +1,5 @@
-﻿using SizeBench.AnalysisEngine.Symbols;
+﻿using System.Reflection.PortableExecutable;
+using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.Logging;
 using SizeBench.TestDataCommon;
 
@@ -41,7 +42,7 @@ public sealed class EnumerateSymbolsInCOFFGroupSessionTaskTests : IDisposable
     [TestMethod]
     public void CanExecuteWithoutProgressReporting()
     {
-        var coffGroup = new COFFGroup(this.SessionTaskParameters!.DataCache, ".text$mn", size: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: PE.DataSectionFlags.MemoryExecute);
+        var coffGroup = new COFFGroup(this.SessionTaskParameters!.DataCache, ".text$mn", size: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
         coffGroup.MarkFullyConstructed();
         var task = new EnumerateSymbolsInCOFFGroupSessionTask(this.SessionTaskParameters,
                                                               this.CancellationToken,
@@ -58,7 +59,7 @@ public sealed class EnumerateSymbolsInCOFFGroupSessionTaskTests : IDisposable
     [TestMethod]
     public void CanCancelInTheMiddleOfEnumerationWhenRVAsAreMonotonicallyIncreasing()
     {
-        var coffGroup = new COFFGroup(this.SessionTaskParameters!.DataCache, ".text$mn", size: 0x1000, rva: 0x500, fileAlignment: 0, sectionAlignment: 0, characteristics: PE.DataSectionFlags.MemoryExecute);
+        var coffGroup = new COFFGroup(this.SessionTaskParameters!.DataCache, ".text$mn", size: 0x1000, rva: 0x500, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
         coffGroup.MarkFullyConstructed();
         var cancellationTokenSource = new CancellationTokenSource();
 
@@ -97,7 +98,7 @@ public sealed class EnumerateSymbolsInCOFFGroupSessionTaskTests : IDisposable
     [TestMethod]
     public void FiresProgressNotificationsWithoutSpamming()
     {
-        var coffGroup = new COFFGroup(this.SessionTaskParameters!.DataCache, ".text$mn", size: 250, rva: 0x500, fileAlignment: 0x200, sectionAlignment: 0x1000, characteristics: PE.DataSectionFlags.MemoryExecute);
+        var coffGroup = new COFFGroup(this.SessionTaskParameters!.DataCache, ".text$mn", size: 250, rva: 0x500, fileAlignment: 0x200, sectionAlignment: 0x1000, characteristics: SectionCharacteristics.MemExecute);
         coffGroup.MarkFullyConstructed();
         var mockProgress = new Mock<IProgress<SessionTaskProgress>>();
         mockProgress.Setup(p => p.Report(It.IsAny<SessionTaskProgress>())).Verifiable();

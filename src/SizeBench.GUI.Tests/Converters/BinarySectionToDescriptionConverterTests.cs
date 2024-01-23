@@ -1,5 +1,5 @@
-﻿using SizeBench.AnalysisEngine;
-using SizeBench.AnalysisEngine.PE;
+﻿using System.Reflection.PortableExecutable;
+using SizeBench.AnalysisEngine;
 
 namespace SizeBench.GUI.Converters.Tests;
 
@@ -10,7 +10,7 @@ public sealed class BinarySectionToDescriptionConverterTests
     public void KnownBinarySectionDescriptionFound()
     {
         using var cache = new SessionDataCache();
-        var textSection = new BinarySection(cache, ".text", 100, 100, 100, 100, 100, DataSectionFlags.MemoryExecute | DataSectionFlags.MemoryRead);
+        var textSection = new BinarySection(cache, ".text", 100, 100, 100, 100, 100, SectionCharacteristics.MemExecute | SectionCharacteristics.MemRead);
         Assert.AreEqual("Code", BinarySectionToDescriptionConverter.Instance.Convert(textSection, typeof(string), null, null));
     }
 
@@ -18,7 +18,7 @@ public sealed class BinarySectionToDescriptionConverterTests
     public void UnknownBinarySectionIsEmptyString()
     {
         using var cache = new SessionDataCache();
-        var unknownSection = new BinarySection(cache, ".unknown_section", 100, 100, 100, 100, 100, DataSectionFlags.MemoryExecute | DataSectionFlags.MemoryRead);
+        var unknownSection = new BinarySection(cache, ".unknown_section", 100, 100, 100, 100, 100, SectionCharacteristics.MemExecute | SectionCharacteristics.MemRead);
         Assert.AreEqual(String.Empty, BinarySectionToDescriptionConverter.Instance.Convert(unknownSection, typeof(string), null, null));
     }
 
@@ -26,11 +26,11 @@ public sealed class BinarySectionToDescriptionConverterTests
     public void KnownBinarySectionDiffDescriptionFound()
     {
         using var beforeCache = new SessionDataCache();
-        var beforeRdataSection = new BinarySection(beforeCache, ".rdata", 100, 100, 100, 100, 100, DataSectionFlags.MemoryExecute | DataSectionFlags.MemoryRead);
+        var beforeRdataSection = new BinarySection(beforeCache, ".rdata", 100, 100, 100, 100, 100, SectionCharacteristics.MemExecute | SectionCharacteristics.MemRead);
         beforeRdataSection.MarkFullyConstructed();
 
         using var afterCache = new SessionDataCache();
-        var afterRdataSection = new BinarySection(afterCache, ".rdata", 100, 100, 100, 100, 100, DataSectionFlags.MemoryExecute | DataSectionFlags.MemoryRead);
+        var afterRdataSection = new BinarySection(afterCache, ".rdata", 100, 100, 100, 100, 100, SectionCharacteristics.MemExecute | SectionCharacteristics.MemRead);
         afterRdataSection.MarkFullyConstructed();
 
         using var diffCache = new DiffSessionDataCache();

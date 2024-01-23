@@ -1,4 +1,6 @@
-﻿namespace SizeBench.AnalysisEngine.SessionManagedObjects.Tests;
+﻿using System.Reflection.PortableExecutable;
+
+namespace SizeBench.AnalysisEngine.SessionManagedObjects.Tests;
 
 [TestClass]
 public class COFFGroupTests
@@ -13,7 +15,7 @@ public class COFFGroupTests
                                    0x0 /* rva */,
                                    0x200 /* fileAlignment */,
                                    0x1000 /* sectionAlignment */,
-                                   characteristics: PE.DataSectionFlags.MemoryRead);
+                                   characteristics: SectionCharacteristics.MemRead);
 
         // 0x000-0x0F9
         var cg1 = new COFFGroup(sdc, ".rdata$r",
@@ -21,7 +23,7 @@ public class COFFGroupTests
                                 0x000 /* rva */,
                                 0x200 /* fileAlignment */,
                                 0x1000 /* sectionAlignment */,
-                                PE.DataSectionFlags.ContentInitializedData)
+                                SectionCharacteristics.ContainsInitializedData)
         {
             Section = bs,
             TailSlopVirtualSizeAlignment = 20
@@ -46,7 +48,7 @@ public class COFFGroupTests
                                    0x0 /* rva */,
                                    0x200 /* fileAlignment */,
                                    0x1000 /* sectionAlignment */,
-                                   characteristics: PE.DataSectionFlags.MemoryRead);
+                                   characteristics: SectionCharacteristics.MemRead);
 
         // 0x000-0x0F9
         var cg1 = new COFFGroup(sdc, ".rdata$r",
@@ -54,7 +56,7 @@ public class COFFGroupTests
                                 0x000 /* rva */,
                                 0x200 /* fileAlignment */,
                                 0x1000 /* sectionAlignment */,
-                                PE.DataSectionFlags.ContentInitializedData)
+                                SectionCharacteristics.ContainsInitializedData)
         {
             Section = bs
         };

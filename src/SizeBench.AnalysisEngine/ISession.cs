@@ -1,4 +1,5 @@
-﻿using SizeBench.AnalysisEngine.Symbols;
+﻿using SizeBench.AnalysisEngine.PE;
+using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.Logging;
 
 namespace SizeBench.AnalysisEngine;
@@ -9,6 +10,8 @@ public interface ISession : ISessionWithProgress
     string BinaryPath { get; }
 
     byte BytesPerWord { get; }
+
+    IPEFile PEFile { get; }
 
     Task<IReadOnlyList<BinarySection>> EnumerateBinarySectionsAndCOFFGroups(CancellationToken token);
     Task<IReadOnlyList<BinarySection>> EnumerateBinarySectionsAndCOFFGroups(CancellationToken token, ILogger? parentLogger);

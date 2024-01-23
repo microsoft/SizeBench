@@ -48,4 +48,6 @@ public enum SymbolComparisonClass
     ImportDescriptor,
     ImportThunk,
     ImportByName,
+    ImportString,
+    LoadConfigTable
 }

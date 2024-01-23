@@ -45,12 +45,13 @@ public sealed class Session_BinarySectionsTests
         Assert.AreEqual(0xC00u, rdataSection.Size);
         Assert.IsTrue(rdataSection.COFFGroups.Count > 0);
         Assert.AreEqual(0x200u, relocSection.Size);
-        Assert.AreEqual(0, relocSection.COFFGroups.Count);
+        Assert.AreEqual(1, relocSection.COFFGroups.Count); // We should have synthesized a COFF group for the .reloc section from the base reloc directory in the PE
 
         var textmnCOFFGroup = (from cg in textSection.COFFGroups where cg.Name == ".text$mn" select cg).First();
         var xdataCOFFGroup = (from cg in rdataSection.COFFGroups where cg.Name == ".xdata" select cg).First();
         var bssCOFFGroup = (from cg in dataSection.COFFGroups where cg.Name == ".bss" select cg).First();
         var crtXCACOFFGroup = (from cg in rdataSection.COFFGroups where cg.Name == ".CRT$XCA" select cg).First();
+        var baseRelocSynthesizedCOFFGroup = (from cg in relocSection.COFFGroups where cg.Name == ".sizebench-synthesized-PE-directory-BaseRelocationTable" select cg).First();
         var nonexistentCOFFGroup = (from cg in rdataSection.COFFGroups where cg.Name == ".CRT$ZZZ" select cg).FirstOrDefault();
 
         Assert.IsNull(nonexistentCOFFGroup); // Negative test case - let's make sure not everything matches
@@ -67,6 +68,8 @@ public sealed class Session_BinarySectionsTests
         Assert.AreEqual(".data", bssCOFFGroup.Section.Name);
         Assert.AreEqual(0x8u, crtXCACOFFGroup.Size);
         Assert.AreEqual(".rdata", crtXCACOFFGroup.Section.Name);
+        Assert.AreEqual(0x18u, baseRelocSynthesizedCOFFGroup.Size);
+        Assert.AreEqual(".reloc", baseRelocSynthesizedCOFFGroup.Section.Name);
     }
 
     [TestMethod]
@@ -93,18 +96,16 @@ public sealed class Session_BinarySectionsTests
         Assert.AreEqual(0xA00u, rdataSection.Size);
         Assert.IsTrue(rdataSection.COFFGroups.Count > 0);
         Assert.AreEqual(0x200u, relocSection.Size);
-        Assert.AreEqual(0, relocSection.COFFGroups.Count);
+        Assert.AreEqual(1, relocSection.COFFGroups.Count); // We should have synthesized a COFF group for the .reloc section from the base reloc directory in the PE
 
-        var textmnCOFFGroup = (from cg in textSection.COFFGroups where cg.Name == ".text$mn" select cg).FirstOrDefault();
+        var textmnCOFFGroup = (from cg in textSection.COFFGroups where cg.Name == ".text$mn" select cg).First();
         var xdataCOFFGroup = (from cg in rdataSection.COFFGroups where cg.Name == ".xdata" select cg).FirstOrDefault();
-        var bssCOFFGroup = (from cg in dataSection.COFFGroups where cg.Name == ".bss" select cg).FirstOrDefault();
-        var crtXCACOFFGroup = (from cg in rdataSection.COFFGroups where cg.Name == ".CRT$XCA" select cg).FirstOrDefault();
+        var bssCOFFGroup = (from cg in dataSection.COFFGroups where cg.Name == ".bss" select cg).First();
+        var crtXCACOFFGroup = (from cg in rdataSection.COFFGroups where cg.Name == ".CRT$XCA" select cg).First();
+        var baseRelocSynthesizedCOFFGroup = (from cg in relocSection.COFFGroups where cg.Name == ".sizebench-synthesized-PE-directory-BaseRelocationTable" select cg).First();
         var nonexistentCOFFGroup = (from cg in rdataSection.COFFGroups where cg.Name == ".CRT$ZZZ" select cg).FirstOrDefault();
 
-        Assert.IsNotNull(textmnCOFFGroup);
         Assert.IsNull(xdataCOFFGroup); // xdata should not exist for 32-bit binaries
-        Assert.IsNotNull(bssCOFFGroup);
-        Assert.IsNotNull(crtXCACOFFGroup);
         Assert.IsNull(nonexistentCOFFGroup); // Negative test case - let's make sure not everything matches
 
         // Validating this against known good output from "link /dump /headers /coffgroup SizeBench.AnalysisEngine.Tests.CppDll.dll"
@@ -115,5 +116,7 @@ public sealed class Session_BinarySectionsTests
         Assert.AreEqual(".data", bssCOFFGroup.Section.Name);
         Assert.AreEqual(0x4u, crtXCACOFFGroup.Size);
         Assert.AreEqual(".rdata", crtXCACOFFGroup.Section.Name);
+        Assert.AreEqual(0x168u, baseRelocSynthesizedCOFFGroup.Size);
+        Assert.AreEqual(".reloc", baseRelocSynthesizedCOFFGroup.Section.Name);
     }
 }

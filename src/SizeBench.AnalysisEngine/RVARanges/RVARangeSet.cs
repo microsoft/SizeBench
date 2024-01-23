@@ -108,7 +108,7 @@ internal sealed class RVARangeSet : IEnumerable<RVARange>
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    public static List<RVARange> CoalesceRVARangesFromList(List<RVARange> ranges, uint maxPaddingToMerge = 0)
+    public static List<RVARange> CoalesceRVARangesFromList(IEnumerable<RVARange> ranges, uint maxPaddingToMerge = 0)
     {
         var rangesToReturn = new List<RVARange>();
 
@@ -127,7 +127,7 @@ internal sealed class RVARangeSet : IEnumerable<RVARange>
         return rangesToReturn;
     }
 
-    public static RVARangeSet FromListOfRVARanges(List<RVARange> ranges, uint maxPaddingToMerge)
+    public static RVARangeSet FromListOfRVARanges(IEnumerable<RVARange> ranges, uint maxPaddingToMerge)
     {
         var set = new RVARangeSet();
         foreach (var coalescedRange in CoalesceRVARangesFromList(ranges, maxPaddingToMerge))

@@ -223,13 +223,9 @@ internal abstract unsafe class EHSymbolParser
     {
         var exceptionDirectory = this.PEFile.ExceptionDirectory;
 
-        // We use the size out of the ExceptionDirectory instead of the one from ImageDirectoryEntryToDataEx, because the one from the P/Invoke
-        // is limited to ushort and the exception directory is often above 64KB in size so it can't be represented appropriately there.
-        PInvokes.ImageDirectoryEntryToDataEx(libraryBaseAddress, false, IMAGE_DIRECTORY_ENTRY.Exception, out _ /* size */, out var headerPtr);
-
         // If we don't find an Exception directory, then this binary has no pdata.  An example of this is an apiset DLL like
         // api-ms-win-core-fibers-l1-1-0.dll
-        if (headerPtr == IntPtr.Zero)
+        if (exceptionDirectory.RelativeVirtualAddress == 0)
         {
             cache.PDataRVARange = new RVARange(0, 0);
             cache.PDataSymbolsByRVA = new SortedList<uint, PDataSymbol>();
@@ -238,21 +234,20 @@ internal abstract unsafe class EHSymbolParser
             return Array.Empty<T>();
         }
 
-        var header = Marshal.PtrToStructure<IMAGE_SECTION_HEADER>(headerPtr);
-        var pdataAddress = new IntPtr(libraryBaseAddress + header.VirtualAddress);
+        var pdataAddress = new IntPtr(libraryBaseAddress + exceptionDirectory.RelativeVirtualAddress);
         var arr = new T[exceptionDirectory.Size / Marshal.SizeOf<T>()];
         var handle = GCHandle.Alloc(arr, GCHandleType.Pinned);
         try
         {
             var arrPtr = handle.AddrOfPinnedObject();
-            PInvokes.memcpy(arrPtr, pdataAddress, new UIntPtr(exceptionDirectory.Size));
+            PInvokes.memcpy(arrPtr, pdataAddress, new UIntPtr((uint)exceptionDirectory.Size));
         }
         finally
         {
             handle.Free();
         }
 
-        cache.PDataRVARange = RVARange.FromRVAAndSize(exceptionDirectory.VirtualAddress, exceptionDirectory.Size);
+        cache.PDataRVARange = RVARange.FromRVAAndSize((uint)exceptionDirectory.RelativeVirtualAddress, (uint)exceptionDirectory.Size);
         return arr;
     }
 

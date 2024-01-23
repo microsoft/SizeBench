@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using SizeBench.AnalysisEngine;
 using SizeBench.AnalysisEngine.DIAInterop;
+using SizeBench.AnalysisEngine.PE;
 using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.Logging;
 
@@ -11,7 +12,7 @@ internal class TestDIAAdapter : IDIAAdapter
 {
     public IEnumerable<BinarySection>? BinarySectionsToFind;
 
-    public IEnumerable<BinarySection> FindBinarySections(ILogger logger, CancellationToken token)
+    public IEnumerable<BinarySection> FindBinarySections(IPEFile peFile, ILogger logger, CancellationToken token)
     {
         if (this.BinarySectionsToFind is null)
         {
@@ -23,7 +24,7 @@ internal class TestDIAAdapter : IDIAAdapter
 
     public IEnumerable<COFFGroup>? COFFGroupsToFind;
 
-    public IEnumerable<COFFGroup> FindCOFFGroups(ILogger logger, CancellationToken token)
+    public IEnumerable<COFFGroup> FindCOFFGroups(IPEFile peFile, ILogger logger, CancellationToken token)
     {
         if (this.COFFGroupsToFind is null)
         {

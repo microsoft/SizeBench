@@ -1,4 +1,4 @@
-﻿using SizeBench.AnalysisEngine.PE;
+﻿using System.Reflection.PortableExecutable;
 using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.Logging;
 using SizeBench.TestDataCommon;
@@ -131,8 +131,8 @@ public sealed class EnumerateSymbolsInLibSessionTaskTests : IDisposable
 
     private BinarySection GenerateMockTextSection()
     {
-        var textSection = new BinarySection(this.SessionTaskParameters!.DataCache, ".text", size: 0x1000u, virtualSize: 0, rva: 0x4000u, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
-        var textMnCG = new COFFGroup(this.SessionTaskParameters.DataCache, ".text$mn", size: 0x1000u, rva: 0x4000u, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
+        var textSection = new BinarySection(this.SessionTaskParameters!.DataCache, ".text", size: 0x1000u, virtualSize: 0, rva: 0x4000u, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
+        var textMnCG = new COFFGroup(this.SessionTaskParameters.DataCache, ".text$mn", size: 0x1000u, rva: 0x4000u, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
 
         var textRVARanges = new List<RVARange>();
         for (uint i = 0; i < 60; i++)
@@ -154,8 +154,8 @@ public sealed class EnumerateSymbolsInLibSessionTaskTests : IDisposable
 
     private BinarySection GenerateMockRDataSection()
     {
-        var rdataSection = new BinarySection(this.SessionTaskParameters!.DataCache, ".rdata", size: 0x1000u, virtualSize: 0, rva: 0x1000u, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryRead);
-        var rdataZzCG = new COFFGroup(this.SessionTaskParameters.DataCache, ".rdata$zz", size: 0x1000u, rva: 0x1000u, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryRead);
+        var rdataSection = new BinarySection(this.SessionTaskParameters!.DataCache, ".rdata", size: 0x1000u, virtualSize: 0, rva: 0x1000u, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemRead);
+        var rdataZzCG = new COFFGroup(this.SessionTaskParameters.DataCache, ".rdata$zz", size: 0x1000u, rva: 0x1000u, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemRead);
 
         var rdataRVARanges = new List<RVARange>();
         for (uint i = 0; i < 60; i++)

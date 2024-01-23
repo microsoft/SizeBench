@@ -96,7 +96,7 @@ internal sealed unsafe class AMD64_EHParser : EHSymbolParser
 
         var pAfterUnwindCodes = pRawXdata;
 
-        if (flags == UNWIND_INFO_Flags.UNW_FLAG_CHAININFO)
+        if (flags.HasFlag(UNWIND_INFO_Flags.UNW_FLAG_CHAININFO))
         {
             ParseOneChainInfo(targetSymbol, targetStartRva, unwindInfoStartRva, pAfterUnwindCodes, unwindInfoStart);
         }

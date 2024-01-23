@@ -292,6 +292,10 @@ internal class LinkerCommandLine : CommandLine
         {
             return new MSVC_LINK_CommandLine(rawCommandLine, language, toolName, frontEndVersion, backEndVersion);
         }
+        else if (language == CompilandLanguage.CV_CFL_LINK && toolName == "LLVM Linker")
+        {
+            return new LLD_LINK_CommandLine(rawCommandLine, language, toolName, frontEndVersion, backEndVersion);
+        }
         else
         {
             return new LinkerCommandLine(rawCommandLine, language, toolName, frontEndVersion, backEndVersion);
@@ -299,7 +303,7 @@ internal class LinkerCommandLine : CommandLine
     }
 }
 
-internal sealed class MSVC_LINK_CommandLine : LinkerCommandLine
+internal class MSVC_LINK_CommandLine : LinkerCommandLine
 {
     private enum LTCGStatus
     {
@@ -475,5 +479,16 @@ internal sealed class MSVC_LINK_CommandLine : LinkerCommandLine
         GetSwitchState(new string[] { "/ltcg:pgi", "/genprofile", "/fastgenprofile" }, CommandLineSwitchState.SwitchNotFound, CommandLineOrderOfPrecedence.FirstWins, StringComparison.OrdinalIgnoreCase) == CommandLineSwitchState.SwitchEnabled;
 
     public MSVC_LINK_CommandLine(string rawCommandLine, CompilandLanguage language, string toolName, Version frontEndVersion, Version backEndVersion)
+        : base(rawCommandLine, language, toolName, frontEndVersion, backEndVersion) { }
+}
+
+// Because lld-link.exe shares so many parameter names and values with link.exe, we'll just derive from MSVC_LINK_CommandLine
+internal sealed class LLD_LINK_CommandLine : MSVC_LINK_CommandLine
+{
+    // It doesn't appear that LLD does the equivalent of MSVC's PGI (Profile Guided Instrumented) binaries, instead it may be a compiler option?
+    // For now we'll treat all LLD linked binaries as non-PGI and see if this surfaces problems later.
+    internal override bool IsPGInstrumented => false;
+
+    public LLD_LINK_CommandLine(string rawCommandLine, CompilandLanguage language, string toolName, Version frontEndVersion, Version backEndVersion)
         : base(rawCommandLine, language, toolName, frontEndVersion, backEndVersion) { }
 }

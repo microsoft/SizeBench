@@ -200,7 +200,7 @@ internal static class UriParsingHelper
     {
         var components = UriComponents.Path;
 
-        if (uri.OriginalString.StartsWith("/", StringComparison.Ordinal))
+        if (uri.OriginalString.StartsWith('/'))
         {
             components |= UriComponents.KeepDelimiter;
         }

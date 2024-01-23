@@ -18,7 +18,7 @@ using SizeBench.GUI.Commands;
 using SizeBench.GUI.Controls.Errors;
 using SizeBench.GUI.Core;
 using SizeBench.GUI.Windows;
-using reg = Castle.MicroKernel.Registration;
+using CastleReg = Castle.MicroKernel.Registration;
 
 namespace SizeBench.GUI.ViewModels;
 
@@ -149,7 +149,7 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
         using var deeplinkLog = this._applicationLogger.StartTaskLog("Trying to resolve deeplink");
         deeplinkLog.Log($"deeplink = {deeplink}");
 
-        if (deeplink.Scheme.ToUpperInvariant() != "SIZEBENCH")
+        if (!deeplink.Scheme.Equals("SIZEBENCH", StringComparison.OrdinalIgnoreCase))
         {
             return;
         }
@@ -293,12 +293,12 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
         var newTab = new SingleBinaryTab(session, container);
 
         container.Install(FromAssembly.InDirectory(new AssemblyFilter(".", "SizeBench.*dll")));
-        container.Register(reg.Component.For<ISession, ISessionWithProgress>()
-                                        .Instance(session)
-                                        .LifestyleSingleton());
-        container.Register(reg.Component.For<SingleBinaryTab, TabBase, IUITaskScheduler>()
-                                        .Instance(newTab)
-                                        .LifestyleSingleton());
+        container.Register(CastleReg.Component.For<ISession, ISessionWithProgress>()
+                                              .Instance(session)
+                                              .LifestyleSingleton());
+        container.Register(CastleReg.Component.For<SingleBinaryTab, TabBase, IUITaskScheduler>()
+                                              .Instance(newTab)
+                                              .LifestyleSingleton());
 
         this.OpenTabs.Add(newTab);
 
@@ -317,12 +317,12 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
         var newTab = new BinaryDiffTab(diffSession, container);
 
         container.Install(FromAssembly.InDirectory(new AssemblyFilter(".", "SizeBench.*")));
-        container.Register(reg.Component.For<IDiffSession, ISessionWithProgress>()
-                                        .Instance(diffSession)
-                                        .LifestyleSingleton());
-        container.Register(reg.Component.For<BinaryDiffTab, TabBase, IUITaskScheduler>()
-                                        .Instance(newTab)
-                                        .LifestyleSingleton());
+        container.Register(CastleReg.Component.For<IDiffSession, ISessionWithProgress>()
+                                              .Instance(diffSession)
+                                              .LifestyleSingleton());
+        container.Register(CastleReg.Component.For<BinaryDiffTab, TabBase, IUITaskScheduler>()
+                                              .Instance(newTab)
+                                              .LifestyleSingleton());
 
         this.OpenTabs.Add(newTab);
 

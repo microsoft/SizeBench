@@ -16,3 +16,7 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Design", "CA1034:Nested types should not be visible", Justification = "Not important for test code")]
 
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Not important for test code")]
+
+[assembly: SuppressMessage("Performance", "CA1851:Possible multiple enumerations of 'IEnumerable' collection", Justification = "Performance of tests isn't *that* important.")]
+
+[assembly: SuppressMessage("Performance", "CA1859:Use concrete types when possible for improved performance", Justification = "Performance of tests isn't *that* important.")]

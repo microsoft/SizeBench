@@ -49,7 +49,7 @@ internal sealed class SizeBenchDataGridHyperlinkColumn : DataGridColumn
 
     private void OnHyperlinkTextBindingChanged() => NotifyPropertyChanged(nameof(this.HyperlinkTextBinding));
 
-    private static object OnCoerceSortMemberPath(DependencyObject d, object baseValue)
+    private static string OnCoerceSortMemberPath(DependencyObject d, object baseValue)
     {
         var column = (SizeBenchDataGridHyperlinkColumn)d;
         var sortMemberPath = (string)baseValue;

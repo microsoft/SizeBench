@@ -1015,7 +1015,7 @@ internal sealed class PEFile : IPEFile
         return new RsrcGroupCursorDataSymbol(totalSizeOfGroupCursor, languageName, depth1NameAsString, cursors);
     }
 
-    private unsafe RsrcDataSymbol CreateStringTableSymbol(string languageName, string depth1NameAsString, IMAGE_RESOURCE_DATA_ENTRY dataEntry)
+    private unsafe RsrcStringTableDataSymbol CreateStringTableSymbol(string languageName, string depth1NameAsString, IMAGE_RESOURCE_DATA_ENTRY dataEntry)
     {
         var strTable = (ushort*)GetDataMemberPtrByRVA(dataEntry.OffsetToData);
         var end = (byte*)strTable + dataEntry.Size;

@@ -57,9 +57,9 @@ public static class SymbolNameHelper
 
                 var argTypeName = function.FunctionType.ArgumentTypes[argumentIndex].Name;
 
-                if (templateParamAnonymizedNames.ContainsKey(argTypeName))
+                if (templateParamAnonymizedNames.TryGetValue(argTypeName, out var value))
                 {
-                    sb.Append(templateParamAnonymizedNames[argTypeName]);
+                    sb.Append(value);
                 }
                 else
                 {
@@ -140,9 +140,9 @@ public static class SymbolNameHelper
 
                         // If we've seen this name before, re-use the "TX" that we assigned it before.
                         // If not, we'll establish a "TX" for it.
-                        if (templateParamAnonymizedNames.ContainsKey(templateParamConcreteNames[paramCount]))
+                        if (templateParamAnonymizedNames.TryGetValue(templateParamConcreteNames[paramCount], out var value))
                         {
-                            anonymizedNameToAppend = templateParamAnonymizedNames[templateParamConcreteNames[paramCount]];
+                            anonymizedNameToAppend = value;
                         }
                         else
                         {

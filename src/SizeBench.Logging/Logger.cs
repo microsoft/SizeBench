@@ -39,12 +39,11 @@ public sealed class Logger : ILogger
         this._stopwatch = stopwatch;
     }
 
+    private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(this.IsDisposed, this.Name);
+
     public void Log(string message, LogLevel logLevel = LogLevel.Info, [CallerMemberName] string callerMemberName = "")
     {
-        if (this.IsDisposed)
-        {
-            throw new ObjectDisposedException(this.Name);
-        }
+        ThrowIfDisposed();
 
         var logEntry = new LogEntry(callerMemberName, message, logLevel);
         LogWithSynchronizationContext(logEntry);
@@ -52,10 +51,7 @@ public sealed class Logger : ILogger
 
     public void LogException(string message, Exception ex, [CallerMemberName] string callerMemberName = "")
     {
-        if (this.IsDisposed)
-        {
-            throw new ObjectDisposedException(this.Name);
-        }
+        ThrowIfDisposed();
 
         var logEntry = new LogExceptionEntry(callerMemberName, message, ex);
         LogWithSynchronizationContext(logEntry);
@@ -63,10 +59,7 @@ public sealed class Logger : ILogger
 
     public LogEntryForProgress StartProgressLogEntry(string initialProgressMessage, [CallerMemberName] string callerMemberName = "")
     {
-        if (this.IsDisposed)
-        {
-            throw new ObjectDisposedException(this.Name);
-        }
+        ThrowIfDisposed();
 
         var logEntry = new LogEntryForProgress(callerMemberName, initialProgressMessage, LogLevel.Info);
         LogWithSynchronizationContext(logEntry);

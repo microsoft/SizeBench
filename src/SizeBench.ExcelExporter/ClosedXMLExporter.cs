@@ -268,7 +268,7 @@ internal sealed class ClosedXMLExporter : IExcelExporter
         {
             for (var columnIndex = 0; columnIndex < columnHeaders.Length; columnIndex++)
             {
-                dataWorksheet.Cell(2 + rowIndex, 1 + columnIndex).Value = dataRows[rowIndex, columnIndex];
+                dataWorksheet.Cell(2 + rowIndex, 1 + columnIndex).Value = XLCellValue.FromObject(dataRows[rowIndex, columnIndex], CultureInfo.InvariantCulture);
             }
         }
 

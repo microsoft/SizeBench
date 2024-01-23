@@ -16,7 +16,7 @@ public sealed class QueuedTaskScheduler : TaskScheduler, IDisposable
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes",
                      Justification = "This is a debug visualizer, so it's instantiated by the debugger when needed.")]
     /// <summary>Debug view for the QueuedTaskScheduler.</summary>
-    private class QueuedTaskSchedulerDebugView
+    private sealed class QueuedTaskSchedulerDebugView
     {
         /// <summary>The scheduler.</summary>
         private readonly QueuedTaskScheduler _scheduler;
@@ -537,7 +537,7 @@ public sealed class QueuedTaskScheduler : TaskScheduler, IDisposable
     }
 
     /// <summary>A group of queues a the same priority level.</summary>
-    private class QueueGroup : List<QueuedTaskSchedulerQueue>
+    private sealed class QueueGroup : List<QueuedTaskSchedulerQueue>
     {
         /// <summary>The starting index for the next round-robin traversal.</summary>
         public int NextQueueIndex;

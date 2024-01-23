@@ -5,7 +5,7 @@ using SizeBench.Logging;
 
 namespace SizeBench.SKUCrawler.CrawlFolder;
 
-internal class CrawlFolderArguments : ApplicationArguments
+internal sealed class CrawlFolderArguments : ApplicationArguments
 {
     public string? CrawlRoot { get; set; }
 

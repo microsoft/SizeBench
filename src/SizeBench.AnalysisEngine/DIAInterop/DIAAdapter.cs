@@ -56,6 +56,8 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
     private uint _sectionAlignment;
     private readonly int _affinitizedThreadId;
 
+    private static readonly string[] debugFastlinkSwitchNames = ["/debug:fastlink"];
+
     private void ThrowIfOnWrongThread()
     {
         if (Environment.CurrentManagedThreadId != this._affinitizedThreadId)
@@ -284,7 +286,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             throw new PDBNotSuitableForAnalysisException("Unable to find the linker command-line used, this binary was probably produced by using /debug:fastlink in your link command - please generate a full PDB with /debug:full for use with SizeBench.");
         }
 
-        if (linkerCommandLine.GetSwitchState(new string[] { "/debug:fastlink" }, CommandLineSwitchState.SwitchNotFound, CommandLineOrderOfPrecedence.LastWins, StringComparison.OrdinalIgnoreCase) == CommandLineSwitchState.SwitchEnabled)
+        if (linkerCommandLine.GetSwitchState(debugFastlinkSwitchNames, CommandLineSwitchState.SwitchNotFound, CommandLineOrderOfPrecedence.LastWins, StringComparison.OrdinalIgnoreCase) == CommandLineSwitchState.SwitchEnabled)
         {
             throw new PDBNotSuitableForAnalysisException("This PDB is a 'Mini PDB' which is not suitable for static analysis purposes.  This PDB was probably produced by using /debug:fastlink in your link command - please generate a full PDB with /debug:full for use with SizeBench.");
         }
@@ -511,7 +513,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                     {
                         // Example:
                         // ?g_EncryptedSegmentSystemCall_160@WarbirdRuntime@@3U_ENCRYPTION_SEGMENT@1@C
-                        prefixToMerge = coffGroup.Name[..(coffGroup.Name.IndexOf("_", startIndex: "?g_E".Length, StringComparison.Ordinal) + "_".Length)];
+                        prefixToMerge = coffGroup.Name[..(coffGroup.Name.IndexOf('_', startIndex: "?g_E".Length) + "_".Length)];
                     }
                     pendingRawCG = new RawCOFFGroup(prefixToMerge + "<all>", coffGroup.Length, coffGroup.RVAStart, coffGroup.Characteristics);
                 }
@@ -2643,7 +2645,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
 
     #region Custom Types
 
-    private TypeSymbol ParseCustomType(IDiaSymbol diaSymbol, uint symbolLength)
+    private CustomTypeSymbol ParseCustomType(IDiaSymbol diaSymbol, uint symbolLength)
     {
         Debug.Assert(diaSymbol.unmodifiedType is null);
 
@@ -2695,7 +2697,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         return returnValue;
     }
 
-    private ISymbol ParseSymbol(IDiaSymbol diaSymbol, CancellationToken cancellationToken)
+    private Symbol ParseSymbol(IDiaSymbol diaSymbol, CancellationToken cancellationToken)
     {
         // At first it may look weird to assign these to local variables, but trust me it's super useful for debugging since VS doesn't like
         // evaluating COM object properties in conditional breakpoints.  This allows conditional breakpoints to be useful here in this very
@@ -3076,13 +3078,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
 
     #region IDisposable
 
-    private void ThrowIfDisposingOrDisposed()
-    {
-        if (this.IsDisposing || this.IsDisposed)
-        {
-            throw new ObjectDisposedException(GetType().Name);
-        }
-    }
+    private void ThrowIfDisposingOrDisposed() => ObjectDisposedException.ThrowIf(this.IsDisposing || this.IsDisposed, GetType().Name);
 
     private bool IsDisposing;
     private bool IsDisposed;

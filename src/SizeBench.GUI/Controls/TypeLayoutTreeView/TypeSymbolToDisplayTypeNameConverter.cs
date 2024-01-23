@@ -45,7 +45,7 @@ public sealed class TypeSymbolToDisplayTypeNameConverter : IValueConverter
                 var namespaceStartIndex = typeSymbol.Name.IndexOf("::", StringComparison.Ordinal);
                 if (namespaceStartIndex < templateStartIndex)
                 {
-                    displayName = typeSymbol.Name[(typeSymbol.Name.LastIndexOf("::", typeSymbol.Name.IndexOf("<", StringComparison.Ordinal), StringComparison.Ordinal) + "::".Length)..];
+                    displayName = typeSymbol.Name[(typeSymbol.Name.LastIndexOf("::", typeSymbol.Name.IndexOf('<', StringComparison.Ordinal), StringComparison.Ordinal) + "::".Length)..];
                 }
             }
             else

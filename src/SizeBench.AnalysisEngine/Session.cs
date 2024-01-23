@@ -65,10 +65,11 @@ public sealed class Session : ISession
 
     #region Debugger Interop
 
-    private IDebuggerAdapter? _debuggerAdapter;
+    private DebuggerAdapter? _debuggerAdapter;
 
     private async Task EnsureDebuggerAdapter(CancellationToken token)
     {
+        ThrowIfDisposingOrDisposed();
         if (this._debuggerAdapter != null)
         {
             return;
@@ -214,13 +215,7 @@ public sealed class Session : ISession
 
     #region IAsyncDisposable Support
 
-    private void ThrowIfDisposingOrDisposed()
-    {
-        if (this.IsDisposing || this.IsDisposed)
-        {
-            throw new ObjectDisposedException(GetType().Name);
-        }
-    }
+    private void ThrowIfDisposingOrDisposed() => ObjectDisposedException.ThrowIf(this.IsDisposing || this.IsDisposed, GetType().Name);
 
     // IsDisposing is set to true when we begin disposal, but once we begin we have to wait for the background
     // DIA thread to finish whatever it's doing before we can finish disposing, so IsDisposed is the way we
@@ -237,7 +232,7 @@ public sealed class Session : ISession
 
         this.IsDisposing = true;
 
-        this._taskScheduler?.Dispose();
+        this._taskScheduler.Dispose();
 
         this._peFile?.Dispose();
         this._peFile = null;
@@ -714,6 +709,7 @@ public sealed class Session : ISession
     public async Task<string> DisassembleFunction(IFunctionCodeSymbol functionSymbol, DisassembleFunctionOptions options, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(functionSymbol);
+        ArgumentNullException.ThrowIfNull(options);
 
         try
         {

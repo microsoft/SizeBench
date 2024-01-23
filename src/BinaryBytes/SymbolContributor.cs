@@ -1,6 +1,6 @@
 ﻿namespace BinaryBytes;
 
-internal class SymbolContributor
+internal sealed class SymbolContributor
 {
     public string LibraryName { get; private set; }
     public string CompilandName { get; private set; }

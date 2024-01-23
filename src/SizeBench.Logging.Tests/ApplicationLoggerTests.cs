@@ -17,7 +17,7 @@ public class ApplicationLoggerTests
     [TestMethod]
     public void LoggingAfterDisposeThrows()
     {
-        IApplicationLogger logger;
+        ApplicationLogger logger;
         using (logger = new ApplicationLogger("Test App", null))
         {
         }
@@ -42,7 +42,7 @@ public class ApplicationLoggerTests
     {
         AsyncPump.Run(async delegate
         {
-            using IApplicationLogger logger = new ApplicationLogger("Test App", SynchronizationContext.Current);
+            using var logger = new ApplicationLogger("Test App", SynchronizationContext.Current);
             var testThreadId = Environment.CurrentManagedThreadId;
             Assert.IsTrue(logger.Entries is INotifyCollectionChanged);
             var observable = (INotifyCollectionChanged)logger.Entries;
@@ -66,7 +66,7 @@ public class ApplicationLoggerTests
     public void DisposingCausesAllSessionLoggersToDispose()
     {
         Logger? sessionLogger;
-        using (IApplicationLogger logger = new ApplicationLogger("Test App", null))
+        using (var logger = new ApplicationLogger("Test App", null))
         {
             sessionLogger = logger.CreateSessionLog("Session 1") as Logger;
         }
@@ -78,7 +78,7 @@ public class ApplicationLoggerTests
     {
         var testContext = new SynchronizationContext();
         SynchronizationContext.SetSynchronizationContext(testContext);
-        using IApplicationLogger logger = new ApplicationLogger("Test App", testContext);
+        using var logger = new ApplicationLogger("Test App", testContext);
         var inheritSync = logger.CreateSessionLog("Test Session With Inheritance");
         Assert.AreEqual(testContext, inheritSync.SynchronizationContext);
     }

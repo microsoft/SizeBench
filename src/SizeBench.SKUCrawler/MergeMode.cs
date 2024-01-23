@@ -2,7 +2,7 @@
 
 namespace SizeBench.SKUCrawler.CrawlFolder;
 
-internal class MergeArguments : ApplicationArguments
+internal sealed class MergeArguments : ApplicationArguments
 {
     public List<string> FilesToMerge { get; } = new List<string>();
 

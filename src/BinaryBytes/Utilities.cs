@@ -135,10 +135,10 @@ internal static class Utilities
     internal static SymbolContributor GetContributorForRva(uint rva, Dictionary<uint, SymbolContributor> rvaToContributorMap)
     {
         var rvaContributor = new SymbolContributor(String.Empty, String.Empty);
-        if (rvaToContributorMap.ContainsKey(rva))
+        if (rvaToContributorMap.TryGetValue(rva, out var value))
         {
-            var libname = rvaToContributorMap[rva]?.LibraryName ?? String.Empty;
-            var compilandName = rvaToContributorMap[rva]?.CompilandName ?? String.Empty;
+            var libname = value?.LibraryName ?? String.Empty;
+            var compilandName = value?.CompilandName ?? String.Empty;
             rvaContributor = new SymbolContributor(libname, compilandName);
         }
 

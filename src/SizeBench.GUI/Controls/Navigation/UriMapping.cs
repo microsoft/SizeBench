@@ -170,7 +170,7 @@ public sealed class UriMapping
 
         // 'uriValues' is the values of the identifiers from the 'Uri' template, as they appear in the Uri
         // being processed
-        IDictionary<string, string> uriValues = new Dictionary<string, string>();
+        var uriValues = new Dictionary<string, string>();
 
         // i begins at 1 because the group at index 0 is always equal to the parent's Match,
         // which we do not want.  We only want explicitly-named groups.
@@ -183,7 +183,7 @@ public sealed class UriMapping
         foreach (var identifier in this._mappedUriIdentifiers)
         {
             var identifierWithBraces = "{" + identifier + "}";
-            var replacementValue = (uriValues.ContainsKey(identifier) ? uriValues[identifier] : String.Empty);
+            var replacementValue = (uriValues.TryGetValue(identifier, out var value) ? value : String.Empty);
 
             // First check for identifiers in the base Uri, and replace them as appropriate
             uriAfterMappingBase = uriAfterMappingBase.Replace(identifierWithBraces, replacementValue, StringComparison.Ordinal);

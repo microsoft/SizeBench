@@ -12,7 +12,7 @@ using SizeBench.Threading.Tasks.Schedulers;
 
 namespace SizeBench.SKUCrawler;
 
-internal class BatchProcess : IDisposable
+internal sealed class BatchProcess : IDisposable
 {
     // At least in SKUCrawler we want to 'fold up' all the BlockSymbols from a function up into the Function.
     // At some point it'd be good to have a way to do this in the Analysis Engine for other customers, as BlockSymbols suck
@@ -46,7 +46,7 @@ internal class BatchProcess : IDisposable
 
     private string DbFilename => $"{this._logFilenameBase}.db";
 
-    private class ProductBinaryAnalysisResults
+    private sealed class ProductBinaryAnalysisResults
     {
         public ProductBinaryAnalysisResults(string binaryPath)
         {
@@ -1078,7 +1078,7 @@ internal class BatchProcess : IDisposable
     #region IDisposable Support
     private bool disposedValue; // To detect redundant calls
 
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         if (!this.disposedValue)
         {

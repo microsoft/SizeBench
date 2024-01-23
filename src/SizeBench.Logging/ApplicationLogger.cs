@@ -16,7 +16,7 @@ public sealed class ApplicationLogger : IApplicationLogger
     private readonly IList<LogEntry> _entries;
     public IEnumerable<LogEntry> Entries => this._entries;
 
-    private readonly IList<LogEntry> _pendingEntries;
+    private readonly List<LogEntry> _pendingEntries;
 
     public ApplicationLogger(string name, SynchronizationContext? synchronizationContext)
     {
@@ -36,9 +36,11 @@ public sealed class ApplicationLogger : IApplicationLogger
         }
     }
 
+    private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(this.IsDisposed, this.Name);
+
     public void Log(string message, LogLevel logLevel = LogLevel.Info, [CallerMemberName] string callerMemberName = "")
     {
-        ObjectDisposedException.ThrowIf(this.IsDisposed, this.Name);
+        ThrowIfDisposed();
 
         var logEntry = new LogEntry(callerMemberName, message, logLevel);
         LogWithSynchronizationContext(logEntry);
@@ -46,10 +48,7 @@ public sealed class ApplicationLogger : IApplicationLogger
 
     public void LogException(string message, Exception ex, [CallerMemberName] string callerMemberName = "")
     {
-        if (this.IsDisposed)
-        {
-            throw new ObjectDisposedException(this.Name);
-        }
+        ThrowIfDisposed();
 
         var logEntry = new LogExceptionEntry(callerMemberName, message, ex);
         LogWithSynchronizationContext(logEntry);
@@ -57,10 +56,7 @@ public sealed class ApplicationLogger : IApplicationLogger
 
     public LogEntryForProgress StartProgressLogEntry(string initialProgressMessage, [CallerMemberName] string callerMemberName = "")
     {
-        if (this.IsDisposed)
-        {
-            throw new ObjectDisposedException(this.Name);
-        }
+        ThrowIfDisposed();
 
         var logEntry = new LogEntryForProgress(callerMemberName, initialProgressMessage, LogLevel.Info);
         LogWithSynchronizationContext(logEntry);
@@ -94,10 +90,7 @@ public sealed class ApplicationLogger : IApplicationLogger
 
     public ILogger CreateSessionLog(string sessionName)
     {
-        if (this.IsDisposed)
-        {
-            throw new ObjectDisposedException(this.Name);
-        }
+        ThrowIfDisposed();
 
         IList<LogEntry> taskLogEntries;
         IList<LogEntry> pendingTaskLogEntries;
@@ -119,12 +112,9 @@ public sealed class ApplicationLogger : IApplicationLogger
 
     internal void RemoveSessionLog(Logger sessionLogger) => this._sessionLogs.Remove(sessionLogger);
 
-    private ILogger StartTaskLogCommon(string taskName, string callingMember)
+    private Logger StartTaskLogCommon(string taskName, string callingMember)
     {
-        if (this.IsDisposed)
-        {
-            throw new ObjectDisposedException(this.Name);
-        }
+        ThrowIfDisposed();
 
         IList<LogEntry> taskLogEntries;
         IList<LogEntry> pendingTaskLogEntries;
@@ -154,10 +144,7 @@ public sealed class ApplicationLogger : IApplicationLogger
 
     public void WriteLog(TextWriter writer)
     {
-        if (this.IsDisposed)
-        {
-            throw new ObjectDisposedException(this.Name);
-        }
+        ThrowIfDisposed();
 
         ArgumentNullException.ThrowIfNull(writer);
 

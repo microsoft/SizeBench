@@ -11,3 +11,5 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Usage", "CA2201:Do not raise reserved exception types", Justification = "Not important for test code.")]
 
 [assembly: SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Not important for test code.")]
+
+[assembly: SuppressMessage("Performance", "CA1854:Prefer the 'IDictionary.TryGetValue(TKey, out TValue)' method", Justification = "Performance of tests isn't *that* important.")]

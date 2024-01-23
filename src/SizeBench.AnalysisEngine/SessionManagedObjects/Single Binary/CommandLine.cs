@@ -271,8 +271,10 @@ internal class CompilerCommandLine : CommandLine
 
 internal sealed class MSVC_CXX_CommandLine : CompilerCommandLine
 {
+    internal static readonly string[] rttiSwitchNames = ["GR"];
+
     // RTTI is on by default for C++ code, and the last copy of the switch is the final override.
-    internal override bool RTTIEnabled => GetSwitchState(new string[] { "GR" }, CommandLineSwitchState.SwitchEnabled, CommandLineOrderOfPrecedence.LastWins) == CommandLineSwitchState.SwitchEnabled;
+    internal override bool RTTIEnabled => GetSwitchState(rttiSwitchNames, CommandLineSwitchState.SwitchEnabled, CommandLineOrderOfPrecedence.LastWins) == CommandLineSwitchState.SwitchEnabled;
 
     public MSVC_CXX_CommandLine(string rawCommandLine, CompilandLanguage language, string toolName, Version frontEndVersion, Version backEndVersion)
         : base(rawCommandLine, language, toolName, frontEndVersion, backEndVersion) { }
@@ -305,6 +307,8 @@ internal class LinkerCommandLine : CommandLine
 
 internal class MSVC_LINK_CommandLine : LinkerCommandLine
 {
+    internal static readonly string[] pgiSwitchNames = ["/ltcg:pgi", "/genprofile", "/fastgenprofile"];
+
     private enum LTCGStatus
     {
         LTCG,
@@ -476,7 +480,7 @@ internal class MSVC_LINK_CommandLine : LinkerCommandLine
     }
 
     internal override bool IsPGInstrumented =>
-        GetSwitchState(new string[] { "/ltcg:pgi", "/genprofile", "/fastgenprofile" }, CommandLineSwitchState.SwitchNotFound, CommandLineOrderOfPrecedence.FirstWins, StringComparison.OrdinalIgnoreCase) == CommandLineSwitchState.SwitchEnabled;
+        GetSwitchState(pgiSwitchNames, CommandLineSwitchState.SwitchNotFound, CommandLineOrderOfPrecedence.FirstWins, StringComparison.OrdinalIgnoreCase) == CommandLineSwitchState.SwitchEnabled;
 
     public MSVC_LINK_CommandLine(string rawCommandLine, CompilandLanguage language, string toolName, Version frontEndVersion, Version backEndVersion)
         : base(rawCommandLine, language, toolName, frontEndVersion, backEndVersion) { }

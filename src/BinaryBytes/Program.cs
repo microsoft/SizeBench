@@ -157,7 +157,7 @@ public static class Program
         {
             var startingByteOfFirstCoffgroup = section.COFFGroups[0].RVA;
             ulong endingByteOfLastCoffgroup = section.COFFGroups[section.COFFGroups.Count - 1].RVA +
-                                            section.COFFGroups[section.COFFGroups.Count - 1].Size;
+                                              section.COFFGroups[section.COFFGroups.Count - 1].VirtualSize;
 
             // Is there padding at the start of the section?
             if (section.RVA < startingByteOfFirstCoffgroup)
@@ -169,7 +169,7 @@ public static class Program
             }
 
             // Is there padding at the end of the section?
-            ulong endingByteOfTheSection = section.RVA + section.Size;
+            ulong endingByteOfTheSection = section.RVA + section.VirtualSize;
             if (endingByteOfTheSection > endingByteOfLastCoffgroup)
             {
                 adjustedSymbols.Insert(adjustedSymbols.Count,
@@ -182,7 +182,7 @@ public static class Program
         {
             var rvaContributor = Utilities.GetContributorForRva(section.RVA, rvaToContributorMap);
             adjustedSymbols.Add(Utilities.CreateSpecialBytesItem(Constants.SpecialSection, String.Empty,
-                section.RVA, section.Size, rvaContributor));
+                section.RVA, section.VirtualSize, rvaContributor));
         }
     }
 
@@ -195,7 +195,9 @@ public static class Program
         var adjustedSymbols = new List<BytesItem>();
         foreach (var coffgroup in section.COFFGroups)
         {
-            var symbols = await session.EnumerateSymbolsInCOFFGroup(coffgroup, CancellationToken.None);
+            // Ignore COMDAT-folded symbols because they don't take up space and they can add a lot of bloat to the database.
+            var symbols = (await session.EnumerateSymbolsInCOFFGroup(coffgroup, CancellationToken.None))
+                          .Where(symbol => !symbol.IsCOMDATFolded).ToList();
 
             if (symbols != null && symbols.Count > 0)
             {
@@ -205,7 +207,7 @@ public static class Program
             {
                 var rvaContributor = Utilities.GetContributorForRva(coffgroup.RVA, rvaToContributorMap);
                 adjustedSymbols.Add(Utilities.CreateSpecialBytesItem(Constants.SpecialCoffGroup,
-                    coffgroup.Name, coffgroup.RVA, coffgroup.Size, rvaContributor));
+                    coffgroup.Name, coffgroup.RVA, coffgroup.VirtualSize, rvaContributor));
             }
         }
 
@@ -238,7 +240,7 @@ public static class Program
                 bytesItems.Add(Utilities.CreatePaddingBytesItem(Constants.SymbolPadding, coffgroup.Name,
                     endingByteOfPreviousSymbol, startingByteOfCurrentSymbol - endingByteOfPreviousSymbol));
             }
-            endingByteOfPreviousSymbol = symbol.RVA + symbol.Size;
+            endingByteOfPreviousSymbol = symbol.RVA + symbol.VirtualSize;
 
             // Add the actual symbol itself to the items list
             var rvaContributor = Utilities.GetContributorForRva(symbol.RVA, rvaToContributorMap);
@@ -246,8 +248,8 @@ public static class Program
         }
 
         // Is there gap at the end of this COFF group?
-        ulong endingByteOfCoffgroup = coffgroup.RVA + coffgroup.Size;
-        var endingByteOfLastSymbol = symbols[symbols.Count - 1].RVA + symbols[symbols.Count - 1].Size;
+        ulong endingByteOfCoffgroup = coffgroup.RVA + coffgroup.VirtualSize;
+        var endingByteOfLastSymbol = symbols[symbols.Count - 1].RVA + symbols[symbols.Count - 1].VirtualSize;
         if (endingByteOfCoffgroup != endingByteOfLastSymbol && endingByteOfCoffgroup > endingByteOfLastSymbol)
         {
             bytesItems.Add(Utilities.CreatePaddingBytesItem(Constants.CoffgroupEndPadding, coffgroup.Name,

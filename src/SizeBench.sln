@@ -51,6 +51,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{85C0E032-D387-4A5A-BEC8-346E02B38ADE}"
 	ProjectSection(SolutionItems) = preProject
 		..\docs\Analysis Engine internals.md = ..\docs\Analysis Engine internals.md
+		..\docs\Contributing.md = ..\docs\Contributing.md
 		..\docs\Opening a Session.md = ..\docs\Opening a Session.md
 		..\docs\Principles.md = ..\docs\Principles.md
 		..\docs\Size VirtualSize and RVAs.md = ..\docs\Size VirtualSize and RVAs.md
@@ -306,7 +307,7 @@ Global
 		{CB423BCF-0005-41BD-8082-BE0027F38E65}.Release|x64.ActiveCfg = Release|x64
 		{CB423BCF-0005-41BD-8082-BE0027F38E65}.Release|x64.Build.0 = Release|x64
 		{F3B85B36-DE41-48CC-84E5-D7FC9D1CE28D}.Debug|x64.ActiveCfg = Debug|x64
-		{F3B85B36-DE41-48CC-84E5-D7FC9D1CE28D}.Release|x64.ActiveCfg = Release|x64
+		{F3B85B36-DE41-48CC-84E5-D7FC9D1CE28D}.Release|x64.ActiveCfg = Debug|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

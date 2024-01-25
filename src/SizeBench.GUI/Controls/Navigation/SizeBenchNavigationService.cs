@@ -247,9 +247,9 @@ public sealed class SizeBenchNavigationService
 
         SizeBenchPage? reusedPage = null;
 
-        if (this._cacheRequiredPages.ContainsKey(uriAllButFragment))
+        if (this._cacheRequiredPages.TryGetValue(uriAllButFragment, out var value))
         {
-            reusedPage = this._cacheRequiredPages[uriAllButFragment];
+            reusedPage = value;
         }
         else if (this.Cache.Contains(uriAllButFragment))
         {

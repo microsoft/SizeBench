@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
-using SizeBench.AnalysisEngine.PE;
+using System.Reflection.PortableExecutable;
 
 namespace SizeBench.AnalysisEngine;
 
@@ -30,7 +30,7 @@ public sealed class COFFGroup
     public uint RVA { get; }
 
     [Display(AutoGenerateField = false)]
-    public DataSectionFlags Characteristics { get; }
+    public SectionCharacteristics Characteristics { get; }
 
     // When parsing a COFF Group it is not possible to tell if the size found is real
     // or virtual, so we must look it up based on properties of its containing section.
@@ -184,7 +184,7 @@ public sealed class COFFGroup
 
     //TODO: remove FileAlignment and SectionAlignment parameters here, they don't do much...but need to check how the size vs. virtualsize is calculated in
     //      MarkFullyConstructed.  It seems like I could base this off VA vs. RVA or something instead?
-    internal COFFGroup(SessionDataCache cache, string name, uint size, uint rva, uint fileAlignment, uint sectionAlignment, DataSectionFlags characteristics)
+    internal COFFGroup(SessionDataCache cache, string name, uint size, uint rva, uint fileAlignment, uint sectionAlignment, SectionCharacteristics characteristics)
     {
 #if DEBUG
         var conflict = cache.COFFGroupsConstrutedEver.Where(cg => cg.RVA == rva || cg.Name == name).FirstOrDefault();
@@ -211,8 +211,8 @@ public sealed class COFFGroup
         // If, however, the file alignment is >= 4K (the default), then we can use the characteristics to
         // determine if this is representing 'real' size (on-disk size) or 'virtual' size (size in memory, but not on-disk).
         if (this.SectionAlignment >= 0x1000 &&
-             this.Characteristics.HasFlag(DataSectionFlags.ContentUninitializedData) &&
-            !this.Characteristics.HasFlag(DataSectionFlags.ContentInitializedData))
+             this.Characteristics.HasFlag(SectionCharacteristics.ContainsUninitializedData) &&
+            !this.Characteristics.HasFlag(SectionCharacteristics.ContainsInitializedData))
         {
             this._virtualSize = this.RawSize;
             this._size = 0;

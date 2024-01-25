@@ -1,6 +1,6 @@
-﻿using Dia2Lib;
+﻿using System.Reflection.PortableExecutable;
+using Dia2Lib;
 using SizeBench.AnalysisEngine;
-using SizeBench.AnalysisEngine.PE;
 using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.TestDataCommon;
 
@@ -24,8 +24,8 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     [TestMethod]
     public void CanNavigateToBinarySection()
     {
-        var firstSection = new BinarySection(this.SessionDataCache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
-        var secondSection = new BinarySection(this.SessionDataCache, ".rdata", size: 0, virtualSize: 200, rva: 200, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryRead);
+        var firstSection = new BinarySection(this.SessionDataCache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
+        var secondSection = new BinarySection(this.SessionDataCache, ".rdata", size: 0, virtualSize: 200, rva: 200, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemRead);
 
         Assert.AreEqual(new Uri(@"BinarySection/.text", UriKind.Relative), SingleBinaryModelToUriConverter.ModelToUri(firstSection));
         Assert.AreEqual(new Uri(@"BinarySection/.rdata", UriKind.Relative), SingleBinaryModelToUriConverter.ModelToUri(secondSection));
@@ -34,7 +34,7 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     [TestMethod]
     public void CanNavigateToCOFFGroup()
     {
-        var coffGroup = new COFFGroup(this.SessionDataCache, ".text$zz", size: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
+        var coffGroup = new COFFGroup(this.SessionDataCache, ".text$zz", size: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
 
         Assert.AreEqual(new Uri($@"COFFGroup/.text$zz", UriKind.Relative), SingleBinaryModelToUriConverter.ModelToUri(coffGroup));
     }
@@ -133,7 +133,7 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     {
         var lib = new Library("test lib name");
         var compiland = new Compiland(this.SessionDataCache, "1.obj", lib, CommonCommandLines.NullCommandLine, compilandSymIndex: 0);
-        var textSection = new BinarySection(this.SessionDataCache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
+        var textSection = new BinarySection(this.SessionDataCache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
         var contribution = compiland.GetOrCreateSectionContribution(textSection);
         compiland.MarkFullyConstructed();
 
@@ -145,7 +145,7 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     {
         var lib = new Library("test lib name");
         var compiland = new Compiland(this.SessionDataCache, "1.obj", lib, CommonCommandLines.NullCommandLine, compilandSymIndex: 0);
-        var textMnCG = new COFFGroup(this.SessionDataCache, ".text$mn", size: 0, rva: 100, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
+        var textMnCG = new COFFGroup(this.SessionDataCache, ".text$mn", size: 0, rva: 100, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
         var contribution = compiland.GetOrCreateCOFFGroupContribution(textMnCG);
         compiland.MarkFullyConstructed();
 
@@ -156,7 +156,7 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     public void CanNavigateToLibSectionContribution()
     {
         var lib = new Library(@"c:\data\foo.lib");
-        var textSection = new BinarySection(this.SessionDataCache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
+        var textSection = new BinarySection(this.SessionDataCache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
         var contribution = lib.GetOrCreateSectionContribution(textSection);
 
         Assert.AreEqual(new Uri($@"Contribution?BinarySection=.text&Lib={Uri.EscapeDataString(lib.Name)}", UriKind.Relative), SingleBinaryModelToUriConverter.ModelToUri(contribution));
@@ -166,7 +166,7 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     public void CanNavigateToLibCOFFGroupContribution()
     {
         var lib = new Library(@"c:\data\foo.lib");
-        var textMnCG = new COFFGroup(this.SessionDataCache, ".text$mn", size: 0, rva: 100, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
+        var textMnCG = new COFFGroup(this.SessionDataCache, ".text$mn", size: 0, rva: 100, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
         var contribution = lib.GetOrCreateCOFFGroupContribution(textMnCG);
 
         Assert.AreEqual(new Uri($@"Contribution?COFFGroup=.text$mn&Lib={Uri.EscapeDataString(lib.Name)}", UriKind.Relative), SingleBinaryModelToUriConverter.ModelToUri(contribution));
@@ -176,7 +176,7 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     public void CanNavigateToSourceFileSectionContribution()
     {
         var sourceFile = new SourceFile(this.SessionDataCache, @"c:\foo\bar\baz.h", fileId: 1, compilands: new List<Compiland>());
-        var textSection = new BinarySection(this.SessionDataCache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
+        var textSection = new BinarySection(this.SessionDataCache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
         var contribution = sourceFile.GetOrCreateSectionContribution(textSection);
         sourceFile.MarkFullyConstructed();
 
@@ -187,7 +187,7 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     public void CanNavigateToSourceFileCOFFGroupContribution()
     {
         var sourceFile = new SourceFile(this.SessionDataCache, @"c:\foo\bar\baz.h", fileId: 1, compilands: new List<Compiland>());
-        var textMnCG = new COFFGroup(this.SessionDataCache, ".text$mn", size: 0, rva: 100, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
+        var textMnCG = new COFFGroup(this.SessionDataCache, ".text$mn", size: 0, rva: 100, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
         var contribution = sourceFile.GetOrCreateCOFFGroupContribution(textMnCG);
         sourceFile.MarkFullyConstructed();
 

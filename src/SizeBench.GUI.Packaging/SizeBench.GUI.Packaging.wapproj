@@ -55,7 +55,6 @@
   <ItemGroup>
     <ProjectReference Include="..\SizeBench.GUI\SizeBench.GUI.csproj">
       <SkipGetTargetFrameworkProperties>True</SkipGetTargetFrameworkProperties>
-      <PublishProfile>PublishProfiles\WinX64.pubxml</PublishProfile>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

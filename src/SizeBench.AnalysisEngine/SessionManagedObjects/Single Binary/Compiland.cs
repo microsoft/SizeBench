@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection.PortableExecutable;
 using SizeBench.AnalysisEngine.DIAInterop;
 using SizeBench.AnalysisEngine.Helpers;
 
@@ -261,7 +262,7 @@ public sealed class Compiland
             this._containsExecutableCode = false;
             foreach (var section in this._sectionContributions.Keys)
             {
-                if ((section.Characteristics & PE.DataSectionFlags.MemoryExecute) == PE.DataSectionFlags.MemoryExecute)
+                if ((section.Characteristics & SectionCharacteristics.MemExecute) == SectionCharacteristics.MemExecute)
                 {
                     this._containsExecutableCode = true;
                     break;
@@ -276,7 +277,7 @@ public sealed class Compiland
         for (var i = 0; i < this._sectionContributionsAsList.Count; i++)
         {
             var kvp = this._sectionContributionsAsList[i];
-            if ((kvp.Key.Characteristics & PE.DataSectionFlags.MemoryExecute) == PE.DataSectionFlags.MemoryExecute)
+            if ((kvp.Key.Characteristics & SectionCharacteristics.MemExecute) == SectionCharacteristics.MemExecute)
             {
                 if (kvp.Value.Contains(rva))
                 {

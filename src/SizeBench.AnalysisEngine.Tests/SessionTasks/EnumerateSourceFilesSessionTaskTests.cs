@@ -1,5 +1,5 @@
-﻿using SizeBench.AnalysisEngine.DIAInterop;
-using SizeBench.AnalysisEngine.PE;
+﻿using System.Reflection.PortableExecutable;
+using SizeBench.AnalysisEngine.DIAInterop;
 using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.Logging;
 using SizeBench.TestDataCommon;
@@ -30,23 +30,23 @@ public sealed class EnumerateSourceFilesSessionTaskTests : IDisposable
         this.TestDIAAdapter.BinarySectionsToFind = new List<BinarySection>()
             {
                 // .text  = 0x0000-0x1999
-                new BinarySection(this.DataCache, ".text", size: 0x2000, virtualSize: 0x2000, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute),
+                new BinarySection(this.DataCache, ".text", size: 0x2000, virtualSize: 0x2000, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute),
                 // .rdata = 0x2000-0x2999
-                new BinarySection(this.DataCache, ".rdata", size: 0x1000, virtualSize: 0x1000, rva: 0x2000, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryRead),
+                new BinarySection(this.DataCache, ".rdata", size: 0x1000, virtualSize: 0x1000, rva: 0x2000, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemRead),
                 // .data  = 0x3000-0x3499
-                new BinarySection(this.DataCache, ".pdata", size: 0x500, virtualSize: 0x500, rva: 0x3000, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryRead)
+                new BinarySection(this.DataCache, ".pdata", size: 0x500, virtualSize: 0x500, rva: 0x3000, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemRead)
             };
 
         this.TestDIAAdapter.COFFGroupsToFind = new List<COFFGroup>()
             {
                 // .text$mn = 0x0000-0x1499
-                new COFFGroup(this.DataCache, ".text$mn", size: 0x1500, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: PE.DataSectionFlags.MemoryExecute),
+                new COFFGroup(this.DataCache, ".text$mn", size: 0x1500, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute),
                 // .xdata = 0x2100-0x2199
-                new COFFGroup(this.DataCache, ".xdata", size: 0x100, rva: 0x2100, fileAlignment: 0, sectionAlignment: 0, characteristics: PE.DataSectionFlags.MemoryRead),
+                new COFFGroup(this.DataCache, ".xdata", size: 0x100, rva: 0x2100, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemRead),
                 // .text$zz = 0x1500-0x1999
-                new COFFGroup(this.DataCache, ".text$zz", size: 0x500, rva: 0x1500, fileAlignment: 0, sectionAlignment: 0, characteristics: PE.DataSectionFlags.MemoryExecute),
+                new COFFGroup(this.DataCache, ".text$zz", size: 0x500, rva: 0x1500, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute),
                 // .pdata = 0x3000-0x3499
-                new COFFGroup(this.DataCache, ".pdata", size: 0x500, rva: 0x3000, fileAlignment: 0, sectionAlignment: 0, characteristics: PE.DataSectionFlags.MemoryExecute),
+                new COFFGroup(this.DataCache, ".pdata", size: 0x500, rva: 0x3000, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute),
             };
 
         uint nextCompilandSymIndexId = 0;

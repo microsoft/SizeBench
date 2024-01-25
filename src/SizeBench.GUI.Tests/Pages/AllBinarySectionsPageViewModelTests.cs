@@ -1,5 +1,5 @@
-﻿using SizeBench.AnalysisEngine;
-using SizeBench.AnalysisEngine.PE;
+﻿using System.Reflection.PortableExecutable;
+using SizeBench.AnalysisEngine;
 using SizeBench.ExcelExporter;
 using SizeBench.GUI.Core;
 using SizeBench.GUI.Tests;
@@ -29,8 +29,8 @@ public class AllBinarySectionsPageViewModelTests
     public void CanExportToExcel()
     {
         using var cache = new SessionDataCache();
-        var firstSection = new BinarySection(cache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
-        var secondSection = new BinarySection(cache, ".rdata", size: 0, virtualSize: 200, rva: 200, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryRead);
+        var firstSection = new BinarySection(cache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
+        var secondSection = new BinarySection(cache, ".rdata", size: 0, virtualSize: 200, rva: 200, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemRead);
         var sections = new List<BinarySection>() { firstSection, secondSection };
 
         this.MockSession.Setup(s => s.EnumerateBinarySectionsAndCOFFGroups(It.IsAny<CancellationToken>())).Returns(Task.FromResult(sections as IReadOnlyList<BinarySection>));

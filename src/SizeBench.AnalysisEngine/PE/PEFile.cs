@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.MemoryMappedFiles;
+using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices;
 using SizeBench.AnalysisEngine.DIAInterop;
 using SizeBench.AnalysisEngine.Helpers;
@@ -11,13 +12,14 @@ using SizeBench.Logging;
 
 namespace SizeBench.AnalysisEngine.PE;
 
-internal sealed class PEFile : IDisposable, IBinaryDataLoader
+internal sealed partial class PEFile : IPEFile
 {
     private readonly IntPtr _library = IntPtr.Zero;
     private readonly unsafe byte* _libraryBaseAddress = null;
     private readonly ulong _libraryPreferredLoadAddress;
-    private readonly IMAGE_NT_HEADERS32 _headers32;
-    private readonly IMAGE_NT_HEADERS64 _headers64;
+    private RVARangeSet? _delayLoadImportThunksRVARangeSet;
+    private RVARangeSet? _delayLoadImportStringsRVARangeSet;
+    private RVARangeSet? _delayLoadModuleHandlesRVARangeSet;
 
     // The TempFile will only exist if _hasForceIntegrityBitSet == true
     private readonly bool _hasForceIntegrityBitSet;
@@ -32,14 +34,14 @@ internal sealed class PEFile : IDisposable, IBinaryDataLoader
 
     public byte BytesPerWord { get; }
 
-    public MachineType MachineType => this.BytesPerWord == 8 ? this._headers64.FileHeader.Machine : this._headers32.FileHeader.Machine;
+    public MachineType MachineType { get; }
 
-    private List<IMAGE_DEBUG_DIRECTORY> DebugDirectories { get; set; } = new List<IMAGE_DEBUG_DIRECTORY>();
+    private List<IMAGE_DEBUG_DIRECTORY> DebugDirectories { get; } = new List<IMAGE_DEBUG_DIRECTORY>();
 
-    internal PEFileDebugSignature DebugSignature { get; private set; } = new PEFileDebugSignature(Guid.Empty, 0, String.Empty);
+    public PEFileDebugSignature DebugSignature { get; private set; } = new PEFileDebugSignature(Guid.Empty, 0, String.Empty);
 
-    internal IMAGE_DATA_DIRECTORY ExceptionDirectory => this.BytesPerWord == 8 ? this._headers64.OptionalHeader.ExceptionTable : this._headers32.OptionalHeader.ExceptionTable;
-    internal IMAGE_DATA_DIRECTORY DebugDirectory => this.BytesPerWord == 8 ? this._headers64.OptionalHeader.Debug : this._headers32.OptionalHeader.Debug;
+    internal DirectoryEntry ExceptionDirectory => this.PEHeader.ExceptionTableDirectory;
+    internal DirectoryEntry DebugDirectory => this.PEHeader.DebugTableDirectory;
 
     public RVARange RsrcRange { get; }
     internal SortedList<uint, RsrcSymbolBase> RsrcSymbols { get; } = new SortedList<uint, RsrcSymbolBase>();
@@ -47,19 +49,18 @@ internal sealed class PEFile : IDisposable, IBinaryDataLoader
     internal SortedList<uint, ISymbol> OtherPESymbols { get; } = new SortedList<uint, ISymbol>();
     internal RVARangeSet OtherPESymbolsRVARanges { get; }
 
-    internal class PEFileDebugSignature
-    {
-        public Guid Guid { get; }
-        public uint Age { get; }
-        public string PdbPath { get; }
+    private readonly List<PEDirectorySymbol> _peDirectorySymbols = new List<PEDirectorySymbol>();
+    public IReadOnlyList<PEDirectorySymbol> PEDirectorySymbols => this._peDirectorySymbols;
 
-        public PEFileDebugSignature(Guid guid, uint age, string pdbPath)
-        {
-            this.Guid = guid;
-            this.Age = age;
-            this.PdbPath = pdbPath;
-        }
-    }
+    public IEnumerable<RVARange> DelayLoadImportThunksRVARanges => this._delayLoadImportThunksRVARangeSet ?? (IEnumerable<RVARange>)[];
+    public IEnumerable<RVARange> DelayLoadImportStringsRVARanges => this._delayLoadImportStringsRVARangeSet ?? (IEnumerable<RVARange>)[];
+    public IEnumerable<RVARange> DelayLoadModuleHandlesRVARanges => this._delayLoadModuleHandlesRVARangeSet ?? (IEnumerable<RVARange>)[];
+    public ISymbol? GFIDSTable { get; private set; }
+    public ISymbol? GIATSTable { get; private set; }
+
+    public PEReader PEReader { get; }
+
+    private PEHeader PEHeader => this.PEReader.PEHeaders.PEHeader!;
 
     /// <summary>
     /// Loads the PE file into memory, strips integrity bit if it must, and so on.
@@ -68,10 +69,10 @@ internal sealed class PEFile : IDisposable, IBinaryDataLoader
     public unsafe PEFile(string originalBinaryPathMayBeRemote, ILogger logger)
     {
         using var taskLog = logger.StartTaskLog("Parse PE File");
-        var bytes = new byte[4096];
+        Span<byte> bytes = stackalloc byte[4096];
         using (var stream = File.OpenRead(originalBinaryPathMayBeRemote))
         {
-            stream.Read(bytes, offset: 0, count: bytes.Length);
+            stream.Read(bytes);
         }
 
         fixed (byte* pBytes = bytes)
@@ -108,39 +109,39 @@ internal sealed class PEFile : IDisposable, IBinaryDataLoader
 
         taskLog.Log($"{Path.GetFileName(this.GuaranteedLocalCopyOfBinary.OriginalPath)} library loaded at Base Address = 0x{((long)this._libraryBaseAddress):X}");
 
-        // We do need to load _headers32 and _headers64 here, not above where we look at the headers earlier - because the
-        // OptionalHeader.ImageBase will be different based on where the loader really put us in memory.  This is important for
-        // when we want to do things like load vtable addresses later (we need to subtract the right _libraryPreferredLoadAddress)
         var _pntHeaders = new IntPtr(PInvokes.ImageNtHeader(this._libraryBaseAddress));
 
-        this._headers32 = Marshal.PtrToStructure<IMAGE_NT_HEADERS32>(_pntHeaders);
+        // I have to know how long the image is now that the OS loader has put it into memory, so before I can instantaite the PEReader,
+        // manually marshal out the NT headers and find the SizeOfImage that way.
+        var headers32OnlyUsedForSize = Marshal.PtrToStructure<IMAGE_NT_HEADERS32>(_pntHeaders);
 
-        if (this._headers32.FileHeader.Machine is
-            not MachineType.x64 and
-            not MachineType.I386 and
-            not MachineType.ARM and
-            not MachineType.ARM64)
+        this.PEReader = new PEReader(this._libraryBaseAddress, size: (int)headers32OnlyUsedForSize.OptionalHeader.SizeOfImage, isLoadedImage: true);
+
+        this.MachineType = this.PEReader.PEHeaders.CoffHeader.Machine switch
         {
-            throw new InvalidOperationException($"SizeBench does not know how to deal with MachineType={this._headers32.FileHeader.Machine} binaries at this time.");
-        }
+            Machine.Amd64 => MachineType.x64,
+            Machine.I386 => MachineType.I386,
+            Machine.Arm or Machine.ArmThumb2 => MachineType.ARM,
+            Machine.Arm64 => MachineType.ARM64,
+            _ => throw new InvalidOperationException($"SizeBench does not know how to deal with MachineType={this.PEReader.PEHeaders.CoffHeader.Machine} binaries at this time.")
+        };
 
-        if (this._headers32.OptionalHeader.Magic == MagicType.IMAGE_NT_OPTIONAL_HDR64_MAGIC)
+        // We do need to load the _libraryPreferredLoadAddress here and not where we look at the headers earlier - because the
+        // OptionalHeader.ImageBase will be different based on where the loader really put us in memory.  This is important for
+        // when we want to do things like load vtable addresses later (we need to subtract the right _libraryPreferredLoadAddress)
+        this._libraryPreferredLoadAddress = this.PEHeader.ImageBase;
+        this.FileAlignment = (uint)this.PEHeader.FileAlignment;
+        this.SectionAlignment = (uint)this.PEHeader.SectionAlignment;
+        this.RsrcRange = RVARange.FromRVAAndSize((uint)this.PEHeader.ResourceTableDirectory.RelativeVirtualAddress, (uint)this.PEHeader.ResourceTableDirectory.Size);
+
+        if (this.PEHeader!.Magic == PEMagic.PE32Plus)
         {
             this.BytesPerWord = 8;
-            this._headers64 = Marshal.PtrToStructure<IMAGE_NT_HEADERS64>(_pntHeaders);
-            this._libraryPreferredLoadAddress = this._headers64.OptionalHeader.ImageBase;
-            this.FileAlignment = this._headers64.OptionalHeader.FileAlignment;
-            this.SectionAlignment = this._headers64.OptionalHeader.SectionAlignment;
-            this.RsrcRange = RVARange.FromRVAAndSize(this._headers64.OptionalHeader.ResourceTable.VirtualAddress, this._headers64.OptionalHeader.ResourceTable.Size);
             taskLog.Log($"{Path.GetFileName(this.GuaranteedLocalCopyOfBinary.OriginalPath)} is 64-bit, preferred load address=0x{this._libraryPreferredLoadAddress:X}");
         }
         else
         {
             this.BytesPerWord = 4;
-            this._libraryPreferredLoadAddress = this._headers32.OptionalHeader.ImageBase;
-            this.FileAlignment = this._headers32.OptionalHeader.FileAlignment;
-            this.SectionAlignment = this._headers32.OptionalHeader.SectionAlignment;
-            this.RsrcRange = RVARange.FromRVAAndSize(this._headers32.OptionalHeader.ResourceTable.VirtualAddress, this._headers32.OptionalHeader.ResourceTable.Size);
             taskLog.Log($"{Path.GetFileName(this.GuaranteedLocalCopyOfBinary.OriginalPath)} is 32-bit, preferred load address=0x{this._libraryPreferredLoadAddress:X}");
         }
 
@@ -148,7 +149,7 @@ internal sealed class PEFile : IDisposable, IBinaryDataLoader
         // There are 16 of them, so here we go.
 
         // 0. ExportTable
-        // TBD - does SizeBench need to parse anything here?
+        ParseExportTable();
 
         // 1. ImportTable
         ParseImportTable(taskLog);
@@ -164,14 +165,14 @@ internal sealed class PEFile : IDisposable, IBinaryDataLoader
         // TBD - does SizeBench need to parse anything here?
 
         // 5. BaseRelocationTable
-        AddDirectorySymbolIfPresent(this.BytesPerWord == 8 ? this._headers64.OptionalHeader.BaseRelocationTable : this._headers32.OptionalHeader.BaseRelocationTable, "Base Relocation Table");
+        AddDirectorySymbolIfPresent(this.PEHeader.BaseRelocationTableDirectory, "Base Relocation Table");
 
         // 6. Debug
         ParseDebugDirectory(taskLog);
 
         // 7. Architecture
         // TBD - is this always zero as the docs say?
-        Debug.Assert(this.BytesPerWord == 8 ? this._headers64.OptionalHeader.Architecture.VirtualAddress == 0 : this._headers32.OptionalHeader.Architecture.VirtualAddress == 0);
+        Debug.Assert(this.PEHeader.CopyrightTableDirectory.RelativeVirtualAddress == 0);
 
         // 8. GlobalPtr
         // TBD - does SizeBench need to parse anything here?
@@ -180,8 +181,7 @@ internal sealed class PEFile : IDisposable, IBinaryDataLoader
         // TBD - does SizeBench need to parse anything here?
 
         // 10. LoadConfigTable
-        // TBD - this requires more work as this structure has revved many times, but it has a lot of goodness in it.
-        //       Tracked by Product Backlog Item 3600
+        ParseLoadConfigDirectory();
 
         // 11. BoundImport
         // TBD - does SizeBench need to parse anything here?
@@ -190,13 +190,13 @@ internal sealed class PEFile : IDisposable, IBinaryDataLoader
         // TBD - does SizeBench need to parse anything here?
 
         // 13. DelayImportDescriptor
-        // TBD - does SizeBench need to parse anything here?
+        ParseDelayLoadImportDescriptorDirectory();
 
         // 14. CLRRuntimeHeader (aka IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR)
         // No need for SizeBench to try parsing this now as we reject managed binaries.
 
         // 15. Reserved
-        Debug.Assert(this.BytesPerWord == 8 ? this._headers64.OptionalHeader.Reserved.VirtualAddress == 0 : this._headers32.OptionalHeader.Reserved.VirtualAddress == 0);
+        // This is always 0, and is not exposed in PEReader as a result, so nothing to do here.
 
 
         // Now assemble the final RVARangeSet since all those symbols are collected.
@@ -210,19 +210,35 @@ internal sealed class PEFile : IDisposable, IBinaryDataLoader
         this.OtherPESymbolsRVARanges = RVARangeSet.FromListOfRVARanges(otherPESymbolRanges, maxPaddingToMerge: 16);
     }
 
-    private void AddDirectorySymbolIfPresent(IMAGE_DATA_DIRECTORY dataDirectory, string name)
+    private void AddDirectorySymbolIfPresent(DirectoryEntry dataDirectory, string name)
     {
-        if (dataDirectory.VirtualAddress != 0)
+        if (dataDirectory.RelativeVirtualAddress != 0)
         {
-            this.OtherPESymbols.Add(dataDirectory.VirtualAddress, new PEDirectorySymbol(dataDirectory.VirtualAddress, dataDirectory.Size, $"[PE Directory] {name}"));
+            var directory = new PEDirectorySymbol((uint)dataDirectory.RelativeVirtualAddress, (uint)dataDirectory.Size, name);
+            this.OtherPESymbols.Add((uint)dataDirectory.RelativeVirtualAddress, directory);
+            this._peDirectorySymbols.Add(directory);
         }
+    }
+
+    private unsafe void ParseExportTable()
+    {
+        var exportTable = this.PEHeader.ExportTableDirectory;
+
+        if (exportTable.Size == 0)
+        {
+            return;
+        }
+
+        AddDirectorySymbolIfPresent(exportTable, "Exports");
+
+        // Could parse the IMAGE_EXPORT_DIRECTORY here, but for now that's not needed.
     }
 
     private unsafe void ParseImportTable(ILogger log)
     {
         // Note that we don't want to add a PEDirectorySymbol for the import table, as we parse out each import descriptor in it instead which provides a more useful
         // symbol name by having the import DLL name.
-        var importTable = this.BytesPerWord == 8 ? this._headers64.OptionalHeader.ImportTable : this._headers32.OptionalHeader.ImportTable;
+        var importTable = this.PEHeader.ImportTableDirectory;
 
         if (importTable.Size == 0)
         {
@@ -232,9 +248,9 @@ internal sealed class PEFile : IDisposable, IBinaryDataLoader
         // The ImportTable is an array of IMAGE_IMPORT_DESCRIPTORs.
         Debug.Assert(importTable.Size % Marshal.SizeOf<IMAGE_IMPORT_DESCRIPTOR>() == 0);
 
-        var descriptor = (IMAGE_IMPORT_DESCRIPTOR*)GetDataMemberPtrByRVA(importTable.VirtualAddress);
-        var descriptorRva = importTable.VirtualAddress;
-        while (descriptorRva < importTable.VirtualAddress + importTable.Size)
+        var descriptor = (IMAGE_IMPORT_DESCRIPTOR*)GetDataMemberPtrByRVA(importTable.RelativeVirtualAddress);
+        var descriptorRva = (uint)importTable.RelativeVirtualAddress;
+        while (descriptorRva < importTable.RelativeVirtualAddress + importTable.Size)
         {
             if (descriptor->Name == 0 || descriptor->OriginalFirstThunk == 0)
             {
@@ -245,8 +261,7 @@ internal sealed class PEFile : IDisposable, IBinaryDataLoader
             // The descriptor name will be the name of the module being imported, like "kernel32.dll" or "combase.dll"
             var descriptorName = Marshal.PtrToStringAnsi(new IntPtr(GetDataMemberPtrByRVA(descriptor->Name)))!;
             this.OtherPESymbols.Add(descriptorRva, new ImportDescriptorSymbol(descriptorRva, descriptorName));
-            //TODO: this should be some kind of string symbol, not PEDirectorySymbol
-            this.OtherPESymbols.Add(descriptor->Name, new PEDirectorySymbol(descriptor->Name, (uint)descriptorName.Length + 1 /* null terminator */, $"`string': \"{descriptorName}\""));
+            this.OtherPESymbols.Add(descriptor->Name, new ImportStringSymbol(descriptor->Name, (uint)descriptorName.Length + 1 /* null terminator */, $"`string': \"{descriptorName}\""));
 
             Debug.Assert((descriptor->OriginalFirstThunk != 0) == (descriptor->FirstThunk != 0));
 
@@ -299,14 +314,258 @@ internal sealed class PEFile : IDisposable, IBinaryDataLoader
         }
     }
 
+    private unsafe void ParseLoadConfigDirectory()
+    {
+        var loadConfigTable = this.PEHeader.LoadConfigTableDirectory;
+
+        if (loadConfigTable.RelativeVirtualAddress == 0 || loadConfigTable.Size == 0)
+        {
+            return;
+        }
+
+        AddDirectorySymbolIfPresent(loadConfigTable, "Load Config");
+
+        // Note that the Size stored in the OptionalHeader for the LoadConfigTable appears to be untrustworthy - in
+        // a test 32-bit DLL it was 0x40 when the actual config directory was 0x5c. If the size is non-zero,
+        // we'll need to calculate the size based on the IMAGE_LOAD_CONFIG_DIRECTORY's Size field to trust it.
+        // That means it's not going to work to use AddDirectorySymbolIfPresent here, it assumes the Size
+        // field of the IMAGE_DATA_DIRECTORY is going to be right.
+
+        if (this.BytesPerWord == 8)
+        {
+            if (loadConfigTable.Size >= Marshal.SizeOf<IMAGE_LOAD_CONFIG_DIRECTORY64_V2>())
+            {
+                var configWithCFG = (IMAGE_LOAD_CONFIG_DIRECTORY64_V2*)GetDataMemberPtrByRVA(loadConfigTable.RelativeVirtualAddress);
+                if (configWithCFG->GuardCFFunctionTable != 0 && configWithCFG->GuardCFFunctionCount != 0)
+                {
+                    var gfidsTableRVA = (uint)(configWithCFG->GuardCFFunctionTable - this._libraryPreferredLoadAddress);
+                    var tableCount = configWithCFG->GuardCFFunctionCount;
+
+                    var extraBytesPerEntry = (configWithCFG->GuardFlags & CFGConstants.IMAGE_GUARD_CF_FUNCTION_TABLE_SIZE_MASK) >> (int)CFGConstants.IMAGE_GUARD_CF_FUNCTION_TABLE_SIZE_SHIFT;
+                    var stride = 4 /* size of RVA */ + extraBytesPerEntry;
+
+                    var tableSize = (uint)(tableCount * stride);
+
+                    var gfidsTableRVAEnd = gfidsTableRVA + tableSize;
+                    this.GFIDSTable = new LoadConfigTableSymbol(gfidsTableRVA, tableSize, "FID Table");
+                    this.OtherPESymbols.Add(gfidsTableRVA, this.GFIDSTable);
+                }
+            }
+
+            if (loadConfigTable.Size >= Marshal.SizeOf<IMAGE_LOAD_CONFIG_DIRECTORY64_V3>())
+            {
+                var configWithGIATS = (IMAGE_LOAD_CONFIG_DIRECTORY64_V3*)GetDataMemberPtrByRVA(loadConfigTable.RelativeVirtualAddress);
+                if (configWithGIATS->GuardAddressTakenIatEntryTable != 0 && configWithGIATS->GuardAddressTakenIatEntryCount != 0)
+                {
+                    var giatsTableRVA = (uint)(configWithGIATS->GuardAddressTakenIatEntryTable - this._libraryPreferredLoadAddress);
+                    var tableCount = configWithGIATS->GuardAddressTakenIatEntryCount;
+
+                    var extraBytesPerEntry = (configWithGIATS->GuardFlags & CFGConstants.IMAGE_GUARD_CF_FUNCTION_TABLE_SIZE_MASK) >> (int)CFGConstants.IMAGE_GUARD_CF_FUNCTION_TABLE_SIZE_SHIFT;
+                    var stride = 4 /* size of RVA */ + extraBytesPerEntry;
+
+                    var tableSize = (uint)(tableCount * stride);
+
+                    var giatsTableRVAEnd = giatsTableRVA + tableSize;
+                    this.GIATSTable = new LoadConfigTableSymbol(giatsTableRVA, tableSize, "IAT Address-Taken Table");
+                    this.OtherPESymbols.Add(giatsTableRVA, this.GIATSTable);
+                }
+            }
+
+            // TODO: consider also representing XFG here with a newer IMAGE_LOAD_CONFIG_DIRECTORY version
+        }
+        else if (this.BytesPerWord == 4)
+        {
+            if (loadConfigTable.Size >= Marshal.SizeOf<IMAGE_LOAD_CONFIG_DIRECTORY32_V2>())
+            {
+                var configWithCFG = (IMAGE_LOAD_CONFIG_DIRECTORY32_V2*)GetDataMemberPtrByRVA(loadConfigTable.RelativeVirtualAddress);
+                if (configWithCFG->Size >= 92 && configWithCFG->GuardCFFunctionTable != 0 && configWithCFG->GuardCFFunctionCount != 0)
+                {
+                    var gfidsTableRVA = (uint)(configWithCFG->GuardCFFunctionTable - this._libraryPreferredLoadAddress);
+                    var tableCount = configWithCFG->GuardCFFunctionCount;
+
+                    var extraBytesPerEntry = (configWithCFG->GuardFlags & CFGConstants.IMAGE_GUARD_CF_FUNCTION_TABLE_SIZE_MASK) >> (int)CFGConstants.IMAGE_GUARD_CF_FUNCTION_TABLE_SIZE_SHIFT;
+                    var stride = 4 /* size of RVA */ + extraBytesPerEntry;
+
+                    var tableSize = tableCount * stride;
+
+                    var gfidsTableRVAEnd = gfidsTableRVA + tableSize;
+                    this.GFIDSTable = new LoadConfigTableSymbol(gfidsTableRVA, tableSize, "FID Table");
+                    this.OtherPESymbols.Add(gfidsTableRVA, this.GFIDSTable);
+                }
+            }
+
+            if (loadConfigTable.Size >= Marshal.SizeOf<IMAGE_LOAD_CONFIG_DIRECTORY32_V3>())
+            {
+                var configWithGIATS = (IMAGE_LOAD_CONFIG_DIRECTORY32_V3*)GetDataMemberPtrByRVA(loadConfigTable.RelativeVirtualAddress);
+                if (configWithGIATS->GuardAddressTakenIatEntryTable != 0 && configWithGIATS->GuardAddressTakenIatEntryCount != 0)
+                {
+                    var giatsTableRVA = (uint)(configWithGIATS->GuardAddressTakenIatEntryTable - this._libraryPreferredLoadAddress);
+                    var tableCount = configWithGIATS->GuardAddressTakenIatEntryCount;
+
+                    var extraBytesPerEntry = (configWithGIATS->GuardFlags & CFGConstants.IMAGE_GUARD_CF_FUNCTION_TABLE_SIZE_MASK) >> (int)CFGConstants.IMAGE_GUARD_CF_FUNCTION_TABLE_SIZE_SHIFT;
+                    var stride = 4 /* size of RVA */ + extraBytesPerEntry;
+
+                    var tableSize = tableCount * stride;
+
+                    var giatsTableRVAEnd = giatsTableRVA + tableSize;
+                    this.GIATSTable = new LoadConfigTableSymbol(giatsTableRVA, tableSize, "IAT Address-Taken Table");
+                    this.OtherPESymbols.Add(giatsTableRVA, this.GIATSTable);
+                }
+            }
+
+            // TODO: consider also representing XFG here with a newer IMAGE_LOAD_CONFIG_DIRECTORY version
+        }
+    }
+
+    private unsafe void ParseDelayLoadImportDescriptorDirectory()
+    {
+        var delayImportTable = this.PEHeader.DelayImportTableDirectory;
+
+        if (delayImportTable.Size == 0)
+        {
+            return;
+        }
+
+        if (delayImportTable.RelativeVirtualAddress != 0)
+        {
+            var directory = new PEDirectorySymbol((uint)delayImportTable.RelativeVirtualAddress, (uint)delayImportTable.Size, "Delay Load Imports");
+            this._peDirectorySymbols.Add(directory);
+        }
+
+        // The DelayImportDescriptor is an array of IMAGE_DELAYLOAD_DESCRIPTORs.
+        Debug.Assert(delayImportTable.Size % Marshal.SizeOf<IMAGE_DELAYLOAD_DESCRIPTOR>() == 0);
+
+        var thunks = new List<ImportThunkSymbol>();
+        var strings = new List<ImportSymbolBase>();
+        var moduleHandleRanges = new List<RVARange>();
+
+        var descriptor = (IMAGE_DELAYLOAD_DESCRIPTOR*)GetDataMemberPtrByRVA(delayImportTable.RelativeVirtualAddress);
+        var descriptorRva = (uint)delayImportTable.RelativeVirtualAddress;
+        while (descriptorRva < delayImportTable.RelativeVirtualAddress + delayImportTable.Size)
+        {
+            if (descriptor->DllNameRVA == 0 || descriptor->ImportAddressTableRVA == 0 || descriptor->ImportNameTableRVA == 0)
+            {
+                this.OtherPESymbols.Add(descriptorRva, new ImportDescriptorSymbol(descriptorRva, "null terminator"));
+                break;
+            }
+
+            // The descriptor name will be the name of the module being imported, like "kernel32.dll" or "combase.dll"
+            var descriptorName = Marshal.PtrToStringAnsi(new IntPtr(GetDataMemberPtrByRVA(descriptor->DllNameRVA)))!;
+            this.OtherPESymbols.Add(descriptorRva, new ImportDescriptorSymbol(descriptorRva, descriptorName));
+            var descriptorString = new ImportStringSymbol(descriptor->DllNameRVA, (uint)descriptorName.Length + 1 /* null terminator */, $"`string': \"{descriptorName}\"");
+            this.OtherPESymbols.Add(descriptor->DllNameRVA, descriptorString);
+            strings.Add(descriptorString);
+
+            if (descriptor->ModuleHandleRVA != 0)
+            {
+                moduleHandleRanges.Add(RVARange.FromRVAAndSize(descriptor->ModuleHandleRVA, this.BytesPerWord));
+            }
+
+            var hasIAT = descriptor->ImportAddressTableRVA != 0;
+
+            if (descriptor->ImportNameTableRVA != 0)
+            {
+                var nameTableThunkPtrRva = descriptor->ImportNameTableRVA;
+                var nameTableThunkRva = this.BytesPerWord is 8 ? (uint)*(UInt64*)(GetDataMemberPtrByRVA(nameTableThunkPtrRva)) : *(UInt32*)(GetDataMemberPtrByRVA(nameTableThunkPtrRva));
+
+                var iatThunkPtrRva = hasIAT ? descriptor->ImportAddressTableRVA : 0;
+                var iatThunkRva = hasIAT ? (this.BytesPerWord is 8 ? (uint)*(UInt64*)(GetDataMemberPtrByRVA(iatThunkPtrRva)) : *(UInt32*)(GetDataMemberPtrByRVA(iatThunkPtrRva))) : 0;
+
+                while (true)
+                {
+                    Debug.Assert(this.BytesPerWord is 8 or 4);
+                    var thunk64 = this.BytesPerWord is 8 ? (IMAGE_THUNK_DATA64*)(UInt64*)GetDataMemberPtrByRVA(nameTableThunkPtrRva) : null;
+                    var thunk32 = this.BytesPerWord is not 8 ? (IMAGE_THUNK_DATA32*)GetDataMemberPtrByRVA(nameTableThunkRva) : null;
+                    var thunkSize = this.BytesPerWord is 8 ? (uint)Marshal.SizeOf<IMAGE_THUNK_DATA64>() : (uint)Marshal.SizeOf<IMAGE_THUNK_DATA32>();
+
+                    var ordinal = (ushort)((this.BytesPerWord is 8 ? thunk64->Ordinal : thunk32->Ordinal) & 0xFFFF);
+                    var isOrdinalOnly = this.BytesPerWord is 8 ? (thunk64->Ordinal & (1ul << 63)) > 0 : (thunk32->Ordinal & (1 << 31)) > 0; // If the high bit is set, this is not a named entry, it is ordinal-only
+                    var addressOfData = this.BytesPerWord is 8 ? (uint)thunk64->AddressOfData : thunk32->AddressOfData;
+
+                    ImportThunkSymbol nameThunkSymbol;
+                    ImportThunkSymbol? iatThunkSymbol = null;
+
+                    if (ordinal == 0)
+                    {
+                        nameThunkSymbol = new ImportThunkSymbol(nameTableThunkPtrRva, thunkSize, 0, descriptorName, "INT null terminator");
+                        this.OtherPESymbols.Add(nameTableThunkPtrRva, nameThunkSymbol);
+                        thunks.Add(nameThunkSymbol);
+
+                        if (hasIAT)
+                        {
+                            iatThunkSymbol = new ImportThunkSymbol(iatThunkPtrRva, thunkSize, 0, descriptorName, "IAT null terminator");
+                            this.OtherPESymbols.Add(iatThunkPtrRva, iatThunkSymbol);
+                            thunks.Add(iatThunkSymbol);
+                        }
+
+                        break;
+                    }
+                    else if (isOrdinalOnly)
+                    {
+                        nameThunkSymbol = new ImportThunkSymbol(nameTableThunkPtrRva, thunkSize, ordinal, descriptorName, null);
+
+                        if (hasIAT)
+                        {
+                            iatThunkSymbol = new ImportThunkSymbol(iatThunkPtrRva, thunkSize, ordinal, descriptorName, null);
+                        }
+                    }
+                    else
+                    {
+                        var importByNamePtr = GetDataMemberPtrByRVA(addressOfData);
+                        // First 2 bytes are the 'hint' (ordinal)
+                        var hint = *(ushort*)(importByNamePtr);
+                        importByNamePtr += 2;
+                        var thunkName = Marshal.PtrToStringAnsi(new IntPtr(importByNamePtr))!;
+                        nameThunkSymbol = new ImportThunkSymbol(nameTableThunkPtrRva, thunkSize, hint, descriptorName, thunkName);
+                        var importByName = new ImportByNameSymbol(addressOfData, (uint)thunkName.Length + 1 /* null terminator */ + 2 /* hint ushort */, hint, descriptorName, thunkName);
+                        this.OtherPESymbols.Add(addressOfData, importByName);
+                        strings.Add(importByName);
+
+                        if (hasIAT)
+                        {
+                            iatThunkSymbol = new ImportThunkSymbol(iatThunkPtrRva, thunkSize, hint, descriptorName, thunkName);
+                        }
+                    }
+
+                    this.OtherPESymbols.Add(nameTableThunkPtrRva, nameThunkSymbol);
+                    thunks.Add(nameThunkSymbol);
+
+                    if (hasIAT && iatThunkSymbol is not null)
+                    {
+                        this.OtherPESymbols.Add(iatThunkPtrRva, iatThunkSymbol);
+                        thunks.Add(iatThunkSymbol);
+                    }
+
+                    nameTableThunkPtrRva += this.BytesPerWord;
+                    iatThunkPtrRva += this.BytesPerWord;
+                }
+            }
+
+            descriptor++;
+            descriptorRva += (uint)Marshal.SizeOf<IMAGE_IMPORT_DESCRIPTOR>();
+        }
+
+        if (thunks.Count > 0)
+        {
+            this._delayLoadImportThunksRVARangeSet = RVARangeSet.FromListOfRVARanges(thunks.Select(thunk => new RVARange(thunk.RVA, thunk.RVAEnd)), maxPaddingToMerge: 8);
+        }
+
+        if (strings.Count > 0)
+        {
+            this._delayLoadImportStringsRVARangeSet = RVARangeSet.FromListOfRVARanges(strings.Select(str => new RVARange(str.RVA, str.RVAEnd)), maxPaddingToMerge: 8);
+        }
+
+        if (moduleHandleRanges.Count > 0)
+        {
+            this._delayLoadModuleHandlesRVARangeSet = RVARangeSet.FromListOfRVARanges(moduleHandleRanges, maxPaddingToMerge: 8);
+        }
+    }
+
     private unsafe void ParseDebugDirectory(ILogger log)
     {
         AddDirectorySymbolIfPresent(this.DebugDirectory, "Debug");
 
-        //TODO: see if this P/Invoke can be removed and we can just use the OptionalHeader.Debug RVA?
-        PInvokes.ImageDirectoryEntryToDataEx(this._libraryBaseAddress, false, IMAGE_DIRECTORY_ENTRY.Debug, out _, out var headerPtr);
-
-        if (headerPtr == IntPtr.Zero)
+        if (this.DebugDirectory.RelativeVirtualAddress == 0)
         {
             // No debug directories found, so we'll accept whatever PDB the user gives us - hopefully it matches!
             // This means PEFile.DebugSignature will be null.
@@ -317,15 +576,19 @@ internal sealed class PEFile : IDisposable, IBinaryDataLoader
         unsafe
         {
             var numDirectories = this.DebugDirectory.Size / Marshal.SizeOf<IMAGE_DEBUG_DIRECTORY>();
-            this.DebugDirectories.Capacity = (int)numDirectories;
+            this.DebugDirectories.Capacity = numDirectories;
             log.Log($"Found {numDirectories} IMAGE_DEBUG_DIRECTORY entries");
 
-            var pDebugDirectory = this._libraryBaseAddress + (this.BytesPerWord == 8 ? this._headers64.OptionalHeader.Debug.VirtualAddress : this._headers32.OptionalHeader.Debug.VirtualAddress);
+            var pDebugDirectory = this._libraryBaseAddress + this.DebugDirectory.RelativeVirtualAddress;
             var debugDirectory = Marshal.PtrToStructure<IMAGE_DEBUG_DIRECTORY>((IntPtr)pDebugDirectory);
             var sizeOfDebugDirectory = Marshal.SizeOf<IMAGE_DEBUG_DIRECTORY>();
 
             this.DebugDirectories.Add(debugDirectory);
-            this.OtherPESymbols.Add(debugDirectory.AddressOfRawData, new PEDirectorySymbol(debugDirectory.AddressOfRawData, debugDirectory.SizeOfData, $"[Debug Directory] {debugDirectory.Type}"));
+            {
+                var debugDirectorySymbol = new PEDirectorySymbol(debugDirectory.AddressOfRawData, debugDirectory.SizeOfData, $"[Debug Directory] {debugDirectory.Type}");
+                this._peDirectorySymbols.Add(debugDirectorySymbol);
+                this.OtherPESymbols.Add(debugDirectory.AddressOfRawData, debugDirectorySymbol);
+            }
 
             for (var i = 1; i < numDirectories; i++)
             {
@@ -337,7 +600,9 @@ internal sealed class PEFile : IDisposable, IBinaryDataLoader
                 // about visibility of size.
                 if (debugDirectory.SizeOfData != 0)
                 {
-                    this.OtherPESymbols.Add(debugDirectory.AddressOfRawData, new PEDirectorySymbol(debugDirectory.AddressOfRawData, debugDirectory.SizeOfData, $"[Debug Directory] {debugDirectory.Type}"));
+                    var debugDirectorySymbol = new PEDirectorySymbol(debugDirectory.AddressOfRawData, debugDirectory.SizeOfData, $"[Debug Directory] {debugDirectory.Type}");
+                    this._peDirectorySymbols.Add(debugDirectorySymbol);
+                    this.OtherPESymbols.Add(debugDirectory.AddressOfRawData, debugDirectorySymbol);
                 }
             }
 
@@ -359,7 +624,7 @@ internal sealed class PEFile : IDisposable, IBinaryDataLoader
 
                         this.DebugSignature = new PEFileDebugSignature(new Guid(rsdsInfo.Guid), rsdsInfo.Age, path);
 
-                        log.Log($"DebugSignature Guid={this.DebugSignature.Guid}, Age={this.DebugSignature.Age}, Path={this.DebugSignature.PdbPath}");
+                        log.Log($"DebugSignature Guid={this.DebugSignature.PdbGuid}, Age={this.DebugSignature.Age}, Path={this.DebugSignature.PdbPath}");
                     }
                     break;
                 }
@@ -750,7 +1015,7 @@ internal sealed class PEFile : IDisposable, IBinaryDataLoader
         return new RsrcGroupCursorDataSymbol(totalSizeOfGroupCursor, languageName, depth1NameAsString, cursors);
     }
 
-    private unsafe RsrcDataSymbol CreateStringTableSymbol(string languageName, string depth1NameAsString, IMAGE_RESOURCE_DATA_ENTRY dataEntry)
+    private unsafe RsrcStringTableDataSymbol CreateStringTableSymbol(string languageName, string depth1NameAsString, IMAGE_RESOURCE_DATA_ENTRY dataEntry)
     {
         var strTable = (ushort*)GetDataMemberPtrByRVA(dataEntry.OffsetToData);
         var end = (byte*)strTable + dataEntry.Size;
@@ -828,8 +1093,10 @@ internal sealed class PEFile : IDisposable, IBinaryDataLoader
     }
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [DllImport("Advapi32", CallingConvention = CallingConvention.Cdecl, EntryPoint = "IsTextUnicode", SetLastError = false, ExactSpelling = true)]
-    private static extern unsafe bool IsTextUnicode(byte* buf, int len, ref IsTextUnicodeFlags opt);
+    [LibraryImport("Advapi32", EntryPoint = "IsTextUnicode", SetLastError = false)]
+    [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvCdecl) })]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static unsafe partial bool IsTextUnicode(byte* buf, int len, ref IsTextUnicodeFlags opt);
 
     public string LoadStringByRVA(long RVA, ulong length, out bool isUnicodeString)
     {
@@ -929,6 +1196,7 @@ internal sealed class PEFile : IDisposable, IBinaryDataLoader
     {
         if (!this._isDisposed)
         {
+            this.PEReader.Dispose();
             PInvokes.FreeLibrary(this._library);
 
             this.GuaranteedLocalCopyOfBinary?.Dispose();

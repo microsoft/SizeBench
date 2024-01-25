@@ -7,15 +7,15 @@ namespace SizeBench.GUI.Windows;
 
 // This is all HWNDy code, very hard to test effectively
 [ExcludeFromCodeCoverage]
-internal static class WindowTitleBarExtensions
+internal static partial class WindowTitleBarExtensions
 {
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [DllImport("user32.dll")]
-    private static extern uint GetWindowLong(IntPtr hWnd, int nIndex);
+    [LibraryImport("user32.dll")]
+    private static partial uint GetWindowLong(IntPtr hWnd, int nIndex);
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [DllImport("user32.dll", PreserveSig = true)]
-    private static extern void SetWindowLong(IntPtr hWnd, int nIndex, uint dwNewLong);
+    [LibraryImport("user32.dll")]
+    private static partial void SetWindowLong(IntPtr hWnd, int nIndex, uint dwNewLong);
 
     private const int GWL_STYLE = -16;
     private const int GWL_EXSTYLE = -20;

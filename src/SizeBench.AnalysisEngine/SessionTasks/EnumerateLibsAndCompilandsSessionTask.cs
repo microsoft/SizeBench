@@ -134,11 +134,7 @@ internal sealed class EnumerateLibsAndCompilandsSessionTask : SessionTask<List<L
         }
 
         var contributingCompiland = lib.GetOrCreateCompiland(this.DataCache, sectionContrib.CompilandName, sectionContrib.CompilandSymIndexId, this._sessionTaskParameters.DIAAdapter);
-        if (!compilands.ContainsKey(sectionContrib.CompilandSymIndexId))
-        {
-            compilands.Add(sectionContrib.CompilandSymIndexId, contributingCompiland);
-        }
-
+        compilands.TryAdd(sectionContrib.CompilandSymIndexId, contributingCompiland);
         var rvaRange = RVARange.FromRVAAndSize(sectionContrib.RVA, sectionContrib.Length, isVirtualSize: coffGroup.IsVirtualSizeOnly);
 
         contributingCompiland.GetOrCreateSectionContribution(section).AddRVARange(rvaRange);

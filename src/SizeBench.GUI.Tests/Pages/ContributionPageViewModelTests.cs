@@ -1,10 +1,10 @@
 ﻿using SizeBench.AnalysisEngine;
-using SizeBench.AnalysisEngine.PE;
 using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.ExcelExporter;
 using SizeBench.TestDataCommon;
 using SizeBench.GUI.Core;
 using SizeBench.GUI.Tests;
+using System.Reflection.PortableExecutable;
 
 namespace SizeBench.GUI.Pages.Tests;
 
@@ -32,8 +32,8 @@ public class ContributionPageViewModelTests
         this.MockUITaskScheduler.SetupForSynchronousCompletionOfLongRunningUITasks();
 
         using var cache = new SessionDataCache();
-        var textSection = new BinarySection(cache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
-        var textMnCG = new COFFGroup(cache, ".text$mn", size: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute)
+        var textSection = new BinarySection(cache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
+        var textMnCG = new COFFGroup(cache, ".text$mn", size: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute)
         {
             Section = textSection
         };

@@ -32,7 +32,7 @@ internal static class ApplicationDbHandler
                                               "COFFGroup VARCHAR(20), " +
                                               "SymbolName VARCHAR(100), " +
                                               "RVA INT, " +
-                                              "Size INT, " +
+                                              "VirtualSize INT, " +
                                               "Libraryname VARCHAR(100), " +
                                               "CompilandName VARCHAR(100), " +
                                               "IsPadding BOOL NOT NULL DEFAULT 0, " +
@@ -73,9 +73,9 @@ internal static class ApplicationDbHandler
 
                     command.CommandText =
                         $"INSERT INTO {TableName} " +
-                        $"(Binary, PESection, COFFGroup, SymbolName, RVA, Size, Libraryname, CompilandName, IsPadding, IsPGO, IsOptimizedForSpeed) " +
+                        $"(Binary, PESection, COFFGroup, SymbolName, RVA, VirtualSize, Libraryname, CompilandName, IsPadding, IsPGO, IsOptimizedForSpeed) " +
                         $"VALUES " +
-                        $"(@Binary, @SectionName, @CoffgroupName, @SymbolName, @RVA, @Size, @LibraryFilename, " +
+                        $"(@Binary, @SectionName, @CoffgroupName, @SymbolName, @RVA, @VirtualSize, @LibraryFilename, " +
                         $"@CompilandName, @IsPadding, @IsPGO, @IsOptimizedForSpeed)";
 
                     command.Parameters.AddWithValue("@Binary", "");
@@ -83,7 +83,7 @@ internal static class ApplicationDbHandler
                     command.Parameters.AddWithValue("@CoffgroupName", "");
                     command.Parameters.AddWithValue("@SymbolName", "");
                     command.Parameters.AddWithValue("@RVA", "");
-                    command.Parameters.AddWithValue("@Size", "");
+                    command.Parameters.AddWithValue("@VirtualSize", "");
                     command.Parameters.AddWithValue("@LibraryFilename", "");
                     command.Parameters.AddWithValue("@CompilandName", "");
                     command.Parameters.AddWithValue("@IsPadding", "");
@@ -100,7 +100,7 @@ internal static class ApplicationDbHandler
                             var escapedName = item.Name.Replace("'", "''", StringComparison.Ordinal);
 
                             InsertItem(binary, section.SectionName, item.CoffgroupName, escapedName, item.RVA,
-                                item.Size, item.LibraryFilename, item.CompilandName, isPadding, isPGO,
+                                item.VirtualSize, item.LibraryFilename, item.CompilandName, isPadding, isPGO,
                                 isOptimizedForSpeed, command);
                         }
                     }
@@ -121,14 +121,14 @@ internal static class ApplicationDbHandler
     }
 
     private static int InsertItem(string binary, string secton, string coff, string symbolname,
-        uint rva, ulong size, string lib, string compiland, int isPadding, int isPgo, int isOptimizedForSpeed, SqliteCommand command)
+        uint rva, ulong virtualSize, string lib, string compiland, int isPadding, int isPgo, int isOptimizedForSpeed, SqliteCommand command)
     {
         command.Parameters["@Binary"].Value = binary;
         command.Parameters["@SectionName"].Value = secton;
         command.Parameters["@CoffgroupName"].Value = coff;
         command.Parameters["@SymbolName"].Value = symbolname;
         command.Parameters["@RVA"].Value = rva;
-        command.Parameters["@Size"].Value = size;
+        command.Parameters["@VirtualSize"].Value = virtualSize;
         command.Parameters["@LibraryFilename"].Value = lib;
         command.Parameters["@CompilandName"].Value = compiland;
         command.Parameters["@IsPadding"].Value = isPadding;

@@ -22,8 +22,8 @@
 
     <ItemGroup>
         <PackageReference Include="Castle.Windsor" Version="6.0.0" />
-        <PackageReference Include="Microsoft.Debugging.DataModel.DbgModelApiXtn" Version="20220617.1556.0" />
-        <PackageReference Include="Microsoft.Debugging.Platform.DbgX" Version="20220619.1.0" />
+        <PackageReference Include="Microsoft.Debugging.DataModel.DbgModelApiXtn" Version="20230731.1609.0" />
+        <PackageReference Include="Microsoft.Debugging.Platform.DbgX" Version="20240117.4.0" />
         <PackageReference Include="Nito.AsyncEx" Version="5.1.2" />
     </ItemGroup>
 

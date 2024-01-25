@@ -27,9 +27,9 @@ public sealed class DictionaryThatDoesntThrowWhenKeyNotPresent<TValue> : INotify
     {
         get
         {
-            if (this._dictionary.ContainsKey(key))
+            if (this._dictionary.TryGetValue(key, out var value))
             {
-                return this._dictionary[key];
+                return value;
             }
             else
             {

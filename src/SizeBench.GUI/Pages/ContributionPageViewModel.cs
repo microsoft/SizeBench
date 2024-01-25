@@ -41,11 +41,11 @@ internal sealed class ContributionPageViewModel : SingleBinaryViewModelBase
 
     protected internal override async Task InitializeAsync()
     {
-        var libName = this.QueryString.ContainsKey("Lib") ? this.QueryString["Lib"] : null;
-        var binarySectionName = this.QueryString.ContainsKey("BinarySection") ? this.QueryString["BinarySection"] : null;
-        var compilandName = this.QueryString.ContainsKey("Compiland") ? this.QueryString["Compiland"] : null;
-        var coffGroupName = this.QueryString.ContainsKey("COFFGroup") ? this.QueryString["COFFGroup"] : null;
-        var sourceFileName = this.QueryString.ContainsKey("SourceFile") ? this.QueryString["SourceFile"] : null;
+        var libName = this.QueryString.TryGetValue("Lib", out var value) ? value : null;
+        var binarySectionName = this.QueryString.TryGetValue("BinarySection", out value) ? value : null;
+        var compilandName = this.QueryString.TryGetValue("Compiland", out value) ? value : null;
+        var coffGroupName = this.QueryString.TryGetValue("COFFGroup", out value) ? value : null;
+        var sourceFileName = this.QueryString.TryGetValue("SourceFile", out value) ? value : null;
 
         if (String.IsNullOrEmpty(libName) && String.IsNullOrEmpty(compilandName) && String.IsNullOrEmpty(sourceFileName))
         {

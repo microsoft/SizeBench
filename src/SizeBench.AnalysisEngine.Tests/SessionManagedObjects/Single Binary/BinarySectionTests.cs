@@ -1,4 +1,6 @@
-﻿namespace SizeBench.AnalysisEngine.SessionManagedObjects.Tests;
+﻿using System.Reflection.PortableExecutable;
+
+namespace SizeBench.AnalysisEngine.SessionManagedObjects.Tests;
 
 [TestClass]
 public class BinarySectionTests
@@ -13,7 +15,7 @@ public class BinarySectionTests
                                    0x0 /* rva */,
                                    0x200 /* fileAlignment */,
                                    0x1000 /* sectionAlignment */,
-                                   characteristics: PE.DataSectionFlags.MemoryRead);
+                                   characteristics: SectionCharacteristics.MemRead);
 
         // 0x000-0x0F9
         var cg1 = new COFFGroup(sdc, ".rdata$r",
@@ -21,7 +23,7 @@ public class BinarySectionTests
                                 0x000 /* rva */,
                                 0x200 /* fileAlignment */,
                                 0x1000 /* sectionAlignment */,
-                                PE.DataSectionFlags.ContentInitializedData);
+                                SectionCharacteristics.ContainsInitializedData);
         cg1.MarkFullyConstructed();
 
         // 0x100-0x2F9
@@ -30,7 +32,7 @@ public class BinarySectionTests
                                 0x100 /* rva */,
                                 0x200 /* fileAlignment */,
                                 0x1000 /* sectionAlignment */,
-                                PE.DataSectionFlags.ContentInitializedData);
+                                SectionCharacteristics.ContainsInitializedData);
         cg2.MarkFullyConstructed();
         // 0x300 - 0x349
         var cg3 = new COFFGroup(sdc, ".rdata$00",
@@ -38,7 +40,7 @@ public class BinarySectionTests
                                 0x300 /* rva */,
                                 0x200 /* fileAlignment */,
                                 0x1000 /* sectionAlignment */,
-                                PE.DataSectionFlags.ContentInitializedData);
+                                SectionCharacteristics.ContainsInitializedData);
         cg3.MarkFullyConstructed();
 
         bs.AddCOFFGroup(cg1);
@@ -66,7 +68,7 @@ public class BinarySectionTests
                                    0x0 /* rva */,
                                    0x200 /* fileAlignment */,
                                    0x1000 /* sectionAlignment */,
-                                   characteristics: PE.DataSectionFlags.MemoryRead);
+                                   characteristics: SectionCharacteristics.MemRead);
 
         // 0x000-0x0F4, assume 16 byte alignment will kick it up to 0x100
         var cg1 = new COFFGroup(sdc, ".rdata$r",
@@ -74,7 +76,7 @@ public class BinarySectionTests
                                 0x000 /* rva */,
                                 0x200 /* fileAlignment */,
                                 0x1000 /* sectionAlignment */,
-                                PE.DataSectionFlags.ContentInitializedData);
+                                SectionCharacteristics.ContainsInitializedData);
         cg1.MarkFullyConstructed();
 
         // 0x100-0x2F4, again 16-byte alignment will kick it up to 0x300
@@ -83,7 +85,7 @@ public class BinarySectionTests
                                 0x100 /* rva */,
                                 0x200 /* fileAlignment */,
                                 0x1000 /* sectionAlignment */,
-                                PE.DataSectionFlags.ContentInitializedData);
+                                SectionCharacteristics.ContainsInitializedData);
         cg2.MarkFullyConstructed();
         // 0x300 - 0x349
         var cg3 = new COFFGroup(sdc, ".rdata$00",
@@ -91,7 +93,7 @@ public class BinarySectionTests
                                 0x300 /* rva */,
                                 0x200 /* fileAlignment */,
                                 0x1000 /* sectionAlignment */,
-                                PE.DataSectionFlags.ContentInitializedData);
+                                SectionCharacteristics.ContainsInitializedData);
         cg3.MarkFullyConstructed();
 
         bs.AddCOFFGroup(cg1);
@@ -121,7 +123,7 @@ public class BinarySectionTests
                                    0x0 /* rva */,
                                    fileAlignment,
                                    0x1000 /* sectionAlignment */,
-                                   characteristics: PE.DataSectionFlags.MemoryRead);
+                                   characteristics: SectionCharacteristics.MemRead);
 
         // 0x000-0x0F7, assume 16 byte alignment will kick it up to 0x100
         var cg1 = new COFFGroup(sdc, ".rdata$r",
@@ -129,7 +131,7 @@ public class BinarySectionTests
                                 0x000 /* rva */,
                                 fileAlignment,
                                 0x1000 /* sectionAlignment */,
-                                PE.DataSectionFlags.ContentInitializedData)
+                                SectionCharacteristics.ContainsInitializedData)
         {
             Section = bs
         };
@@ -141,7 +143,7 @@ public class BinarySectionTests
                                 0x100 /* rva */,
                                 fileAlignment,
                                 0x1000 /* sectionAlignment */,
-                                PE.DataSectionFlags.ContentInitializedData)
+                                SectionCharacteristics.ContainsInitializedData)
         {
             Section = bs
         };
@@ -153,7 +155,7 @@ public class BinarySectionTests
                                 0x300 /* rva */,
                                 fileAlignment,
                                 0x1000 /* sectionAlignment */,
-                                PE.DataSectionFlags.ContentInitializedData)
+                                SectionCharacteristics.ContainsInitializedData)
         {
             Section = bs
         };
@@ -185,7 +187,7 @@ public class BinarySectionTests
                                    0x0 /* rva */,
                                    0x200 /* fileAlignment */,
                                    0x1000 /* sectionAlignment */,
-                                   characteristics: PE.DataSectionFlags.MemoryRead);
+                                   characteristics: SectionCharacteristics.MemRead);
 
         // 0x000-0x0F4, assume 16 byte alignment will kick it up to 0x100
         var cg1 = new COFFGroup(sdc, ".rdata$r",
@@ -193,7 +195,7 @@ public class BinarySectionTests
                                 0x000 /* rva */,
                                 0x200 /* fileAlignment */,
                                 0x1000 /* sectionAlignment */,
-                                PE.DataSectionFlags.ContentInitializedData);
+                                SectionCharacteristics.ContainsInitializedData);
         cg1.MarkFullyConstructed();
 
         // 0x100-0x29B, 4096-byte alignment (more than the FileAlignment of 512 bytes or 0x200) will kick it up to 0x1000
@@ -202,7 +204,7 @@ public class BinarySectionTests
                                 0x100 /* rva */,
                                 0x200 /* fileAlignment */,
                                 0x1000 /* sectionAlignment */,
-                                PE.DataSectionFlags.ContentInitializedData);
+                                SectionCharacteristics.ContainsInitializedData);
         cg2.MarkFullyConstructed();
 
         // 0x1000 - 0x1049
@@ -211,7 +213,7 @@ public class BinarySectionTests
                                 0x1000 /* rva */,
                                 0x200 /* fileAlignment */,
                                 0x1000 /* sectionAlignment */,
-                                PE.DataSectionFlags.ContentInitializedData);
+                                SectionCharacteristics.ContainsInitializedData);
         cg3.MarkFullyConstructed();
 
         bs.AddCOFFGroup(cg1);
@@ -244,7 +246,7 @@ public class BinarySectionTests
                                    0x0 /* rva */,
                                    0x200 /* fileAlignment */,
                                    0x1000 /* sectionAlignment */,
-                                   characteristics: PE.DataSectionFlags.MemoryRead);
+                                   characteristics: SectionCharacteristics.MemRead);
 
         // 0x000-0x0F9
         var cg1 = new COFFGroup(sdc, ".rdata$r",
@@ -252,7 +254,7 @@ public class BinarySectionTests
                                 0x000 /* rva */,
                                 0x200 /* fileAlignment */,
                                 0x1000 /* sectionAlignment */,
-                                PE.DataSectionFlags.ContentInitializedData);
+                                SectionCharacteristics.ContainsInitializedData);
         cg1.MarkFullyConstructed();
 
         // 0x100-0x2F9
@@ -261,7 +263,7 @@ public class BinarySectionTests
                                 0x100 /* rva */,
                                 0x200 /* fileAlignment */,
                                 0x1000 /* sectionAlignment */,
-                                PE.DataSectionFlags.ContentInitializedData);
+                                SectionCharacteristics.ContainsInitializedData);
         cg2.MarkFullyConstructed();
         // 0x300 - 0x349
         var cg3 = new COFFGroup(sdc, ".rdata$00",
@@ -269,7 +271,7 @@ public class BinarySectionTests
                                 0x300 /* rva */,
                                 0x200 /* fileAlignment */,
                                 0x1000 /* sectionAlignment */,
-                                PE.DataSectionFlags.ContentInitializedData);
+                                SectionCharacteristics.ContainsInitializedData);
         cg3.MarkFullyConstructed();
 
         bs.AddCOFFGroup(cg1);
@@ -291,7 +293,7 @@ public class BinarySectionTests
                                    0x0 /* rva */,
                                    0x200 /* fileAlignment */,
                                    0x1000 /* sectionAlignment */,
-                                   characteristics: PE.DataSectionFlags.MemoryRead);
+                                   characteristics: SectionCharacteristics.MemRead);
 
         // 0x000-0x0F9
         var cg1 = new COFFGroup(sdc, ".rdata$r",
@@ -299,7 +301,7 @@ public class BinarySectionTests
                                 0x000 /* rva */,
                                 0x200 /* fileAlignment */,
                                 0x1000 /* sectionAlignment */,
-                                PE.DataSectionFlags.ContentInitializedData);
+                                SectionCharacteristics.ContainsInitializedData);
         cg1.MarkFullyConstructed();
 
         // 0x100-0x2F9
@@ -308,7 +310,7 @@ public class BinarySectionTests
                                 0x100 /* rva */,
                                 0x200 /* fileAlignment */,
                                 0x1000 /* sectionAlignment */,
-                                PE.DataSectionFlags.ContentInitializedData);
+                                SectionCharacteristics.ContainsInitializedData);
         cg2.MarkFullyConstructed();
         // 0x300 - 0x349
         var cg3 = new COFFGroup(sdc, ".rdata$00",
@@ -316,7 +318,7 @@ public class BinarySectionTests
                                 0x300 /* rva */,
                                 0x200 /* fileAlignment */,
                                 0x1000 /* sectionAlignment */,
-                                PE.DataSectionFlags.ContentInitializedData);
+                                SectionCharacteristics.ContainsInitializedData);
         cg3.MarkFullyConstructed();
 
         bs.AddCOFFGroup(cg1);

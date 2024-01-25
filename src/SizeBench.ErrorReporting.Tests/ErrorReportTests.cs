@@ -6,7 +6,7 @@ namespace SizeBench.ErrorReporting.Tests;
 [TestClass]
 public class ErrorReportTests
 {
-    internal class TestErrorInfoProvider : IErrorInfoProvider
+    internal sealed class TestErrorInfoProvider : IErrorInfoProvider
     {
         public string Info { get; set; } = String.Empty;
 

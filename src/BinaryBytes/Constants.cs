@@ -1,6 +1,6 @@
 ﻿namespace BinaryBytes;
 
-internal class Constants
+internal static class Constants
 {
     // Distinguishable names for padding bytes based on where they appear in the PE section
     internal const string SectionStartPadding = "SectionStartPadding";

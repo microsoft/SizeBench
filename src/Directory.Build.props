@@ -20,7 +20,7 @@
   
   <!-- All of this applies only to the .NET code, and packaging of the app -->
   <PropertyGroup Condition="'$(MSBuildProjectExtension)'=='.csproj' Or '$(MSBuildProjectExtension)'=='.wapproj'">
-    <TargetFramework>net6.0-windows10.0.17763</TargetFramework>
+    <TargetFramework>net8.0-windows10.0.17763</TargetFramework>
     <Platforms>x64</Platforms>
     <PlatformTarget>x64</PlatformTarget>
     <Platform>x64</Platform>

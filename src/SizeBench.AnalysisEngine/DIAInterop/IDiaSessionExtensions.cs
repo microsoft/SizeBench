@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices;
 using Dia2Lib;
 using SizeBench.AnalysisEngine.PE;
@@ -93,17 +94,6 @@ internal static class IDiaSessionExtensions
         return (CompilandLanguage)Int32.MaxValue;
     }
 
-    #region Enumerate IMAGE_SECTION_HEADERs
-
-    // TODO: consider replacing some or all of the IMAGE_SECTION_HEADER code here with System.Reflection.PortableExecutable that exists now in .NET Core
-
-    public static IEnumerable<IMAGE_SECTION_HEADER> EnumerateImageSectionHeaders(this IDiaSession session, CancellationToken token)
-    {
-        var sectionHeadersData = session.EnumerateDebugStreamData(token).FirstOrDefault(data => data.name == "SECTIONHEADERS");
-
-        return sectionHeadersData?.EnumerateImageSectionHeaders(token) ?? Enumerable.Empty<IMAGE_SECTION_HEADER>();
-    }
-
     public static IEnumerable<IDiaEnumDebugStreamData> EnumerateDebugStreamData(this IDiaSession session, CancellationToken token)
     {
         session.getEnumDebugStreams(out var enumDebugStreams);
@@ -119,42 +109,14 @@ internal static class IDiaSessionExtensions
         }
     }
 
-    private static IEnumerable<IMAGE_SECTION_HEADER> EnumerateImageSectionHeaders(this IDiaEnumDebugStreamData enumDebugStreamData,
-                                                                                  CancellationToken token)
-    {
-        var handCoded = (IDiaEnumDebugStreamDataHandCoded)enumDebugStreamData;
-
-        var output = new byte[Marshal.SizeOf<IMAGE_SECTION_HEADER>()];
-
-        var celtSectionHeader = handCoded.Next(1, Marshal.SizeOf<IMAGE_SECTION_HEADER>(), out var bytesRead, output);
-        while (celtSectionHeader == 1 && bytesRead == Marshal.SizeOf<IMAGE_SECTION_HEADER>())
-        {
-            token.ThrowIfCancellationRequested();
-
-            yield return MarshalSectionHeader(output);
-
-            celtSectionHeader = handCoded.Next(1, Marshal.SizeOf<IMAGE_SECTION_HEADER>(), out bytesRead, output);
-        }
-    }
-
-    private static IMAGE_SECTION_HEADER MarshalSectionHeader(byte[] bytes)
-    {
-        unsafe
-        {
-            fixed (byte* bp = bytes)
-            {
-                return Marshal.PtrToStructure<IMAGE_SECTION_HEADER>((IntPtr)bp);
-            }
-        }
-    }
-
-    #endregion
 
     #region Enumerate COFF Groups
 
-    public static IEnumerable<IDiaSymbol> EnumerateCoffGroupSymbols(this IDiaSession session, CancellationToken token)
+    public static IEnumerable<RawCOFFGroup> EnumerateCoffGroupSymbols(this IDiaSession session, IPEFile peFile, CancellationToken token)
     {
         session.globalScope.findChildren(SymTagEnum.SymTagCompiland, "* Linker *", 0 /* nsNone */, out var compilandEnum);
+
+        var diaCoffGroupRanges = new List<RVARange>(100);
 
         foreach (IDiaSymbol? compiland in compilandEnum)
         {
@@ -182,7 +144,74 @@ internal static class IDiaSessionExtensions
                 // since they can share an RVA with a "real" (lengthy) COFF Group and that's confusing.
                 if (coffGroup.length > 0)
                 {
-                    yield return coffGroup;
+                    diaCoffGroupRanges.Add(RVARange.FromRVAAndSize(coffGroup.relativeVirtualAddress, (uint)coffGroup.length));
+                    yield return new RawCOFFGroup(coffGroup.name, (uint)coffGroup.length, coffGroup.relativeVirtualAddress, (SectionCharacteristics)coffGroup.characteristics);
+                }
+            }
+
+            var discoveredSet = RVARangeSet.FromListOfRVARanges(diaCoffGroupRanges, maxPaddingToMerge: 8);
+
+            // lld-link sometimes leaves 'holes' between SymTagCoffGroup symbols that can be filled in by PE directories that we have already
+            // parsed, or by certain well-known tables like the .gfids/.giats tables.  We'll synthesize COFF Groups in this case, though arguably
+            // this is a bug in lld-link's PDB generation.
+            foreach (var directory in peFile.PEDirectorySymbols)
+            {
+                var directoryRVARange = RVARange.FromRVAAndSize(directory.RVA, directory.Size);
+                if (!discoveredSet.AtLeastPartiallyOverlapsWith(directoryRVARange))
+                {
+                    // We don't know what the characteristics ought to be, so we just won't specify any.
+                    yield return new RawCOFFGroup(directory.COFFGroupFallbackName, directory.Size, directory.RVA, 0);
+                }
+            }
+
+            if (peFile.GFIDSTable != null)
+            {
+                var gfidsRange = RVARange.FromRVAAndSize(peFile.GFIDSTable.RVA, peFile.GFIDSTable.Size);
+                if (!discoveredSet.AtLeastPartiallyOverlapsWith(gfidsRange))
+                {
+                    yield return new RawCOFFGroup(".gfids", peFile.GFIDSTable.Size, peFile.GFIDSTable.RVA, 0);
+                }
+            }
+
+            if (peFile.GIATSTable != null)
+            {
+                var giatsRange = RVARange.FromRVAAndSize(peFile.GIATSTable.RVA, peFile.GIATSTable.Size);
+                if (!discoveredSet.AtLeastPartiallyOverlapsWith(giatsRange))
+                {
+                    yield return new RawCOFFGroup(".giats", peFile.GIATSTable.Size, peFile.GIATSTable.RVA, 0);
+                }
+            }
+
+            var i = 0;
+            foreach (var importThunksRange in peFile.DelayLoadImportThunksRVARanges)
+            {
+                if (!discoveredSet.AtLeastPartiallyOverlapsWith(importThunksRange))
+                {
+                    var synthesizedName = i == 0 ? ".sizebench-synthesized-delay-load-import-thunks" : $".sizebench-synthesized-delay-load-import-thunks-{i}";
+                    i++;
+                    yield return new RawCOFFGroup(synthesizedName, importThunksRange.Size, importThunksRange.RVAStart, 0);
+                }
+            }
+
+            i = 0;
+            foreach (var importStringsRange in peFile.DelayLoadImportStringsRVARanges)
+            {
+                if (!discoveredSet.AtLeastPartiallyOverlapsWith(importStringsRange))
+                {
+                    var synthesizedName = i == 0 ? ".sizebench-synthesized-delay-load-import-strings" : $".sizebench-synthesized-delay-load-import-strings-{i}";
+                    i++;
+                    yield return new RawCOFFGroup(synthesizedName, importStringsRange.Size, importStringsRange.RVAStart, 0);
+                }
+            }
+
+            i = 0;
+            foreach (var importModuleHandlesRange in peFile.DelayLoadModuleHandlesRVARanges)
+            {
+                if (!discoveredSet.AtLeastPartiallyOverlapsWith(importModuleHandlesRange))
+                {
+                    var synthesizedName = i == 0 ? ".sizebench-synthesized-delay-load-module-handles" : $".sizebench-synthesized-delay-load-module-handles-{i}";
+                    i++;
+                    yield return new RawCOFFGroup(synthesizedName, importModuleHandlesRange.Size, importModuleHandlesRange.RVAStart, 0);
                 }
             }
         }
@@ -240,7 +269,12 @@ internal static class IDiaSessionExtensions
         {
             if (contrib != null)
             {
-                yield return contrib;
+                // Sometimes LLD records contribs with zero size - we can ignore these as there is nothing interesting about
+                // something without a size.
+                if (contrib.length != 0)
+                {
+                    yield return contrib;
+                }
             }
             else
             {

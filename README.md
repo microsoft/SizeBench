@@ -46,7 +46,6 @@ Any use of third-party trademarks or logos are subject to those third-party's po
 
 The next expected work should be roughly this:
 
-1. Support LLD-linked binaries, to the degree they can be given LLD's PDBs.
 1. Move to GitHub Actions for CI and PR pipelines.
 1. Create and publish NuGet package for the Analysis Engine.
 1. Support diffing of SourceFiles.

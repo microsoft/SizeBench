@@ -6,7 +6,7 @@ using SizeBench.Threading.Tasks.Schedulers;
 
 namespace SizeBench.SKUCrawler;
 
-internal class MasterControllerProcess : IDisposable
+internal sealed class MasterControllerProcess : IDisposable
 {
     private readonly ConcurrentBag<Process> BatchProcesses = new ConcurrentBag<Process>();
     //TODO: SKUCrawler: check if Parallel.ForEachAsync might be a simpler way of writing this code, once moved to .NET 6
@@ -147,7 +147,7 @@ internal class MasterControllerProcess : IDisposable
     #region IDisposable Support
     private bool disposedValue; // To detect redundant calls
 
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         if (!this.disposedValue)
         {

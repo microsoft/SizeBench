@@ -30,16 +30,13 @@ public static class ExceptionHashExtensions
     private static string CalculateMD5(string textToHash)
     {
         var stringBuilder = new StringBuilder(32);
+        var bytes = Encoding.ASCII.GetBytes(textToHash);
 #pragma warning disable CA5351 // Do Not Use Broken Cryptographic Algorithms - this isn't used for any security purpose, just to bucket errors for diagnostics
-        using (var md5 = MD5.Create())
+        var array = MD5.HashData(bytes);
 #pragma warning restore CA5351 // Do Not Use Broken Cryptographic Algorithms
+        for (var i = 0; i < array.Length; i++)
         {
-            var bytes = Encoding.ASCII.GetBytes(textToHash);
-            var array = md5.ComputeHash(bytes);
-            for (var i = 0; i < array.Length; i++)
-            {
-                stringBuilder.Append(array[i].ToString("X2", CultureInfo.InvariantCulture.NumberFormat));
-            }
+            stringBuilder.Append(array[i].ToString("X2", CultureInfo.InvariantCulture.NumberFormat));
         }
         return stringBuilder.ToString();
     }

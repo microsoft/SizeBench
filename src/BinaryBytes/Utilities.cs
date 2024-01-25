@@ -57,7 +57,7 @@ internal static class Utilities
         return binaryPath;
     }
 
-    internal static BytesItem CreatePaddingBytesItem(string name, string coffgroup, uint rva, ulong size)
+    internal static BytesItem CreatePaddingBytesItem(string name, string coffgroup, uint rva, ulong virtualSize)
     {
         return new BytesItem()
         {
@@ -65,7 +65,7 @@ internal static class Utilities
             Name = name,
             CoffgroupName = coffgroup,
             RVA = rva,
-            Size = size,
+            VirtualSize = virtualSize,
             LibraryFilename = String.Empty,
             CompilandName = String.Empty,
             IsPGO = false,
@@ -73,7 +73,7 @@ internal static class Utilities
         };
     }
 
-    internal static BytesItem CreateSpecialBytesItem(string name, string coffgroup, uint rva, ulong size, SymbolContributor contributor)
+    internal static BytesItem CreateSpecialBytesItem(string name, string coffgroup, uint rva, ulong virtualSize, SymbolContributor contributor)
     {
         return new BytesItem()
         {
@@ -81,7 +81,7 @@ internal static class Utilities
             Name = name,
             CoffgroupName = coffgroup,
             RVA = rva,
-            Size = size,
+            VirtualSize = virtualSize,
             LibraryFilename = contributor.LibraryName,
             CompilandName = contributor.CompilandName,
             IsPGO = false,
@@ -103,7 +103,7 @@ internal static class Utilities
             Name = symbol.Name,
             CoffgroupName = coffgroup,
             RVA = symbol.RVA,
-            Size = symbol.Size,
+            VirtualSize = symbol.VirtualSize,
             LibraryFilename = contributor.LibraryName,
             CompilandName = contributor.CompilandName,
             IsPGO = functionSymbol?.IsPGO ?? false,
@@ -135,10 +135,10 @@ internal static class Utilities
     internal static SymbolContributor GetContributorForRva(uint rva, Dictionary<uint, SymbolContributor> rvaToContributorMap)
     {
         var rvaContributor = new SymbolContributor(String.Empty, String.Empty);
-        if (rvaToContributorMap.ContainsKey(rva))
+        if (rvaToContributorMap.TryGetValue(rva, out var value))
         {
-            var libname = rvaToContributorMap[rva]?.LibraryName ?? String.Empty;
-            var compilandName = rvaToContributorMap[rva]?.CompilandName ?? String.Empty;
+            var libname = value?.LibraryName ?? String.Empty;
+            var compilandName = value?.CompilandName ?? String.Empty;
             rvaContributor = new SymbolContributor(libname, compilandName);
         }
 

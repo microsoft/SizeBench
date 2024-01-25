@@ -2,7 +2,7 @@
 
   <ItemGroup>
     <PackageReference Include="Castle.Windsor" Version="6.0.0" />
-    <PackageReference Include="ClosedXML" Version="0.96.0" />
+    <PackageReference Include="ClosedXML" Version="0.102.2" />
   </ItemGroup>
 
   <ItemGroup>

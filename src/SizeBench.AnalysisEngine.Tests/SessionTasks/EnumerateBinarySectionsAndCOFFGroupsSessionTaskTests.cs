@@ -1,4 +1,4 @@
-﻿using SizeBench.AnalysisEngine.PE;
+﻿using System.Reflection.PortableExecutable;
 using SizeBench.Logging;
 using SizeBench.TestDataCommon;
 
@@ -29,24 +29,24 @@ public sealed class EnumerateBinarySectionsAndCOFFGroupsSessionTaskTests : IDisp
         this.Sections = new List<BinarySection>()
             {
                 // RVA: 0-999
-                new BinarySection(this.DataCache, ".text",  size: 1000, virtualSize: 1000, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute),
+                new BinarySection(this.DataCache, ".text",  size: 1000, virtualSize: 1000, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute),
                 // RVA: 1000-1499
-                new BinarySection(this.DataCache, ".rdata", size: 500, virtualSize: 500, rva: 1000, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryRead),
+                new BinarySection(this.DataCache, ".rdata", size: 500, virtualSize: 500, rva: 1000, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemRead),
                 // RVA: 1500-1999 (note this is .bss so it's using VirtualSize)
-                new BinarySection(this.DataCache, ".bss", size: 0, virtualSize: 500, rva: 1500, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryRead | DataSectionFlags.ContentInitializedData)
+                new BinarySection(this.DataCache, ".bss", size: 0, virtualSize: 500, rva: 1500, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemRead | SectionCharacteristics.ContainsInitializedData)
             };
 
         this.COFFGroups = new List<COFFGroup>()
             {
                 // .text is 0-999, so these are 0-799 and 800-999
-                new COFFGroup(this.DataCache, ".text$x", size: 800, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute),
-                new COFFGroup(this.DataCache, ".text$mn", size: 200, rva: 800, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute),
+                new COFFGroup(this.DataCache, ".text$x", size: 800, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute),
+                new COFFGroup(this.DataCache, ".text$mn", size: 200, rva: 800, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute),
                 // .rdata is 1000-1499, so these are 1000-1099 and 1100-1499
-                new COFFGroup(this.DataCache, ".rdata$brc", size: 100, rva: 1000, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryRead | DataSectionFlags.ContentInitializedData),
+                new COFFGroup(this.DataCache, ".rdata$brc", size: 100, rva: 1000, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemRead | SectionCharacteristics.ContainsInitializedData),
                 // Pick an intentionally weird name to verify we're not matching anything based on name like SizeBench V1 did (names are wrong, RVA ranges are right)
-                new COFFGroup(this.DataCache, ".testing", size: 400, rva: 1100, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryRead | DataSectionFlags.ContentInitializedData),
+                new COFFGroup(this.DataCache, ".testing", size: 400, rva: 1100, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemRead | SectionCharacteristics.ContainsInitializedData),
                 // This one is in virtualSize, from 1500-1999
-                new COFFGroup(this.DataCache, ".bss-cg", size: 500, rva: 1500, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.ContentUninitializedData)
+                new COFFGroup(this.DataCache, ".bss-cg", size: 500, rva: 1500, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.ContainsUninitializedData)
             };
     }
 

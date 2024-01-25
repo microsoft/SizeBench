@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     
     <!-- Below this, in this PropertyGroup, is all about Code Analysis -->
-    <AnalysisLevel>6</AnalysisLevel> <!-- Update this when upgrading from net6 -->
+    <AnalysisLevel>8</AnalysisLevel> <!-- Update this when upgrading from net8 -->
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
@@ -33,7 +33,7 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup Condition="'$(SizeBenchTestCode)'=='true' And '$(MSBuildProjectExtension)'=='.csproj'">
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.3" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.1.1" />
     <PackageReference Include="MSTest.TestFramework" Version="3.1.1" />
     <PackageReference Include="Moq" Version="4.18.4" />

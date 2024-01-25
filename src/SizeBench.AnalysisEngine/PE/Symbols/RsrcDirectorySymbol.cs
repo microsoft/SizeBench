@@ -18,10 +18,7 @@ internal sealed class RsrcDirectorySymbol : RsrcSymbolBase
     internal RsrcDirectorySymbol(uint rva, uint size, uint depth, Win32ResourceType rsrcType, string rsrcTypeName, string? directoryName)
         : base(rva, size, ConjureName(depth, rsrcTypeName, directoryName))
     {
-        if (depth > 2)
-        {
-            throw new ArgumentOutOfRangeException(nameof(depth));
-        }
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(depth, 2u);
 
         this._depth = depth;
         this._win32ResourceType = rsrcType;

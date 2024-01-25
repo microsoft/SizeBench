@@ -1,4 +1,5 @@
-﻿using SizeBench.AnalysisEngine.Symbols;
+﻿using System.Reflection.PortableExecutable;
+using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.Logging;
 using SizeBench.TestDataCommon;
 
@@ -33,7 +34,7 @@ public sealed class EnumerateSymbolsInContributionSessionTaskTests : IDisposable
             this.TestDIAAdapter,
             this.DataCache);
 
-        this.TextMnCG = new COFFGroup(this.SessionTaskParameters.DataCache, ".text$mn", size: 0x0, rva: 0x0, fileAlignment: 0, sectionAlignment: 0, characteristics: PE.DataSectionFlags.MemoryExecute);
+        this.TextMnCG = new COFFGroup(this.SessionTaskParameters.DataCache, ".text$mn", size: 0x0, rva: 0x0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
         this.TestLib = new Library("LIB blah");
         this.TestContribution = this.TestLib.GetOrCreateCOFFGroupContribution(this.TextMnCG);
 

@@ -15,6 +15,7 @@ FortranDll - a DLL built using Intel's FORTRAN compiler (ifort).  This is not in
              manually if you really need to rebuild it later.
 Rust - for testing Rust code, for scenarios like "enums with methods" that can't be emitted into PDBs by C/C++.
        To build this use "cargo build --release" and get the DLL and PDB out of the target\release folder.
+ClangClx64 - for testing an x64 DLL built with clang-cl and lld-link, to test things like Clang language extensions (e.g. _Float16)
 
 Diff Testing
 ------------

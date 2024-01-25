@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection.PortableExecutable;
 using SizeBench.AnalysisEngine.Helpers;
 
 namespace SizeBench.AnalysisEngine;
@@ -302,7 +303,7 @@ public sealed class SourceFile
                 return this._containsExecutableCode.Value;
             }
 
-            this._containsExecutableCode = this._sectionContributions.Keys.Any(s => (s.Characteristics & PE.DataSectionFlags.MemoryExecute) == PE.DataSectionFlags.MemoryExecute);
+            this._containsExecutableCode = this._sectionContributions.Keys.Any(s => (s.Characteristics & SectionCharacteristics.MemExecute) == SectionCharacteristics.MemExecute);
             return this._containsExecutableCode.Value;
         }
     }
@@ -312,7 +313,7 @@ public sealed class SourceFile
         for (var i = 0; i < this._sectionContributionsAsList.Count; i++)
         {
             var kvp = this._sectionContributionsAsList[i];
-            if ((kvp.Key.Characteristics & PE.DataSectionFlags.MemoryExecute) == PE.DataSectionFlags.MemoryExecute)
+            if ((kvp.Key.Characteristics & SectionCharacteristics.MemExecute) == SectionCharacteristics.MemExecute)
             {
                 if (kvp.Value.Contains(rva))
                 {

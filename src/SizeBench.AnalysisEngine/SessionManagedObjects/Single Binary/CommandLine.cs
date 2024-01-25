@@ -271,8 +271,10 @@ internal class CompilerCommandLine : CommandLine
 
 internal sealed class MSVC_CXX_CommandLine : CompilerCommandLine
 {
+    internal static readonly string[] rttiSwitchNames = ["GR"];
+
     // RTTI is on by default for C++ code, and the last copy of the switch is the final override.
-    internal override bool RTTIEnabled => GetSwitchState(new string[] { "GR" }, CommandLineSwitchState.SwitchEnabled, CommandLineOrderOfPrecedence.LastWins) == CommandLineSwitchState.SwitchEnabled;
+    internal override bool RTTIEnabled => GetSwitchState(rttiSwitchNames, CommandLineSwitchState.SwitchEnabled, CommandLineOrderOfPrecedence.LastWins) == CommandLineSwitchState.SwitchEnabled;
 
     public MSVC_CXX_CommandLine(string rawCommandLine, CompilandLanguage language, string toolName, Version frontEndVersion, Version backEndVersion)
         : base(rawCommandLine, language, toolName, frontEndVersion, backEndVersion) { }
@@ -292,6 +294,10 @@ internal class LinkerCommandLine : CommandLine
         {
             return new MSVC_LINK_CommandLine(rawCommandLine, language, toolName, frontEndVersion, backEndVersion);
         }
+        else if (language == CompilandLanguage.CV_CFL_LINK && toolName == "LLVM Linker")
+        {
+            return new LLD_LINK_CommandLine(rawCommandLine, language, toolName, frontEndVersion, backEndVersion);
+        }
         else
         {
             return new LinkerCommandLine(rawCommandLine, language, toolName, frontEndVersion, backEndVersion);
@@ -299,8 +305,10 @@ internal class LinkerCommandLine : CommandLine
     }
 }
 
-internal sealed class MSVC_LINK_CommandLine : LinkerCommandLine
+internal class MSVC_LINK_CommandLine : LinkerCommandLine
 {
+    internal static readonly string[] pgiSwitchNames = ["/ltcg:pgi", "/genprofile", "/fastgenprofile"];
+
     private enum LTCGStatus
     {
         LTCG,
@@ -472,8 +480,19 @@ internal sealed class MSVC_LINK_CommandLine : LinkerCommandLine
     }
 
     internal override bool IsPGInstrumented =>
-        GetSwitchState(new string[] { "/ltcg:pgi", "/genprofile", "/fastgenprofile" }, CommandLineSwitchState.SwitchNotFound, CommandLineOrderOfPrecedence.FirstWins, StringComparison.OrdinalIgnoreCase) == CommandLineSwitchState.SwitchEnabled;
+        GetSwitchState(pgiSwitchNames, CommandLineSwitchState.SwitchNotFound, CommandLineOrderOfPrecedence.FirstWins, StringComparison.OrdinalIgnoreCase) == CommandLineSwitchState.SwitchEnabled;
 
     public MSVC_LINK_CommandLine(string rawCommandLine, CompilandLanguage language, string toolName, Version frontEndVersion, Version backEndVersion)
+        : base(rawCommandLine, language, toolName, frontEndVersion, backEndVersion) { }
+}
+
+// Because lld-link.exe shares so many parameter names and values with link.exe, we'll just derive from MSVC_LINK_CommandLine
+internal sealed class LLD_LINK_CommandLine : MSVC_LINK_CommandLine
+{
+    // It doesn't appear that LLD does the equivalent of MSVC's PGI (Profile Guided Instrumented) binaries, instead it may be a compiler option?
+    // For now we'll treat all LLD linked binaries as non-PGI and see if this surfaces problems later.
+    internal override bool IsPGInstrumented => false;
+
+    public LLD_LINK_CommandLine(string rawCommandLine, CompilandLanguage language, string toolName, Version frontEndVersion, Version backEndVersion)
         : base(rawCommandLine, language, toolName, frontEndVersion, backEndVersion) { }
 }

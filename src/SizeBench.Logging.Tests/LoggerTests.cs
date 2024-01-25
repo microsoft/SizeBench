@@ -10,14 +10,14 @@ public class LoggerTests
     [TestMethod]
     public void CanConstructTaskLoggerWithoutSynchronizationContext()
     {
-        using ILogger logger = new Logger("Test Task", new List<LogEntry>(), new List<LogEntry>(), null, null);
+        using var logger = new Logger("Test Task", new List<LogEntry>(), new List<LogEntry>(), null, null);
     }
 
     [ExpectedException(typeof(ObjectDisposedException), AllowDerivedTypes = false)]
     [TestMethod]
     public void LoggingAfterDisposeThrows()
     {
-        ILogger logger;
+        Logger logger;
         using (logger = new Logger("Test Task", new List<LogEntry>(), new List<LogEntry>(), null, null))
         {
         }
@@ -62,7 +62,7 @@ public class LoggerTests
     {
         AsyncPump.Run(async delegate
         {
-            using ILogger logger = new Logger("Test Task", new ObservableCollection<LogEntry>(), new ObservableCollection<LogEntry>(), SynchronizationContext.Current, null);
+            using var logger = new Logger("Test Task", new ObservableCollection<LogEntry>(), new ObservableCollection<LogEntry>(), SynchronizationContext.Current, null);
             var testThreadId = Environment.CurrentManagedThreadId;
             var observable = (INotifyCollectionChanged)logger.Entries;
             var completionSource = new TaskCompletionSource<Tuple<NotifyCollectionChangedEventArgs, int>>();
@@ -86,7 +86,7 @@ public class LoggerTests
     {
         AsyncPump.Run(async delegate
         {
-            using ILogger logger = new Logger("Test Task", new ObservableCollection<LogEntry>(), new ObservableCollection<LogEntry>(), SynchronizationContext.Current, null);
+            using var logger = new Logger("Test Task", new ObservableCollection<LogEntry>(), new ObservableCollection<LogEntry>(), SynchronizationContext.Current, null);
             var testThreadId = Environment.CurrentManagedThreadId;
             Assert.IsInstanceOfType(logger.Entries, typeof(INotifyCollectionChanged));
             var observable = (INotifyCollectionChanged)logger.Entries;
@@ -116,7 +116,7 @@ public class LoggerTests
     {
         var testContext = new SynchronizationContext();
         SynchronizationContext.SetSynchronizationContext(testContext);
-        using ILogger logger = new Logger("Test Task", new List<LogEntry>(), new List<LogEntry>(), testContext, null);
+        using var logger = new Logger("Test Task", new List<LogEntry>(), new List<LogEntry>(), testContext, null);
         var inheritSync = logger.StartTaskLog("Test Subtask With Inheritance");
         Assert.AreEqual(testContext, inheritSync.SynchronizationContext);
     }
@@ -153,7 +153,7 @@ public class LoggerTests
     [TestMethod]
     public void DisposedLoggerThrowsOnEverything()
     {
-        ILogger logger = new Logger("Test Task", new List<LogEntry>(), new List<LogEntry>(), null, null);
+        var logger = new Logger("Test Task", new List<LogEntry>(), new List<LogEntry>(), null, null);
         logger.Dispose();
 
         Assert.ThrowsException<ObjectDisposedException>(() => logger.Log("test"));

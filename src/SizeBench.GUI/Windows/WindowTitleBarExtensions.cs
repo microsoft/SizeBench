@@ -10,11 +10,11 @@ namespace SizeBench.GUI.Windows;
 internal static partial class WindowTitleBarExtensions
 {
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [LibraryImport("user32.dll")]
+    [LibraryImport("user32.dll", EntryPoint = "GetWindowLongW")]
     private static partial uint GetWindowLong(IntPtr hWnd, int nIndex);
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [LibraryImport("user32.dll")]
+    [LibraryImport("user32.dll", EntryPoint = "SetWindowLongW")]
     private static partial void SetWindowLong(IntPtr hWnd, int nIndex, uint dwNewLong);
 
     private const int GWL_STYLE = -16;

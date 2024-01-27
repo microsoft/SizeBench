@@ -68,12 +68,12 @@
                         </Hyperlink>
                     </Label>
                     <Label Style="{StaticResource LinkLabelStyle}">
-                        <Hyperlink NavigateUri="https://msblox.visualstudio.com/_git/SizeBench?path=%2FDocs%2FContributing.md"
+                        <Hyperlink NavigateUri="https://github.com/microsoft/SizeBench/blob/main/docs/Contributing.md"
                                    Style="{StaticResource LinkLabelStyle}">
                             <i:Interaction.Behaviors>
                                 <navigationControls:ExternalHyperlinkNavigationBehavior/>
                             </i:Interaction.Behaviors>
-                            <TextBlock Text="How to contribute (MS internal only for now)"/>
+                            <TextBlock Text="How to contribute"/>
                         </Hyperlink>
                     </Label>
                 </StackPanel>

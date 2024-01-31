@@ -871,8 +871,10 @@ internal sealed partial class PEFile : IPEFile
                 string languageName;
                 try
                 {
-                    if (entry.ID == 0)
+                    if (entry.ID is 0 or 0x400)
                     {
+                        // 0x400 seems to be LANG_NEUTRAL with SUBLANG_DEFAULT when in codepage(1252), and CultureInfo.GetCultureInfo(0x400) throws a CultureNotFoundException,
+                        // so we'll special-case this one since it's moderately common.
                         languageName = "LANG_NEUTRAL";
                     }
                     else
@@ -880,11 +882,7 @@ internal sealed partial class PEFile : IPEFile
                         languageName = CultureInfo.GetCultureInfo((int)entry.ID).DisplayName;
                     }
                 }
-                catch (ArgumentOutOfRangeException)
-                {
-                    languageName = $"Unknown language";
-                }
-                catch (CultureNotFoundException)
+                catch (Exception ex) when (ex is ArgumentOutOfRangeException or CultureNotFoundException)
                 {
                     languageName = $"Unknown language";
                 }
@@ -1104,8 +1102,13 @@ internal sealed partial class PEFile : IPEFile
         {
             var pRVA = GetDataMemberPtrByRVA(RVA);
 
-            // We select all the flags, to try every test possible to discount this as Unicode
-            var flags = (IsTextUnicodeFlags)0xFFFF;
+            // We select all the flags, to try every test possible to discount this as Unicode,
+            // except we exclude IS_TEXT_UNICODE_NULL_BYTES because sometimes string symbols over-report
+            // their size (LLD has been observed to do this), so it ends up putting two strings in the binary
+            // with only one symbol representing them.  This means we get a null byte between the two strings,
+            // but we can't really do any better than discovering this as one null-embedded string, and it's
+            // better than having IsTextUnicode tell us this string is Unicode so we marshal it as garbage.
+            var flags = (IsTextUnicodeFlags)(0xFFFF & ~((int)IsTextUnicodeFlags.IS_TEXT_UNICODE_NULL_BYTES));
             isUnicodeString = IsTextUnicode(pRVA, (int)length, ref flags);
 
             if (isUnicodeString)

@@ -11,6 +11,7 @@ public sealed class BinarySection
     internal static readonly BinarySection NoSectionsSentinel = new BinarySection("No sections"); // To be used only for diffing, really
 
     private bool _fullyConstructed;
+    private readonly Linker _linker = Linker.Unknown;
 
     public string Name { get; }
 
@@ -174,6 +175,7 @@ public sealed class BinarySection
         this.FileAlignment = fileAlignment;
         this.SectionAlignment = sectionAlignment;
         this.Characteristics = characteristics;
+        this._linker = cache?.LinkerDetected ?? Linker.Unknown;
 
         // We assume that every section's Size is a multiple of FileAlignment - this seems to be true.  If it's not, it wouldn't be especially hard to add
         // TailSlopSizeAlignment like TailSlopVirtualSizeAlignment.
@@ -218,7 +220,15 @@ public sealed class BinarySection
                 Trace.WriteLine($"COFF Groups {coffGroupsSortedByRVA[i - 1].Name} and {coffGroupsSortedByRVA[i].Name} contain a large gap between them ({gapVirtualSize} bytes), which is larger than the FileAlignment ({this.FileAlignment}).  This has not been seen before in practice, and may indicate a bug in SizeBench.");
                 PrintDebuggingInfoForGapAndAlignmentAnalysis();
 
-                throw new InvalidOperationException($"The gap between COFF Groups '{coffGroupsSortedByRVA[i].Name}' and '{coffGroupsSortedByRVA[i - 1].Name}' in binary section '{this.Name}' is {gapVirtualSize} bytes - a gap this large has not been observed before so it may indicate a bug in SizeBench");
+                // LLD sometimes puts things like strings into .rdata without making a COFF Group in the PDB or the PE file header, so if this is LLD
+                // we'll just let it slide.  It means that the "sum of COFF Group sizes" won't equal their containing Section, and it means the
+                // TailSlop[Virtual]SizeAlignment will be wrong, but it's better than preventing usage of SizeBench for these binaries at all.
+                // Trying to detect every string in a binary on load to generate a synthetic COFF Group could also fix this, but that seems like it could
+                // be prohibitively slow for performance as it could need to enumerate thousands of string symbols from DIA to calcualte the RVA range(s).
+                if (this._linker is not Linker.LLD)
+                {
+                    throw new InvalidOperationException($"The gap between COFF Groups '{coffGroupsSortedByRVA[i].Name}' and '{coffGroupsSortedByRVA[i - 1].Name}' in binary section '{this.Name}' is {gapVirtualSize} bytes - a gap this large has not been observed before so it may indicate a bug in SizeBench");
+                }
             }
             coffGroupsSortedByRVA[i - 1].TailSlopVirtualSizeAlignment = gapVirtualSize;
             coffGroupsSortedByRVA[i - 1].TailSlopSizeAlignment = gapSize;

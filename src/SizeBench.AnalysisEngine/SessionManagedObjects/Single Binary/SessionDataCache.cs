@@ -8,6 +8,8 @@ internal sealed class SessionDataCache : IDisposable
 {
     public uint BytesPerWord { get; set; }
 
+    internal Linker LinkerDetected { get; set; } = Linker.Unknown;
+
     private List<BinarySection>? _binarySectionsConstructedEver = new List<BinarySection>();
     public IReadOnlyList<BinarySection> BinarySectionsConstructedEver
         => this._binarySectionsConstructedEver ?? new List<BinarySection>();

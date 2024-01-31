@@ -6,7 +6,7 @@
     <!-- Path relative to solution directory -->
     <ResultsDirectory>.\TestResults</ResultsDirectory>
     <TargetPlatform>x64</TargetPlatform>
-    <TargetFrameworkVersion>.NETCoreApp, Version=6.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>.NETCoreApp, Version=8.0</TargetFrameworkVersion>
 
     <!-- Timeout is in milliseconds, so this is 500s or just over 8 minutes -->
     <TestSessionTimeout>500000</TestSessionTimeout>

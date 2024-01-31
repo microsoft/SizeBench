@@ -305,6 +305,13 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         {
             throw new PDBNotSuitableForAnalysisException("This binary is using incremental linking (such as /ltcg:incremental, or /debug without specifying /incremental:no).  This is not valid for SizeBench's static analysis purposes - please use /ltcg or /incremental:no or otherwise ensure a full link happens.");
         }
+
+        this.DataCache.LinkerDetected = linkerCommandLine switch
+        {
+            LLD_LINK_CommandLine => Linker.LLD,
+            MSVC_LINK_CommandLine => Linker.MSVC,
+            _ => throw new InvalidOperationException("Unknown linker!")
+        };
     }
 
     private bool AreSymbolsStripped() => this.DiaGlobalScope.isStripped != 0;
@@ -899,6 +906,15 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
     {
         List<SeparatedCodeBlockSymbol>? separatedBlockSymbols = null;
         primaryBlockSymbol.findChildren(SymTagEnum.SymTagBlock, null, 0, out var enumBlockSymbols);
+
+        // In some cases we get a null enumBlockSymbols, like for example when the function is a thunk or fully optimized out.  LLD in particular
+        // seems to emit some "0 RVA, 0 length" function symbols that end up here.  In that case we'll just return null as it's safe to assume we
+        // have no separated blocks in this case.
+        if (enumBlockSymbols is null)
+        {
+            return null;
+        }
+
         foreach (IDiaSymbol? blockDiaSymbol in enumBlockSymbols)
         {
             cancellationToken.ThrowIfCancellationRequested();

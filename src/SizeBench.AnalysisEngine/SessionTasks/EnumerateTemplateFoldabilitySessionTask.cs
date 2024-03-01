@@ -48,7 +48,7 @@ internal sealed class EnumerateTemplateFoldabilitySessionTask : SessionTask<List
             symbolsEnumerated += (uint)groupOfTemplatedFunctions.Count();
             if (symbolsEnumerated >= nextLoggerOutput)
             {
-                ReportProgress($"Enumerated {symbolsEnumerated}/{allTemplatedFunctionSymbols.Count} functions, found {foldables.Count} items with interesting foldability so far.", symbolsEnumerated, (uint)allTemplatedFunctionSymbols.Count);
+                ReportProgress($"Enumerated {symbolsEnumerated:N0}/{allTemplatedFunctionSymbols.Count:N0} functions, found {foldables.Count:N0} items with interesting foldability so far.", symbolsEnumerated, (uint)allTemplatedFunctionSymbols.Count);
                 nextLoggerOutput += loggerOutputVelocity;
             }
 
@@ -98,8 +98,8 @@ internal sealed class EnumerateTemplateFoldabilitySessionTask : SessionTask<List
                                                       CalculatePercentageSimilarity(groupOfTemplatedFunctions)));
         }
 
-        ReportProgress($"Enumerated {symbolsEnumerated}/{allTemplatedFunctionSymbols.Count} functions, found {foldables.Count} items so far.", nextLoggerOutput, (uint)allTemplatedFunctionSymbols.Count);
-        logger.Log($"Finished enumerating {foldables.Count} template foldability items");
+        ReportProgress($"Enumerated {symbolsEnumerated:N0}/{allTemplatedFunctionSymbols.Count:N0} functions, found {foldables.Count:N0} items so far.", nextLoggerOutput, (uint)allTemplatedFunctionSymbols.Count);
+        logger.Log($"Finished enumerating {foldables.Count:N0} template foldability items");
         this.DataCache.AllTemplateFoldabilityItems = foldables;
 
         return this.DataCache.AllTemplateFoldabilityItems;

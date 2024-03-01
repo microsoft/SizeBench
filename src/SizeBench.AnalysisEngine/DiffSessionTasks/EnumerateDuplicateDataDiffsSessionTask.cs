@@ -54,7 +54,7 @@ internal sealed class EnumerateDuplicateDataDiffsSessionTask : DiffSessionTask<L
 
                 if (beforeDDIsParsed >= nextLoggerOutput)
                 {
-                    ReportProgress($"Parsed {beforeDDIsParsed}/{beforeDDIsCount} 'before' duplicate data items and {afterDDIsParsed}/{afterDDIsCount} 'after' duplicate data items into diffs.", beforeDDIsParsed + afterDDIsParsed, totalDDIsToDiff);
+                    ReportProgress($"Parsed {beforeDDIsParsed:N0}/{beforeDDIsCount:N0} 'before' duplicate data items and {afterDDIsParsed:N0}/{afterDDIsCount:N0} 'after' duplicate data items into diffs.", beforeDDIsParsed + afterDDIsParsed, totalDDIsToDiff);
                     nextLoggerOutput += loggerOutputVelocity;
                 }
 
@@ -82,7 +82,7 @@ internal sealed class EnumerateDuplicateDataDiffsSessionTask : DiffSessionTask<L
 
                 if (afterDDIsParsed >= nextLoggerOutput)
                 {
-                    ReportProgress($"Parsed {afterDDIsParsed}/{afterDDIsCount} 'after' duplicate data items into diffs.", afterDDIsParsed + beforeDDIsCount, totalDDIsToDiff);
+                    ReportProgress($"Parsed {afterDDIsParsed:N0}/{afterDDIsCount:N0} 'after' duplicate data items into diffs.", afterDDIsParsed + beforeDDIsCount, totalDDIsToDiff);
                     nextLoggerOutput += loggerOutputVelocity;
                 }
 
@@ -94,9 +94,9 @@ internal sealed class EnumerateDuplicateDataDiffsSessionTask : DiffSessionTask<L
         }
 
         // One final progress report so the log shows a nice summary at the end
-        ReportProgress($"Parsed {beforeDDIsCount} 'before' duplicate data items and {afterDDIsCount} 'after' duplicate data items, generating  {DDIDiffs.Count} diffs.", totalDDIsToDiff, totalDDIsToDiff);
+        ReportProgress($"Parsed {beforeDDIsCount:N0} 'before' duplicate data items and {afterDDIsCount:N0} 'after' duplicate data items, generating  {DDIDiffs.Count:N0} diffs.", totalDDIsToDiff, totalDDIsToDiff);
 
-        logger.Log($"Finished enumerating {DDIDiffs.Count} duplicate data item diffs.");
+        logger.Log($"Finished enumerating {DDIDiffs.Count:N0} duplicate data item diffs.");
 
         return DDIDiffs;
     }

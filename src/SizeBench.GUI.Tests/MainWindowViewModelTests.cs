@@ -56,7 +56,7 @@ public sealed class MainWindowViewModelTests : IDisposable
         var expectedBinaryPath = @"c:\dev\blah.dll";
         var expectedPDBPath = @"c:\dev\other\blah.pdb";
 
-        this.MockSessionFactory.Setup(sf => sf.CreateSession(expectedBinaryPath, expectedPDBPath, It.IsAny<ILogger>()))
+        this.MockSessionFactory.Setup(sf => sf.CreateSession(expectedBinaryPath, expectedPDBPath, It.IsAny<SessionOptions>(), It.IsAny<ILogger>()))
                                .Returns(Task.FromResult<ISession>(new Mock<ISession>().Object));
 
         using var container = new WindsorContainer();
@@ -65,7 +65,7 @@ public sealed class MainWindowViewModelTests : IDisposable
                                          appLogger,
                                          this.MockSessionFactory.Object);
         await vm.TryResolveDeeplink(new Uri($"sizebench://2.0/Test?BinaryPath={Uri.EscapeDataString(expectedBinaryPath)}&PDBPath={Uri.EscapeDataString(expectedPDBPath)}"));
-        this.MockSessionFactory.Verify(sf => sf.CreateSession(expectedBinaryPath, expectedPDBPath, It.IsAny<ILogger>()), Times.Exactly(1));
+        this.MockSessionFactory.Verify(sf => sf.CreateSession(expectedBinaryPath, expectedPDBPath, It.IsAny<SessionOptions>(), It.IsAny<ILogger>()), Times.Exactly(1));
     }
 
     [TestMethod]
@@ -76,7 +76,7 @@ public sealed class MainWindowViewModelTests : IDisposable
         var expectedInAppPage = @"BinarySection/.text";
 
         var tcsCreateSession = new TaskCompletionSource<ISession>();
-        this.MockSessionFactory.Setup(sf => sf.CreateSession(expectedBinaryPath, expectedPDBPath, It.IsAny<ILogger>()))
+        this.MockSessionFactory.Setup(sf => sf.CreateSession(expectedBinaryPath, expectedPDBPath, It.IsAny<SessionOptions>(), It.IsAny<ILogger>()))
                                .Returns(tcsCreateSession.Task);
 
         using var container = new WindsorContainer();
@@ -89,7 +89,7 @@ public sealed class MainWindowViewModelTests : IDisposable
         Assert.AreEqual(0, vm.OpenTabs.Count);
         Assert.IsNull(vm.SelectedTab);
 
-        this.MockSessionFactory.Verify(sf => sf.CreateSession(expectedBinaryPath, expectedPDBPath, It.IsAny<ILogger>()), Times.Exactly(1));
+        this.MockSessionFactory.Verify(sf => sf.CreateSession(expectedBinaryPath, expectedPDBPath, It.IsAny<SessionOptions>(), It.IsAny<ILogger>()), Times.Exactly(1));
         tcsCreateSession.SetResult(new Mock<ISession>().Object);
 
         await deeplinkResolutionTask;

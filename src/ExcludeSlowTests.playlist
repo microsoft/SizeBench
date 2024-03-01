@@ -1,0 +1,7 @@
+<Playlist Version="2.0">
+  <Rule Name="Includes" Match="Any">
+    <Rule Match="Not">
+      <Property Name="Trait" Value="SlowTests" />
+    </Rule>
+  </Rule>
+</Playlist>

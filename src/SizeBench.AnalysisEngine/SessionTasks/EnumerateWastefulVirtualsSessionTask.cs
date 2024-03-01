@@ -57,7 +57,7 @@ internal sealed class EnumerateWastefulVirtualsSessionTask : SessionTask<List<Wa
             wastefulVirtuals = AnalyzeForWaste(classesWorthLoadingFunctionsFor);
         }
 
-        ReportProgress($"Enumerated {udts.Count}/{udts.Count} user-defined types, found {wastefulVirtuals.Count} types with wasteful virtuals.", (uint)udts.Count, (uint)udts.Count);
+        ReportProgress($"Enumerated {udts.Count:N0}/{udts.Count:N0} user-defined types, found {wastefulVirtuals.Count:N0} types with wasteful virtuals.", (uint)udts.Count, (uint)udts.Count);
         logger.Log($"Finished enumerating {wastefulVirtuals.Count} wasteful virtuals");
         this.DataCache.AllWastefulVirtualItems = wastefulVirtuals;
 
@@ -79,7 +79,7 @@ internal sealed class EnumerateWastefulVirtualsSessionTask : SessionTask<List<Wa
             udtsEnumerated++;
             if (udtsEnumerated >= nextLoggerOutput)
             {
-                ReportProgress($"Analyzed {udtsEnumerated}/{classesWithVirtualsWorthExploring.Count} user-defined types for waste, found {wastefulVirtuals.Count} types with wasteful virtuals so far.", nextLoggerOutput, (uint)classesWithVirtualsWorthExploring.Count);
+                ReportProgress($"Analyzed {udtsEnumerated:N0}/{classesWithVirtualsWorthExploring.Count:N0} user-defined types for waste, found {wastefulVirtuals.Count:N0} types with wasteful virtuals so far.", nextLoggerOutput, (uint)classesWithVirtualsWorthExploring.Count);
                 nextLoggerOutput += loggerOutputVelocity;
             }
 
@@ -288,7 +288,7 @@ internal sealed class EnumerateWastefulVirtualsSessionTask : SessionTask<List<Wa
             udtsEnumerated++;
             if (udtsEnumerated >= nextLoggerOutput)
             {
-                ReportProgress($"Functions loaded for {udtsEnumerated}/{classesWorthLoadingFunctionsFor.Count} user-defined types so far.", nextLoggerOutput, (uint)classesWorthLoadingFunctionsFor.Count);
+                ReportProgress($"Functions loaded for {udtsEnumerated:N0}/{classesWorthLoadingFunctionsFor.Count:N0} user-defined types so far.", nextLoggerOutput, (uint)classesWorthLoadingFunctionsFor.Count);
                 nextLoggerOutput += loggerOutputVelocity;
             }
 

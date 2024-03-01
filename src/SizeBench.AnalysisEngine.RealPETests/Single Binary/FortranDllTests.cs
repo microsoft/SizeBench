@@ -122,4 +122,13 @@ public class FortranDllTests
         Assert.AreEqual("File2", subroutine3Placement.Lib!.ShortName);
         Assert.AreEqual("File2.f90", subroutine3Placement.SourceFile!.ShortName);
     }
+
+    public static IEnumerable<object[]> DynamicDataSourceForSymbolSourcesSupportedTests => SymbolSourcesSupportedCommonTests.DynamicDataSourceForSymbolSourcesSupportedTests;
+
+    [TestMethod]
+    [DynamicData(nameof(DynamicDataSourceForSymbolSourcesSupportedTests))]
+    public Task SymbolSourcesSupportedWorks(SymbolSourcesSupported symbolSources) =>
+        SymbolSourcesSupportedCommonTests.VerifyNoUnexpectedSymbolTypesCanBeMaterialized(
+            this.BinaryPath, this.PDBPath, symbolSources,
+            this.TestContext!.CancellationTokenSource.Token);
 }

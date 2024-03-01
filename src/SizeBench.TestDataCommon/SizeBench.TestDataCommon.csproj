@@ -1,18 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <SizeBenchTestCode>true</SizeBenchTestCode>
-        <NoWarn>1701;1702;0649</NoWarn>
-    </PropertyGroup>
+  <PropertyGroup>
+    <SizeBenchTestCode>true</SizeBenchTestCode>
+    <NoWarn>1701;1702;0649</NoWarn>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Castle.Windsor" Version="6.0.0" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Castle.Windsor" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\SizeBench.AnalysisEngine\SizeBench.AnalysisEngine.csproj" />
-        <ProjectReference Include="..\SizeBench.Logging\SizeBench.Logging.csproj" />
-        <ProjectReference Include="..\SizeBench.TestInfrastructure\SizeBench.TestInfrastructure.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SizeBench.AnalysisEngine\SizeBench.AnalysisEngine.csproj" />
+    <ProjectReference Include="..\SizeBench.Logging\SizeBench.Logging.csproj" />
+    <ProjectReference Include="..\SizeBench.TestInfrastructure\SizeBench.TestInfrastructure.csproj" />
+  </ItemGroup>
 
 </Project>

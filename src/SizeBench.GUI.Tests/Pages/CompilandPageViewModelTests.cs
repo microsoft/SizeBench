@@ -25,7 +25,7 @@ public class CompilandPageViewModelTests
     {
         using var generator = new SingleBinaryDataGenerator();
 
-        generator.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Compilands as IReadOnlyList<Compiland>));
+        generator.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Compilands as IReadOnlyCollection<Compiland>));
         var tcsTestResultsComplete = new TaskCompletionSource<object>();
 
         var symbols = new List<ISymbol>
@@ -70,7 +70,7 @@ public class CompilandPageViewModelTests
     {
         using var generator = new SingleBinaryDataGenerator();
 
-        generator.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Compilands as IReadOnlyList<Compiland>));
+        generator.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Compilands as IReadOnlyCollection<Compiland>));
         var tcsTestResultsComplete = new TaskCompletionSource<object>();
 
         var tcsSymbolsReady = new TaskCompletionSource<IReadOnlyList<ISymbol>>();
@@ -94,7 +94,7 @@ public class CompilandPageViewModelTests
     {
         using var generator = new SingleBinaryDataGenerator();
 
-        generator.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Compilands as IReadOnlyList<Compiland>));
+        generator.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Compilands as IReadOnlyCollection<Compiland>));
         var tcsTestResultsComplete = new TaskCompletionSource<object>();
 
         var symbols = new List<ISymbol>

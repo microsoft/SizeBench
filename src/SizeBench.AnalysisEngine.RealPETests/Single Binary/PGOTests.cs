@@ -1,11 +1,13 @@
 ﻿using System.IO;
 using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.Logging;
+using SizeBench.TestInfrastructure;
 
 namespace SizeBench.AnalysisEngine.RealPETests.Single_Binary;
 
 [DeploymentItem(@"Test PEs\External\x64\Microsoft.UI.Xaml.dll")]
 [DeploymentItem(@"Test PEs\External\x64\Microsoft.UI.Xaml.pdb")]
+[TestCategory(CommonTestCategories.SlowTests)]
 [TestClass]
 public sealed class PGOTests
 {
@@ -538,4 +540,15 @@ public sealed class PGOTests
         Assert.AreEqual("mincore", placement.Lib!.ShortName);
         Assert.IsNull(placement.SourceFile);
     }
+
+    public static IEnumerable<object[]> DynamicDataSourceForSymbolSourcesSupportedTests => SymbolSourcesSupportedCommonTests.DynamicDataSourceForSymbolSourcesSupportedTests;
+
+    [TestMethod]
+    [DynamicData(nameof(DynamicDataSourceForSymbolSourcesSupportedTests))]
+    public Task SymbolSourcesSupportedWorks(SymbolSourcesSupported symbolSources) =>
+        SymbolSourcesSupportedCommonTests.VerifyNoUnexpectedSymbolTypesCanBeMaterialized(
+            Path.Combine(this.TestContext!.DeploymentDirectory!, "Microsoft.UI.Xaml.dll"),
+            Path.Combine(this.TestContext!.DeploymentDirectory!, "Microsoft.UI.Xaml.pdb"),
+            symbolSources,
+            this.TestContext.CancellationTokenSource.Token);
 }

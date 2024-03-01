@@ -54,8 +54,8 @@ public class ContributionPageViewModelTests
         var libs = new List<Library>() { this.testLib };
         var compilands = new List<Compiland>() { this.testCompiland };
         this.MockSession.Setup(s => s.EnumerateBinarySectionsAndCOFFGroups(It.IsAny<CancellationToken>())).Returns(Task.FromResult(sections as IReadOnlyList<BinarySection>));
-        this.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(libs as IReadOnlyList<Library>));
-        this.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromResult(compilands as IReadOnlyList<Compiland>));
+        this.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(libs as IReadOnlyCollection<Library>));
+        this.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromResult(compilands as IReadOnlyCollection<Compiland>));
     }
 
     [TestMethod]

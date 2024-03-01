@@ -20,15 +20,15 @@ internal sealed class BinarySectionPageViewModel : SingleBinaryViewModelBase
         private set { this._binarySection = value; RaisePropertyChanged(); }
     }
 
-    private IReadOnlyList<Library>? _libList;
-    public IReadOnlyList<Library>? Libs
+    private IReadOnlyCollection<Library>? _libCollection;
+    public IReadOnlyCollection<Library>? Libs
     {
-        get => this._libList;
-        private set { this._libList = value; RaisePropertyChanged(); }
+        get => this._libCollection;
+        private set { this._libCollection = value; RaisePropertyChanged(); }
     }
 
-    private IReadOnlyList<Compiland>? _compilands;
-    public IReadOnlyList<Compiland>? Compilands
+    private IReadOnlyCollection<Compiland>? _compilands;
+    public IReadOnlyCollection<Compiland>? Compilands
     {
         get => this._compilands;
         private set { this._compilands = value; RaisePropertyChanged(); }

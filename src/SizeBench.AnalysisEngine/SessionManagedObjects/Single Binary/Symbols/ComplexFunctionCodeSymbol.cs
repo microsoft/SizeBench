@@ -55,6 +55,8 @@ public sealed class ComplexFunctionCodeSymbol : IFunctionCodeSymbol
                                        bool isOptimizedForSpeed = false)
     {
 #if DEBUG
+        Debug.Assert(cache.SymbolSourcesSupported.HasFlag(SymbolSourcesSupported.Code));
+
         if (cache.AllFunctionSymbolsBySymIndexIdOfPrimaryBlock.ContainsKey(primaryBlock.SymIndexId))
         {
             throw new ObjectAlreadyExistsException();

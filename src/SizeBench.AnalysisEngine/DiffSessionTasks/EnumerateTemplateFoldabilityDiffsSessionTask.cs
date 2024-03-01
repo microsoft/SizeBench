@@ -54,7 +54,7 @@ internal sealed class EnumerateTemplateFoldabilityDiffsSessionTask : DiffSession
 
                 if (beforeTFIsParsed >= nextLoggerOutput)
                 {
-                    ReportProgress($"Parsed {beforeTFIsParsed}/{beforeTFIsCount} 'before' template foldability items and {afterTFIsParsed}/{afterTFIsCount} 'after' template foldability items into diffs.", beforeTFIsParsed + afterTFIsParsed, totalTFIsToDiff);
+                    ReportProgress($"Parsed {beforeTFIsParsed:N0}/{beforeTFIsCount:N0} 'before' template foldability items and {afterTFIsParsed:N0}/{afterTFIsCount:N0} 'after' template foldability items into diffs.", beforeTFIsParsed + afterTFIsParsed, totalTFIsToDiff);
                     nextLoggerOutput += loggerOutputVelocity;
                 }
 
@@ -82,7 +82,7 @@ internal sealed class EnumerateTemplateFoldabilityDiffsSessionTask : DiffSession
 
                 if (afterTFIsParsed >= nextLoggerOutput)
                 {
-                    ReportProgress($"Parsed {afterTFIsParsed}/{afterTFIsCount} 'after' template foldability items into diffs.", afterTFIsParsed + beforeTFIsCount, totalTFIsToDiff);
+                    ReportProgress($"Parsed {afterTFIsParsed:N0}/{afterTFIsCount:N0} 'after' template foldability items into diffs.", afterTFIsParsed + beforeTFIsCount, totalTFIsToDiff);
                     nextLoggerOutput += loggerOutputVelocity;
                 }
 
@@ -94,9 +94,9 @@ internal sealed class EnumerateTemplateFoldabilityDiffsSessionTask : DiffSession
         }
 
         // One final progress report so the log shows a nice summary at the end
-        ReportProgress($"Parsed {beforeTFIsCount} 'before' template foldability items and {afterTFIsCount} 'after' template foldability items, generating  {TFIDiffs.Count} diffs.", totalTFIsToDiff, totalTFIsToDiff);
+        ReportProgress($"Parsed {beforeTFIsCount:N0} 'before' template foldability items and {afterTFIsCount:N0} 'after' template foldability items, generating  {TFIDiffs.Count:N0} diffs.", totalTFIsToDiff, totalTFIsToDiff);
 
-        logger.Log($"Finished enumerating {TFIDiffs.Count} template foldability item diffs.");
+        logger.Log($"Finished enumerating {TFIDiffs.Count:N0} template foldability item diffs.");
 
         return TFIDiffs;
     }

@@ -32,7 +32,7 @@ internal class EnumerateSymbolsInContributionSessionTask : SessionTask<List<ISym
         {
             if (numRangesEnumerated > nextLoggerOutput)
             {
-                ReportProgress($"Parsed {numRangesEnumerated}/{rvaRanges.Count} RVA Ranges.  So far, {symbolsEnumerated.Count} symbols have been found.", numRangesEnumerated, (uint)rvaRanges.Count);
+                ReportProgress($"Parsed {numRangesEnumerated:N0}/{rvaRanges.Count:N0} RVA Ranges.  So far, {symbolsEnumerated.Count:N0} symbols have been found.", numRangesEnumerated, (uint)rvaRanges.Count);
                 nextLoggerOutput += loggerOutputVelocity;
             }
 

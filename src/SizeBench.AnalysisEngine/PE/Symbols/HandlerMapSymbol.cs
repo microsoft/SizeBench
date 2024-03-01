@@ -4,8 +4,8 @@ internal sealed class HandlerMapSymbol : XDataSymbol
 {
     public override SymbolComparisonClass SymbolComparisonClass => SymbolComparisonClass.HandlerMap;
 
-    internal HandlerMapSymbol(Symbol? targetSymbol, uint targetStartRVA, uint rva, uint size)
-        : base(targetSymbol, targetStartRVA, rva, size)
+    internal HandlerMapSymbol(Symbol? targetSymbol, uint targetStartRVA, uint rva, uint size, SymbolSourcesSupported symbolSourcesSupported)
+        : base(targetSymbol, targetStartRVA, rva, size, symbolSourcesSupported)
     {
     }
 

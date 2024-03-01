@@ -1,0 +1,54 @@
+﻿<navigation:SizeBenchPage x:Class="SizeBench.GUI.Pages.Symbols.InlineSiteGroupPage"
+                          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                          xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                          xmlns:commands="clr-namespace:SizeBench.GUI.Commands"
+                          xmlns:controls="clr-namespace:SizeBench.GUI.Controls"
+                          xmlns:navigation="clr-namespace:SizeBench.GUI.Controls.Navigation"
+                          xmlns:converters="clr-namespace:SizeBench.GUI.Converters"
+                          mc:Ignorable="d" 
+      d:DesignHeight="300" d:DesignWidth="300"
+      Title="{Binding PageTitle}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <TextBlock Text="Name: "/>
+            <controls:SelectableTextBlock TextWrapping="Wrap" Text="{Binding InlineSiteGroup.InlinedFunctionName, Mode=OneWay, Converter={x:Static converters:SymbolNameToFriendlyNameConverter.Instance}}"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <TextBlock Text="Total Size: "/>
+            <TextBlock Text="{Binding InlineSiteGroup.TotalSize, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"/>
+        </StackPanel>
+
+        <TextBlock Grid.Row="2" TextWrapping="Wrap" Margin="0,10,0,0">
+            <Run>This is an inlined function.  Below are all the </Run>
+            <Run Text="{Binding InlineSiteGroup.InlineSites.Count, StringFormat=N0, Mode=OneWay}"/>
+            <Run>places it gets inlined into.</Run>
+            <LineBreak/>
+            <LineBreak/>
+            <Run>Note that making this function __declspec(noinline) or otherwise forcing it not to inline won't save all of the size, as
+                 each callsite will still need to emit parameter passing and call instructions, among other costs.  But this can still help
+                 determine if a particular function is inlined so often that it may be worth micro-optimizing.
+            </Run>
+        </TextBlock>
+
+        <DataGrid Grid.Row="3" ItemsSource="{Binding InlineSiteGroup.InlineSites}"
+                  AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False"
+                  IsReadOnly="True" HeadersVisibility="Column" IsSynchronizedWithCurrentItem="True"
+                  SelectionMode="Single">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Size" Binding="{Binding Size, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}, Mode=OneWay}"/>
+                <DataGridTextColumn Header="Inlined Into" Binding="{Binding BlockInlinedInto.Name, Mode=OneWay}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</navigation:SizeBenchPage>

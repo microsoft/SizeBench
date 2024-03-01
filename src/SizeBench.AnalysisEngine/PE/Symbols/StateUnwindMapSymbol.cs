@@ -4,8 +4,8 @@ internal sealed class StateUnwindMapSymbol : XDataSymbol
 {
     public override SymbolComparisonClass SymbolComparisonClass => SymbolComparisonClass.StateUnwindMap;
 
-    internal StateUnwindMapSymbol(Symbol? targetSymbol, uint targetStartRVA, uint rva, uint size)
-        : base(targetSymbol, targetStartRVA, rva, size)
+    internal StateUnwindMapSymbol(Symbol? targetSymbol, uint targetStartRVA, uint rva, uint size, SymbolSourcesSupported symbolSourcesSupported)
+        : base(targetSymbol, targetStartRVA, rva, size, symbolSourcesSupported)
     {
     }
 

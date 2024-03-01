@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using SizeBench.AnalysisEngine;
+using SizeBench.AnalysisEngine.RealPETests.Single_Binary;
 using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.Logging;
 
@@ -43,17 +44,17 @@ public sealed class ClangClTests
         Assert.IsNotNull(ClangClx64Session);
 
         // These are gotten from "link /dump /headers SizeBenchV2.AnalysisEngine.Tests.ClangClx64.dll" and looking at the "Exception" directory
-        Assert.AreEqual(0x5000u, ClangClx64Session.DataCache.PDataRVARange!.RVAStart);
-        Assert.AreEqual(0x348u, ClangClx64Session.DataCache.PDataRVARange!.Size);
+        Assert.AreEqual(0x5000u, ClangClx64Session.DataCache.PDataRVARange.RVAStart);
+        Assert.AreEqual(0x348u, ClangClx64Session.DataCache.PDataRVARange.Size);
 
         // We discover the .xdata COFF Group in the PDB, since Clang doesn't record it in the PE file.  This can be verified with
         // Dia2Dump.exe -compiland "* Linker *" SizeBenchV2.AnalysisEngine.Tests.ClangClx64.pdb
-        Assert.AreEqual(1, ClangClx64Session.DataCache.XDataRVARanges!.Count);
+        Assert.AreEqual(1, ClangClx64Session.DataCache.XDataRVARanges.Count);
         Assert.AreEqual(0x3A18u, ClangClx64Session.DataCache.XDataRVARanges.First().RVAStart);
         Assert.AreEqual(0x2E4u, ClangClx64Session.DataCache.XDataRVARanges.First().Size);
 
         // [unwind] for _RTC_Initialize, Clang does not seem to generate chain-unwind the way MSVC does
-        var _RTC_InitializeUnwind = (UnwindInfoSymbol)ClangClx64Session.DataCache.XDataSymbolsByRVA![0x3CC4];
+        var _RTC_InitializeUnwind = (UnwindInfoSymbol)ClangClx64Session.DataCache.XDataSymbolsByRVA[0x3CC4];
         Assert.AreEqual(0x25C0u, _RTC_InitializeUnwind.TargetStartRVA);
         Assert.AreEqual(12u, _RTC_InitializeUnwind.Size);
         Assert.IsTrue(_RTC_InitializeUnwind.Name.Contains("_RTC_Initialize", StringComparison.Ordinal));
@@ -66,7 +67,7 @@ public sealed class ClangClTests
         // a length of 0x98 so it extends all the way to the end of the funclet.  Less expressive than MSVC's symbols, but it'll do, and at least
         // it's not losing/hiding bytes to attribute to this function.
         // Each [pdata] should have a corresponding [unwind] too.
-        var Dllx64_CppxdataUsage_MaybeThrowPdata = ClangClx64Session.DataCache.PDataSymbolsByRVA![0x5000];
+        var Dllx64_CppxdataUsage_MaybeThrowPdata = ClangClx64Session.DataCache.PDataSymbolsByRVA[0x5000];
         Assert.AreEqual(0x1000u, Dllx64_CppxdataUsage_MaybeThrowPdata.TargetStartRVA);
         Assert.AreEqual(12u, Dllx64_CppxdataUsage_MaybeThrowPdata.Size);
         Assert.IsTrue(Dllx64_CppxdataUsage_MaybeThrowPdata.Name.Contains("Dllx64_CppxdataUsage::MaybeThrow", StringComparison.Ordinal));
@@ -238,4 +239,15 @@ public sealed class ClangClTests
         Assert.AreEqual("_Float16", setFloat16.FunctionType!.ArgumentTypes![0].Name);
         Assert.AreEqual("void TypeWithClangExtensions::SetFloat16(_Float16)", setFloat16.FormattedName.All);
     }
+
+    public static IEnumerable<object[]> DynamicDataSourceForSymbolSourcesSupportedTests => SymbolSourcesSupportedCommonTests.DynamicDataSourceForSymbolSourcesSupportedTests;
+
+    [TestMethod]
+    [DynamicData(nameof(DynamicDataSourceForSymbolSourcesSupportedTests))]
+    public Task SymbolSourcesSupportedWorks(SymbolSourcesSupported symbolSources) =>
+        SymbolSourcesSupportedCommonTests.VerifyNoUnexpectedSymbolTypesCanBeMaterialized(
+            Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.ClangClx64.dll"),
+            Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.ClangClx64.pdb"),
+            symbolSources,
+            this.TestContext!.CancellationTokenSource.Token);
 }

@@ -152,9 +152,9 @@ public sealed class BlockSymbolPageViewModelTests : IDisposable
         var allBlocksAtThisRVA = new List<ISymbol>() { function.SeparatedBlocks[0], foldedBlock1, foldedBlock2 };
 
         var nameCanonicalization = new NameCanonicalization();
-        nameCanonicalization.AddName(function.SeparatedBlocks[0].SymIndexId, function.SeparatedBlocks[0].Name, SymTagEnum.SymTagBlock);
-        nameCanonicalization.AddName(foldedBlock1.SymIndexId, foldedBlock1.Name, SymTagEnum.SymTagBlock);
-        nameCanonicalization.AddName(foldedBlock2.SymIndexId, foldedBlock2.Name, SymTagEnum.SymTagBlock);
+        nameCanonicalization.AddName(function.SeparatedBlocks[0].SymIndexId, SymTagEnum.SymTagBlock, name: function.SeparatedBlocks[0].Name);
+        nameCanonicalization.AddName(foldedBlock1.SymIndexId, SymTagEnum.SymTagBlock, name: foldedBlock1.Name);
+        nameCanonicalization.AddName(foldedBlock2.SymIndexId, SymTagEnum.SymTagBlock, name: foldedBlock2.Name);
         nameCanonicalization.Canonicalize();
         this.Generator.DataCache.AllCanonicalNames = new SortedList<uint, NameCanonicalization>
             {

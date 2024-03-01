@@ -107,7 +107,7 @@ public static class SymbolNameHelper
         var templateParamTotalCountAcrossAllSegments = 0;
         var templateParamStartIndex = -1;
         var templateParamConcreteNames = new Dictionary<int, string>();
-        templateParamAnonymizedNames = new Dictionary<string, string>();
+        templateParamAnonymizedNames = new Dictionary<string, string>(StringComparer.Ordinal);
         for (var i = 0; i < name.Length; i++)
         {
             var c = name[i];
@@ -149,7 +149,7 @@ public static class SymbolNameHelper
                             templateParamTotalCountAcrossAllSegments++;
                             if (templateParamConcreteNames[paramCount].Length > 0)
                             {
-                                anonymizedNameToAppend = "T" + templateParamTotalCountAcrossAllSegments;
+                                anonymizedNameToAppend = $"T{templateParamTotalCountAcrossAllSegments}";
                                 templateParamAnonymizedNames.Add(templateParamConcreteNames[paramCount], anonymizedNameToAppend);
                             }
                         }

@@ -12,6 +12,7 @@ namespace SizeBench.AnalysisEngine.Tests;
 [DeploymentItem(@"Test PEs\SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.pdb")]
 [DeploymentItem(@"Single Binary\Disassemblies\EventInfo_lambda1071_operator()_Disassembly.txt")]
 [DeploymentItem(@"Single Binary\Disassemblies\asmVeryLongBasicBlock_Disassembly.txt")]
+[TestCategory(CommonTestCategories.SlowTests)]
 [STATestClass]
 public sealed class DisassembleFunctionTests
 {

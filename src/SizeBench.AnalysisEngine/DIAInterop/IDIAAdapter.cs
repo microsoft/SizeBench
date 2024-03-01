@@ -24,9 +24,10 @@ internal interface IDIAAdapter
     ISymbol? FindSymbolByRVA(uint rva, bool allowFindingNearest, CancellationToken cancellationToken);
     TSymbol FindSymbolBySymIndexId<TSymbol>(uint symIndexId, CancellationToken cancellationToken) where TSymbol : class, ISymbol;
     TSymbol FindTypeSymbolBySymIndexId<TSymbol>(uint symIndexId, CancellationToken cancellationToken) where TSymbol : TypeSymbol;
+    List<InlineSiteSymbol>? FindAllInlineSitesForBlock(CodeBlockSymbol codeBlock, CancellationToken cancellationToken);
+    List<InlineSiteSymbol> FindAllInlineSites(CancellationToken cancellationToken);
 
-    // The output Tuple is (symbol found, amount of RVA range that has been explored)
-    IEnumerable<ValueTuple<ISymbol, uint>> FindSymbolsInRVARange(RVARange range, CancellationToken cancellationToken);
+    IEnumerable<(ISymbol symbol, uint amountOfRVARangeExplored)> FindSymbolsInRVARange(RVARange range, CancellationToken cancellationToken);
 
     SortedList<uint, NameCanonicalization> FindCanonicalNamesForFoldableRVAs(ILogger logger, CancellationToken cancellationToken);
 

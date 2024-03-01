@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using SizeBench.AnalysisEngine;
+using SizeBench.AnalysisEngine.RealPETests.Single_Binary;
 using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.Logging;
 
@@ -43,11 +44,11 @@ public sealed class DllArmTests
         Assert.IsNotNull(DllArm32Session);
 
         // These are gotten from "link /dump /headers PEParser.Tests.Dllarm32.dll" and looking at the "Exception" directory
-        Assert.AreEqual(0x7000u, DllArm32Session.DataCache.PDataRVARange!.RVAStart);
-        Assert.AreEqual(0x318u, DllArm32Session.DataCache.PDataRVARange!.Size);
+        Assert.AreEqual(0x7000u, DllArm32Session.DataCache.PDataRVARange.RVAStart);
+        Assert.AreEqual(0x318u, DllArm32Session.DataCache.PDataRVARange.Size);
 
         // We should be discovering a bunch of RVA Ranges that we then coalesce down to just two: cppxdata in .rdata and the .xdata COFF Group
-        Assert.AreEqual(2, DllArm32Session.DataCache.XDataRVARanges!.Count);
+        Assert.AreEqual(2, DllArm32Session.DataCache.XDataRVARanges.Count);
 
         // The first range is for the cppxdata symbol that is in .rdata
         var xdataRanges = DllArm32Session.DataCache.XDataRVARanges.OrderBy(range => range.RVAStart);
@@ -62,7 +63,7 @@ public sealed class DllArmTests
         // type, and the properties of those symbols as seen in the MAP file (assumed to be the truth).
 
         // [packedUnwindData-pdata] for _RTC_Initialize
-        var _RTC_InitializePackedUnwind = (PackedUnwindDataPDataSymbol)DllArm32Session.DataCache.PDataSymbolsByRVA![0x7258];
+        var _RTC_InitializePackedUnwind = (PackedUnwindDataPDataSymbol)DllArm32Session.DataCache.PDataSymbolsByRVA[0x7258];
         Assert.AreEqual(0x27C4u, _RTC_InitializePackedUnwind.TargetStartRVA);
         Assert.AreEqual(8u, _RTC_InitializePackedUnwind.Size);
         Assert.IsTrue(_RTC_InitializePackedUnwind.Name.Contains("_RTC_Initialize", StringComparison.Ordinal));
@@ -76,35 +77,35 @@ public sealed class DllArmTests
         Assert.IsTrue(DllArm_CppxdataUsage_MaybeThrowPdata.Name.Contains("pdata", StringComparison.Ordinal));
 
         // [cppxdata] for DllArm_CppxdataUsage::MaybeThrow
-        var DllArm_CppxdataUsage_MaybeThrowCppxdata = (CppXdataSymbol)DllArm32Session.DataCache.XDataSymbolsByRVA![0x40D8];
+        var DllArm_CppxdataUsage_MaybeThrowCppxdata = (CppXdataSymbol)DllArm32Session.DataCache.XDataSymbolsByRVA[0x40D8];
         Assert.AreEqual(DllArm_CppxdataUsage_MaybeThrowPdata.TargetStartRVA, DllArm_CppxdataUsage_MaybeThrowCppxdata.TargetStartRVA);
         Assert.AreEqual(40u, DllArm_CppxdataUsage_MaybeThrowCppxdata.Size);
         Assert.IsTrue(DllArm_CppxdataUsage_MaybeThrowCppxdata.Name.Contains("DllArm_CppxdataUsage::MaybeThrow", StringComparison.Ordinal));
         Assert.IsTrue(DllArm_CppxdataUsage_MaybeThrowCppxdata.Name.Contains("cppxdata", StringComparison.Ordinal));
 
         // [handlerMap] for DllArm_CppxdataUsage::MaybeThrow
-        var DllArm_CppxdataUsage_MaybeThrowHandlerMap = (HandlerMapSymbol)DllArm32Session.DataCache.XDataSymbolsByRVA![0x4124];
+        var DllArm_CppxdataUsage_MaybeThrowHandlerMap = (HandlerMapSymbol)DllArm32Session.DataCache.XDataSymbolsByRVA[0x4124];
         Assert.AreEqual(DllArm_CppxdataUsage_MaybeThrowPdata.TargetStartRVA, DllArm_CppxdataUsage_MaybeThrowHandlerMap.TargetStartRVA);
         Assert.AreEqual(20u, DllArm_CppxdataUsage_MaybeThrowHandlerMap.Size);
         Assert.IsTrue(DllArm_CppxdataUsage_MaybeThrowHandlerMap.Name.Contains("DllArm_CppxdataUsage::MaybeThrow", StringComparison.Ordinal));
         Assert.IsTrue(DllArm_CppxdataUsage_MaybeThrowHandlerMap.Name.Contains("handlerMap", StringComparison.Ordinal));
 
         // [ip2State] for DllArm_CppxdataUsage::MaybeThrow
-        var DllArm_CppxdataUsage_MaybeThrowIpToStateMap = (IpToStateMapSymbol)DllArm32Session.DataCache.XDataSymbolsByRVA![0x4138];
+        var DllArm_CppxdataUsage_MaybeThrowIpToStateMap = (IpToStateMapSymbol)DllArm32Session.DataCache.XDataSymbolsByRVA[0x4138];
         Assert.AreEqual(DllArm_CppxdataUsage_MaybeThrowPdata.TargetStartRVA, DllArm_CppxdataUsage_MaybeThrowIpToStateMap.TargetStartRVA);
         Assert.AreEqual(64u, DllArm_CppxdataUsage_MaybeThrowIpToStateMap.Size);
         Assert.IsTrue(DllArm_CppxdataUsage_MaybeThrowIpToStateMap.Name.Contains("DllArm_CppxdataUsage::MaybeThrow", StringComparison.Ordinal));
         Assert.IsTrue(DllArm_CppxdataUsage_MaybeThrowIpToStateMap.Name.Contains("ip2state", StringComparison.Ordinal));
 
         // [stateUnwindMap] for DllArm_CppxdataUsage::MaybeThrow
-        var DllArm_CppxdataUsage_MaybeThrowStateUnwindMap = (StateUnwindMapSymbol)DllArm32Session.DataCache.XDataSymbolsByRVA![0x4100];
+        var DllArm_CppxdataUsage_MaybeThrowStateUnwindMap = (StateUnwindMapSymbol)DllArm32Session.DataCache.XDataSymbolsByRVA[0x4100];
         Assert.AreEqual(DllArm_CppxdataUsage_MaybeThrowPdata.TargetStartRVA, DllArm_CppxdataUsage_MaybeThrowStateUnwindMap.TargetStartRVA);
         Assert.AreEqual(16u, DllArm_CppxdataUsage_MaybeThrowStateUnwindMap.Size);
         Assert.IsTrue(DllArm_CppxdataUsage_MaybeThrowStateUnwindMap.Name.Contains("DllArm_CppxdataUsage::MaybeThrow", StringComparison.Ordinal));
         Assert.IsTrue(DllArm_CppxdataUsage_MaybeThrowStateUnwindMap.Name.Contains("stateUnwindMap", StringComparison.Ordinal));
 
         // [tryMap] for DllArm_CppxdataUsage::MaybeThrow
-        var DllArm_CppxdataUsage_MaybeThrowTryMap = (TryMapSymbol)DllArm32Session.DataCache.XDataSymbolsByRVA![0x4110];
+        var DllArm_CppxdataUsage_MaybeThrowTryMap = (TryMapSymbol)DllArm32Session.DataCache.XDataSymbolsByRVA[0x4110];
         Assert.AreEqual(DllArm_CppxdataUsage_MaybeThrowPdata.TargetStartRVA, DllArm_CppxdataUsage_MaybeThrowTryMap.TargetStartRVA);
         Assert.AreEqual(20u, DllArm_CppxdataUsage_MaybeThrowTryMap.Size);
         Assert.IsTrue(DllArm_CppxdataUsage_MaybeThrowTryMap.Name.Contains("DllArm_CppxdataUsage::MaybeThrow", StringComparison.Ordinal));
@@ -118,14 +119,14 @@ public sealed class DllArmTests
         Assert.IsTrue(dllMainPdata.Name.Contains("pdata", StringComparison.Ordinal));
 
         // This tests an unwind symbol that does not have an exception handler
-        var is_potentially_valid_image_baseUnwind = (UnwindInfoSymbol)DllArm32Session.DataCache.XDataSymbolsByRVA![0x4B10];
+        var is_potentially_valid_image_baseUnwind = (UnwindInfoSymbol)DllArm32Session.DataCache.XDataSymbolsByRVA[0x4B10];
         Assert.AreEqual(0x1EB4u, is_potentially_valid_image_baseUnwind.TargetStartRVA);
         Assert.AreEqual(16u, is_potentially_valid_image_baseUnwind.Size);
         Assert.IsTrue(is_potentially_valid_image_baseUnwind.Name.Contains("is_potentially_valid_image_base", StringComparison.Ordinal));
         Assert.IsTrue(is_potentially_valid_image_baseUnwind.Name.Contains("unwind", StringComparison.Ordinal));
 
         // This tests an unwind symbol that uses __GSHandlecrCheck
-        var dllMainUnwind = (UnwindInfoSymbol)DllArm32Session.DataCache.XDataSymbolsByRVA![0x4708];
+        var dllMainUnwind = (UnwindInfoSymbol)DllArm32Session.DataCache.XDataSymbolsByRVA[0x4708];
         Assert.AreEqual(0x14E4u, dllMainUnwind.TargetStartRVA);
         Assert.AreEqual(28u, dllMainUnwind.Size);
         Assert.IsTrue(dllMainUnwind.Name.Contains("DllMain", StringComparison.Ordinal));
@@ -133,7 +134,7 @@ public sealed class DllArmTests
         Assert.IsTrue(dllMainUnwind.Name.Contains("unwind", StringComparison.Ordinal));
 
         // This tests an unwind symbol that uses __GSHandlerCheck_EH
-        var DllArm_CppxdataUsage_MaybeThrowUnwind = (UnwindInfoSymbol)DllArm32Session.DataCache.XDataSymbolsByRVA![0x4728];
+        var DllArm_CppxdataUsage_MaybeThrowUnwind = (UnwindInfoSymbol)DllArm32Session.DataCache.XDataSymbolsByRVA[0x4728];
         Assert.AreEqual(0x1618u, DllArm_CppxdataUsage_MaybeThrowUnwind.TargetStartRVA);
         Assert.AreEqual(36u, DllArm_CppxdataUsage_MaybeThrowUnwind.Size);
         Assert.IsTrue(DllArm_CppxdataUsage_MaybeThrowUnwind.Name.Contains("DllArm_CppxdataUsage::MaybeThrow", StringComparison.Ordinal));
@@ -141,7 +142,7 @@ public sealed class DllArmTests
         Assert.IsTrue(DllArm_CppxdataUsage_MaybeThrowUnwind.Name.Contains("unwind", StringComparison.Ordinal));
 
         // This tests an unwind symbol that uses __GSHandlerCheck_SEH (for Structured Exception Handling with /GS data)
-        var DllArm_CppxdataUsage_MaybeThrowWithSEHUnwind = (UnwindInfoSymbol)DllArm32Session.DataCache.XDataSymbolsByRVA![0x4768];
+        var DllArm_CppxdataUsage_MaybeThrowWithSEHUnwind = (UnwindInfoSymbol)DllArm32Session.DataCache.XDataSymbolsByRVA[0x4768];
         Assert.AreEqual(0x1674u, DllArm_CppxdataUsage_MaybeThrowWithSEHUnwind.TargetStartRVA);
         Assert.AreEqual(68u, DllArm_CppxdataUsage_MaybeThrowWithSEHUnwind.Size);
         Assert.IsTrue(DllArm_CppxdataUsage_MaybeThrowWithSEHUnwind.Name.Contains("DllArm_CppxdataUsage::MaybeThrowWithSEH", StringComparison.Ordinal));
@@ -183,4 +184,15 @@ public sealed class DllArmTests
         StringAssert.Contains(secondEntry.Name, "DllArm_BaseClass", StringComparison.Ordinal);
         StringAssert.Contains(secondEntry.Name, "ASecondVirtualFunction", StringComparison.Ordinal);
     }
+
+    public static IEnumerable<object[]> DynamicDataSourceForSymbolSourcesSupportedTests => SymbolSourcesSupportedCommonTests.DynamicDataSourceForSymbolSourcesSupportedTests;
+
+    [TestMethod]
+    [DynamicData(nameof(DynamicDataSourceForSymbolSourcesSupportedTests))]
+    public Task SymbolSourcesSupportedWorks(SymbolSourcesSupported symbolSources) =>
+        SymbolSourcesSupportedCommonTests.VerifyNoUnexpectedSymbolTypesCanBeMaterialized(
+            Path.Combine(this.TestContext!.DeploymentDirectory!, "PEParser.Tests.Dllarm32.dll"),
+            Path.Combine(this.TestContext!.DeploymentDirectory!, "PEParser.Tests.Dllarm32.pdb"),
+            symbolSources,
+            this.TestContext.CancellationTokenSource.Token);
 }

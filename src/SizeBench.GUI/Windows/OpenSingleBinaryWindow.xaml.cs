@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Windows;
+using SizeBench.AnalysisEngine;
 
 namespace SizeBench.GUI.Windows;
 
@@ -17,6 +18,7 @@ internal partial class OpenSingleBinaryWindow : Window
 
     public string PDBPath => this._viewModel.SelectSingleBinaryAndPDBControlViewModel.PDBPath;
     public string BinaryPath => this._viewModel.SelectSingleBinaryAndPDBControlViewModel.BinaryPath;
+    public SessionOptions SessionOptions => this._viewModel.SelectSessionOptionsControlViewModel.SessionOptions;
 
     private void btnCancel_Click(object sender, RoutedEventArgs e)
         => this.DialogResult = false;

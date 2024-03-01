@@ -37,8 +37,8 @@ public class COFFGroupPageViewModelTests
         this.MockSession.Setup(s => s.EnumerateBinarySectionsAndCOFFGroups(It.IsAny<CancellationToken>())).Returns(Task.FromResult(sections as IReadOnlyList<BinarySection>));
         using var cts = new CancellationTokenSource();
         cts.Cancel();
-        this.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromCanceled<IReadOnlyList<Library>>(cts.Token));
-        this.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromCanceled<IReadOnlyList<Compiland>>(cts.Token));
+        this.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromCanceled<IReadOnlyCollection<Library>>(cts.Token));
+        this.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromCanceled<IReadOnlyCollection<Compiland>>(cts.Token));
     }
 
     [Timeout(5 * 1000)]

@@ -179,11 +179,11 @@ internal sealed class DiffTestDataGenerator : IDisposable
     public Compiland BeforeB1Compiland;
     public Compiland BeforeB2Compiland;
     public Compiland BeforeC1Compiland;
-    public List<Compiland> BeforeCompilands;
+    public HashSet<Compiland> BeforeCompilands;
     public Library BeforeALib;
     public Library BeforeBLib;
     public Library BeforeCLib;
-    public List<Library> BeforeLibs;
+    public HashSet<Library> BeforeLibs;
     public UserDefinedTypeSymbol BeforeIUnknownUDT;
 
     // After objects
@@ -211,11 +211,11 @@ internal sealed class DiffTestDataGenerator : IDisposable
     public Compiland AfterB1Compiland;
     public Compiland AfterB2Compiland;
     public Compiland AfterD1Compiland;
-    public List<Compiland> AfterCompilands;
+    public HashSet<Compiland> AfterCompilands;
     public Library AfterALib;
     public Library AfterBLib;
     public Library AfterDLib;
-    public List<Library> AfterLibs;
+    public HashSet<Library> AfterLibs;
     public UserDefinedTypeSymbol AfterIUnknownUDT;
 
     // Diff objects
@@ -763,14 +763,14 @@ internal sealed class DiffTestDataGenerator : IDisposable
         this.BeforeC1Compiland.MarkFullyConstructed();
         this.BeforeCLib.MarkFullyConstructed();
 
-        this.BeforeLibs = new List<Library>()
+        this.BeforeLibs = new HashSet<Library>()
             {
                 this.BeforeALib,
                 this.BeforeBLib,
                 this.BeforeCLib
             };
 
-        this.BeforeCompilands = new List<Compiland>()
+        this.BeforeCompilands = new HashSet<Compiland>()
             {
                 this.BeforeA1Compiland,
                 this.BeforeA2Compiland,
@@ -925,14 +925,14 @@ internal sealed class DiffTestDataGenerator : IDisposable
         this.AfterD1Compiland.MarkFullyConstructed();
         this.AfterDLib.MarkFullyConstructed();
 
-        this.AfterLibs = new List<Library>()
+        this.AfterLibs = new HashSet<Library>()
             {
                 this.AfterALib,
                 this.AfterBLib,
                 this.AfterDLib
             };
 
-        this.AfterCompilands = new List<Compiland>()
+        this.AfterCompilands = new HashSet<Compiland>()
             {
                 this.AfterA1Compiland,
                 this.AfterA2Compiland,

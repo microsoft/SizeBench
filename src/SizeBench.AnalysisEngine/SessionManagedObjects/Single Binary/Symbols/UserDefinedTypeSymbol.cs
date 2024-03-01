@@ -282,7 +282,7 @@ internal static class UserDefinedTypeSymbolExtensions
             udtsEnumerated++;
             if (udtsEnumerated >= nextLoggerOutput)
             {
-                progressReporter($"Base type information loaded for {udtsEnumerated}/{udts.Count} user-defined types so far.", nextLoggerOutput, (uint)udts.Count);
+                progressReporter($"Base type information loaded for {udtsEnumerated:N0}/{udts.Count:N0} user-defined types so far.", nextLoggerOutput, (uint)udts.Count);
                 nextLoggerOutput += loggerOutputVelocity;
             }
 
@@ -305,7 +305,7 @@ internal static class UserDefinedTypeSymbolExtensions
             udtsEnumerated++;
             if (udtsEnumerated >= nextLoggerOutput)
             {
-                progressReporter($"Derived type information processed for {udtsEnumerated}/{udts.Count} user-defined types so far.", nextLoggerOutput, (uint)udts.Count);
+                progressReporter($"Derived type information processed for {udtsEnumerated:N0}/{udts.Count:N0} user-defined types so far.", nextLoggerOutput, (uint)udts.Count);
                 nextLoggerOutput += loggerOutputVelocity;
             }
 

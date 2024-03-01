@@ -12,8 +12,8 @@ internal sealed class RsrcCursorDataSymbol : RsrcDataSymbol
     public ushort Width { get; }
     public ushort Height { get; }
     public ushort BitsPerPixel { get; }
-    internal RsrcCursorDataSymbol(uint rva, uint size, string language, string dataName, ushort width, ushort height, ushort bpp)
-        : base(rva, size, language, Win32ResourceType.CURSOR, "CURSOR", dataName, nameSuffix: $" {width}x{height} {bpp}bpp")
+    internal RsrcCursorDataSymbol(uint rva, uint size, string language, string dataName, ushort width, ushort height, ushort bpp, SymbolSourcesSupported symbolSourcesSupported)
+        : base(rva, size, language, Win32ResourceType.CURSOR, "CURSOR", dataName, nameSuffix: $" {width}x{height} {bpp}bpp", symbolSourcesSupported)
     {
         this.Width = width;
         this.Height = height;

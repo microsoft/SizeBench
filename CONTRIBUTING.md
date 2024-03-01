@@ -44,6 +44,8 @@ You'll need Visual Studio's Enterprise SKU, and you'll need the C++ and C# clien
 tools, at a minimum. You'll also need to install these additional _Individual components_:
 
  - MSVC v140 - VS 2015 C++ build tools (v14.00) under _Compilers, build tools, and runtimes_
+ - C++ Clang for Windows
+ - MSBuild support for LLVM (lang-cl) toolset
  - Windows 10 SDK (10.0.15063.0) for Desktop C++ [x86 and x64]. This can be downloaded from 
    [here](https://developer.microsoft.com/en-us/windows/downloads/sdk-archive/) if it does not 
    show up in your version of the Visual Studio Installer.
@@ -52,15 +54,24 @@ tools, at a minimum. You'll also need to install these additional _Individual co
 Once you open the SizeBench.sln Solution, you should build it once to be sure everything seems to be set
 up right.  If you hit issues, file an issue and we'll help you out. Then, do the following:
 
-```
-Test menu -> Test Explorer, click on the Settings gear, and select the following options:
-
-Run Tests After Build
-Configure Run Settings -> Select Solution wide runsettings File, and choose Runsettings.runsettings in the src folder
-Processor Architecture for AnyCPU projects -> X64
-```
+1. In Visual Studio, go to the `Test -> Test Explorer` menu option.
+1. Click the "Open Playlist" button and find the [ExcludeSlowTests.playlist](src/ExcludeSlowTests.playlist) file in your enlistment.
+  - You can run all the tests by not selecting this playlist, but some of the PGO test are *very slow*
+    so for a typical dev inner loop you want to exclude these.  They'll still run in the PR and CI
+    pipelines so if you break something you'll get a signal eventually.
+  - This will open a new Test Explorer window for that playlist.  The rest of the instructions apply
+    to that Test Explorer instance.
+1. Click on the Settings gear in Test Explorer, and select the following options:
+  - Run Tests After Build
+  - Configure Run Settings -> Select Solution wide runsettings File, and choose Runsettings.runsettings in the src folder
+  - Processor Architecture for AnyCPU projects -> X64
 
 Then you can Build the solution, and after the build it should run all the tests and show results in Test Explorer.
+
+#### What to do if tests don't run in Visual Studio
+There seems to be a bug in some versions of Visual Studio where not every test runs if you select "Run
+All Tests" in the Test Explorer.  If you see this, try clearing out the contents of the `TestPEs_Staging`
+folder and re-running the tests.
 
 ## Expectations of a change
 First of all, thank you for adding a feature or fixing a bug in SizeBench!

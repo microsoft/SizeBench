@@ -15,7 +15,6 @@ public sealed class QueuedTaskScheduler : TaskScheduler, IDisposable
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes",
                      Justification = "This is a debug visualizer, so it's instantiated by the debugger when needed.")]
-    /// <summary>Debug view for the QueuedTaskScheduler.</summary>
     private sealed class QueuedTaskSchedulerDebugView
     {
         /// <summary>The scheduler.</summary>
@@ -564,8 +563,7 @@ public sealed class QueuedTaskScheduler : TaskScheduler, IDisposable
     private sealed class QueuedTaskSchedulerQueue : TaskScheduler, IDisposable
     {
         [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes",
-             Justification = "This is a debug visualizer, so it's instantiated by the debugger when needed.")]
-        /// <summary>A debug view for the queue.</summary>
+                         Justification = "This is a debug visualizer, so it's instantiated by the debugger when needed.")]
         private sealed class QueuedTaskSchedulerQueueDebugView
         {
             /// <summary>The queue.</summary>

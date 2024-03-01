@@ -67,12 +67,10 @@ public sealed class EnumerateDuplicateDataSessionTaskTests : IDisposable
                 new RawSectionContribution(libName: @"c:\dummy\c.lib", compilandName: @"c:\dummy\c.obj" , compilandSymIndexId: nextCompilandSymIndexId++, rva: 0x1500, length: 0x200),
             };
 
-        this.DataCache.PDataRVARange = new RVARange(0, 0);
-        this.DataCache.PDataSymbolsByRVA = new SortedList<uint, PDataSymbol>();
-        this.DataCache.XDataRVARanges = new RVARangeSet();
-        this.DataCache.XDataSymbolsByRVA = new SortedList<uint, XDataSymbol>();
-        this.DataCache.RsrcRVARange = new RVARange(0, 0);
-        this.DataCache.RsrcSymbolsByRVA = new SortedList<uint, RsrcSymbolBase>();
+        this.DataCache.PDataHasBeenInitialized = true;
+        this.DataCache.XDataHasBeenInitialized = true;
+        this.DataCache.RsrcHasBeenInitialized = true;
+        this.DataCache.OtherPESymbolsHaveBeenInitialized = true;
 
         // Every test needs the compilands to be available (to construct the right DataSymbol objects) so run the EnumerateLibsAndCompilandsSessionTask to populate the cache of
         // compilands.

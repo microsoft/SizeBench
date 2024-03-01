@@ -9,16 +9,16 @@ namespace SizeBench.GUI.Pages;
 
 internal sealed class AllLibsPageViewModel : SingleBinaryViewModelBase
 {
-    private IReadOnlyList<Library>? _libList;
+    private IReadOnlyCollection<Library>? _libCollection;
 
     public ObservableCollection<DataGridColumnDescription> DataGridSizeColumnDescriptions { get; } = new ObservableCollection<DataGridColumnDescription>();
 
     public ObservableCollection<DataGridColumnDescription> DataGridVirtualSizeColumnDescriptions { get; } = new ObservableCollection<DataGridColumnDescription>();
 
-    public IReadOnlyList<Library>? Libs
+    public IReadOnlyCollection<Library>? Libs
     {
-        get => this._libList;
-        private set { this._libList = value; RaisePropertyChanged(); }
+        get => this._libCollection;
+        private set { this._libCollection = value; RaisePropertyChanged(); }
     }
 
     public List<string> DisplayModes { get; } = new List<string>() { "Size on disk", "Size in memory" };

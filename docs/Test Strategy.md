@@ -6,6 +6,7 @@ test style fashion.
 Then there are integration tests which inspect a real binary to ensure end-to-end
 analysis can handle the complexities of the stuff the real toolchain spits out.
 
+
 ## Unit Tests
 The unit tests are filled with mocks, stubs, fakes...whatever is needed to be
 able to test the functionality in question without dependency on a real binary.
@@ -28,6 +29,22 @@ favor the test PEs we can build ourselves, so we can understand the source code
 that generates a given binary, and because the checked-in binaries and PDBs are
 not great for git (large binary files) where at least the TestPEs built in the
 repo tend to be on the smaller side.
+
+
+## What Tests To Run And When
+Most of the tests are quite fast - on a moderate machine in 2024, over 1000 tests can execute
+even in Debug configuration in under a minute.
+
+But some tests are quite slow, like for PGO'd binaries or disassembly of complex functions with
+DbgX.  All the really slow tests are annotated this way:
+
+`[TestCategory(CommonTestCategories.SlowTests)]`
+
+If you use the [ExcludeSlowTests.playlist](/src/ExcludeSlowTests.playlist) playlist in the Visual
+Studio Test Explorer you can have a better experience of using "run all tests" and running the vast
+majority of tests for an inner loop.  You can run the slow tests from the default Test Explorer
+if you really want to but they can take over an hour, so be prepared to chill.  They'll all run in
+the PR and CI pipelines so you can also just let those be your safety check later.
 
 
 #### Updating Test PEs

@@ -196,9 +196,9 @@ public sealed class FunctionSymbolPageViewModelTests : IDisposable
         var allFunctionsAtThisRVA = new List<ISymbol>() { function, foldedFunction2, foldedFunction1 };
 
         var nameCanonicalization = new NameCanonicalization();
-        nameCanonicalization.AddName(function.SymIndexId, function.FullName, SymTagEnum.SymTagFunction);
-        nameCanonicalization.AddName(foldedFunction1.SymIndexId, foldedFunction1.FullName, SymTagEnum.SymTagFunction);
-        nameCanonicalization.AddName(foldedFunction2.SymIndexId, foldedFunction2.FullName, SymTagEnum.SymTagFunction);
+        nameCanonicalization.AddName(function.SymIndexId, SymTagEnum.SymTagFunction, name: function.FullName);
+        nameCanonicalization.AddName(foldedFunction1.SymIndexId, SymTagEnum.SymTagFunction, name: foldedFunction1.FullName);
+        nameCanonicalization.AddName(foldedFunction2.SymIndexId, SymTagEnum.SymTagFunction, name: foldedFunction2.FullName);
         nameCanonicalization.Canonicalize();
         this.Generator.DataCache.AllCanonicalNames = new SortedList<uint, NameCanonicalization>
             {

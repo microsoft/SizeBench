@@ -136,13 +136,14 @@ internal static class Program
                 var productBinariesInThisBatch = new List<ProductBinary>(crawlArgs.BatchSize);
                 productBinariesInThisBatch.AddRange(productBinaries.Skip(crawlArgs.BatchSize * (crawlArgs.BatchNumber - 1)).Take(crawlArgs.BatchSize));
 
-                using var batchProcess = new BatchProcess(crawlArgs.BatchNumber, productBinariesInThisBatch, _logFilenameBase)
+                var batchProcess = new BatchProcess(crawlArgs.BatchNumber, productBinariesInThisBatch, _logFilenameBase)
                 {
                     BinaryRoot = crawlArgs.CrawlRoot ?? String.Empty,
                     IncludeWastefulVirtuals = crawlArgs.IncludeWastefulVirtuals,
-                    IncludeCodeSymbols = crawlArgs.IncludeCodeSymbols
+                    IncludeCodeSymbols = crawlArgs.IncludeCodeSymbols,
+                    IncludeDuplicateDataItems = crawlArgs.IncludeDuplicateDataItems,
                 };
-                await batchProcess.AnalyzeBatch(appLogger);
+                await batchProcess.AnalyzeBatchAsync(appLogger);
             }
         }
         else
@@ -235,6 +236,8 @@ internal static class Program
                           "                         default because it can be quite slow." + Environment.NewLine +
                           "/includeCodeSymbols      Include symbol information for all the code symbols in all compilands - this is also " + Environment.NewLine +
                           "                         omitted by default because it's potentially slow." + Environment.NewLine +
+                          "/includeDuplicateData    Include Duplicate Data information in the output database - this is omitted by " + Environment.NewLine +
+                          "                         default because it's potentially slow." + Environment.NewLine +
                           Environment.NewLine +
                           "/merge [fileName]        The fileName database will be merged into the final database." + Environment.NewLine +
                           Environment.NewLine +
@@ -552,7 +555,16 @@ internal static class Program
         {
             var mergeStartTime = DateTime.Now;
             connectionToMerged.Open();
+
+            {
+                // Disable on-disk journaling for perf
+                var pragmaCommand = connectionToMerged.CreateCommand();
+                pragmaCommand.CommandText = "PRAGMA journal_mode = MEMORY;";
+                pragmaCommand.ExecuteNonQuery();
+            }
+
             using var transaction = connectionToMerged.BeginTransaction();
+
             var symbolSizeAndNameToMergedDatabaseIDs = new SortedList<int, SortedList<string, int>>(capacity: 10000);
             foreach (var file in appArgs.GetDatabaseFilesToMerge())
             {
@@ -562,6 +574,13 @@ internal static class Program
                     DataSource = file.FullName
                 }.ToString());
                 connectionToOneBatch.Open();
+
+                {
+                    // Disable on-disk journaling for perf
+                    var pragmaCommand = connectionToOneBatch.CreateCommand();
+                    pragmaCommand.CommandText = "PRAGMA journal_mode = MEMORY;";
+                    pragmaCommand.ExecuteNonQuery();
+                }
 
                 var mergedCommand = connectionToMerged.CreateCommand();
                 mergedCommand.Transaction = transaction;
@@ -577,7 +596,11 @@ internal static class Program
                 var compilandIDMappings = MergeInCompilandsTable(mergedCommand, mergedSelect_last_rowidCommand, connectionToOneBatch, binaryIDMappings, libIDMappings);
                 var sourceFileIDMappings = MergeInSourceFilesTable(mergedCommand, mergedSelect_last_rowidCommand, connectionToOneBatch, binaryIDMappings);
                 var symbolIDMappings = MergeInSymbolsTable(mergedCommand, mergedSelect_last_rowidCommand, connectionToOneBatch, symbolSizeAndNameToMergedDatabaseIDs);
-                MergeInDuplicateDataTable(mergedCommand, connectionToOneBatch, binaryIDMappings, symbolIDMappings);
+
+                if (BatchHasDuplicateDataTable(connectionToOneBatch))
+                {
+                    MergeInDuplicateDataTable(mergedCommand, connectionToOneBatch, binaryIDMappings, symbolIDMappings);
+                }
 
                 if (BatchHasWastefulVirtualsTable(connectionToOneBatch))
                 {
@@ -624,6 +647,9 @@ internal static class Program
             Console.Out.WriteLine($"Finished processing - full SQLite database output is in {Path.Combine(appArgs.OutputFolder, "merged.db")}");
         }
     }
+
+    private static bool BatchHasDuplicateDataTable(SqliteConnection connectionToOneBatch)
+        => DoesTableExist(connectionToOneBatch, _DuplicateDataTableName);
 
     private static bool BatchHasWastefulVirtualsTable(SqliteConnection connectionToOneBatch)
         => DoesTableExist(connectionToOneBatch, _WastefulVirtualsTypeTableName);

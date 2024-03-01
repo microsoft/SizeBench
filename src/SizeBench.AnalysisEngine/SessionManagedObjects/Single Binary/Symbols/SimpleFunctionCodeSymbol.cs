@@ -60,6 +60,8 @@ public sealed class SimpleFunctionCodeSymbol : CodeBlockSymbol, IFunctionCodeSym
                                       bool isOptimizedForSpeed = false) : base(cache, rva, size, symIndexId: symIndexId)
     {
 #if DEBUG
+        Debug.Assert(cache.SymbolSourcesSupported.HasFlag(SymbolSourcesSupported.Code));
+
         if (cache.AllFunctionSymbolsBySymIndexIdOfPrimaryBlock.ContainsKey(symIndexId))
         {
             throw new ObjectAlreadyExistsException();

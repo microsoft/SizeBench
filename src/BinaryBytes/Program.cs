@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using SizeBench.AnalysisEngine;
 using SizeBench.AnalysisEngine.Symbols;
@@ -21,11 +22,11 @@ public static class Program
                 using var appLogger = new ApplicationLogger("BinaryBytes", null);
                 if (CommandLineArgs.IsMultiFileCommand)
                 {
-                    await ProcessMultiplePdbFiles(appLogger, CommandLineArgs.PdbPath);
+                    await ProcessMultiplePdbFiles(appLogger, CommandLineArgs.PdbPath, CommandLineArgs.SymbolSourcesSupported);
                 }
                 else
                 {
-                    await ProcessSinglePdbFile(appLogger, CommandLineArgs.PdbPath, CommandLineArgs.BinaryPath);
+                    await ProcessSinglePdbFile(appLogger, CommandLineArgs.PdbPath, CommandLineArgs.BinaryPath, CommandLineArgs.SymbolSourcesSupported);
                 }
             }
         }
@@ -51,26 +52,26 @@ public static class Program
         }
     }
 
-    private static async Task ProcessMultiplePdbFiles(ApplicationLogger appLogger, string pdbDirPath)
+    private static async Task ProcessMultiplePdbFiles(ApplicationLogger appLogger, string pdbDirPath, SymbolSourcesSupported symbolSourcesSupported)
     {
         var pdbfiles = Directory.EnumerateFiles(pdbDirPath, "*.pdb", SearchOption.AllDirectories);
         foreach (var pdbfile in pdbfiles)
         {
-            await ProcessSinglePdbFile(appLogger, pdbfile, null);
+            await ProcessSinglePdbFile(appLogger, pdbfile, null, symbolSourcesSupported);
         }
     }
 
-    private static async Task ProcessSinglePdbFile(ApplicationLogger appLogger, string pdbFilePath, string? binaryFile)
+    private static async Task ProcessSinglePdbFile(ApplicationLogger appLogger, string pdbFilePath, string? binaryFile, SymbolSourcesSupported symbolSourcesSupported)
     {
         using var sessionLogger = appLogger.CreateSessionLog(pdbFilePath);
-        sessionLogger.Log("Processing...");
         sessionLogger.Log($"PDB Path: {pdbFilePath}");
 
         var binaryFilePath = Utilities.InferBinaryPath(pdbFilePath, binaryFile);
         if (binaryFilePath != null && File.Exists(pdbFilePath) && File.Exists(binaryFilePath))
         {
             sessionLogger.Log($"Binary Path: {binaryFilePath}");
-            await DoTheWork(pdbFilePath, binaryFilePath, sessionLogger);
+            using var doTheWorkLogger = sessionLogger.StartTaskLog($"Processing everything for {binaryFilePath}");
+            await DoTheWork(pdbFilePath, binaryFilePath, symbolSourcesSupported, doTheWorkLogger);
         }
         else
         {
@@ -92,22 +93,35 @@ public static class Program
     /// <summary>
     /// This routine is the enrty point for doing all of the work in getting bytes detail of a given binary.
     /// </summary>
-    private static async Task DoTheWork(string pdbFilePath, string binaryFilePath, ILogger sessionLogger)
+    private static async Task DoTheWork(string pdbFilePath, string binaryFilePath, SymbolSourcesSupported symbolSourcesSupported, ILogger sessionLogger)
     {
         try
         {
             IEnumerable<SectionBytes> binaryBytes = Array.Empty<SectionBytes>();
+            IEnumerable<InlineSiteSymbol> inlineSites = Array.Empty<InlineSiteSymbol>();
+            var options = new SessionOptions() { SymbolSourcesSupported = symbolSourcesSupported };
 
-            await using (var session = await Session.Create(binaryFilePath, pdbFilePath, sessionLogger))
+            await using var session = await Session.Create(binaryFilePath, pdbFilePath, options, sessionLogger);
+            var sections = await session.EnumerateBinarySectionsAndCOFFGroups(CancellationToken.None);
+            var compilands = await session.EnumerateCompilands(CancellationToken.None);
+
+            Dictionary<uint, SymbolContributor> rvaToContributorMap;
+            using (sessionLogger.StartTaskLog("BinaryBytes Creating RVA To Contributor Map"))
             {
-                var sections = await session.EnumerateBinarySectionsAndCOFFGroups(CancellationToken.None);
-                var compilands = await session.EnumerateCompilands(CancellationToken.None);
+                rvaToContributorMap = Utilities.CreateRvaToContributorMap(compilands);
+            }
 
-                var rvaToContributorMap = Utilities.CreateRvaToContributorMap(compilands);
+            using (sessionLogger.StartTaskLog("BinaryBytes Processing Section Bytes"))
+            {
                 binaryBytes = await ProcessSectionBytes(session, sections, rvaToContributorMap);
             }
 
-            WriteBytesToDatabase(binaryFilePath, binaryBytes, sessionLogger);
+            using (sessionLogger.StartTaskLog("BinaryBytes Processing Inline Sites"))
+            {
+                inlineSites = await session.EnumerateAllInlineSites(CancellationToken.None);
+            }
+
+            await WriteBytesToDatabase(binaryFilePath, binaryBytes, inlineSites, session, sessionLogger);
         }
 #pragma warning disable CA1031 // Do not catch general exception types - if we fail processing one binary it's desirable to keep going
         catch (Exception ex)
@@ -122,10 +136,13 @@ public static class Program
     /// and then insert the bytes data into it.
     /// Note that for our purpose this DB is stored as a flat file database.
     /// </summary>
-    private static void WriteBytesToDatabase(string binaryFilePath, IEnumerable<SectionBytes> binaryBytes, ILogger sessionLogger)
+    private static async Task WriteBytesToDatabase(string binaryFilePath, IEnumerable<SectionBytes> binaryBytes, 
+                                             IEnumerable<InlineSiteSymbol> inlineSites, Session session,
+                                             ILogger sessionLogger)
     {
-        ApplicationDbHandler.SetupDb(CommandLineArgs.OutfilePath, sessionLogger);
-        ApplicationDbHandler.AddData(binaryFilePath, binaryBytes, sessionLogger);
+        using var dbLogger = sessionLogger.StartTaskLog("Writing everything to SQLite");
+        ApplicationDbHandler.SetupDb(CommandLineArgs.OutfilePath, dbLogger);
+        await ApplicationDbHandler.AddData(binaryFilePath, binaryBytes, inlineSites, session, dbLogger);
     }
 
     /// <summary>
@@ -139,19 +156,19 @@ public static class Program
         foreach (var section in sections)
         {
             var adjustedSymbols = await ProcessCoffGroupBytes(session, section, rvaToContributorMap);
-            MarkSpecialBytesInSection(section, rvaToContributorMap, ref adjustedSymbols);
+            MarkSpecialBytesInSection(section, rvaToContributorMap, adjustedSymbols);
 
             binaryBytes.Add(new SectionBytes()
             {
                 SectionName = section.Name,
-                Items = adjustedSymbols
+                Items = adjustedSymbols,
             });
         }
 
         return binaryBytes;
     }
 
-    private static void MarkSpecialBytesInSection(BinarySection section, Dictionary<uint, SymbolContributor> rvaToContributorMap, ref List<BytesItem> adjustedSymbols)
+    private static void MarkSpecialBytesInSection(BinarySection section, Dictionary<uint, SymbolContributor> rvaToContributorMap, List<BytesItem> adjustedSymbols)
     {
         if (section.COFFGroups.Count > 0)
         {
@@ -195,13 +212,16 @@ public static class Program
         var adjustedSymbols = new List<BytesItem>();
         foreach (var coffgroup in section.COFFGroups)
         {
+            Program.LogIt($"Processing COFF Group {coffgroup.Name}...", endWithNewline: false);
+            var sw = Stopwatch.StartNew();
+
             // Ignore COMDAT-folded symbols because they don't take up space and they can add a lot of bloat to the database.
             var symbols = (await session.EnumerateSymbolsInCOFFGroup(coffgroup, CancellationToken.None))
                           .Where(symbol => !symbol.IsCOMDATFolded).ToList();
 
-            if (symbols != null && symbols.Count > 0)
+            if (symbols.Count > 0)
             {
-                IdentifyPaddingAroundSymbols(symbols, coffgroup, rvaToContributorMap, ref adjustedSymbols);
+                IdentifyPaddingAroundSymbols(symbols, coffgroup, rvaToContributorMap, adjustedSymbols);
             }
             else
             {
@@ -209,6 +229,9 @@ public static class Program
                 adjustedSymbols.Add(Utilities.CreateSpecialBytesItem(Constants.SpecialCoffGroup,
                     coffgroup.Name, coffgroup.RVA, coffgroup.VirtualSize, rvaContributor));
             }
+
+            sw.Stop();
+            Console.WriteLine($"took {sw.Elapsed}, and found {adjustedSymbols.Count:N0} symbols");
         }
 
         return adjustedSymbols;
@@ -218,7 +241,7 @@ public static class Program
     /// Given a COFF group and a list of symbols in that group, this routine identifies all the Padding bytes and
     /// the actual symbols bytes in the COFF group and marks them appropriately.
     /// </summary>
-    private static void IdentifyPaddingAroundSymbols(IReadOnlyList<ISymbol> symbols, COFFGroup coffgroup, Dictionary<uint, SymbolContributor> rvaToContributorMap, ref List<BytesItem> bytesItems)
+    private static void IdentifyPaddingAroundSymbols(IReadOnlyList<ISymbol> symbols, COFFGroup coffgroup, Dictionary<uint, SymbolContributor> rvaToContributorMap, List<BytesItem> bytesItems)
     {
         // Is there gap at the start of this COFF group?
         var startingByteOfCoffgroup = coffgroup.RVA;
@@ -254,6 +277,18 @@ public static class Program
         {
             bytesItems.Add(Utilities.CreatePaddingBytesItem(Constants.CoffgroupEndPadding, coffgroup.Name,
                     endingByteOfLastSymbol, endingByteOfCoffgroup - endingByteOfLastSymbol));
+        }
+    }
+
+    internal static void LogIt(string log, bool endWithNewline = true)
+    {
+        if (endWithNewline)
+        {
+            Console.WriteLine($"{DateTime.Now:MM/dd HH:mm:ss}: {log}");
+        }
+        else
+        {
+            Console.Write($"{DateTime.Now:MM/dd HH:mm:ss}: {log}");
         }
     }
 }

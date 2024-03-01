@@ -13,11 +13,11 @@ public sealed class COFFGroup
         {
             if (this._fullyConstructed)
             {
-                return $"COFF Group: {this.Name}, Section={this.Section?.Name ?? "<none set>"} Size={this.Size}, VirtualSize={this.VirtualSize}, RVA={this.RVA}";
+                return $"COFF Group: {this.Name}, Section={this.Section?.Name ?? "<none set>"} Size={this.Size:N0}, VirtualSize={this.VirtualSize:N0}, RVA=0x{this.RVA:X}";
             }
             else
             {
-                return $"[Not Yet Fully Constructed] COFF Group: {this.Name}, _rawSize={this._rawSize}, RVA={this.RVA}";
+                return $"[Not Yet Fully Constructed] COFF Group: {this.Name}, _rawSize={this._rawSize:N0}, RVA=0x{this.RVA:X}";
             }
         }
     }

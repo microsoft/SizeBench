@@ -2,7 +2,7 @@
 
 internal sealed class BytesItem
 {
-    public string CoffgroupName { get; set; } = String.Empty;
+    public string CoffGroupName { get; set; } = String.Empty;
     public string Name { get; set; } = String.Empty;
     public uint RVA { get; set; }
     public ulong VirtualSize { get; set; }

@@ -4,6 +4,14 @@ A Session has to be created asynchronously because we need to set up the DIA thr
 calls on a background thread as they can be quite slow and DIA is thread-affinitive as a COM API.  So a Session
 is created via the Session.Create static function that returns an awaitable Task.
 
+When creating a Session you can optionally specify a `SessionOptions` object which for now only
+has the ability to configure `SymbolSourcesSupported`.  By default, all symbol sources are supported.
+A session can basically "opt out" of supporting some types of symbols as a performance optimization.
+For example, very large binaries can have immense amounts of PDATA and XDATA, but a team may only care
+about optimizing the size of code or data in their binary, so they can open a session with only
+`SymbolSourcesSupport.Code` or `SymbolSourcesSupported.Code | SymbolSourcesSupported.DataSymbols`
+to avoid the parsing costs of other symbol types and memory consumption.
+
 When getting a Session ready, we need to do a bunch of things in a careful order to ensure the Session has all
 the global state it will need before we give it back to a caller.  That way they can call other APIs in whatever
 order they want (say, loading all the wasteful virtuals first, then all the static libraries, then all the 

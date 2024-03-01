@@ -5,8 +5,8 @@ internal sealed class ImportThunkSymbol : ImportSymbolBase
 {
     public override SymbolComparisonClass SymbolComparisonClass => SymbolComparisonClass.ImportThunk;
 
-    internal ImportThunkSymbol(uint rva, uint size, ushort ordinal, string importDescriptorName, string? thunkName)
-        : base(rva, size, ConjureName(ordinal, importDescriptorName, thunkName))
+    internal ImportThunkSymbol(uint rva, uint size, ushort ordinal, string importDescriptorName, string? thunkName, SymbolSourcesSupported symbolSourcesSupported)
+        : base(rva, size, ConjureName(ordinal, importDescriptorName, thunkName), symbolSourcesSupported)
     { }
 
     private static string ConjureName(ushort ordinal, string importDescriptorName, string? thunkName)

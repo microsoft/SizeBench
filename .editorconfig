@@ -215,6 +215,10 @@ csharp_style_deconstructed_variable_declaration = true:suggestion
 csharp_prefer_simple_default_expression =true:error
 csharp_style_pattern_local_over_anonymous_function = true:suggestion
 csharp_style_inlined_variable_declaration =true:error
+# Primary Constructors
+csharp_style_prefer_primary_constructors = false:error
+# Collection Expressions
+dotnet_style_prefer_collection_expression = false:silent
 ###############################
 # C# Formatting Rules         #
 ###############################
@@ -306,11 +310,5 @@ dotnet_diagnostic.CA1065.severity=error
 dotnet_diagnostic.IDE0090.severity=none
 dotnet_diagnostic.IDE0028.severity = none
 csharp_style_namespace_declarations=file_scoped:error
-###############################
-# VB Coding Conventions       #
-###############################
-[*.vb]
-# Modifier preferences
-visual_basic_preferred_modifier_order = Partial,Default,Private,Protected,Public,Friend,NotOverridable,Overridable,MustOverride,Overloads,Overrides,MustInherit,NotInheritable,Static,Shared,Shadows,ReadOnly,WriteOnly,Dim,Const,WithEvents,Widening,Narrowing,Custom,Async:suggestion
-dotnet_diagnostic.CA1047.severity=error
 
+dotnet_diagnostic.CS1591.severity = silent # CS1591: Missing XML comment for publicly visible type or member

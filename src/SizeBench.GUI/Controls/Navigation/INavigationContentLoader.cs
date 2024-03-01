@@ -7,7 +7,7 @@ public interface INavigationContentLoader
     Task<LoadResult> LoadContentAsync(Uri targetUri, Uri? currentUri);
 
     /// <summary>
-    /// Tells whether or not the targetUri is of the correct format for <see cref="LoadContent(Uri,Uri)"/>.
+    /// Tells whether or not the targetUri is of the correct format for <see cref="LoadContentAsync(Uri,Uri)"/>.
     /// </summary>
     /// <param name="targetUri">A URI to load</param>
     /// <param name="currentUri">The current URI</param>

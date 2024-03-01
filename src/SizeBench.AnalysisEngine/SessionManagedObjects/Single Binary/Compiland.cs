@@ -8,8 +8,11 @@ using SizeBench.AnalysisEngine.Helpers;
 namespace SizeBench.AnalysisEngine;
 
 [DebuggerDisplay("Compiland Name={Name}, Size={Size}")]
-public sealed class Compiland
+public sealed class Compiland : IEquatable<Compiland>
 {
+    [Display(AutoGenerateField = false)]
+    public static string UnknownName => "...no name found...";
+
     private bool _fullyConstructed;
 
     internal readonly uint SymIndexId;
@@ -178,13 +181,14 @@ public sealed class Compiland
         // parse so we hope that most binaries only have compilands that are unique by name (including the name of the lib
         // they're part of) - note that name is a fully-qualified path, so that's not too crazy to assume.
         if (cache.CompilandsConstructedEver.Any(c => c.SymIndexId == compilandSymIndex) ||
-            cache.CompilandsConstructedEver.Any(c => c.Name == name && c.Lib.Name == lib.Name))
+            cache.CompilandsConstructedEver.Any(c => c.Name.Equals(name, StringComparison.OrdinalIgnoreCase) &&
+                                                     c.Lib.Name.Equals(lib.Name, StringComparison.OrdinalIgnoreCase)))
         {
             throw new ObjectAlreadyExistsException();
         }
 #endif
 
-        this.Name = name;
+        this.Name = String.IsNullOrEmpty(name) ? UnknownName : name;
         this._commandLine = commandLine;
         this.SymIndexId = compilandSymIndex;
         this.Lib = lib;
@@ -327,4 +331,18 @@ public sealed class Compiland
 
     internal bool IsVeryLikelyTheSameAs(Compiland otherCompiland)
         => PathHeuristicComparer.PathNamesAreVerySimilar(this.Name, otherCompiland.Name);
+
+    public override bool Equals(object? obj) => base.Equals(obj as Compiland);
+
+    public bool Equals(Compiland? other)
+    {
+        if (other is null) { return false; }
+
+        if (ReferenceEquals(this, other)) { return true; }
+
+        return this.Name.Equals(other.Name, StringComparison.OrdinalIgnoreCase) &&
+               this.Lib.Equals(other.Lib);
+    }
+
+    public override int GetHashCode() => HashCode.Combine(this.Name.GetHashCode(StringComparison.OrdinalIgnoreCase), this.Lib);
 }

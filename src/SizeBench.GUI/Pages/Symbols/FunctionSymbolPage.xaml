@@ -142,6 +142,29 @@
                         </StackPanel>
                     </Expander>
 
+                    <Expander Header="Functions Inlined into this one" IsExpanded="True"
+                              HorizontalAlignment="Left"
+                              Visibility="{Binding HasInlineSites, Mode=OneWay, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}}"
+                              Width="{Binding ViewportWidth, ElementName=scroller}">
+                        <StackPanel>
+                            <TextBlock TextWrapping="Wrap" Margin="0,10,0,0">
+                                <Run>These functions are inlined into this function.  Removing them may not save their "size" because the optimizer could make different decisions based on
+                                the code that survives in the function.  Likewise, making them explicitly no-inline will not save all the size as some will remain for a call instruction and 
+                                parameter passing.</Run>
+                            </TextBlock>
+
+                            <DataGrid ItemsSource="{Binding InlineSites, Mode=OneWay}"
+                                      AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False"
+                                      IsReadOnly="True" HeadersVisibility="Column" IsSynchronizedWithCurrentItem="True"
+                                      SelectionMode="Single">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Function Name" Binding="{Binding Name, Mode=OneWay}"/>
+                                    <DataGridTextColumn Header="Size" Binding="{Binding Size, Mode=OneWay}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Expander>
+                    
                     <Expander Header="Disassembly" IsExpanded="True" HorizontalAlignment="Left">
                         <controls:SelectableTextBlock Text="{Binding Disassembly, Mode=OneWay}"
                                                       FontSize="16" FontFamily="Consolas"/>

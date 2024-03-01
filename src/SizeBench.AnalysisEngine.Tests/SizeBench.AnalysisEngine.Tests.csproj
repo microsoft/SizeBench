@@ -5,9 +5,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Castle.Windsor" Version="6.0.0" />
-        <PackageReference Include="Microsoft.Debugging.DataModel.DbgModelApiXtn" Version="20230731.1609.0" />
-        <PackageReference Include="Microsoft.Debugging.Platform.DbgX" Version="20240117.4.0" />
+        <PackageReference Include="Castle.Windsor" />
+        <PackageReference Include="Microsoft.Debugging.DataModel.DbgModelApiXtn" />
+        <PackageReference Include="Microsoft.Debugging.Platform.DbgX" />
     </ItemGroup>
 
     <ItemGroup>

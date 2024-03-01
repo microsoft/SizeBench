@@ -1,4 +1,6 @@
-﻿namespace SizeBench.AnalysisEngine.Symbols;
+﻿using System.Diagnostics;
+
+namespace SizeBench.AnalysisEngine.Symbols;
 
 internal abstract class RsrcSymbolBase : ISymbol
 {
@@ -17,8 +19,10 @@ internal abstract class RsrcSymbolBase : ISymbol
 
     public abstract SymbolComparisonClass SymbolComparisonClass { get; }
 
-    internal RsrcSymbolBase(uint rva, uint size, string name)
+    internal RsrcSymbolBase(uint rva, uint size, string name, SymbolSourcesSupported symbolSourcesSupported)
     {
+        Debug.Assert(symbolSourcesSupported.HasFlag(SymbolSourcesSupported.RSRC));
+
         this.RVA = rva;
         this.Size = size;
         this.Name = name;

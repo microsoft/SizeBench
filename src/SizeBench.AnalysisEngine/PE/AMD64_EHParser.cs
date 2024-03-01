@@ -31,7 +31,8 @@ internal sealed unsafe class AMD64_EHParser : EHSymbolParser
 
     public AMD64_EHParser(IDIAAdapter diaAdapter,
                           byte* libraryBaseAddress,
-                          PEFile peFile) : base(diaAdapter, libraryBaseAddress, peFile)
+                          PEFile peFile,
+                          SymbolSourcesSupported symbolSourcesSupported) : base(diaAdapter, libraryBaseAddress, peFile, symbolSourcesSupported)
     {
         this.__GSHandlerCheck_EHRva = diaAdapter.SymbolRvaFromName("__GSHandlerCheck_EH", true);
         this.__GSHandlerCheck_EH4Rva = diaAdapter.SymbolRvaFromName("__GSHandlerCheck_EH4", true);
@@ -103,7 +104,7 @@ internal sealed unsafe class AMD64_EHParser : EHSymbolParser
         else if (flags == 0)
         {
             // Just a simple [unwind]
-            AddXData(new UnwindInfoSymbol(targetSymbol, targetStartRva, unwindInfoStartRva, (uint)(pAfterUnwindCodes - unwindInfoStart)));
+            AddXData(new UnwindInfoSymbol(targetSymbol, targetStartRva, unwindInfoStartRva, (uint)(pAfterUnwindCodes - unwindInfoStart), this.SymbolSourcesSupported));
         }
         else
         {
@@ -117,7 +118,7 @@ internal sealed unsafe class AMD64_EHParser : EHSymbolParser
         var rfChain = Marshal.PtrToStructure<RUNTIME_FUNCTION>(new IntPtr(pAfterUnwindCodes));
         pAfterUnwindCodes += Marshal.SizeOf<RUNTIME_FUNCTION>();
 
-        AddXData(new ChainUnwindInfoSymbol(targetSymbol, targetStartRva, unwindInfoStartRva, (uint)(pAfterUnwindCodes - unwindInfoStart)));
+        AddXData(new ChainUnwindInfoSymbol(targetSymbol, targetStartRva, unwindInfoStartRva, (uint)(pAfterUnwindCodes - unwindInfoStart), this.SymbolSourcesSupported));
 
         var targetSymbolForChain = GetTargetSymbolForRVA(rfChain.FunctionStartRva);
         ParseOneXData(targetSymbolForChain, rfChain.FunctionStartRva, rfChain.UnwindInfoRva);
@@ -160,8 +161,8 @@ internal sealed unsafe class AMD64_EHParser : EHSymbolParser
                 continue;
             }
 
-            var pdataEntryRva = cache.PDataRVARange!.RVAStart + (uint)(i * sizeOfRUNTIMEFUNCTION);
-            pdataSymbols.Add(pdataEntryRva, new PDataSymbol(pdataEntry.FunctionStartRva, pdataEntry.UnwindInfoRva, pdataEntryRva, sizeOfRUNTIMEFUNCTION));
+            var pdataEntryRva = cache.PDataRVARange.RVAStart + (uint)(i * sizeOfRUNTIMEFUNCTION);
+            pdataSymbols.Add(pdataEntryRva, new PDataSymbol(pdataEntry.FunctionStartRva, pdataEntry.UnwindInfoRva, pdataEntryRva, sizeOfRUNTIMEFUNCTION, this.SymbolSourcesSupported));
         }
 
         return pdataSymbols;
@@ -169,7 +170,7 @@ internal sealed unsafe class AMD64_EHParser : EHSymbolParser
 
     protected override void ParseXDataForArchitecture(RVARange? XDataRVARange, SessionDataCache cache)
     {
-        foreach (var pds in cache.PDataSymbolsByRVA!.Values)
+        foreach (var pds in cache.PDataSymbolsByRVA.Values)
         {
             var targetSymbol = GetTargetSymbolForRVA(pds.TargetStartRVA);
             pds.UpdateTargetSymbol(targetSymbol);

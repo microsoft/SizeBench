@@ -12,7 +12,7 @@ public sealed class EnvironmentInfoProvider : KeyValueInfoProvider
 
     public override Dictionary<string, string> GetEntries()
     {
-        var entries = new Dictionary<string, string>()
+        var entries = new Dictionary<string, string>(StringComparer.Ordinal)
             {
                 { "Processor Count", Environment.ProcessorCount.ToString(CultureInfo.InvariantCulture.NumberFormat) },
                 { "OS Version", Environment.OSVersion.ToString() },

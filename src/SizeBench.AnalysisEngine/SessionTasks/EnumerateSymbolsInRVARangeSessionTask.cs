@@ -21,10 +21,10 @@ internal class EnumerateSymbolsInRVARangeSessionTask : SessionTask<List<ISymbol>
     {
         this.CancellationToken.ThrowIfCancellationRequested();
 
-        if (this.DataCache.PDataRVARange is null || this.DataCache.PDataSymbolsByRVA is null ||
-            this.DataCache.XDataRVARanges is null || this.DataCache.XDataSymbolsByRVA is null ||
-            this.DataCache.RsrcRVARange is null || this.DataCache.RsrcSymbolsByRVA is null ||
-            this.DataCache.OtherPESymbolsRVARanges is null || this.DataCache.OtherPESymbolsByRVA is null)
+        if (this.DataCache.PDataHasBeenInitialized == false ||
+            this.DataCache.XDataHasBeenInitialized == false ||
+            this.DataCache.RsrcHasBeenInitialized == false ||
+            this.DataCache.OtherPESymbolsHaveBeenInitialized == false)
         {
             throw new InvalidOperationException("It is not valid to attempt to enumerate symbols in an RVA range before the PE symbols have been parsed, as that is necessary to ensure all types of symbols are found.  This is a bug in SizeBench's implementation, not your usage of it.");
         }
@@ -161,7 +161,7 @@ internal class EnumerateSymbolsInRVARangeSessionTask : SessionTask<List<ISymbol>
 
     private void EnumerateDIASymbols(ILogger logger, int nextLoggerOutput, int loggerOutputVelocity, List<ISymbol> symbolsEnumerated)
     {
-        foreach (var symbolAndProgress in this.DIAAdapter.FindSymbolsInRVARange(this._rvaRange, this.CancellationToken))
+        foreach ((var symbol, var amountOfRVARangeExplored) in this.DIAAdapter.FindSymbolsInRVARange(this._rvaRange, this.CancellationToken))
         {
             if (this.CancellationToken.IsCancellationRequested)
             {
@@ -172,14 +172,14 @@ internal class EnumerateSymbolsInRVARangeSessionTask : SessionTask<List<ISymbol>
 
             // If we already found this symbol in OtherPESymbols, then that one will be preferred and this DIA version of the symbol will be
             // ignored, as we can better control those symbols to have useful names, ordinals for import thunks, and so on.
-            if (false == this.DataCache.OtherPESymbolsByRVA!.ContainsKey(symbolAndProgress.Item1.RVA))
+            if (false == this.DataCache.OtherPESymbolsByRVA.ContainsKey(symbol.RVA))
             {
-                symbolsEnumerated.Add(symbolAndProgress.Item1);
+                symbolsEnumerated.Add(symbol);
             }
 
             if (symbolsEnumerated.Count > nextLoggerOutput)
             {
-                ReportProgress($"Enumerated {symbolsEnumerated.Count} symbols.", symbolAndProgress.Item2, this._rvaRange.VirtualSize);
+                ReportProgress($"Enumerated {symbolsEnumerated.Count:N0} symbols.", amountOfRVARangeExplored, this._rvaRange.VirtualSize);
                 nextLoggerOutput += loggerOutputVelocity;
             }
         }

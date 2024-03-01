@@ -29,6 +29,7 @@ public sealed class StaticDataSymbol : Symbol
                               Compiland? referencedIn,
                               IFunctionCodeSymbol? functionParent) : base(cache, GetName(name, functionParent), rva, size, isVirtualSize, symIndexId)
     {
+        Debug.Assert(cache.SymbolSourcesSupported.HasFlag(SymbolSourcesSupported.DataSymbols));
         Debug.Assert(dataKind is DataKind.DataIsFileStatic or DataKind.DataIsGlobal or DataKind.DataIsStaticLocal);
 
         this.DataKind = dataKind;

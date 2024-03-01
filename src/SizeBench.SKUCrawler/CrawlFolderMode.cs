@@ -21,6 +21,7 @@ internal sealed class CrawlFolderArguments : ApplicationArguments
 
     public bool IncludeWastefulVirtuals { get; set; }
     public bool IncludeCodeSymbols { get; set; }
+    public bool IncludeDuplicateDataItems { get; set; }
 
     public int BatchSize { get; } = 25; // Make this customizable later if we need to
 
@@ -68,6 +69,10 @@ internal sealed class CrawlFolderArguments : ApplicationArguments
             {
                 this.IncludeCodeSymbols = true;
             }
+            else if (args[i].Equals("/includeDuplicateData", StringComparison.OrdinalIgnoreCase))
+            {
+                this.IncludeDuplicateDataItems = true;
+            }
         }
 
         return !String.IsNullOrEmpty(this.CrawlRoot);
@@ -81,6 +86,7 @@ internal sealed class CrawlFolderArguments : ApplicationArguments
         return $"/batch /batchNumber {batchNumber} /timestampOfMaster \"{this.TimestampOfMaster}\" /outputFolder \"{this.OutputFolder}\"" +
                $" {(this.IncludeWastefulVirtuals ? "/includeWastefulVirtuals" : "")}" +
                $" {(this.IncludeCodeSymbols ? "/includeCodeSymbols" : "")}" +
+               $" {(this.IncludeDuplicateDataItems ? "/includeDuplicateData" : "")}" +
                $" /folderRoot \"{this.CrawlRoot}\"";
     }
 }

@@ -31,14 +31,10 @@ public sealed class EnumerateSymbolsInCompilandSessionTaskTests : IDisposable
         this.TestLib = new Library(@"c:\test\blah.lib");
         this.TestCompiland = new Compiland(this.DataCache, @"c:\foo\a1.obj", this.TestLib, CommonCommandLines.NullCommandLine, compilandSymIndex: 0);
 
-        this.DataCache.PDataRVARange = new RVARange(0, 0);
-        this.DataCache.PDataSymbolsByRVA = new SortedList<uint, PDataSymbol>();
-        this.DataCache.XDataRVARanges = new RVARangeSet();
-        this.DataCache.XDataSymbolsByRVA = new SortedList<uint, XDataSymbol>();
-        this.DataCache.RsrcRVARange = new RVARange(0, 0);
-        this.DataCache.RsrcSymbolsByRVA = new SortedList<uint, RsrcSymbolBase>();
-        this.DataCache.OtherPESymbolsRVARanges = new RVARangeSet();
-        this.DataCache.OtherPESymbolsByRVA = new SortedList<uint, ISymbol>();
+        this.DataCache.PDataHasBeenInitialized = true;
+        this.DataCache.XDataHasBeenInitialized = true;
+        this.DataCache.RsrcHasBeenInitialized = true;
+        this.DataCache.OtherPESymbolsHaveBeenInitialized = true;
     }
 
     [TestMethod]

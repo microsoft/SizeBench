@@ -282,7 +282,6 @@ public class RVARangeTests
 
 #pragma warning disable CA1508 // Avoid dead conditional code - this is explicitly testing this case
         Assert.IsFalse(virtualRange.Equals(null));
-        Assert.IsFalse(virtualRange is null);
         Assert.IsFalse(null == virtualRange);
 #pragma warning restore CA1508 // Avoid dead conditional code
     }

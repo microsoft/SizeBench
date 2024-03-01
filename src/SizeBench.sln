@@ -186,6 +186,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BinaryBytes", "BinaryBytes\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SizeBenchV2.AnalysisEngine.Tests.ClangClx64", "TestPEProjects\SizeBenchV2.AnalysisEngine.Tests.ClangClx64\SizeBenchV2.AnalysisEngine.Tests.ClangClx64.vcxproj", "{F3B85B36-DE41-48CC-84E5-D7FC9D1CE28D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SizeBenchV2.AnalysisEngine.Tests.CodePageWin32Rsrc", "TestPEProjects\SizeBenchV2.AnalysisEngine.Tests.CodePageWin32Rsrc\SizeBenchV2.AnalysisEngine.Tests.CodePageWin32Rsrc.vcxproj", "{F5A769AB-AA4A-419B-BD04-E15C5B3F61A2}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SizeBenchV2.AnalysisEngine.Tests.InlineSites", "TestPEProjects\SizeBenchV2.AnalysisEngine.Tests.InlineSites\SizeBenchV2.AnalysisEngine.Tests.InlineSites.vcxproj", "{1758B4E2-9D50-4257-9ABD-5838A768575E}"
 EndProject
 Global
@@ -316,6 +318,8 @@ Global
 		{CB423BCF-0005-41BD-8082-BE0027F38E65}.Release|x64.Build.0 = Release|x64
 		{F3B85B36-DE41-48CC-84E5-D7FC9D1CE28D}.Debug|x64.ActiveCfg = Debug|x64
 		{F3B85B36-DE41-48CC-84E5-D7FC9D1CE28D}.Release|x64.ActiveCfg = Debug|x64
+		{F5A769AB-AA4A-419B-BD04-E15C5B3F61A2}.Debug|x64.ActiveCfg = Debug|x64
+		{F5A769AB-AA4A-419B-BD04-E15C5B3F61A2}.Release|x64.ActiveCfg = Debug|x64
 		{1758B4E2-9D50-4257-9ABD-5838A768575E}.Debug|x64.ActiveCfg = Debug|x64
 		{1758B4E2-9D50-4257-9ABD-5838A768575E}.Release|x64.ActiveCfg = Debug|x64
 	EndGlobalSection
@@ -369,6 +373,7 @@ Global
 		{F6E559D0-7001-4B27-AA20-05147E96FFCA} = {9C5136EA-5ED0-4302-BD0E-C3E45B150D54}
 		{CB423BCF-0005-41BD-8082-BE0027F38E65} = {F6E559D0-7001-4B27-AA20-05147E96FFCA}
 		{F3B85B36-DE41-48CC-84E5-D7FC9D1CE28D} = {DCE07710-61B5-4730-BF3D-1488D637807D}
+		{F5A769AB-AA4A-419B-BD04-E15C5B3F61A2} = {DCE07710-61B5-4730-BF3D-1488D637807D}
 		{1758B4E2-9D50-4257-9ABD-5838A768575E} = {DCE07710-61B5-4730-BF3D-1488D637807D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

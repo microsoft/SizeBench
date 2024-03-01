@@ -20,6 +20,13 @@ internal static class SymbolSourcesSupportedCommonTests
     internal static IEnumerable<object[]> DynamicDataSourceForSymbolSourcesSupportedTests { get; } =
         GetAllEnumCombinations<SymbolSourcesSupported>().Select(x => new object[] { x }).ToArray();
 
+    // Use this for enormous binaries that take too long to run every test.  If we run all 64 combinations of flags today,
+    // we time out in the ADO pipelines because they're limited to 1 hour.  We either need to use agents that can run longer
+    // or partition the tests into multiple Jobs in the YAML to allow these to complete in time.  For now we'll test only
+    // each individual type of symbol, not all combinations of flags.
+    internal static IEnumerable<object[]> DynamicDataSourceForSymbolSourcesSupportedTests_Slimmed { get; } =
+        Enum.GetValuesAsUnderlyingType<SymbolSourcesSupported>().Cast<SymbolSourcesSupported>().Select(x => new object[] { x }).ToArray();
+
     public static List<T> GetAllEnumCombinations<T>() where T : struct
     {
         if (!typeof(T).IsEnum)

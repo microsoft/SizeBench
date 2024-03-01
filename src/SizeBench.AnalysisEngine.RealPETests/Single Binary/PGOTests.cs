@@ -541,10 +541,11 @@ public sealed class PGOTests
         Assert.IsNull(placement.SourceFile);
     }
 
-    public static IEnumerable<object[]> DynamicDataSourceForSymbolSourcesSupportedTests => SymbolSourcesSupportedCommonTests.DynamicDataSourceForSymbolSourcesSupportedTests;
+    public static IEnumerable<object[]> DynamicDataSourceForSymbolSourcesSupportedTests_Slimmed => 
+        SymbolSourcesSupportedCommonTests.DynamicDataSourceForSymbolSourcesSupportedTests_Slimmed;
 
     [TestMethod]
-    [DynamicData(nameof(DynamicDataSourceForSymbolSourcesSupportedTests))]
+    [DynamicData(nameof(DynamicDataSourceForSymbolSourcesSupportedTests_Slimmed))]
     public Task SymbolSourcesSupportedWorks(SymbolSourcesSupported symbolSources) =>
         SymbolSourcesSupportedCommonTests.VerifyNoUnexpectedSymbolTypesCanBeMaterialized(
             Path.Combine(this.TestContext!.DeploymentDirectory!, "Microsoft.UI.Xaml.dll"),

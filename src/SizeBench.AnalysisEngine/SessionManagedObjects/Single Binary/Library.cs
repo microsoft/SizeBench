@@ -7,7 +7,7 @@ using SizeBench.AnalysisEngine.Helpers;
 namespace SizeBench.AnalysisEngine;
 
 [DebuggerDisplay("LIB Name={Name}, Size={Size}")]
-public sealed class Library
+public sealed class Library : IEquatable<Library>
 {
     private bool _fullyConstructed;
 
@@ -53,7 +53,7 @@ public sealed class Library
 
     #region Compilands
 
-    private readonly Dictionary<string, Compiland> _compilands = new Dictionary<string, Compiland>();
+    private readonly Dictionary<string, Compiland> _compilands = new Dictionary<string, Compiland>(StringComparer.OrdinalIgnoreCase);
     public IReadOnlyDictionary<string, Compiland> Compilands
     {
         get
@@ -222,4 +222,17 @@ public sealed class Library
 
     internal bool IsVeryLikelyTheSameAs(Library otherLib)
         => PathHeuristicComparer.PathNamesAreVerySimilar(this.Name, otherLib.Name);
+
+    public override bool Equals(object? obj) => base.Equals(obj as Library);
+
+    public bool Equals(Library? other)
+    {
+        if (other is null) { return false; }
+
+        if (ReferenceEquals(this, other)) { return true; }
+
+        return this.Name.Equals(other.Name, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public override int GetHashCode() => this.Name.GetHashCode(StringComparison.OrdinalIgnoreCase);
 }

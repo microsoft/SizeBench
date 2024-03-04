@@ -8,8 +8,9 @@
     <TargetPlatform>x64</TargetPlatform>
     <TargetFrameworkVersion>.NETCoreApp, Version=8.0</TargetFrameworkVersion>
 
-    <!-- Timeout is in milliseconds, so this is 500s or just over 8 minutes -->
-    <TestSessionTimeout>500000</TestSessionTimeout>
+    <!-- Timeout is in milliseconds, so this is 3 hours, because
+         the PGO tests can be very slow to be exhaustive. -->
+    <TestSessionTimeout>10800000</TestSessionTimeout>
     
     <!-- MaxCpuCount, when used, seems to cause VS to be unable to display code coverage % covered properly, so disabling... -->
     <!-- <MaxCpuCount>4</MaxCpuCount> -->
@@ -60,6 +61,7 @@
                 <ModulePath>.*SizeBench.*TestInfrastructure.*</ModulePath>
                 <ModulePath>.*SizeBench.*Tests\.dll$</ModulePath>
                 <ModulePath>.*SizeBench.*TestDataCommon\.dll$</ModulePath>
+                <ModulePath>.*DiffPlex.*</ModulePath>
                 <ModulePath>.*moq\.dll$</ModulePath>
                 <ModulePath>.*SizeBench.*TestData.*</ModulePath>
                 <!-- Exclude Test PEs so we don't instrument the checked-in test collateral, which can subtly change it -->
@@ -77,6 +79,7 @@
                 <Function>.*::__GetTestMethodInfo.*</Function>
                 <Function>^Microsoft::VisualStudio::CppCodeCoverageFramework::.*</Function>
                 <Function>^Microsoft::VisualStudio::CppUnitTestFramework::.*</Function>
+                <Function>^System.Text.RegularExpressions.Generated.*</Function>
               </Exclude>
             </Functions>
 

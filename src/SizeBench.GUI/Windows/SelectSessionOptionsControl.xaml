@@ -1,0 +1,37 @@
+﻿<UserControl x:Class="SizeBench.GUI.Windows.SelectSessionOptionsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignWidth="500" d:Background="White"
+             MaxWidth="600">
+    <Expander Header="Advanced Options" IsExpanded="False">
+        <HeaderedContentControl Header="Symbols Sourced From:">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <WrapPanel Margin="5">
+                    <CheckBox Width="100" Content="Code" IsChecked="{Binding CodeSymbolsSupported}" ToolTip="Ex: functions, separated code blocks, thunks" />
+                    <CheckBox Width="100" Content="Data" IsChecked="{Binding DataSymbolsSupported}" ToolTip="Ex: data symbols like constexpr arrays or strings" />
+                    <CheckBox Width="100" Content="PDATA" IsChecked="{Binding PDATASymbolsSupported}" ToolTip="Ex: procedure data (.pdata section)" />
+                    <CheckBox Width="100" Content="XDATA" IsChecked="{Binding XDATASymbolsSupported}" ToolTip="Ex: exception unwinding data (.xdata COFF Group)"/>
+                    <CheckBox Width="100" Content="RSRC" IsChecked="{Binding RSRCSymbolsSupported}" ToolTip="Ex: Win32 resources (.rsrc section)" />
+                    <CheckBox Width="200" Content="Other PE Symbols" IsChecked="{Binding OtherPESymbolsSupported}"  ToolTip="Ex: load config directory, imports, delay load imports, debug directories" />
+                </WrapPanel>
+                
+                <TextBlock Grid.Row="1" Margin="10,0,10,0" TextWrapping="Wrap">
+                    <Run>Some sources of symbols (like PDATA and XDATA) can take a long time to parse out of large binaries, so</Run>
+                    <Run>you can disable them to open a binary up much faster if you're only looking for certain things like code.</Run>
+                    <Run>Hover over any of the checkboxes to see a description of this type of symbol.</Run>
+                    <LineBreak/>
+                    <LineBreak/>
+                    <Bold><Run>Note: if some symbol sources are disabled, then SizeBench will show a subset of its normal data.</Run></Bold>
+                </TextBlock>
+            </Grid>
+        </HeaderedContentControl>
+    </Expander>
+</UserControl>

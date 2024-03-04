@@ -8,7 +8,7 @@ internal sealed class ImportDescriptorSymbol : ImportSymbolBase
 {
     public override SymbolComparisonClass SymbolComparisonClass => SymbolComparisonClass.ImportDescriptor;
 
-    internal ImportDescriptorSymbol(uint rva, string importName)
-        : base(rva, (uint)Marshal.SizeOf<IMAGE_IMPORT_DESCRIPTOR>(), $"[import descriptor] {importName}")
+    internal ImportDescriptorSymbol(uint rva, string importName, SymbolSourcesSupported symbolSourcesSupported)
+        : base(rva, (uint)Marshal.SizeOf<IMAGE_IMPORT_DESCRIPTOR>(), $"[import descriptor] {importName}", symbolSourcesSupported)
     { }
 }

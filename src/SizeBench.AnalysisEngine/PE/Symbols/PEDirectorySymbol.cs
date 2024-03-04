@@ -23,6 +23,10 @@ public sealed class PEDirectorySymbol : ISymbol
 
     internal PEDirectorySymbol(uint rva, uint size, string name)
     {
+        // We specifically don't check for this because directories are very valuable for other parts of SizeBench (ex: checking
+        // the debug signature), and they're so cheap to parse that avoiding them is unnecessary for perf.
+        //Debug.Assert(symbolSourcesSupported.HasFlag(SymbolSourcesSupported.OtherPESymbols));
+
         this.RVA = rva;
         this.Size = size;
         this.Name = $"[PE Directory] {name}";

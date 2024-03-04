@@ -21,14 +21,23 @@ internal sealed class LookupSymbolPlacementInBinarySessionTask : SessionTask<Sym
 
     protected override SymbolPlacement ExecuteCore(ILogger logger)
     {
+        const int numSteps = 4;
+        var lookupStepsCompleted = 0u;
+        ReportProgress("Finding binary sections and COFF groups in the binary to find symbol's location", lookupStepsCompleted, numSteps);
         var binarySections = new EnumerateBinarySectionsAndCOFFGroupsSessionTask(this._sessionTaskParameters, this.CancellationToken).Execute(logger);
         var coffGroups = binarySections.SelectMany(bs => bs.COFFGroups).ToList();
+        lookupStepsCompleted++;
 
+        ReportProgress("Finding libs and compilands in the binary to find symbol's location", lookupStepsCompleted, numSteps);
         var libs = new EnumerateLibsAndCompilandsSessionTask(this._sessionTaskParameters, this.CancellationToken, this.ProgressReporter).Execute(logger);
         var compilands = libs.SelectMany(l => l.Compilands.Values).ToList();
+        lookupStepsCompleted++;
 
+        ReportProgress("Finding source files in the binary to find symbol's location", lookupStepsCompleted, numSteps);
         var sourceFiles = new EnumerateSourceFilesSessionTask(this._sessionTaskParameters, this.CancellationToken, this.ProgressReporter).Execute(logger);
+        lookupStepsCompleted++;
 
+        ReportProgress("Finding this symbol's precise location", lookupStepsCompleted, numSteps);
         var coffGroup = (from cg in coffGroups
                          where this._symbol.RVA >= cg.RVA &&
                                this._symbol.RVAEnd <= (cg.RVA + cg.VirtualSize)
@@ -45,7 +54,10 @@ internal sealed class LookupSymbolPlacementInBinarySessionTask : SessionTask<Sym
                           select sf).FirstOrDefault();
 
         var placement = new SymbolPlacement(section, coffGroup, lib, compiland, sourceFile);
+        lookupStepsCompleted++;
 
+        System.Diagnostics.Debug.Assert(lookupStepsCompleted == numSteps);
+        ReportProgress($"Found symbol's location", lookupStepsCompleted, numSteps);
         logger.Log($"Finished finding the location of '{this._symbol.Name}' at RVA range 0x{this._symbol.RVA:X}-0x{this._symbol.RVAEnd:X} in the binary.  " +
                    $"It is located in section {section?.Name ?? "null"}, COFF Group {coffGroup?.Name ?? "null"}, lib '{lib?.Name ?? "null"}', " +
                    $"compiland '{compiland?.Name ?? "null"}', and source file '{sourceFile?.Name ?? "null"}'");

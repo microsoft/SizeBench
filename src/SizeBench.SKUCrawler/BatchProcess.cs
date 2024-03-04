@@ -1,8 +1,8 @@
-﻿using System.Collections.Concurrent;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading.Channels;
 using Microsoft.Data.Sqlite;
 using SizeBench.AnalysisEngine;
 using SizeBench.AnalysisEngine.Symbols;
@@ -12,7 +12,7 @@ using SizeBench.Threading.Tasks.Schedulers;
 
 namespace SizeBench.SKUCrawler;
 
-internal sealed class BatchProcess : IDisposable
+internal sealed class BatchProcess
 {
     // At least in SKUCrawler we want to 'fold up' all the BlockSymbols from a function up into the Function.
     // At some point it'd be good to have a way to do this in the Analysis Engine for other customers, as BlockSymbols suck
@@ -43,6 +43,7 @@ internal sealed class BatchProcess : IDisposable
     public string BinaryRoot { get; set; } = String.Empty;
     public bool IncludeWastefulVirtuals { get; set; }
     public bool IncludeCodeSymbols { get; set; }
+    public bool IncludeDuplicateDataItems { get; set; }
 
     private string DbFilename => $"{this._logFilenameBase}.db";
 
@@ -58,7 +59,7 @@ internal sealed class BatchProcess : IDisposable
         public long openingTookMs;
         public IReadOnlyList<BinarySection>? sections;
         public long sectionEnumerationTookMs;
-        public IReadOnlyList<Library>? libs;
+        public IReadOnlyCollection<Library>? libs;
         public long libEnumerationTookMs;
         public IReadOnlyList<SourceFile>? sourceFiles;
         public long sourceFileEnumerationTookMs;
@@ -68,11 +69,12 @@ internal sealed class BatchProcess : IDisposable
         public long wviEnumerationTookMs;
         public IReadOnlyList<AnnotationSymbol>? annotations;
         public long annotationEnumerationTookMs;
-        public Dictionary<Tuple<Compiland, SourceFile>, List<SKUCrawlerSymbol>>? codeSymbolsInAllSourceFiles;
+        public Dictionary<(Compiland compiland, SourceFile sourceFile), List<SKUCrawlerSymbol>>? codeSymbolsInAllSourceFiles;
         public long codeSymbolsInSourceFilesEnumerationTookMs;
         public Exception? errorDuringProcessing;
     }
-    private readonly BlockingCollection<ProductBinaryAnalysisResults> _databaseWriteQueue = new BlockingCollection<ProductBinaryAnalysisResults>();
+    private readonly Channel<ProductBinaryAnalysisResults> _databaseWriteChannel = Channel.CreateUnbounded<ProductBinaryAnalysisResults>
+        (new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false });
 
     private readonly int _batchNumber;
     private readonly List<ProductBinary> _productBinariesInThisBatch;
@@ -93,7 +95,7 @@ internal sealed class BatchProcess : IDisposable
 
     }
 
-    public async Task AnalyzeBatch(IApplicationLogger appLogger)
+    public async Task AnalyzeBatchAsync(IApplicationLogger appLogger)
     {
         //TODO: SKUCrawler: check if Parallel.ForEachAsync might be a simpler way of writing this code, once on .NET 6
         using var taskScheduler = new QueuedTaskScheduler(threadCount: Environment.ProcessorCount * 10);
@@ -105,7 +107,19 @@ internal sealed class BatchProcess : IDisposable
             EnsureDatabaseCreated(taskLog);
         }
 
-        var databaseWriterTask = Task.Factory.StartNew(() => WriteToDatabase(appLogger), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        var databaseWriterTask = Task.Factory.StartNew(() => WriteToDatabaseAsync(appLogger).GetAwaiter().GetResult(), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
+        var symbolSourcesSupported = SymbolSourcesSupported.None;
+        if (this.IncludeCodeSymbols || this.IncludeWastefulVirtuals)
+        {
+            symbolSourcesSupported &= SymbolSourcesSupported.Code;
+        }
+        if (this.IncludeDuplicateDataItems)
+        {
+            symbolSourcesSupported &= SymbolSourcesSupported.DataSymbols | SymbolSourcesSupported.XDATA;
+        }
+
+        var sessionOptions = new SessionOptions() { SymbolSourcesSupported = symbolSourcesSupported };
 
         for (var i = 0; i < this._productBinariesInThisBatch.Count; i++)
         {
@@ -115,17 +129,17 @@ internal sealed class BatchProcess : IDisposable
             tasks.Add(taskFactory.StartNew(async () =>
             {
                 await Console.Out.WriteLineAsync($"{DateTime.Now.ToString("HH:mm:ss", CultureInfo.InvariantCulture)} Batch={this._batchNumber:000}, TID={Environment.CurrentManagedThreadId:000}: {binaryNumber:00}/{this._productBinariesInThisBatch.Count}: Analyzing {binary.BinaryPath}");
-                AnalyzeOneBinaryOnThreadPool(log, binary.BinaryPath, binary.PdbPath);
+                AnalyzeOneBinaryOnThreadPool(log, binary.BinaryPath, binary.PdbPath, sessionOptions);
             }, CancellationToken.None, TaskCreationOptions.LongRunning, taskScheduler));
         }
 
         await taskFactory.ContinueWhenAll(tasks.ToArray(),
-                                            _ => this._databaseWriteQueue.CompleteAdding());
+                                          _ => this._databaseWriteChannel.Writer.Complete());
 
         await databaseWriterTask;
     }
 
-    private void AnalyzeOneBinaryOnThreadPool(ILogger log, string binaryPath, string pdbPath)
+    private void AnalyzeOneBinaryOnThreadPool(ILogger log, string binaryPath, string pdbPath, SessionOptions sessionOptions)
     {
         AsyncPump.Run(
             async delegate
@@ -151,7 +165,7 @@ internal sealed class BatchProcess : IDisposable
                     }
 
                     var openingWatch = Stopwatch.StartNew();
-                    var session = await Session.Create(binaryPath, pdbPath, log);
+                    var session = await Session.Create(binaryPath, pdbPath, sessionOptions, log);
                     openingWatch.Stop();
                     results.openingTookMs = openingWatch.ElapsedMilliseconds;
                     await AnalyzeOneBinary(results, session, log);
@@ -171,7 +185,7 @@ internal sealed class BatchProcess : IDisposable
                 }
                 finally
                 {
-                    this._databaseWriteQueue.Add(results);
+                    this._databaseWriteChannel.Writer.TryWrite(results);
                 }
             });
     }
@@ -202,12 +216,15 @@ internal sealed class BatchProcess : IDisposable
             results.sourceFileEnumerationTookMs = enumSourceFilesWatch.ElapsedMilliseconds;
         }
 
-        using (log.StartTaskLog("Enumerating duplicate data"))
+        if (this.IncludeDuplicateDataItems)
         {
-            var ddiWatch = Stopwatch.StartNew();
-            results.duplicateDataItems = await session.EnumerateDuplicateDataItems(CancellationToken.None);
-            ddiWatch.Stop();
-            results.ddiEnumerationTookMs = ddiWatch.ElapsedMilliseconds;
+            using (log.StartTaskLog("Enumerating duplicate data"))
+            {
+                var ddiWatch = Stopwatch.StartNew();
+                results.duplicateDataItems = await session.EnumerateDuplicateDataItems(CancellationToken.None);
+                ddiWatch.Stop();
+                results.ddiEnumerationTookMs = ddiWatch.ElapsedMilliseconds;
+            }
         }
 
         if (this.IncludeWastefulVirtuals)
@@ -246,7 +263,7 @@ internal sealed class BatchProcess : IDisposable
         }
 
         var symbolsInSourceFilesWatch = Stopwatch.StartNew();
-        results.codeSymbolsInAllSourceFiles = new Dictionary<Tuple<Compiland, SourceFile>, List<SKUCrawlerSymbol>>();
+        results.codeSymbolsInAllSourceFiles = new Dictionary<(Compiland compiland, SourceFile sourceFile), List<SKUCrawlerSymbol>>();
 
         foreach (var lib in results.libs)
         {
@@ -328,7 +345,7 @@ internal sealed class BatchProcess : IDisposable
                                     symbolsWithBlocksRolledUp.Add(symbol, skuSymbol);
                                 }
                             }
-                            results.codeSymbolsInAllSourceFiles.Add(Tuple.Create(compiland, sourceFile), symbolsWithBlocksRolledUp.Values.ToList());
+                            results.codeSymbolsInAllSourceFiles.Add((compiland, sourceFile), symbolsWithBlocksRolledUp.Values.ToList());
                         }
                     }
                 }
@@ -338,108 +355,121 @@ internal sealed class BatchProcess : IDisposable
         results.codeSymbolsInSourceFilesEnumerationTookMs = symbolsInSourceFilesWatch.ElapsedMilliseconds;
     }
 
-    private void WriteToDatabase(IApplicationLogger logger)
+    private async Task WriteToDatabaseAsync(IApplicationLogger logger)
     {
         using var taskLog = logger.StartTaskLog("Write binary information to database");
         using var connection = new SqliteConnection(new SqliteConnectionStringBuilder()
         {
             DataSource = this.DbFilename
         }.ToString());
-        connection.Open();
+        await connection.OpenAsync();
 
-        foreach (var databaseWrite in this._databaseWriteQueue.GetConsumingEnumerable())
         {
-            try
+            // Disable on-disk journaling for perf
+            var pragmaCommand = connection.CreateCommand();
+            pragmaCommand.CommandText = "PRAGMA journal_mode = MEMORY;";
+            await pragmaCommand.ExecuteNonQueryAsync();
+        }
+
+#pragma warning disable CA1849 // Call async methods when in an async method - the async version returns DbTransaction, we need a SqliteTransaction.
+        using var transaction = connection.BeginTransaction();
+#pragma warning restore CA1849 // Call async methods when in an async method
+
+        while (await this._databaseWriteChannel.Reader.WaitToReadAsync().ConfigureAwait(false))
+        {
+            while (this._databaseWriteChannel.Reader.TryRead(out var databaseWrite))
             {
-                var compilandsToDatabaseIDs = new Dictionary<Compiland, int>();
-                var symbolsToDatabaseIDs = new Dictionary<uint, Dictionary<string, int>>();
-
-                using var transaction = connection.BeginTransaction();
-                var binaryID = InsertBinary(connection, transaction, databaseWrite);
-
-                InsertPerfStats(connection, transaction, binaryID, databaseWrite);
-
-                if (databaseWrite.sections != null)
+                try
                 {
-                    foreach (var section in databaseWrite.sections)
+                    var compilandsToDatabaseIDs = new Dictionary<Compiland, int>();
+                    var symbolsToDatabaseIDs = new Dictionary<uint, Dictionary<string, int>>();
+
+                    var binaryID = InsertBinary(connection, transaction, databaseWrite);
+
+                    InsertPerfStats(connection, transaction, binaryID, databaseWrite);
+
+                    if (databaseWrite.sections != null)
                     {
-                        InsertSectionAndCOFFGroupsInThatSection(connection, transaction, binaryID, section);
+                        foreach (var section in databaseWrite.sections)
+                        {
+                            InsertSectionAndCOFFGroupsInThatSection(connection, transaction, binaryID, section);
+                        }
+                    }
+
+                    if (databaseWrite.libs != null)
+                    {
+                        foreach (var lib in databaseWrite.libs)
+                        {
+                            InsertLibAndCompilands(connection, transaction, binaryID, lib, compilandsToDatabaseIDs);
+                        }
+                    }
+
+                    var sourceFilesToDatabaseIDs = new Dictionary<SourceFile, int>();
+
+                    // We need to establish an ID for the 'null' source file since some annotations do not have a source file but still need to
+                    // get their foreign key set up.
+                    var sourceFileNullID = -1;
+
+                    if (databaseWrite.sourceFiles != null)
+                    {
+                        sourceFileNullID = InsertSourceFile(connection, transaction, binaryID, null, sourceFilesToDatabaseIDs);
+
+                        foreach (var sf in databaseWrite.sourceFiles)
+                        {
+                            InsertSourceFile(connection, transaction, binaryID, sf, sourceFilesToDatabaseIDs);
+                        }
+                    }
+
+                    if (this.IncludeDuplicateDataItems && databaseWrite.duplicateDataItems != null)
+                    {
+                        foreach (var ddi in databaseWrite.duplicateDataItems)
+                        {
+                            InsertDuplicateDataItem(connection, transaction, binaryID, symbolsToDatabaseIDs, ddi);
+                        }
+                    }
+
+                    if (this.IncludeWastefulVirtuals && databaseWrite.wastefulVirtualItems != null)
+                    {
+                        foreach (var wvi in databaseWrite.wastefulVirtualItems)
+                        {
+                            InsertWastefulVirtualItems(connection, transaction, binaryID, wvi);
+                        }
+                    }
+
+                    if (databaseWrite.annotations != null)
+                    {
+                        foreach (var annotation in databaseWrite.annotations)
+                        {
+                            InsertAnnotation(connection, transaction, binaryID, sourceFilesToDatabaseIDs, sourceFileNullID, annotation);
+                        }
+                    }
+
+                    if (this.IncludeCodeSymbols && databaseWrite.codeSymbolsInAllSourceFiles != null)
+                    {
+                        foreach (var symbolsInCompilandAndSourceFile in databaseWrite.codeSymbolsInAllSourceFiles)
+                        {
+                            InsertSymbolsInSourceFileAndCompiland(connection, transaction,
+                                                                  compilandsToDatabaseIDs[symbolsInCompilandAndSourceFile.Key.compiland],
+                                                                  sourceFilesToDatabaseIDs[symbolsInCompilandAndSourceFile.Key.sourceFile],
+                                                                  symbolsToDatabaseIDs, symbolsInCompilandAndSourceFile.Value);
+                        }
+                    }
+
+                    if (databaseWrite.errorDuringProcessing != null)
+                    {
+                        InsertError(connection, transaction, binaryID, databaseWrite.errorDuringProcessing);
                     }
                 }
-
-                if (databaseWrite.libs != null)
+    #pragma warning disable CA1031 // Do not catch general exception types - if we throw trying to write one binary, maybe we can still write most of them, let's keep going
+                catch (Exception ex)
+    #pragma warning restore CA1031 // Do not catch general exception types
                 {
-                    foreach (var lib in databaseWrite.libs)
-                    {
-                        InsertLibAndCompilands(connection, transaction, binaryID, lib, compilandsToDatabaseIDs);
-                    }
+                    Program.LogExceptionAndReportToStdErr("Database write threw an exception!", ex, logger);
                 }
-
-                var sourceFilesToDatabaseIDs = new Dictionary<SourceFile, int>();
-
-                // We need to establish an ID for the 'null' source file since some annotations do not have a source file but still need to
-                // get their foreign key set up.
-                var sourceFileNullID = -1;
-
-                if (databaseWrite.sourceFiles != null)
-                {
-                    sourceFileNullID = InsertSourceFile(connection, transaction, binaryID, null, sourceFilesToDatabaseIDs);
-
-                    foreach (var sf in databaseWrite.sourceFiles)
-                    {
-                        InsertSourceFile(connection, transaction, binaryID, sf, sourceFilesToDatabaseIDs);
-                    }
-                }
-
-                if (databaseWrite.duplicateDataItems != null)
-                {
-                    foreach (var ddi in databaseWrite.duplicateDataItems)
-                    {
-                        InsertDuplicateDataItem(connection, transaction, binaryID, symbolsToDatabaseIDs, ddi);
-                    }
-                }
-
-                if (this.IncludeWastefulVirtuals && databaseWrite.wastefulVirtualItems != null)
-                {
-                    foreach (var wvi in databaseWrite.wastefulVirtualItems)
-                    {
-                        InsertWastefulVirtualItems(connection, transaction, binaryID, wvi);
-                    }
-                }
-
-                if (databaseWrite.annotations != null)
-                {
-                    foreach (var annotation in databaseWrite.annotations)
-                    {
-                        InsertAnnotation(connection, transaction, binaryID, sourceFilesToDatabaseIDs, sourceFileNullID, annotation);
-                    }
-                }
-
-                if (this.IncludeCodeSymbols && databaseWrite.codeSymbolsInAllSourceFiles != null)
-                {
-                    foreach (var symbolsInCompilandAndSourceFile in databaseWrite.codeSymbolsInAllSourceFiles)
-                    {
-                        InsertSymbolsInSourceFileAndCompiland(connection, transaction,
-                                                              compilandsToDatabaseIDs[symbolsInCompilandAndSourceFile.Key.Item1],
-                                                              sourceFilesToDatabaseIDs[symbolsInCompilandAndSourceFile.Key.Item2],
-                                                              symbolsToDatabaseIDs, symbolsInCompilandAndSourceFile.Value);
-                    }
-                }
-
-                if (databaseWrite.errorDuringProcessing != null)
-                {
-                    InsertError(connection, transaction, binaryID, databaseWrite.errorDuringProcessing);
-                }
-
-                transaction.Commit();
-            }
-#pragma warning disable CA1031 // Do not catch general exception types - if we throw trying to write one binary, maybe we can still write most of them, let's keep going
-            catch (Exception ex)
-#pragma warning restore CA1031 // Do not catch general exception types
-            {
-                Program.LogExceptionAndReportToStdErr("Database write threw an exception!", ex, logger);
             }
         }
+
+        await transaction.CommitAsync();
     }
 
     private const string _BinariesTable = "Binaries";
@@ -679,7 +709,7 @@ internal sealed class BatchProcess : IDisposable
         }
         else
         {
-            var newSymbolsOfCorrectSize = new Dictionary<string, int>()
+            var newSymbolsOfCorrectSize = new Dictionary<string, int>(StringComparer.Ordinal)
                 {
                     { skuSymbol.Name, symbolIDJustInserted }
                 };
@@ -941,22 +971,25 @@ internal sealed class BatchProcess : IDisposable
                 command.ExecuteNonQuery();
             }
 
-            createTableQuery = $"CREATE TABLE {_DuplicateDataTableName} (" +
-                                "DuplicateDataID INTEGER PRIMARY KEY, " +
-                                "BinaryID INT NOT NULL, " +
-                                "SymbolID INT NOT NULL, " +
-                                "WastedSize INT," +
-                                "CONSTRAINT fk_binaries " +
-                                "  FOREIGN KEY (BinaryID) " +
-                               $"  REFERENCES {_BinariesTable}(BinaryID) " +
-                                "CONSTRAINT fk_symbols " +
-                                "  FOREIGN KEY (SymbolID) " +
-                               $"  REFERENCES {_SymbolsTableName}(SymbolID) " +
-                                ")";
-
-            using (command = new SqliteCommand(createTableQuery, connection))
+            if (this.IncludeDuplicateDataItems)
             {
-                command.ExecuteNonQuery();
+                createTableQuery = $"CREATE TABLE {_DuplicateDataTableName} (" +
+                                    "DuplicateDataID INTEGER PRIMARY KEY, " +
+                                    "BinaryID INT NOT NULL, " +
+                                    "SymbolID INT NOT NULL, " +
+                                    "WastedSize INT," +
+                                    "CONSTRAINT fk_binaries " +
+                                    "  FOREIGN KEY (BinaryID) " +
+                                   $"  REFERENCES {_BinariesTable}(BinaryID) " +
+                                    "CONSTRAINT fk_symbols " +
+                                    "  FOREIGN KEY (SymbolID) " +
+                                   $"  REFERENCES {_SymbolsTableName}(SymbolID) " +
+                                    ")";
+
+                using (command = new SqliteCommand(createTableQuery, connection))
+                {
+                    command.ExecuteNonQuery();
+                }
             }
 
             if (this.IncludeWastefulVirtuals)
@@ -1074,33 +1107,4 @@ internal sealed class BatchProcess : IDisposable
             throw;
         }
     }
-
-    #region IDisposable Support
-    private bool disposedValue; // To detect redundant calls
-
-    private void Dispose(bool disposing)
-    {
-        if (!this.disposedValue)
-        {
-            if (disposing)
-            {
-                this._databaseWriteQueue.Dispose();
-            }
-
-            this.disposedValue = true;
-        }
-    }
-
-    // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-    // ~BatchProcess()
-    // {
-    //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-    //   Dispose(false);
-    // }
-
-    // This code added to correctly implement the disposable pattern.
-    public void Dispose() =>
-        // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-        Dispose(true);// TODO: uncomment the following line if the finalizer is overridden above.// GC.SuppressFinalize(this);
-    #endregion
 }

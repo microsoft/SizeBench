@@ -36,7 +36,7 @@ internal sealed class COFFGroupPageViewModel : SingleBinaryViewModelBase
         private set { this._symbols = value; RaisePropertyChanged(); }
     }
 
-    private IReadOnlyList<Library>? _libs;
+    private IReadOnlyCollection<Library>? _libs;
     private CollectionView? _libsCV;
     public CollectionView? Libs
     {
@@ -44,7 +44,7 @@ internal sealed class COFFGroupPageViewModel : SingleBinaryViewModelBase
         set { this._libsCV = value; RaisePropertyChanged(); }
     }
 
-    private IReadOnlyList<Compiland>? _compilands;
+    private IReadOnlyCollection<Compiland>? _compilands;
     private CollectionView? _compilandsCV;
     public CollectionView? Compilands
     {

@@ -26,14 +26,10 @@ public sealed class EnumerateSymbolsInBinarySectionSessionTaskTests : IDisposabl
             this.TestDIAAdapter,
             this.DataCache);
 
-        this.SessionTaskParameters.DataCache.PDataRVARange = new RVARange(0, 0);
-        this.SessionTaskParameters.DataCache.PDataSymbolsByRVA = new SortedList<uint, PDataSymbol>();
-        this.SessionTaskParameters.DataCache.XDataRVARanges = new RVARangeSet();
-        this.SessionTaskParameters.DataCache.XDataSymbolsByRVA = new SortedList<uint, XDataSymbol>();
-        this.SessionTaskParameters.DataCache.RsrcRVARange = new RVARange(0, 0);
-        this.SessionTaskParameters.DataCache.RsrcSymbolsByRVA = new SortedList<uint, RsrcSymbolBase>();
-        this.SessionTaskParameters.DataCache.OtherPESymbolsRVARanges = new RVARangeSet();
-        this.SessionTaskParameters.DataCache.OtherPESymbolsByRVA = new SortedList<uint, ISymbol>();
+        this.SessionTaskParameters.DataCache.PDataHasBeenInitialized = true;
+        this.SessionTaskParameters.DataCache.XDataHasBeenInitialized = true;
+        this.SessionTaskParameters.DataCache.RsrcHasBeenInitialized = true;
+        this.SessionTaskParameters.DataCache.OtherPESymbolsHaveBeenInitialized = true;
     }
 
     [TestMethod]

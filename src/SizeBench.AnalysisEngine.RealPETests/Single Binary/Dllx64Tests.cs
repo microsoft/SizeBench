@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using SizeBench.AnalysisEngine;
+using SizeBench.AnalysisEngine.RealPETests.Single_Binary;
 using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.Logging;
 
@@ -37,11 +38,11 @@ public class Dllx64Tests
         using var logger = new NoOpLogger();
         await using var session = await Session.Create(this.BinaryPath, this.PDBPath, logger);
         // These are gotten from "link /dump /headers PEParser.Tests.Dllx64.dll" and looking at the "Exception" directory
-        Assert.AreEqual(0x7000u, session.DataCache.PDataRVARange!.RVAStart);
+        Assert.AreEqual(0x7000u, session.DataCache.PDataRVARange.RVAStart);
         Assert.AreEqual(0x3C0u, session.DataCache.PDataRVARange.Size);
 
         // We should be discovering two RVA Ranges for xdata symbols for this binary.
-        Assert.AreEqual(2, session.DataCache.XDataRVARanges!.Count);
+        Assert.AreEqual(2, session.DataCache.XDataRVARanges.Count);
 
         // The first range is for the cppxdata symbol that is in .rdata (still unclear why some xdata symbols
         // can live outside of .xdata, but they can...).
@@ -57,14 +58,14 @@ public class Dllx64Tests
         // type, and the properties of those symbols as seen in the MAP file (assumed to be the truth).
 
         // [chainUnwind] for _RTC_Initialize
-        var _RTC_InitializeChainUnwind = (ChainUnwindInfoSymbol)session.DataCache.XDataSymbolsByRVA![0x4ACC];
+        var _RTC_InitializeChainUnwind = (ChainUnwindInfoSymbol)session.DataCache.XDataSymbolsByRVA[0x4ACC];
         Assert.AreEqual(0x28DDu, _RTC_InitializeChainUnwind.TargetStartRVA);
         Assert.AreEqual(20u, _RTC_InitializeChainUnwind.Size);
         Assert.IsTrue(_RTC_InitializeChainUnwind.Name.Contains("_RTC_Initialize", StringComparison.Ordinal));
         Assert.IsTrue(_RTC_InitializeChainUnwind.Name.Contains("chain-unwind", StringComparison.Ordinal));
 
         // [pdata] for Dllx64_CppxdataUsage::MaybeThrow
-        var Dllx64_CppxdataUsage_MaybeThrowPdata = session.DataCache.PDataSymbolsByRVA![0x733C];
+        var Dllx64_CppxdataUsage_MaybeThrowPdata = session.DataCache.PDataSymbolsByRVA[0x733C];
         Assert.AreEqual(0x30D0u, Dllx64_CppxdataUsage_MaybeThrowPdata.TargetStartRVA);
         Assert.AreEqual(12u, Dllx64_CppxdataUsage_MaybeThrowPdata.Size);
         Assert.IsTrue(Dllx64_CppxdataUsage_MaybeThrowPdata.Name.Contains("Dllx64_CppxdataUsage::MaybeThrow", StringComparison.Ordinal));
@@ -762,4 +763,15 @@ public class Dllx64Tests
         Assert.AreEqual(260, DebugBreakImportByName.Ordinal);
         Assert.AreEqual("`string': \"DebugBreak\"", DebugBreakImportByName.Name);
     }
+
+    public static IEnumerable<object[]> DynamicDataSourceForSymbolSourcesSupportedTests => SymbolSourcesSupportedCommonTests.DynamicDataSourceForSymbolSourcesSupportedTests;
+
+    [TestMethod]
+    [DynamicData(nameof(DynamicDataSourceForSymbolSourcesSupportedTests))]
+    public Task SymbolSourcesSupportedWorks(SymbolSourcesSupported symbolSources) =>
+        SymbolSourcesSupportedCommonTests.VerifyNoUnexpectedSymbolTypesCanBeMaterialized(
+            Path.Combine(this.TestContext!.DeploymentDirectory!, "PEParser.Tests.Dllx64.dll"),
+            Path.Combine(this.TestContext!.DeploymentDirectory!, "PEParser.Tests.Dllx64.pdb"),
+            symbolSources,
+            this.TestContext.CancellationTokenSource.Token);
 }

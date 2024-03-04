@@ -26,7 +26,10 @@ public sealed class Session : ISession
     public byte BytesPerWord => this._peFile?.BytesPerWord ?? 0;
 
     private readonly ILogger _logger;
-    internal SessionDataCache DataCache { get; } = new SessionDataCache();
+
+    public SessionOptions SessionOptions { get; }
+
+    internal SessionDataCache DataCache { get; }
 
     public IPEFile PEFile => this._peFile!;
 
@@ -100,9 +103,14 @@ public sealed class Session : ISession
 
     #region Create and Open Session
 
-    public static async Task<Session> Create(string binaryPath, string pdbPath, ILogger sessionLogger)
+    public static Task<Session> Create(string binaryPath, string pdbPath, ILogger sessionLogger)
+        => Create(binaryPath, pdbPath, new SessionOptions(), sessionLogger);
+
+    public static async Task<Session> Create(string binaryPath, string pdbPath, SessionOptions options, ILogger sessionLogger)
     {
-        var s = new Session(binaryPath, pdbPath, sessionLogger);
+        ArgumentNullException.ThrowIfNull(options);
+
+        var s = new Session(binaryPath, pdbPath, options, sessionLogger);
 
         try
         {
@@ -125,9 +133,11 @@ public sealed class Session : ISession
         return this._taskFactory.StartNew(InitializeDIAThread);
     }
 
-    internal Session(string binaryPath, string pdbPath, ILogger sessionLogger)
+    internal Session(string binaryPath, string pdbPath, SessionOptions options, ILogger sessionLogger)
     {
         this._logger = sessionLogger;
+        this.SessionOptions = options;
+        this.DataCache = new SessionDataCache(options.SymbolSourcesSupported);
 
         Debug.Assert(File.Exists(pdbPath));
         this._originalPDBPathMayBeRemote = pdbPath;
@@ -145,7 +155,7 @@ public sealed class Session : ISession
         //      startup.
         //      We should also use that opportunity to plumb through a CancellationToken so we can cancel opening a binary?
 
-        using var initializeDiaThreadLog = this._logger.StartTaskLog("Setting up initial data needed to open the session");
+        using var initializeDiaThreadLog = this._logger.StartTaskLog($"Setting up initial data needed to open the session (symbol sources: {this.SessionOptions.SymbolSourcesSupported})");
         this._diaManagedThreadId = Environment.CurrentManagedThreadId;
 
         this.ProgressReporter?.Report(new SessionTaskProgress("Copying PDB file locally if necessary.", 0, null));
@@ -154,7 +164,7 @@ public sealed class Session : ISession
         this._diaAdapter = new DIAAdapter(this, this._guaranteedLocalPDBFile.GuaranteedLocalPath);
         this._taskParameters = new SessionTaskParameters(this, this._diaAdapter, this.DataCache);
 
-        this._peFile = new PEFile(this._originalBinaryPathMayBeRemote, initializeDiaThreadLog);
+        this._peFile = new PEFile(this._originalBinaryPathMayBeRemote, this.SessionOptions.SymbolSourcesSupported, initializeDiaThreadLog);
         this.DataCache.BytesPerWord = this._peFile.BytesPerWord;
         this.DataCache.RsrcRVARange = this._peFile.RsrcRange;
 
@@ -385,10 +395,10 @@ public sealed class Session : ISession
 
     #region Enumerate Libs
 
-    public Task<IReadOnlyList<Library>> EnumerateLibs(CancellationToken token)
+    public Task<IReadOnlyCollection<Library>> EnumerateLibs(CancellationToken token)
         => EnumerateLibs(token, null);
 
-    public async Task<IReadOnlyList<Library>> EnumerateLibs(CancellationToken token, ILogger? parentLogger)
+    public async Task<IReadOnlyCollection<Library>> EnumerateLibs(CancellationToken token, ILogger? parentLogger)
     {
         if (this.DataCache.AllLibs is null)
         {
@@ -405,7 +415,7 @@ public sealed class Session : ISession
 
     #region Enumerate Compilands
 
-    public async Task<IReadOnlyList<Compiland>> EnumerateCompilands(CancellationToken token)
+    public async Task<IReadOnlyCollection<Compiland>> EnumerateCompilands(CancellationToken token)
     {
         if (this.DataCache.AllCompilands is null)
         {
@@ -501,6 +511,31 @@ public sealed class Session : ISession
                                                                  rva,
                                                                  this.ProgressReporter,
                                                                  token);
+
+        return await PerformSessionTaskOnDIAThread(task, token, null).ConfigureAwait(true);
+    }
+
+    #endregion
+
+    #region Enumerate all the inline sites within a function
+
+    public async Task<IReadOnlyList<InlineSiteSymbol>> EnumerateAllInlineSitesInFunction(IFunctionCodeSymbol functionSymbol, CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(functionSymbol);
+
+        var task = new EnumerateInlineSitesInFunctionSessionTask(this._taskParameters!,
+                                                                 functionSymbol,
+                                                                 this.ProgressReporter,
+                                                                 token);
+
+        return await PerformSessionTaskOnDIAThread(task, token, null).ConfigureAwait(true);
+    }
+
+    public async Task<IReadOnlyList<InlineSiteSymbol>> EnumerateAllInlineSites(CancellationToken token)
+    {
+        var task = new EnumerateAllInlineSitesSessionTask(this._taskParameters!,
+                                                          this.ProgressReporter,
+                                                          token);
 
         return await PerformSessionTaskOnDIAThread(task, token, null).ConfigureAwait(true);
     }

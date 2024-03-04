@@ -13,6 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\.gitignore = ..\.gitignore
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
+		Directory.Packages.props = Directory.Packages.props
 		global.json = global.json
 		NuGet.config = NuGet.config
 	EndProjectSection
@@ -30,6 +31,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{48871072
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{5E7F622A-2164-45BD-94F2-682AD964C057}"
 	ProjectSection(SolutionItems) = preProject
+		ExcludeSlowTests.playlist = ExcludeSlowTests.playlist
 		RunSettings.runsettings = RunSettings.runsettings
 		TestPEProjects\TestPEDll.props = TestPEProjects\TestPEDll.props
 	EndProjectSection
@@ -51,11 +53,15 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{85C0E032-D387-4A5A-BEC8-346E02B38ADE}"
 	ProjectSection(SolutionItems) = preProject
 		..\docs\Analysis Engine internals.md = ..\docs\Analysis Engine internals.md
-		..\docs\Contributing.md = ..\docs\Contributing.md
+		..\CODE_OF_CONDUCT.md = ..\CODE_OF_CONDUCT.md
+		..\CONTRIBUTING.md = ..\CONTRIBUTING.md
 		..\docs\Opening a Session.md = ..\docs\Opening a Session.md
 		..\docs\Principles.md = ..\docs\Principles.md
+		..\README.md = ..\README.md
+		..\SECURITY.md = ..\SECURITY.md
 		..\docs\Size VirtualSize and RVAs.md = ..\docs\Size VirtualSize and RVAs.md
 		..\docs\Solution Architecture.md = ..\docs\Solution Architecture.md
+		..\SUPPORT.md = ..\SUPPORT.md
 		..\docs\Test Strategy.md = ..\docs\Test Strategy.md
 	EndProjectSection
 EndProject
@@ -181,6 +187,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SizeBenchV2.AnalysisEngine.Tests.ClangClx64", "TestPEProjects\SizeBenchV2.AnalysisEngine.Tests.ClangClx64\SizeBenchV2.AnalysisEngine.Tests.ClangClx64.vcxproj", "{F3B85B36-DE41-48CC-84E5-D7FC9D1CE28D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SizeBenchV2.AnalysisEngine.Tests.CodePageWin32Rsrc", "TestPEProjects\SizeBenchV2.AnalysisEngine.Tests.CodePageWin32Rsrc\SizeBenchV2.AnalysisEngine.Tests.CodePageWin32Rsrc.vcxproj", "{F5A769AB-AA4A-419B-BD04-E15C5B3F61A2}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SizeBenchV2.AnalysisEngine.Tests.InlineSites", "TestPEProjects\SizeBenchV2.AnalysisEngine.Tests.InlineSites\SizeBenchV2.AnalysisEngine.Tests.InlineSites.vcxproj", "{1758B4E2-9D50-4257-9ABD-5838A768575E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -312,6 +320,8 @@ Global
 		{F3B85B36-DE41-48CC-84E5-D7FC9D1CE28D}.Release|x64.ActiveCfg = Debug|x64
 		{F5A769AB-AA4A-419B-BD04-E15C5B3F61A2}.Debug|x64.ActiveCfg = Debug|x64
 		{F5A769AB-AA4A-419B-BD04-E15C5B3F61A2}.Release|x64.ActiveCfg = Debug|x64
+		{1758B4E2-9D50-4257-9ABD-5838A768575E}.Debug|x64.ActiveCfg = Debug|x64
+		{1758B4E2-9D50-4257-9ABD-5838A768575E}.Release|x64.ActiveCfg = Debug|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -364,6 +374,7 @@ Global
 		{CB423BCF-0005-41BD-8082-BE0027F38E65} = {F6E559D0-7001-4B27-AA20-05147E96FFCA}
 		{F3B85B36-DE41-48CC-84E5-D7FC9D1CE28D} = {DCE07710-61B5-4730-BF3D-1488D637807D}
 		{F5A769AB-AA4A-419B-BD04-E15C5B3F61A2} = {DCE07710-61B5-4730-BF3D-1488D637807D}
+		{1758B4E2-9D50-4257-9ABD-5838A768575E} = {DCE07710-61B5-4730-BF3D-1488D637807D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {936F9790-BC54-416C-9C26-BB58BA16D33E}

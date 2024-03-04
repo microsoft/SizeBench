@@ -1,11 +1,13 @@
 ﻿using System.IO;
 using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.Logging;
+using SizeBench.TestInfrastructure;
 
 namespace SizeBench.AnalysisEngine.RealPETests;
 
 [DeploymentItem(@"Test PEs\External\x64\ReactNativeXaml.dll")]
 [DeploymentItem(@"Test PEs\External\x64\ReactNativeXaml.pdb")]
+[TestCategory(CommonTestCategories.SlowTests)]
 [TestClass]
 public sealed class Session_RVADuplicationTests
 {

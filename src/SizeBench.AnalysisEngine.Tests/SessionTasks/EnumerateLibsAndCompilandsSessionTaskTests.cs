@@ -1,6 +1,5 @@
 ﻿using System.Reflection.PortableExecutable;
 using SizeBench.AnalysisEngine.DIAInterop;
-using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.Logging;
 using SizeBench.TestDataCommon;
 
@@ -63,12 +62,10 @@ public sealed class EnumerateLibsAndCompilandsSessionTaskTests : IDisposable
                 new RawSectionContribution(libName: @"c:\dummy\c.lib", compilandName: @"c:\dummy\c.obj" , compilandSymIndexId: nextCompilandSymIndexId++, rva: 0x1500, length: 0x200),
             };
 
-        this.DataCache.PDataRVARange = new RVARange(0, 0);
-        this.DataCache.PDataSymbolsByRVA = new SortedList<uint, PDataSymbol>();
-        this.DataCache.XDataRVARanges = new RVARangeSet();
-        this.DataCache.XDataSymbolsByRVA = new SortedList<uint, XDataSymbol>();
-        this.DataCache.RsrcRVARange = new RVARange(0, 0);
-        this.DataCache.RsrcSymbolsByRVA = new SortedList<uint, RsrcSymbolBase>();
+        this.DataCache.PDataHasBeenInitialized = true;
+        this.DataCache.XDataHasBeenInitialized = true;
+        this.DataCache.RsrcHasBeenInitialized = true;
+        this.DataCache.OtherPESymbolsHaveBeenInitialized = true;
     }
 
     [TestMethod]
@@ -84,7 +81,7 @@ public sealed class EnumerateLibsAndCompilandsSessionTaskTests : IDisposable
 
         Assert.IsFalse(String.IsNullOrEmpty(task.TaskName));
         OperationCanceledException? capturedException = null;
-        IList<Library>? asyncResult = null;
+        HashSet<Library>? asyncResult = null;
         try
         {
             using var logger = new NoOpLogger();
@@ -103,14 +100,14 @@ public sealed class EnumerateLibsAndCompilandsSessionTaskTests : IDisposable
     public void CanEnumerateMultipleLibsWithCompilandsThatHaveTheSameNameIfItsAnImport()
     {
         TestNameCollisions("Import:ntdll.dll",
-                           new string[] { @"c:\dev\a.lib", @"c:\dev\a.lib" });
+                           [@"c:\dev\a.lib", @"c:\dev\a.lib"]);
     }
 
     [TestMethod]
     public void CanEnumerateMultipleLibsWithCompilandsThatHaveTheSameNameIfLibNamesDiffer()
     {
         TestNameCollisions(@"c:\dummy\a1.obj",
-                           new string[] { @"c:\dev\a.lib", @"c:\dev\b.lib" });
+                           [@"c:\dev\a.lib", @"c:\dev\b.lib"]);
     }
 
     private void TestNameCollisions(string nameToCollide, string[] libNames)

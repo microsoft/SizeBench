@@ -226,7 +226,7 @@ public sealed class LibDiff
     }
 
     #region Compilands
-    private readonly Dictionary<string, CompilandDiff> _compilandDiffs = new Dictionary<string, CompilandDiff>();
+    private readonly Dictionary<string, CompilandDiff> _compilandDiffs = new Dictionary<string, CompilandDiff>(StringComparer.OrdinalIgnoreCase);
     public IReadOnlyDictionary<string, CompilandDiff> CompilandDiffs => this._compilandDiffs;
 
     #endregion

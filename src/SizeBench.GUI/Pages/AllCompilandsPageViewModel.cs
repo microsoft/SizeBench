@@ -11,12 +11,12 @@ internal sealed class AllCompilandsPageViewModel : SingleBinaryViewModelBase
 {
     private readonly IUITaskScheduler _uiTaskScheduler;
     private readonly IExcelExporter _excelExporter;
-    private IReadOnlyList<Compiland>? _compilandList;
+    private IReadOnlyCollection<Compiland>? _compilandCollection;
 
-    public IReadOnlyList<Compiland>? Compilands
+    public IReadOnlyCollection<Compiland>? Compilands
     {
-        get => this._compilandList;
-        private set { this._compilandList = value; RaisePropertyChanged(); }
+        get => this._compilandCollection;
+        private set { this._compilandCollection = value; RaisePropertyChanged(); }
     }
 
     public List<string> DisplayModes { get; } = new List<string>() { "Size on disk", "Size in memory" };

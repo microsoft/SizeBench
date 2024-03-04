@@ -10,8 +10,8 @@ internal sealed class RsrcStringTableDataSymbol : RsrcDataSymbol
     private string DebuggerDisplay => $"{GetType().Name}: {this.Name} ({this.Size} bytes)";
 
     public IReadOnlyList<string> Strings { get; }
-    internal RsrcStringTableDataSymbol(uint rva, uint size, string language, string dataName, List<string> strings)
-        : base(rva, size, language, Win32ResourceType.STRINGTABLE, "STRINGTABLE", dataName)
+    internal RsrcStringTableDataSymbol(uint rva, uint size, string language, string dataName, List<string> strings, SymbolSourcesSupported symbolSourcesSupported)
+        : base(rva, size, language, Win32ResourceType.STRINGTABLE, "STRINGTABLE", dataName, "", symbolSourcesSupported)
     {
         this.Strings = strings;
     }

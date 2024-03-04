@@ -23,8 +23,10 @@ internal abstract class ImportSymbolBase : ISymbol
 
     public abstract SymbolComparisonClass SymbolComparisonClass { get; }
 
-    internal ImportSymbolBase(uint rva, uint size, string name)
+    internal ImportSymbolBase(uint rva, uint size, string name, SymbolSourcesSupported symbolSourcesSupported)
     {
+        Debug.Assert(symbolSourcesSupported.HasFlag(SymbolSourcesSupported.OtherPESymbols));
+
         this.RVA = rva;
         this.Size = size;
         this.Name = name;

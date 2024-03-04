@@ -7,6 +7,7 @@ namespace SizeBench.AnalysisEngine;
 internal sealed class SessionDataCache : IDisposable
 {
     public uint BytesPerWord { get; set; }
+    public SymbolSourcesSupported SymbolSourcesSupported { get; }
 
     internal Linker LinkerDetected { get; set; } = Linker.Unknown;
 
@@ -34,7 +35,7 @@ internal sealed class SessionDataCache : IDisposable
         }
     }
 
-    private Dictionary<string, SourceFile>? _sourceFilesByFilename = new Dictionary<string, SourceFile>();
+    private Dictionary<string, SourceFile>? _sourceFilesByFilename = new Dictionary<string, SourceFile>(StringComparer.OrdinalIgnoreCase);
     private List<SourceFile>? _sourceFilesConstructedEver = new List<SourceFile>(capacity: 100);
     public IReadOnlyList<SourceFile> SourceFilesConstructedEver => this._sourceFilesConstructedEver ?? new List<SourceFile>();
     public SourceFile? FindSourceFileByFilename(string? sourceFileName)
@@ -53,6 +54,8 @@ internal sealed class SessionDataCache : IDisposable
         return foundFile;
     }
 
+    internal Dictionary<string, SourceFile> UnsafeSourceFilesByFilename_UsedOnlyDuringConstruction => this._sourceFilesByFilename!;
+
     public void RecordBinarySectionConstructed(BinarySection section)
         => this._binarySectionsConstructedEver!.Add(section);
     public void RecordCOFFGroupConstructed(COFFGroup coffGroup)
@@ -70,9 +73,9 @@ internal sealed class SessionDataCache : IDisposable
 
     internal List<BinarySection>? AllBinarySections { get; set; }
     internal List<COFFGroup>? AllCOFFGroups { get; set; }
-    internal List<Compiland>? AllCompilands { get; set; }
+    internal HashSet<Compiland>? AllCompilands { get; set; }
     internal List<SourceFile>? AllSourceFiles { get; set; }
-    internal List<Library>? AllLibs { get; set; }
+    internal HashSet<Library>? AllLibs { get; set; }
     internal List<DuplicateDataItem>? AllDuplicateDataItems { get; set; }
     internal List<WastefulVirtualItem>? AllWastefulVirtualItems { get; set; }
     internal List<TemplateFoldabilityItem>? AllTemplateFoldabilityItems { get; set; }
@@ -82,12 +85,13 @@ internal sealed class SessionDataCache : IDisposable
 
     #region Symbols of specific types, and the big cache with all symbols
 
-    public SortedList<uint, TypeSymbol> AllTypesBySymIndexId { get; } = new SortedList<uint, TypeSymbol>(capacity: 1000);
+    public SortedList<uint, TypeSymbol> AllTypesBySymIndexId { get; } = new SortedList<uint, TypeSymbol>(capacity: 1_000);
     public SortedList<uint, AnnotationSymbol> AllAnnotationsBySymIndexId { get; } = new SortedList<uint, AnnotationSymbol>();
-    public SortedList<uint, ISymbol> AllSymbolsBySymIndexId { get; } = new SortedList<uint, ISymbol>(capacity: 10000);
-    public SortedList<uint, MemberDataSymbol> AllMemberDataSymbolsBySymIndexId { get; } = new SortedList<uint, MemberDataSymbol>(capacity: 1000);
-    public SortedList<uint, ParameterDataSymbol> AllParameterDataSymbolsbySymIndexId { get; } = new SortedList<uint, ParameterDataSymbol>(capacity: 1000);
-    public SortedList<uint, IFunctionCodeSymbol> AllFunctionSymbolsBySymIndexIdOfPrimaryBlock { get; } = new SortedList<uint, IFunctionCodeSymbol>(capacity: 1000);
+    public SortedList<uint, ISymbol> AllSymbolsBySymIndexId { get; } = new SortedList<uint, ISymbol>(capacity: 10_000);
+    public SortedList<uint, MemberDataSymbol> AllMemberDataSymbolsBySymIndexId { get; } = new SortedList<uint, MemberDataSymbol>(capacity: 1_000);
+    public SortedList<uint, ParameterDataSymbol> AllParameterDataSymbolsbySymIndexId { get; } = new SortedList<uint, ParameterDataSymbol>(capacity: 1_000);
+    public SortedList<uint, IFunctionCodeSymbol> AllFunctionSymbolsBySymIndexIdOfPrimaryBlock { get; } = new SortedList<uint, IFunctionCodeSymbol>(capacity: 1_000);
+    public SortedList<uint, InlineSiteSymbol> AllInlineSiteSymbolsBySymIndexId { get; } = new SortedList<uint, InlineSiteSymbol>(capacity: 100);
 
     internal UserDefinedTypeSymbol[]? AllUserDefinedTypes { get; set; }
     internal List<UserDefinedTypeGrouping>? AllUserDefinedTypeGroupings { get; set; }
@@ -98,24 +102,33 @@ internal sealed class SessionDataCache : IDisposable
 
     #region Special kinds of ranges that DIA can't deal with - PDATA, XDATA, and RSRC
 
-    public RVARange? PDataRVARange { get; internal set; }
+    internal bool PDataHasBeenInitialized { get; set; }
+    public RVARange PDataRVARange { get; internal set; } = new RVARange(0, 0);
 
     //TODO: WastefulVirtual: consider replacing these with an Array that's sorted by RVA which may be even faster.
-    public SortedList<uint, PDataSymbol>? PDataSymbolsByRVA { get; internal set; }
+    public SortedList<uint, PDataSymbol> PDataSymbolsByRVA { get; internal set; } = new SortedList<uint, PDataSymbol>();
 
-    public RVARangeSet? XDataRVARanges { get; internal set; }
-    public SortedList<uint, XDataSymbol>? XDataSymbolsByRVA { get; internal set; }
+    internal bool XDataHasBeenInitialized { get; set; }
+    public RVARangeSet XDataRVARanges { get; internal set; } = new RVARangeSet();
+    public SortedList<uint, XDataSymbol> XDataSymbolsByRVA { get; internal set; } = new SortedList<uint, XDataSymbol>();
 
     // TODO: determine if there's a way to use this in source file attribution?  The source files exist (with ".res" extension) and section contribs do...but unclear if this can be correlated
-    public RVARange? RsrcRVARange { get; internal set; }
-    public SortedList<uint, RsrcSymbolBase>? RsrcSymbolsByRVA { get; internal set; }
+    internal bool RsrcHasBeenInitialized { get; set; }
+    public RVARange RsrcRVARange { get; internal set; } = new RVARange(0, 0);
+    public SortedList<uint, RsrcSymbolBase> RsrcSymbolsByRVA { get; internal set; } = new SortedList<uint, RsrcSymbolBase>();
 
-    public SortedList<uint, ISymbol>? OtherPESymbolsByRVA { get; internal set; }
-    public RVARangeSet? OtherPESymbolsRVARanges { get; internal set; }
+    internal bool OtherPESymbolsHaveBeenInitialized { get; set; }
+    public SortedList<uint, ISymbol> OtherPESymbolsByRVA { get; internal set; } = new SortedList<uint, ISymbol>();
+    public RVARangeSet OtherPESymbolsRVARanges { get; internal set; } = new RVARangeSet();
 
     #endregion
 
     internal RVARangeSet? RVARangesThatAreOnlyVirtualSize { get; set; }
+
+    internal SessionDataCache(SymbolSourcesSupported symbolSourcesSupported = SymbolSourcesSupported.All)
+    {
+        this.SymbolSourcesSupported = symbolSourcesSupported;
+    }
 
     #region IDisposable Support
 
@@ -154,14 +167,18 @@ internal sealed class SessionDataCache : IDisposable
             this.AllUserDefinedTypeGroupings = null;
             this.AllDisambiguatingVTablePublicSymbolNamesByRVA = null;
 
-            this.PDataRVARange = null;
-            this.PDataSymbolsByRVA = null;
-            this.XDataRVARanges = null;
-            this.XDataSymbolsByRVA = null;
-            this.RsrcRVARange = null;
-            this.RsrcSymbolsByRVA = null;
-            this.OtherPESymbolsRVARanges = null;
-            this.OtherPESymbolsByRVA = null;
+            this.PDataRVARange = new RVARange(0, 0);
+            this.PDataSymbolsByRVA.Clear();
+            this.PDataHasBeenInitialized = false;
+            this.XDataRVARanges = new RVARangeSet();
+            this.XDataSymbolsByRVA.Clear();
+            this.XDataHasBeenInitialized = false;
+            this.RsrcRVARange = new RVARange(0, 0);
+            this.RsrcSymbolsByRVA.Clear();
+            this.RsrcHasBeenInitialized = false;
+            this.OtherPESymbolsRVARanges = new RVARangeSet();
+            this.OtherPESymbolsByRVA.Clear();
+            this.OtherPESymbolsHaveBeenInitialized = false;
 
             this.IsDisposed = true;
         }

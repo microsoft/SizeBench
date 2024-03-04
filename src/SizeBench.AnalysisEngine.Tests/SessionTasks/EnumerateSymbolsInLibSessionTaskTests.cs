@@ -28,14 +28,10 @@ public sealed class EnumerateSymbolsInLibSessionTaskTests : IDisposable
             this.TestDIAAdapter,
             this.DataCache);
 
-        this.DataCache.PDataRVARange = new RVARange(0, 0);
-        this.DataCache.PDataSymbolsByRVA = new SortedList<uint, PDataSymbol>();
-        this.DataCache.XDataRVARanges = new RVARangeSet();
-        this.DataCache.XDataSymbolsByRVA = new SortedList<uint, XDataSymbol>();
-        this.DataCache.RsrcRVARange = new RVARange(0, 0);
-        this.DataCache.RsrcSymbolsByRVA = new SortedList<uint, RsrcSymbolBase>();
-        this.DataCache.OtherPESymbolsRVARanges = new RVARangeSet();
-        this.DataCache.OtherPESymbolsByRVA = new SortedList<uint, ISymbol>();
+        this.DataCache.PDataHasBeenInitialized = true;
+        this.DataCache.XDataHasBeenInitialized = true;
+        this.DataCache.RsrcHasBeenInitialized = true;
+        this.DataCache.OtherPESymbolsHaveBeenInitialized = true;
     }
 
     [TestMethod]

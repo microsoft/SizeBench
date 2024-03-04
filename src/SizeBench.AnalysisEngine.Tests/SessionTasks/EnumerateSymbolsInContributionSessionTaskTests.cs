@@ -38,14 +38,10 @@ public sealed class EnumerateSymbolsInContributionSessionTaskTests : IDisposable
         this.TestLib = new Library("LIB blah");
         this.TestContribution = this.TestLib.GetOrCreateCOFFGroupContribution(this.TextMnCG);
 
-        this.SessionTaskParameters.DataCache.PDataRVARange = new RVARange(0, 0);
-        this.SessionTaskParameters.DataCache.PDataSymbolsByRVA = new SortedList<uint, PDataSymbol>();
-        this.SessionTaskParameters.DataCache.XDataRVARanges = new RVARangeSet();
-        this.SessionTaskParameters.DataCache.XDataSymbolsByRVA = new SortedList<uint, XDataSymbol>();
-        this.SessionTaskParameters.DataCache.RsrcRVARange = new RVARange(0, 0);
-        this.SessionTaskParameters.DataCache.RsrcSymbolsByRVA = new SortedList<uint, RsrcSymbolBase>();
-        this.SessionTaskParameters.DataCache.OtherPESymbolsRVARanges = new RVARangeSet();
-        this.SessionTaskParameters.DataCache.OtherPESymbolsByRVA = new SortedList<uint, ISymbol>();
+        this.SessionTaskParameters.DataCache.PDataHasBeenInitialized = true;
+        this.SessionTaskParameters.DataCache.XDataHasBeenInitialized = true;
+        this.SessionTaskParameters.DataCache.RsrcHasBeenInitialized = true;
+        this.SessionTaskParameters.DataCache.OtherPESymbolsHaveBeenInitialized = true;
     }
 
     [TestMethod]
@@ -219,9 +215,11 @@ public sealed class EnumerateSymbolsInContributionSessionTaskTests : IDisposable
 
         for (var pdataSymbolRva = rvaBegin; pdataSymbolRva < rvaEnd; pdataSymbolRva += rvaGap)
         {
-            var pdataSymbol = new PDataSymbol(targetStartRVA: 0, unwindInfoStartRVA: 0, rva: pdataSymbolRva, size: rvaGap);
-            this.DataCache.PDataSymbolsByRVA!.Add(pdataSymbol.RVA, pdataSymbol);
+            var pdataSymbol = new PDataSymbol(targetStartRVA: 0, unwindInfoStartRVA: 0, rva: pdataSymbolRva, size: rvaGap, SymbolSourcesSupported.All);
+            this.DataCache.PDataSymbolsByRVA.Add(pdataSymbol.RVA, pdataSymbol);
         }
+
+        this.DataCache.PDataHasBeenInitialized = true;
     }
 
     public void Dispose() => this.DataCache.Dispose();

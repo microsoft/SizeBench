@@ -4,8 +4,8 @@ internal sealed class CppXdataSymbol : XDataSymbol
 {
     public override SymbolComparisonClass SymbolComparisonClass => SymbolComparisonClass.CppXdata;
 
-    public CppXdataSymbol(Symbol? targetSymbol, uint targetStartRVA, uint rva, uint size) :
-        base(targetSymbol, targetStartRVA, rva, size)
+    public CppXdataSymbol(Symbol? targetSymbol, uint targetStartRVA, uint rva, uint size, SymbolSourcesSupported symbolSourcesSupported) :
+        base(targetSymbol, targetStartRVA, rva, size, symbolSourcesSupported)
     {
     }
 

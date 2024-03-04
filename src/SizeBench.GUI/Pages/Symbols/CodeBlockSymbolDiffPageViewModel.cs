@@ -242,6 +242,7 @@ internal sealed class CodeBlockSymbolDiffPageViewModel : BinaryDiffViewModelBase
             throw new NotImplementedException("Something has gone wrong in constructing this page.  This is a bug in SizeBench.");
         }
 
+        // It's intentional that the string ends with ", then " and seems to be hanging.  It's because the XAML has the hyperlink after that.
         sb.Append("  If you meant to compare the entire function across all blocks, then ");
 
         this.BlocksOfDifferentTypeWarningText = sb.ToString();

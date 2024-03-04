@@ -1,4 +1,6 @@
-﻿namespace SizeBench.AnalysisEngine.Symbols;
+﻿using System.Diagnostics;
+
+namespace SizeBench.AnalysisEngine.Symbols;
 
 internal sealed class LoadConfigTableSymbol : ISymbol
 {
@@ -16,8 +18,10 @@ internal sealed class LoadConfigTableSymbol : ISymbol
 
     public SymbolComparisonClass SymbolComparisonClass => SymbolComparisonClass.LoadConfigTable;
 
-    internal LoadConfigTableSymbol(uint rva, uint size, string name)
+    internal LoadConfigTableSymbol(uint rva, uint size, string name, SymbolSourcesSupported symbolSourcesSupported)
     {
+        Debug.Assert(symbolSourcesSupported.HasFlag(SymbolSourcesSupported.OtherPESymbols));
+
         this.RVA = rva;
         this.Size = size;
         this.Name = name;

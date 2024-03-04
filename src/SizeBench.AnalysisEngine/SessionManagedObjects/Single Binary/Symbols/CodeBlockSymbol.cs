@@ -1,4 +1,6 @@
-﻿namespace SizeBench.AnalysisEngine.Symbols;
+﻿using System.Diagnostics;
+
+namespace SizeBench.AnalysisEngine.Symbols;
 
 public abstract class CodeBlockSymbol : Symbol
 {
@@ -30,6 +32,7 @@ public abstract class CodeBlockSymbol : Symbol
                              uint size,
                              uint symIndexId) : base(cache, System.String.Empty, rva, size, isVirtualSize: false, symIndexId: symIndexId, namesAreFinalized: false)
     {
+        Debug.Assert(cache.SymbolSourcesSupported.HasFlag(SymbolSourcesSupported.Code));
     }
 
     protected virtual void OnParentFunctionSet() { }

@@ -14,14 +14,26 @@ public sealed class DictionaryThatDoesntThrowWhenKeyNotPresent<TValue> : INotify
 {
     public DictionaryThatDoesntThrowWhenKeyNotPresent()
     {
+        // Default to Ordinal comparisons since that's performant for most cases
+        this._dictionary = new Dictionary<string, TValue>(StringComparer.Ordinal);
+    }
+
+    public DictionaryThatDoesntThrowWhenKeyNotPresent(IEqualityComparer<string> comparer)
+    {
+        this._dictionary = new Dictionary<string, TValue>(comparer);
     }
 
     public DictionaryThatDoesntThrowWhenKeyNotPresent(IDictionary<string, TValue> source)
     {
-        this._dictionary = new Dictionary<string, TValue>(source);
+        this._dictionary = new Dictionary<string, TValue>(source, StringComparer.Ordinal);
     }
 
-    private readonly Dictionary<string, TValue> _dictionary = new Dictionary<string, TValue>();
+    public DictionaryThatDoesntThrowWhenKeyNotPresent(IDictionary<string, TValue> source, IEqualityComparer<string> comparer)
+    {
+        this._dictionary = new Dictionary<string, TValue>(source, comparer);
+    }
+
+    private readonly Dictionary<string, TValue> _dictionary;
 
     public TValue this[string key]
     {

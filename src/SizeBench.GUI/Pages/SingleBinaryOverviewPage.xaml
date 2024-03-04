@@ -52,6 +52,9 @@
                     <TextBlock FontSize="14" Margin="10,5,0,5" TextWrapping="Wrap">
                         <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}" CommandParameter="{x:Static navigation:WellKnownPages.AllUserDefinedTypesPageUri}">Types</Hyperlink>
                     </TextBlock>
+                    <TextBlock FontSize="14" Margin="10,5,0,5" TextWrapping="Wrap">
+                        <Hyperlink Command="{x:Static commands:AppCommands.NavigateToModel}" CommandParameter="{x:Static navigation:WellKnownPages.AllInlinesPageUri}">Inlines</Hyperlink>
+                    </TextBlock>
                     <!-- Some day also put here: Dynamic Initializers, Functions, VTables -->
                 </StackPanel>
 

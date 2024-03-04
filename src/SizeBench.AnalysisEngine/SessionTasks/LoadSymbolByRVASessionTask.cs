@@ -21,10 +21,10 @@ internal class LoadSymbolByRVASessionTask : SessionTask<ISymbol?>
     {
         this.CancellationToken.ThrowIfCancellationRequested();
 
-        if (this.DataCache.PDataRVARange is null || this.DataCache.PDataSymbolsByRVA is null ||
-            this.DataCache.XDataRVARanges is null || this.DataCache.XDataSymbolsByRVA is null ||
-            this.DataCache.RsrcRVARange is null || this.DataCache.RsrcSymbolsByRVA is null ||
-            this.DataCache.OtherPESymbolsRVARanges is null || this.DataCache.OtherPESymbolsByRVA is null)
+        if (this.DataCache.PDataHasBeenInitialized == false ||
+            this.DataCache.XDataHasBeenInitialized == false ||
+            this.DataCache.RsrcHasBeenInitialized == false ||
+            this.DataCache.OtherPESymbolsHaveBeenInitialized == false)
         {
             throw new InvalidOperationException("It is not valid to attempt to load a symbol by RVA before the PE symbols have been parsed, as that is necessary to ensure all types of symbols are found.  This is a bug in SizeBench's implementation, not your usage of it.");
         }

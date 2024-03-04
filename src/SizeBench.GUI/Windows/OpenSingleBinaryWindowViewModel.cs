@@ -6,13 +6,18 @@ namespace SizeBench.GUI.Windows;
 
 internal sealed class OpenSingleBinaryWindowViewModel : INotifyPropertyChanged
 {
-    public OpenSingleBinaryWindowViewModel(SelectSingleBinaryAndPDBControlViewModel ssbandPDBViewModel)
+    public OpenSingleBinaryWindowViewModel(SelectSingleBinaryAndPDBControlViewModel ssbandPDBViewModel,
+                                           SelectSessionOptionsControlViewModel ssoViewModel)
     {
         this.SelectSingleBinaryAndPDBControlViewModel = ssbandPDBViewModel;
         this.SelectSingleBinaryAndPDBControlViewModel.PropertyChanged += (s, e) => EnableOKButtonIfReady();
+
+        this.SelectSessionOptionsControlViewModel = ssoViewModel;
     }
 
     public SelectSingleBinaryAndPDBControlViewModel SelectSingleBinaryAndPDBControlViewModel { get; }
+
+    public SelectSessionOptionsControlViewModel SelectSessionOptionsControlViewModel { get; }
 
     #region INPC
 

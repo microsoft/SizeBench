@@ -10,6 +10,7 @@ public sealed class BinarySection
 {
     internal static readonly BinarySection NoSectionsSentinel = new BinarySection("No sections"); // To be used only for diffing, really
 
+    private readonly bool _shouldAttemptToEnforceGaps;
     private bool _fullyConstructed;
     private readonly Linker _linker = Linker.Unknown;
 
@@ -176,6 +177,7 @@ public sealed class BinarySection
         this.SectionAlignment = sectionAlignment;
         this.Characteristics = characteristics;
         this._linker = cache?.LinkerDetected ?? Linker.Unknown;
+        this._shouldAttemptToEnforceGaps = (cache?.SymbolSourcesSupported ?? SymbolSourcesSupported.All) == SymbolSourcesSupported.All;
 
         // We assume that every section's Size is a multiple of FileAlignment - this seems to be true.  If it's not, it wouldn't be especially hard to add
         // TailSlopSizeAlignment like TailSlopVirtualSizeAlignment.
@@ -215,7 +217,7 @@ public sealed class BinarySection
             var previousRVAEndSize = coffGroupsSortedByRVA[i - 1].RVA + coffGroupsSortedByRVA[i - 1].Size;
             var gapVirtualSize = coffGroupsSortedByRVA[i].RVA - previousRVAEndVirtualSize;
             var gapSize = coffGroupsSortedByRVA[i].RVA - previousRVAEndSize;
-            if (gapVirtualSize > this.FileAlignment)
+            if (this._shouldAttemptToEnforceGaps && gapVirtualSize > this.FileAlignment)
             {
                 Trace.WriteLine($"COFF Groups {coffGroupsSortedByRVA[i - 1].Name} and {coffGroupsSortedByRVA[i].Name} contain a large gap between them ({gapVirtualSize} bytes), which is larger than the FileAlignment ({this.FileAlignment}).  This has not been seen before in practice, and may indicate a bug in SizeBench.");
                 PrintDebuggingInfoForGapAndAlignmentAnalysis();

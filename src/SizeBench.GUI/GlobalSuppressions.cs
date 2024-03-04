@@ -29,3 +29,7 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Usage", "CA2208:Instantiate argument exceptions correctly", 
                            Justification = "Argument exceptions ordering isn't that important in the GUI, it's not a library used externally.  Also, there have been some regressions in CA2208 in the .NET 8 SDK where it has false positives (see https://github.com/dotnet/roslyn-analyzers/issues/6863)",
                            Scope = "namespaceanddescendants", Target = "~N:SizeBench.GUI")]
+
+[assembly: SuppressMessage("Design", "CA1002:Do not expose generic lists",
+                           Justification = "This rule is about public types for libraries that will have consumers - the UI library is never going to be consumed externally, it is a leaf in the dependency tree",
+                           Scope = "namespaceanddescendants", Target = "~N:SizeBench.GUI")]

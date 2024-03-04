@@ -18,9 +18,9 @@ public sealed class EnumerateLibsAndCompilandDiffsSessionTaskTests : IDisposable
         this._generator.MockAfterSession.Setup(s => s.EnumerateBinarySectionsAndCOFFGroups(It.IsAny<CancellationToken>(), It.IsAny<ILogger>()))
                                         .Returns(() => Task.FromResult(this._generator.AfterSections as IReadOnlyList<BinarySection>));
         this._generator.MockBeforeSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>(), It.IsAny<ILogger>()))
-                                         .Returns(() => Task.FromResult(this._generator.BeforeLibs as IReadOnlyList<Library>));
+                                         .Returns(() => Task.FromResult(this._generator.BeforeLibs as IReadOnlyCollection<Library>));
         this._generator.MockAfterSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>(), It.IsAny<ILogger>()))
-                                        .Returns(() => Task.FromResult(this._generator.AfterLibs as IReadOnlyList<Library>));
+                                        .Returns(() => Task.FromResult(this._generator.AfterLibs as IReadOnlyCollection<Library>));
     }
 
     [TestMethod]

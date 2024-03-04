@@ -21,10 +21,10 @@ public class DllCxxFrameHandler4Tests
         using var logger = new NoOpLogger();
         await using var session = await Session.Create(this.BinaryPath, this.PDBPath, logger);
         // These are gotten from "link /dump /headers PEParser.Tests.DllCxxFrameHandler4.dll" and looking at the "Exception" directory
-        Assert.AreEqual(0x5000u, session.DataCache.PDataRVARange!.RVAStart);
+        Assert.AreEqual(0x5000u, session.DataCache.PDataRVARange.RVAStart);
         Assert.AreEqual(0x2E8u, session.DataCache.PDataRVARange.Size);
 
-        Assert.AreEqual(1, session.DataCache.XDataRVARanges!.Count);
+        Assert.AreEqual(1, session.DataCache.XDataRVARanges.Count);
 
         Assert.AreEqual(0x3788u, session.DataCache.XDataRVARanges.First().RVAStart);
         Assert.AreEqual(0x348u, session.DataCache.XDataRVARanges.First().Size);
@@ -33,14 +33,14 @@ public class DllCxxFrameHandler4Tests
         // type, and the properties of those symbols as seen in the MAP file (assumed to be the truth).
 
         // [pdata] for DllCxxFrameHandler4_CppxdataUsage::MaybeThrow
-        var DllCxxFrameHandler4_CppxdataUsage_MaybeThrowPdata = session.DataCache.PDataSymbolsByRVA![0x524C];
+        var DllCxxFrameHandler4_CppxdataUsage_MaybeThrowPdata = session.DataCache.PDataSymbolsByRVA[0x524C];
         Assert.AreEqual(0x2940u, DllCxxFrameHandler4_CppxdataUsage_MaybeThrowPdata.TargetStartRVA);
         Assert.AreEqual(12u, DllCxxFrameHandler4_CppxdataUsage_MaybeThrowPdata.Size);
         Assert.IsTrue(DllCxxFrameHandler4_CppxdataUsage_MaybeThrowPdata.Name.Contains("DllCxxFrameHandler4_CppxdataUsage::MaybeThrow(", StringComparison.Ordinal));
         Assert.IsTrue(DllCxxFrameHandler4_CppxdataUsage_MaybeThrowPdata.Name.Contains("pdata", StringComparison.Ordinal));
 
         // This tests an unwind symbol that uses __CxxFrameHandler4 (MaybeThrow catch$1)
-        var DllCxxFrameHandler4_CppxdataUsage_MaybeThrowCatch1Unwind = (UnwindInfoSymbol)session.DataCache.XDataSymbolsByRVA![0x3ABC];
+        var DllCxxFrameHandler4_CppxdataUsage_MaybeThrowCatch1Unwind = (UnwindInfoSymbol)session.DataCache.XDataSymbolsByRVA[0x3ABC];
         Assert.AreEqual(0x2BFBu, DllCxxFrameHandler4_CppxdataUsage_MaybeThrowCatch1Unwind.TargetStartRVA);
         Assert.AreEqual(8u, DllCxxFrameHandler4_CppxdataUsage_MaybeThrowCatch1Unwind.Size);
         Assert.IsTrue(DllCxxFrameHandler4_CppxdataUsage_MaybeThrowCatch1Unwind.Name.Contains("DllCxxFrameHandler4_CppxdataUsage::MaybeThrow", StringComparison.Ordinal));

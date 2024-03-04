@@ -3,10 +3,11 @@ using System.Runtime.CompilerServices;
 
 namespace SizeBench.AnalysisEngine;
 
-//TODO: PERF: See if making this a readonly struct would improve perf since it's used so much
-[DebuggerDisplay("RVA Range: Start={RVAStart}, End={RVAEnd}, Size={Size}, VirtualSize={VirtualSize}")]
-public sealed class RVARange : IEquatable<RVARange>
+[DebuggerDisplay("{DebuggerDisplay,nq}")]
+public readonly struct RVARange : IEquatable<RVARange>
 {
+    private string DebuggerDisplay => $"RVA Range: Start=0x{this.RVAStart:X}, End=0x{this.RVAEnd:X}, Size={this.Size:N0}, VirtualSize={this.VirtualSize:N0}";
+
     // It's important that these fields be readonly - they need to be immutable as RVARange objects are treated as if they're immutable.
     // This class overrides GetHashCode() which must only operate on immutable state for dictionaries to not get corrupted buckets - so don't
     // ever make these mutable.
@@ -17,17 +18,17 @@ public sealed class RVARange : IEquatable<RVARange>
     private readonly bool _isVirtualSize;
 #pragma warning restore IDE0032 // Use auto property
 
-    public uint Size => this.IsVirtualSize ? 0 : this.VirtualSize;
-    public uint VirtualSize => this._rvaEnd - this._rvaStart + 1;
+    public readonly uint Size => this.IsVirtualSize ? 0 : this.VirtualSize;
+    public readonly uint VirtualSize => this._rvaEnd - this._rvaStart + 1;
 
 #pragma warning disable IDE0032 // Use auto property - these need to be fields both because of the note above about readonly and also because they're
     // very perf-sensitive so the overhead of get/set on a property is just too high for these 3.
-    public uint RVAStart => this._rvaStart;
-    public uint RVAEnd => this._rvaEnd;
+    public readonly uint RVAStart => this._rvaStart;
+    public readonly uint RVAEnd => this._rvaEnd;
 
     // If this is true, then this RVARange exists only in "virtual size" space - it does not take up any space on disk, but it does take
     // up space in memory.  An example would be the RVARanges composing the .bss COFF Group.
-    public bool IsVirtualSize => this._isVirtualSize;
+    public readonly bool IsVirtualSize => this._isVirtualSize;
 #pragma warning restore IDE0032 // Use auto property
 
     /// <summary>
@@ -131,20 +132,18 @@ public sealed class RVARange : IEquatable<RVARange>
 
     // See https://docs.microsoft.com/dotnet/csharp/programming-guide/statements-expressions-operators/how-to-define-value-equality-for-a-type
 
-    public override bool Equals(object? obj) => Equals(obj as RVARange);
-
-    public bool Equals(RVARange? other)
+    public override bool Equals(object? obj)
     {
-        if (other is null)
+        if (obj is RVARange otherRange)
         {
-            return false;
+            return Equals(otherRange);
         }
 
-        if (ReferenceEquals(this, other))
-        {
-            return true;
-        }
+        return false;
+    }
 
+    public bool Equals(RVARange other)
+    {
         return this._rvaStart == other._rvaStart &&
                this._rvaEnd == other._rvaEnd &&
                this._isVirtualSize == other._isVirtualSize;

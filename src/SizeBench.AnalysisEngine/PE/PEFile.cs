@@ -36,6 +36,8 @@ internal sealed partial class PEFile : IPEFile
 
     public MachineType MachineType { get; }
 
+    internal SymbolSourcesSupported SymbolSourcesSupported { get; }
+
     private List<IMAGE_DEBUG_DIRECTORY> DebugDirectories { get; } = new List<IMAGE_DEBUG_DIRECTORY>();
 
     public PEFileDebugSignature DebugSignature { get; private set; } = new PEFileDebugSignature(Guid.Empty, 0, String.Empty);
@@ -66,8 +68,12 @@ internal sealed partial class PEFile : IPEFile
     /// Loads the PE file into memory, strips integrity bit if it must, and so on.
     /// </summary>
     /// <param name="originalBinaryPathMayBeRemote">The path to the binary - this should be a local path for perf, but that is up to the caller.  We assume it's local and read/write-able.</param>
-    public unsafe PEFile(string originalBinaryPathMayBeRemote, ILogger logger)
+    /// <param name="symbolSourcesSupported">Which kinds of symbols we should attempt to parse out of the PE file</param>
+    /// <param name="logger">Where to log things</param>
+    public unsafe PEFile(string originalBinaryPathMayBeRemote, SymbolSourcesSupported symbolSourcesSupported, ILogger logger)
     {
+        this.SymbolSourcesSupported = symbolSourcesSupported;
+
         using var taskLog = logger.StartTaskLog("Parse PE File");
         Span<byte> bytes = stackalloc byte[4096];
         using (var stream = File.OpenRead(originalBinaryPathMayBeRemote))
@@ -149,13 +155,29 @@ internal sealed partial class PEFile : IPEFile
         // There are 16 of them, so here we go.
 
         // 0. ExportTable
-        ParseExportTable();
+        if (symbolSourcesSupported.HasFlag(SymbolSourcesSupported.OtherPESymbols))
+        {
+            ParseExportTable();
+        }
 
         // 1. ImportTable
-        ParseImportTable(taskLog);
+        if (symbolSourcesSupported.HasFlag(SymbolSourcesSupported.OtherPESymbols))
+        {
+            ParseImportTable(taskLog);
+        }
 
         // 2. ResourceTable
-        ParseRsrcSymbols();
+        if (symbolSourcesSupported.HasFlag(SymbolSourcesSupported.RSRC))
+        {
+            using (logger.StartTaskLog("Parsing Win32 Resources (.rsrc) symbols"))
+            {
+                ParseRsrcSymbols();
+            }
+        }
+        else
+        {
+            logger.Log($"Skipping Win32 Resources (.rsrc) symbols, per {nameof(this.SymbolSourcesSupported)}");
+        }
 
         // 3. ExceptionTable
         // Exception Handling symbols are processed later because there's a careful dance of finding all ICF'd symbols at given RVAs and stuff like that before we can do this the best.
@@ -165,9 +187,14 @@ internal sealed partial class PEFile : IPEFile
         // TBD - does SizeBench need to parse anything here?
 
         // 5. BaseRelocationTable
-        AddDirectorySymbolIfPresent(this.PEHeader.BaseRelocationTableDirectory, "Base Relocation Table");
+        if (symbolSourcesSupported.HasFlag(SymbolSourcesSupported.OtherPESymbols))
+        {
+            AddDirectorySymbolIfPresent(this.PEHeader.BaseRelocationTableDirectory, "Base Relocation Table");
+        }
 
         // 6. Debug
+        // We intentionally don't look at the SymbolSourcesSupported here, as we want to parse the PDB debug signature (GUID and age) even if
+        // we won't record the symbols.
         ParseDebugDirectory(taskLog);
 
         // 7. Architecture
@@ -181,7 +208,10 @@ internal sealed partial class PEFile : IPEFile
         // TBD - does SizeBench need to parse anything here?
 
         // 10. LoadConfigTable
-        ParseLoadConfigDirectory();
+        if (symbolSourcesSupported.HasFlag(SymbolSourcesSupported.OtherPESymbols))
+        {
+            ParseLoadConfigDirectory();
+        }
 
         // 11. BoundImport
         // TBD - does SizeBench need to parse anything here?
@@ -190,7 +220,10 @@ internal sealed partial class PEFile : IPEFile
         // TBD - does SizeBench need to parse anything here?
 
         // 13. DelayImportDescriptor
-        ParseDelayLoadImportDescriptorDirectory();
+        if (symbolSourcesSupported.HasFlag(SymbolSourcesSupported.OtherPESymbols))
+        {
+            ParseDelayLoadImportDescriptorDirectory();
+        }
 
         // 14. CLRRuntimeHeader (aka IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR)
         // No need for SizeBench to try parsing this now as we reject managed binaries.
@@ -254,14 +287,14 @@ internal sealed partial class PEFile : IPEFile
         {
             if (descriptor->Name == 0 || descriptor->OriginalFirstThunk == 0)
             {
-                this.OtherPESymbols.Add(descriptorRva, new ImportDescriptorSymbol(descriptorRva, "null terminator"));
+                this.OtherPESymbols.Add(descriptorRva, new ImportDescriptorSymbol(descriptorRva, "null terminator", this.SymbolSourcesSupported));
                 break;
             }
 
             // The descriptor name will be the name of the module being imported, like "kernel32.dll" or "combase.dll"
             var descriptorName = Marshal.PtrToStringAnsi(new IntPtr(GetDataMemberPtrByRVA(descriptor->Name)))!;
-            this.OtherPESymbols.Add(descriptorRva, new ImportDescriptorSymbol(descriptorRva, descriptorName));
-            this.OtherPESymbols.Add(descriptor->Name, new ImportStringSymbol(descriptor->Name, (uint)descriptorName.Length + 1 /* null terminator */, $"`string': \"{descriptorName}\""));
+            this.OtherPESymbols.Add(descriptorRva, new ImportDescriptorSymbol(descriptorRva, descriptorName, this.SymbolSourcesSupported));
+            this.OtherPESymbols.Add(descriptor->Name, new ImportStringSymbol(descriptor->Name, (uint)descriptorName.Length + 1 /* null terminator */, $"`string': \"{descriptorName}\"", this.SymbolSourcesSupported));
 
             Debug.Assert((descriptor->OriginalFirstThunk != 0) == (descriptor->FirstThunk != 0));
 
@@ -286,12 +319,12 @@ internal sealed partial class PEFile : IPEFile
 
                     if (ordinal == 0)
                     {
-                        this.OtherPESymbols.Add(thunkRva, new ImportThunkSymbol(thunkRva, thunkSize, 0, descriptorName, "null terminator"));
+                        this.OtherPESymbols.Add(thunkRva, new ImportThunkSymbol(thunkRva, thunkSize, 0, descriptorName, "null terminator", this.SymbolSourcesSupported));
                         break;
                     }
                     else if (isOrdinalOnly)
                     {
-                        this.OtherPESymbols.Add(thunkRva, new ImportThunkSymbol(thunkRva, thunkSize, ordinal, descriptorName, null));
+                        this.OtherPESymbols.Add(thunkRva, new ImportThunkSymbol(thunkRva, thunkSize, ordinal, descriptorName, null, this.SymbolSourcesSupported));
                     }
                     else
                     {
@@ -300,8 +333,8 @@ internal sealed partial class PEFile : IPEFile
                         var hint = *(ushort*)(importByNamePtr);
                         importByNamePtr += 2;
                         var thunkName = Marshal.PtrToStringAnsi(new IntPtr(importByNamePtr))!;
-                        this.OtherPESymbols.Add(thunkRva, new ImportThunkSymbol(thunkRva, thunkSize, hint, descriptorName, thunkName));
-                        this.OtherPESymbols.Add(addressOfData, new ImportByNameSymbol(addressOfData, (uint)thunkName.Length + 1 /* null terminator */ + 2 /* hint ushort */, hint, descriptorName, thunkName));
+                        this.OtherPESymbols.Add(thunkRva, new ImportThunkSymbol(thunkRva, thunkSize, hint, descriptorName, thunkName, this.SymbolSourcesSupported));
+                        this.OtherPESymbols.Add(addressOfData, new ImportByNameSymbol(addressOfData, (uint)thunkName.Length + 1 /* null terminator */ + 2 /* hint ushort */, hint, descriptorName, thunkName, this.SymbolSourcesSupported));
                     }
 
                     thunkRva += thunkSize;
@@ -347,7 +380,7 @@ internal sealed partial class PEFile : IPEFile
                     var tableSize = (uint)(tableCount * stride);
 
                     var gfidsTableRVAEnd = gfidsTableRVA + tableSize;
-                    this.GFIDSTable = new LoadConfigTableSymbol(gfidsTableRVA, tableSize, "FID Table");
+                    this.GFIDSTable = new LoadConfigTableSymbol(gfidsTableRVA, tableSize, "FID Table", this.SymbolSourcesSupported);
                     this.OtherPESymbols.Add(gfidsTableRVA, this.GFIDSTable);
                 }
             }
@@ -366,7 +399,7 @@ internal sealed partial class PEFile : IPEFile
                     var tableSize = (uint)(tableCount * stride);
 
                     var giatsTableRVAEnd = giatsTableRVA + tableSize;
-                    this.GIATSTable = new LoadConfigTableSymbol(giatsTableRVA, tableSize, "IAT Address-Taken Table");
+                    this.GIATSTable = new LoadConfigTableSymbol(giatsTableRVA, tableSize, "IAT Address-Taken Table", this.SymbolSourcesSupported);
                     this.OtherPESymbols.Add(giatsTableRVA, this.GIATSTable);
                 }
             }
@@ -389,7 +422,7 @@ internal sealed partial class PEFile : IPEFile
                     var tableSize = tableCount * stride;
 
                     var gfidsTableRVAEnd = gfidsTableRVA + tableSize;
-                    this.GFIDSTable = new LoadConfigTableSymbol(gfidsTableRVA, tableSize, "FID Table");
+                    this.GFIDSTable = new LoadConfigTableSymbol(gfidsTableRVA, tableSize, "FID Table", this.SymbolSourcesSupported);
                     this.OtherPESymbols.Add(gfidsTableRVA, this.GFIDSTable);
                 }
             }
@@ -408,7 +441,7 @@ internal sealed partial class PEFile : IPEFile
                     var tableSize = tableCount * stride;
 
                     var giatsTableRVAEnd = giatsTableRVA + tableSize;
-                    this.GIATSTable = new LoadConfigTableSymbol(giatsTableRVA, tableSize, "IAT Address-Taken Table");
+                    this.GIATSTable = new LoadConfigTableSymbol(giatsTableRVA, tableSize, "IAT Address-Taken Table", this.SymbolSourcesSupported);
                     this.OtherPESymbols.Add(giatsTableRVA, this.GIATSTable);
                 }
             }
@@ -445,14 +478,14 @@ internal sealed partial class PEFile : IPEFile
         {
             if (descriptor->DllNameRVA == 0 || descriptor->ImportAddressTableRVA == 0 || descriptor->ImportNameTableRVA == 0)
             {
-                this.OtherPESymbols.Add(descriptorRva, new ImportDescriptorSymbol(descriptorRva, "null terminator"));
+                this.OtherPESymbols.Add(descriptorRva, new ImportDescriptorSymbol(descriptorRva, "null terminator", this.SymbolSourcesSupported));
                 break;
             }
 
             // The descriptor name will be the name of the module being imported, like "kernel32.dll" or "combase.dll"
             var descriptorName = Marshal.PtrToStringAnsi(new IntPtr(GetDataMemberPtrByRVA(descriptor->DllNameRVA)))!;
-            this.OtherPESymbols.Add(descriptorRva, new ImportDescriptorSymbol(descriptorRva, descriptorName));
-            var descriptorString = new ImportStringSymbol(descriptor->DllNameRVA, (uint)descriptorName.Length + 1 /* null terminator */, $"`string': \"{descriptorName}\"");
+            this.OtherPESymbols.Add(descriptorRva, new ImportDescriptorSymbol(descriptorRva, descriptorName, this.SymbolSourcesSupported));
+            var descriptorString = new ImportStringSymbol(descriptor->DllNameRVA, (uint)descriptorName.Length + 1 /* null terminator */, $"`string': \"{descriptorName}\"", this.SymbolSourcesSupported);
             this.OtherPESymbols.Add(descriptor->DllNameRVA, descriptorString);
             strings.Add(descriptorString);
 
@@ -487,13 +520,13 @@ internal sealed partial class PEFile : IPEFile
 
                     if (ordinal == 0)
                     {
-                        nameThunkSymbol = new ImportThunkSymbol(nameTableThunkPtrRva, thunkSize, 0, descriptorName, "INT null terminator");
+                        nameThunkSymbol = new ImportThunkSymbol(nameTableThunkPtrRva, thunkSize, 0, descriptorName, "INT null terminator", this.SymbolSourcesSupported);
                         this.OtherPESymbols.Add(nameTableThunkPtrRva, nameThunkSymbol);
                         thunks.Add(nameThunkSymbol);
 
                         if (hasIAT)
                         {
-                            iatThunkSymbol = new ImportThunkSymbol(iatThunkPtrRva, thunkSize, 0, descriptorName, "IAT null terminator");
+                            iatThunkSymbol = new ImportThunkSymbol(iatThunkPtrRva, thunkSize, 0, descriptorName, "IAT null terminator", this.SymbolSourcesSupported);
                             this.OtherPESymbols.Add(iatThunkPtrRva, iatThunkSymbol);
                             thunks.Add(iatThunkSymbol);
                         }
@@ -502,11 +535,11 @@ internal sealed partial class PEFile : IPEFile
                     }
                     else if (isOrdinalOnly)
                     {
-                        nameThunkSymbol = new ImportThunkSymbol(nameTableThunkPtrRva, thunkSize, ordinal, descriptorName, null);
+                        nameThunkSymbol = new ImportThunkSymbol(nameTableThunkPtrRva, thunkSize, ordinal, descriptorName, null, this.SymbolSourcesSupported);
 
                         if (hasIAT)
                         {
-                            iatThunkSymbol = new ImportThunkSymbol(iatThunkPtrRva, thunkSize, ordinal, descriptorName, null);
+                            iatThunkSymbol = new ImportThunkSymbol(iatThunkPtrRva, thunkSize, ordinal, descriptorName, null, this.SymbolSourcesSupported);
                         }
                     }
                     else
@@ -516,14 +549,14 @@ internal sealed partial class PEFile : IPEFile
                         var hint = *(ushort*)(importByNamePtr);
                         importByNamePtr += 2;
                         var thunkName = Marshal.PtrToStringAnsi(new IntPtr(importByNamePtr))!;
-                        nameThunkSymbol = new ImportThunkSymbol(nameTableThunkPtrRva, thunkSize, hint, descriptorName, thunkName);
-                        var importByName = new ImportByNameSymbol(addressOfData, (uint)thunkName.Length + 1 /* null terminator */ + 2 /* hint ushort */, hint, descriptorName, thunkName);
+                        nameThunkSymbol = new ImportThunkSymbol(nameTableThunkPtrRva, thunkSize, hint, descriptorName, thunkName, this.SymbolSourcesSupported);
+                        var importByName = new ImportByNameSymbol(addressOfData, (uint)thunkName.Length + 1 /* null terminator */ + 2 /* hint ushort */, hint, descriptorName, thunkName, this.SymbolSourcesSupported);
                         this.OtherPESymbols.Add(addressOfData, importByName);
                         strings.Add(importByName);
 
                         if (hasIAT)
                         {
-                            iatThunkSymbol = new ImportThunkSymbol(iatThunkPtrRva, thunkSize, hint, descriptorName, thunkName);
+                            iatThunkSymbol = new ImportThunkSymbol(iatThunkPtrRva, thunkSize, hint, descriptorName, thunkName, this.SymbolSourcesSupported);
                         }
                     }
 
@@ -733,11 +766,14 @@ internal sealed partial class PEFile : IPEFile
     /// Parses the table of Exception Handling symbols in the binary, referred to as PDATA (Procedure Data) and
     /// XDATA (eXception Data).
     /// </summary>
+    /// <param name="session">The SizeBench Session that has the binary and PDB</param>
+    /// <param name="diaAdapter">The adapter we can use to call DIA in a unit-testable way</param>
     /// <param name="XDataRVARange">If the caller can determine the range of the XDATA (probably by using DIA SymTagCoffGroups),
     /// then we'll use that, and in debug builds will even verify that every xdata symbol discovered fits into that range.
     /// But if the caller cannot determine this ahead of time, just pass null and we'll estimate the XDataRange on the way
     /// out in the parse result - it'll be imperfect since xdata alignment requirements are not recorded in the binary or
     /// PDB so we have to guess.</param>
+    /// <param name="logger">Where to long things</param>
     /// <returns>A structure holding the PDATA and XDATA symbols discovered, and the RVA ranges they fit in.</returns>
     public void ParseEHSymbols(Session session, IDIAAdapter diaAdapter, RVARange? XDataRVARange, ILogger logger)
     {
@@ -746,7 +782,7 @@ internal sealed partial class PEFile : IPEFile
             EHSymbolTable.Parse(this._libraryBaseAddress, session.DataCache, diaAdapter, this, XDataRVARange, logger);
         }
 
-        if (session.DataCache.PDataSymbolsByRVA is null || session.DataCache.XDataSymbolsByRVA is null)
+        if (session.DataCache.PDataHasBeenInitialized == false || session.DataCache.XDataHasBeenInitialized == false)
         {
             throw new InvalidOperationException("After finishing parsing EH symbols, we somehow haven't assigned the PDATA/XDATA symbols - this is incorrect, and a bug in SizeBench's implementation, not your usage of it.");
         }
@@ -781,7 +817,7 @@ internal sealed partial class PEFile : IPEFile
                         }
                         else
                         {
-                            var group = new RsrcGroupStringTablesDataSymbol(contiguousStringTables);
+                            var group = new RsrcGroupStringTablesDataSymbol(contiguousStringTables, this.SymbolSourcesSupported);
                             this.RsrcSymbols.Add(group.RVA, group);
                             contiguousStringTables = new List<RsrcStringTableDataSymbol>();
                         }
@@ -789,7 +825,7 @@ internal sealed partial class PEFile : IPEFile
 
                     if (contiguousStringTables.Count > 0)
                     {
-                        var group = new RsrcGroupStringTablesDataSymbol(contiguousStringTables);
+                        var group = new RsrcGroupStringTablesDataSymbol(contiguousStringTables, this.SymbolSourcesSupported);
                         this.RsrcSymbols.Add(group.RVA, group);
                     }
                 }
@@ -832,7 +868,7 @@ internal sealed partial class PEFile : IPEFile
 
         var depth1NameAsString = depth1?.NameString(rsrcSectionStart);
 
-        this.RsrcSymbols.Add(directoryRVAStart, new RsrcDirectorySymbol(directoryRVAStart, directorySize, depth, rsrcType, rsrcTypeName, depth1NameAsString));
+        this.RsrcSymbols.Add(directoryRVAStart, new RsrcDirectorySymbol(directoryRVAStart, directorySize, depth, rsrcType, rsrcTypeName, depth1NameAsString, this.SymbolSourcesSupported));
 
         var entryRVAStart = directoryRVAStart + (uint)Marshal.SizeOf<IMAGE_RESOURCE_DIRECTORY>();
         for (uint i = 0; i < directory.NumberOfIdEntries + directory.NumberOfNamedEntries; i++)
@@ -845,7 +881,7 @@ internal sealed partial class PEFile : IPEFile
                 // Length is 2 bytes telling us how long the string is, and then 2 bytes per character since they're unicode
                 // It's possible that we discover the same string at various levels of the resource directory - if so, this is
                 // harmless, so we use TryAdd here to skip attempting to add multiple times and throwing due to duplicate keys.
-                this.RsrcSymbols.TryAdd(stringRVA, new RsrcStringSymbol(stringRVA, (uint)(2 + (str.Length * 2)), str));
+                this.RsrcSymbols.TryAdd(stringRVA, new RsrcStringSymbol(stringRVA, (uint)(2 + (str.Length * 2)), str, this.SymbolSourcesSupported));
             }
 
             if (entry.DataIsDirectory)
@@ -889,7 +925,7 @@ internal sealed partial class PEFile : IPEFile
 
                 var depth1NameAsStringWithFallback = depth1NameAsString ?? "<unknown rsrc name>";
 
-                this.RsrcSymbols.Add(dataEntryRVAStart, new RsrcDataEntrySymbol(dataEntryRVAStart, (uint)Marshal.SizeOf<IMAGE_RESOURCE_DATA_ENTRY>(), depth, languageName, rsrcType, rsrcTypeName, depth1NameAsStringWithFallback, i));
+                this.RsrcSymbols.Add(dataEntryRVAStart, new RsrcDataEntrySymbol(dataEntryRVAStart, (uint)Marshal.SizeOf<IMAGE_RESOURCE_DATA_ENTRY>(), depth, languageName, rsrcType, rsrcTypeName, depth1NameAsStringWithFallback, i, this.SymbolSourcesSupported));
 
                 var dataSymbol = CreateRsrcDataSymbol(languageName, rsrcType, rsrcTypeName, depth1NameAsStringWithFallback, dataEntry);
 
@@ -929,9 +965,9 @@ internal sealed partial class PEFile : IPEFile
             Win32ResourceType.STRINGTABLE => CreateStringTableSymbol(languageName, depth1NameAsString, dataEntry),
             Win32ResourceType.CURSOR => null /* we'll find the GROUP_CURSOR and attribute there */,
             Win32ResourceType.GROUP_CURSOR => CreateGroupCursorSymbol(languageName, depth1NameAsString, dataEntry),
-            Win32ResourceType.FONTDIR => new RsrcDataSymbol(dataEntry.OffsetToData, dataEntry.Size, languageName, rsrcType, rsrcTypeName, depth1NameAsString),
-            Win32ResourceType.FONT => new RsrcDataSymbol(dataEntry.OffsetToData, dataEntry.Size, languageName, rsrcType, rsrcTypeName, depth1NameAsString),
-            _ => new RsrcDataSymbol(dataEntry.OffsetToData, dataEntry.Size, languageName, rsrcType, rsrcTypeName, depth1NameAsString),
+            Win32ResourceType.FONTDIR => new RsrcDataSymbol(dataEntry.OffsetToData, dataEntry.Size, languageName, rsrcType, rsrcTypeName, depth1NameAsString, "", this.SymbolSourcesSupported),
+            Win32ResourceType.FONT => new RsrcDataSymbol(dataEntry.OffsetToData, dataEntry.Size, languageName, rsrcType, rsrcTypeName, depth1NameAsString, "", this.SymbolSourcesSupported),
+            _ => new RsrcDataSymbol(dataEntry.OffsetToData, dataEntry.Size, languageName, rsrcType, rsrcTypeName, depth1NameAsString, "", this.SymbolSourcesSupported),
         };
     }
 
@@ -970,12 +1006,12 @@ internal sealed partial class PEFile : IPEFile
 
             var bpp = iconDirEntries[iconEntryIdx].wBitCount;
 
-            icons.Insert(0, new RsrcIconDataSymbol(iconRVA, iconDirEntries[iconEntryIdx].dwBytesInRes, languageName, Win32ResourceType.ICON, "ICON", $"#{iconDirEntries[iconEntryIdx].nID}", width, height, bpp));
+            icons.Insert(0, new RsrcIconDataSymbol(iconRVA, iconDirEntries[iconEntryIdx].dwBytesInRes, languageName, Win32ResourceType.ICON, "ICON", $"#{iconDirEntries[iconEntryIdx].nID}", width, height, bpp, this.SymbolSourcesSupported));
             totalSizeOfGroupIcon += sizeOfIconRoundedUpToNearest8ByteAlignment;
         }
 
 
-        return new RsrcGroupIconDataSymbol(totalSizeOfGroupIcon, languageName, depth1NameAsString, icons);
+        return new RsrcGroupIconDataSymbol(totalSizeOfGroupIcon, languageName, depth1NameAsString, icons, this.SymbolSourcesSupported);
     }
 
     private unsafe RsrcGroupCursorDataSymbol CreateGroupCursorSymbol(string languageName, string depth1NameAsString, IMAGE_RESOURCE_DATA_ENTRY dataEntry)
@@ -1006,11 +1042,11 @@ internal sealed partial class PEFile : IPEFile
             var height = (ushort)(cursorDirEntries[cursorEntryIdx].wHeight / 2);
             var bpp = cursorDirEntries[cursorEntryIdx].wBitCount;
 
-            cursors.Insert(0, new RsrcCursorDataSymbol(cursorRVA, cursorDirEntries[cursorEntryIdx].dwBytesInRes, languageName, $"#{cursorDirEntries[cursorEntryIdx].nID}", width, height, bpp));
+            cursors.Insert(0, new RsrcCursorDataSymbol(cursorRVA, cursorDirEntries[cursorEntryIdx].dwBytesInRes, languageName, $"#{cursorDirEntries[cursorEntryIdx].nID}", width, height, bpp, this.SymbolSourcesSupported));
             totalSizeOfGroupCursor += sizeOfCursorRoundedUpToNearest8ByteAlignment;
         }
 
-        return new RsrcGroupCursorDataSymbol(totalSizeOfGroupCursor, languageName, depth1NameAsString, cursors);
+        return new RsrcGroupCursorDataSymbol(totalSizeOfGroupCursor, languageName, depth1NameAsString, cursors, this.SymbolSourcesSupported);
     }
 
     private unsafe RsrcStringTableDataSymbol CreateStringTableSymbol(string languageName, string depth1NameAsString, IMAGE_RESOURCE_DATA_ENTRY dataEntry)
@@ -1034,7 +1070,7 @@ internal sealed partial class PEFile : IPEFile
             }
         }
 
-        return new RsrcStringTableDataSymbol(dataEntry.OffsetToData, dataEntry.Size, languageName, depth1NameAsString, strings);
+        return new RsrcStringTableDataSymbol(dataEntry.OffsetToData, dataEntry.Size, languageName, depth1NameAsString, strings, this.SymbolSourcesSupported);
     }
 
     private static uint RoundUpTo8ByteAlignment(uint val)

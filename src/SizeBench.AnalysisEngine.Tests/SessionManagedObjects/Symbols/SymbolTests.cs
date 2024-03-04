@@ -24,9 +24,9 @@ public class SymbolTests
     {
         using var cache = new SessionDataCache();
         var nameCanonicalization = new NameCanonicalization();
-        nameCanonicalization.AddName(23, "Test name", SymTagEnum.SymTagFunction);
-        nameCanonicalization.AddName(34, "CFoo::DoTheThing", SymTagEnum.SymTagFunction);
-        nameCanonicalization.AddName(12, "CFoo::DoAnotherThing", SymTagEnum.SymTagFunction);
+        nameCanonicalization.AddName(23, SymTagEnum.SymTagFunction, name: "Test name");
+        nameCanonicalization.AddName(34, SymTagEnum.SymTagFunction, name: "CFoo::DoTheThing");
+        nameCanonicalization.AddName(12, SymTagEnum.SymTagFunction, name: "CFoo::DoAnotherThing");
         nameCanonicalization.Canonicalize();
         cache.AllCanonicalNames = new SortedList<uint, NameCanonicalization>()
             {

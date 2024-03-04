@@ -127,6 +127,10 @@ internal class TestDIAAdapter : IDIAAdapter
         }
     }
 
+    public List<InlineSiteSymbol>? FindAllInlineSitesForBlock(CodeBlockSymbol codeBlock, CancellationToken cancellationToken) => throw new NotImplementedException();
+
+    public List<InlineSiteSymbol> FindAllInlineSites(CancellationToken cancellationToken) => throw new NotImplementedException();
+
     public IEnumerable<IFunctionCodeSymbol> TemplatedFunctionsToFind = new List<IFunctionCodeSymbol>();
 
     public IEnumerable<IFunctionCodeSymbol> FindAllTemplatedFunctions(CancellationToken token) => this.TemplatedFunctionsToFind;

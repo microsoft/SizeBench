@@ -157,9 +157,9 @@ public sealed class FunctionCodeSymbolDiffPageViewModelTests : IDisposable
                                                                                          functionType: expectedDiff.BeforeSymbol!.FunctionType!);
         var allBeforeFoldedFunctions = new List<ISymbol>() { expectedDiff.BeforeSymbol.PrimaryBlock, foldedBeforeComplex.PrimaryBlock, foldedBeforeSimple };
         var nameCanonicalization = new NameCanonicalization();
-        nameCanonicalization.AddName(primaryBlockDiff.BeforeCodeBlockSymbol!.SymIndexId, expectedDiff.FullName, SymTagEnum.SymTagFunction);
-        nameCanonicalization.AddName(foldedBeforeComplex.PrimaryBlock.SymIndexId, foldedBeforeComplex.FullName, SymTagEnum.SymTagFunction);
-        nameCanonicalization.AddName(foldedBeforeSimple.SymIndexId, foldedBeforeSimple.FullName, SymTagEnum.SymTagFunction);
+        nameCanonicalization.AddName(primaryBlockDiff.BeforeCodeBlockSymbol!.SymIndexId, SymTagEnum.SymTagFunction, name: expectedDiff.FullName);
+        nameCanonicalization.AddName(foldedBeforeComplex.PrimaryBlock.SymIndexId, SymTagEnum.SymTagFunction, name: foldedBeforeComplex.FullName);
+        nameCanonicalization.AddName(foldedBeforeSimple.SymIndexId, SymTagEnum.SymTagFunction, name: foldedBeforeSimple.FullName);
         nameCanonicalization.Canonicalize();
         this.Generator.BeforeDataCache.AllCanonicalNames = new SortedList<uint, NameCanonicalization>
             {
@@ -175,10 +175,10 @@ public sealed class FunctionCodeSymbolDiffPageViewModelTests : IDisposable
                                                                                          functionType: expectedDiff.AfterSymbol!.FunctionType!);
         var allAfterFoldedFunctions = new List<ISymbol>() { expectedDiff.AfterSymbol.PrimaryBlock, foldedAfterComplex1.PrimaryBlock, foldedAfterComplex2.PrimaryBlock, foldedAfterSimple };
         nameCanonicalization = new NameCanonicalization();
-        nameCanonicalization.AddName(primaryBlockDiff.AfterCodeBlockSymbol!.SymIndexId, expectedDiff.FullName, SymTagEnum.SymTagFunction);
-        nameCanonicalization.AddName(foldedAfterComplex1.PrimaryBlock.SymIndexId, foldedAfterComplex1.FullName, SymTagEnum.SymTagFunction);
-        nameCanonicalization.AddName(foldedAfterComplex2.PrimaryBlock.SymIndexId, foldedAfterComplex2.FullName, SymTagEnum.SymTagFunction);
-        nameCanonicalization.AddName(foldedAfterSimple.SymIndexId, foldedAfterSimple.FullName, SymTagEnum.SymTagFunction);
+        nameCanonicalization.AddName(primaryBlockDiff.AfterCodeBlockSymbol!.SymIndexId, SymTagEnum.SymTagFunction, name: expectedDiff.FullName);
+        nameCanonicalization.AddName(foldedAfterComplex1.PrimaryBlock.SymIndexId, SymTagEnum.SymTagFunction, name: foldedAfterComplex1.FullName);
+        nameCanonicalization.AddName(foldedAfterComplex2.PrimaryBlock.SymIndexId, SymTagEnum.SymTagFunction, name: foldedAfterComplex2.FullName);
+        nameCanonicalization.AddName(foldedAfterSimple.SymIndexId, SymTagEnum.SymTagFunction, name: foldedAfterSimple.FullName);
         nameCanonicalization.Canonicalize();
         this.Generator.AfterDataCache.AllCanonicalNames = new SortedList<uint, NameCanonicalization>
             {

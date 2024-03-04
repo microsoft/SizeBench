@@ -20,8 +20,8 @@ internal sealed class SeparatedIpToStateMapSymbol : XDataSymbol
 
     internal SeparatedIpToStateMapEntry[] Entries { get; }
 
-    internal SeparatedIpToStateMapSymbol(Symbol? targetSymbol, uint targetStartRVA, uint rva, EHSymbolParser.SepIPToStateMap4 sepMap4)
-        : base(targetSymbol, targetStartRVA, rva, sepMap4.Size)
+    internal SeparatedIpToStateMapSymbol(Symbol? targetSymbol, uint targetStartRVA, uint rva, EHSymbolParser.SepIPToStateMap4 sepMap4, SymbolSourcesSupported symbolSourcesSupported)
+        : base(targetSymbol, targetStartRVA, rva, sepMap4.Size, symbolSourcesSupported)
     {
         this.Entries = new SeparatedIpToStateMapEntry[sepMap4.Entries.Length];
         for (var i = 0; i < sepMap4.Entries.Length; i++)

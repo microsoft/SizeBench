@@ -36,7 +36,7 @@ public class LibPageViewModelTests
         var lib = new Library("1.lib");
         lib.MarkFullyConstructed();
         var libs = new List<Library>() { lib };
-        this.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(libs as IReadOnlyList<Library>));
+        this.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(libs as IReadOnlyCollection<Library>));
         var tcsTestResultsComplete = new TaskCompletionSource<object>();
 
         var symbols = new List<ISymbol>
@@ -78,7 +78,7 @@ public class LibPageViewModelTests
         var lib = new Library("1.lib");
         lib.MarkFullyConstructed();
         var libs = new List<Library>() { lib };
-        this.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(libs as IReadOnlyList<Library>));
+        this.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(libs as IReadOnlyCollection<Library>));
         var tcsTestResultsComplete = new TaskCompletionSource<object>();
 
         var tcsSymbolsReady = new TaskCompletionSource<IReadOnlyList<ISymbol>>();
@@ -101,7 +101,7 @@ public class LibPageViewModelTests
         var lib = new Library("1.lib");
         lib.MarkFullyConstructed();
         var libs = new List<Library>() { lib };
-        this.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(libs as IReadOnlyList<Library>));
+        this.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(libs as IReadOnlyCollection<Library>));
         var tcsTestResultsComplete = new TaskCompletionSource<object>();
 
         var symbols = new List<ISymbol>

@@ -44,7 +44,7 @@ internal sealed class EnumerateAllUserDefinedTypesSessionTask : SessionTask<List
             udtsEnumerated++;
             if (udtsEnumerated >= nextLoggerOutput)
             {
-                ReportProgress($"Enumerated {udtsEnumerated}/{udts.Count} user-defined types so far.", nextLoggerOutput, (uint)udts.Count);
+                ReportProgress($"Enumerated {udtsEnumerated:N0}/{udts.Count:N0} user-defined types so far.", nextLoggerOutput, (uint)udts.Count);
                 nextLoggerOutput += loggerOutputVelocity;
             }
 

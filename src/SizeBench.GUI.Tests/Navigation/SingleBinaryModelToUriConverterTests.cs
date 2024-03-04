@@ -94,7 +94,7 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     {
         var intType = new BasicTypeSymbol(this.SessionDataCache, "int", 4, symIndexId: 0);
         var function = new SimpleFunctionCodeSymbol(this.SessionDataCache, "SomeNamespace::MyType::DeadFunction<AComplex::Type<float>,bool>", rva: 0, size: 100, symIndexId: 1,
-                                                functionType: new FunctionTypeSymbol(this.SessionDataCache, "()(int)", 0, symIndexId: 2, isConst: true, isVolatile: false, argumentTypes: new TypeSymbol[] { intType }, returnValueType: intType));
+                                                    functionType: new FunctionTypeSymbol(this.SessionDataCache, "()(int)", 0, symIndexId: 2, isConst: true, isVolatile: false, argumentTypes: [intType], returnValueType: intType));
 
         Assert.AreEqual(new Uri($@"Symbols/FunctionSymbol?FunctionRVA={function.RVA}&Name=int%20SomeNamespace%3A%3AMyType%3A%3ADeadFunction%3CAComplex%3A%3AType%3Cfloat%3E%2Cbool%3E%28int%29%20const", UriKind.Relative), SingleBinaryModelToUriConverter.ModelToUri(function));
     }
@@ -274,8 +274,8 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     public void CanNavigateToCOMDATFoldedSymbol()
     {
         var nameCanonicalization = new NameCanonicalization();
-        nameCanonicalization.AddName(symIndexId: 0, "test symbol", SymTagEnum.SymTagData);
-        nameCanonicalization.AddName(symIndexId: 1, "canonicalName", SymTagEnum.SymTagData);
+        nameCanonicalization.AddName(symIndexId: 0, SymTagEnum.SymTagData, name: "test symbol");
+        nameCanonicalization.AddName(symIndexId: 1, SymTagEnum.SymTagData, name: "canonicalName");
         nameCanonicalization.Canonicalize();
         this.SessionDataCache.AllCanonicalNames!.Add(9216, nameCanonicalization);
 
@@ -292,8 +292,8 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     public void CanNavigateToCOMDATFoldedFunction()
     {
         var nameCanonicalization = new NameCanonicalization();
-        nameCanonicalization.AddName(symIndexId: 0, "test function", SymTagEnum.SymTagFunction);
-        nameCanonicalization.AddName(symIndexId: 1, "canonicalFunc", SymTagEnum.SymTagFunction);
+        nameCanonicalization.AddName(symIndexId: 0, SymTagEnum.SymTagFunction, name: "test function");
+        nameCanonicalization.AddName(symIndexId: 1, SymTagEnum.SymTagFunction, name: "canonicalFunc");
         nameCanonicalization.Canonicalize();
         this.SessionDataCache.AllCanonicalNames!.Add(9216, nameCanonicalization);
 

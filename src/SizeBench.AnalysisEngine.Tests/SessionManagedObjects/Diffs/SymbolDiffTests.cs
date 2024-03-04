@@ -47,10 +47,10 @@ public sealed class SymbolDiffTests : IDisposable
     public void WorksWithPESymbols()
     {
         var beforeThunk = new ThunkSymbol(this._testGenerator.BeforeDataCache, "symbol123", rva: 300, size: 12, symIndexId: 0);
-        var beforeSymbol = new TryMapSymbol(beforeThunk, targetStartRVA: 123, rva: 500, size: 120);
+        var beforeSymbol = new TryMapSymbol(beforeThunk, targetStartRVA: 123, rva: 500, size: 120, SymbolSourcesSupported.All);
 
         var afterThunk = new ThunkSymbol(this._testGenerator.AfterDataCache, "symbol123", rva: 300, size: 12, symIndexId: 0);
-        var afterSymbol = new TryMapSymbol(afterThunk, targetStartRVA: 600, rva: 1000, size: 64);
+        var afterSymbol = new TryMapSymbol(afterThunk, targetStartRVA: 600, rva: 1000, size: 64, SymbolSourcesSupported.All);
 
         var symbolDiff = new SymbolDiff(beforeSymbol, afterSymbol);
 

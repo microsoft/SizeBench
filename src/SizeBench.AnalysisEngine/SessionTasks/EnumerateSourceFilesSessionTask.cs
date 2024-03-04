@@ -25,8 +25,8 @@ internal sealed class EnumerateSourceFilesSessionTask : SessionTask<List<SourceF
             return this.DataCache.AllSourceFiles;
         }
 
-        if (this.DataCache.PDataRVARange is null || this.DataCache.XDataRVARanges is null ||
-            this.DataCache.PDataSymbolsByRVA is null || this.DataCache.XDataSymbolsByRVA is null)
+        if (this.DataCache.PDataHasBeenInitialized == false || 
+            this.DataCache.XDataHasBeenInitialized == false)
         {
             throw new InvalidOperationException("It is not valid to attempt to enumerate source files before the PDATA and XDATA symbols have been parsed, as that data is necessary to properly attribute PDATA and XDATA contributions.  This is a bug in SizeBench's implementation, not your usage of it.");
         }
@@ -34,14 +34,25 @@ internal sealed class EnumerateSourceFilesSessionTask : SessionTask<List<SourceF
         var binarySections = new EnumerateBinarySectionsAndCOFFGroupsSessionTask(this._sessionTaskParameters, this.CancellationToken).Execute(logger);
         var libraries = new EnumerateLibsAndCompilandsSessionTask(this._sessionTaskParameters, this.CancellationToken, this.ProgressReporter).Execute(logger);
 
-        var sourceFiles = new List<SourceFile>();
+        List<SourceFile>? sourceFiles;
         uint sourceFilesParsed = 0;
         const int loggerOutputVelocity = 100;
         var nextLoggerOutput = loggerOutputVelocity;
 
         using (var parseSourceFilesFromDiaLogger = logger.StartTaskLog("Parsing source files"))
         {
-            sourceFiles = this.DIAAdapter.FindSourceFiles(parseSourceFilesFromDiaLogger, this.CancellationToken).ToList();
+            var foundSourceFiles = this.DIAAdapter.FindSourceFiles(parseSourceFilesFromDiaLogger, this.CancellationToken);
+
+            // Perf optimization - the product code will return this as a List<SourceFile> but we leave it as IEnumerable<SourceFile> to allow
+            // for tests to simulate canceling in the middle of enumeration.
+            if (foundSourceFiles is List<SourceFile> foundListOfSourceFiles)
+            {
+                sourceFiles = foundListOfSourceFiles;
+            }
+            else
+            {
+                sourceFiles = foundSourceFiles.ToList();
+            }
 
             this._totalNumberOfItemsToReportProgressOn = (uint)(sourceFiles.Count + this.DataCache.PDataSymbolsByRVA.Count + this.DataCache.XDataSymbolsByRVA.Count);
 
@@ -50,7 +61,7 @@ internal sealed class EnumerateSourceFilesSessionTask : SessionTask<List<SourceF
                 this.CancellationToken.ThrowIfCancellationRequested();
                 if (sourceFilesParsed >= nextLoggerOutput)
                 {
-                    ReportProgress($"Parsed {sourceFilesParsed}/{sourceFiles.Count} source files.", sourceFilesParsed, this._totalNumberOfItemsToReportProgressOn);
+                    ReportProgress($"Parsed {sourceFilesParsed:N0}/{sourceFiles.Count:N0} source files.", sourceFilesParsed, this._totalNumberOfItemsToReportProgressOn);
                     nextLoggerOutput += loggerOutputVelocity;
                 }
 
@@ -59,7 +70,7 @@ internal sealed class EnumerateSourceFilesSessionTask : SessionTask<List<SourceF
             }
 
             // One final progress report so the log shows this as "120/120" instead of "100/120" due to the throttling of progress messages in the loop
-            ReportProgress($"Parsed {sourceFilesParsed}/{sourceFiles.Count} source files.", sourceFilesParsed, this._totalNumberOfItemsToReportProgressOn);
+            ReportProgress($"Parsed {sourceFilesParsed:N0}/{sourceFiles.Count:N0} source files.", sourceFilesParsed, this._totalNumberOfItemsToReportProgressOn);
         }
 
         // This process can be INCREDIBLY slow if we're naive about things, because large binaries can have tens of thousands of funclets, xdata and
@@ -157,7 +168,7 @@ internal sealed class EnumerateSourceFilesSessionTask : SessionTask<List<SourceF
                                        COFFGroup xdataCOFFGroup,
                                        ILogger logger)
     {
-        if (this.DataCache.XDataSymbolsByRVA!.Count == 0)
+        if (this.DataCache.XDataSymbolsByRVA.Count == 0)
         {
             logger.Log("No XDATA symbols to attribute");
             return;
@@ -194,7 +205,7 @@ internal sealed class EnumerateSourceFilesSessionTask : SessionTask<List<SourceF
             {
                 if (xdataSymbolsAttributed >= nextLoggerOutput)
                 {
-                    ReportProgress($"Attributed {xdataSymbolsAttributed}/{this.DataCache.XDataSymbolsByRVA.Count} XDATA symbols to source files.", itemsAlreadyProgressedThrough + xdataSymbolsAttributed, this._totalNumberOfItemsToReportProgressOn);
+                    ReportProgress($"Attributed {xdataSymbolsAttributed:N0}/{this.DataCache.XDataSymbolsByRVA.Count:N0} XDATA symbols to source files.", itemsAlreadyProgressedThrough + xdataSymbolsAttributed, this._totalNumberOfItemsToReportProgressOn);
                     nextLoggerOutput += loggerOutputVelocity;
                     this.CancellationToken.ThrowIfCancellationRequested();
                 }
@@ -242,12 +253,12 @@ internal sealed class EnumerateSourceFilesSessionTask : SessionTask<List<SourceF
             }
 
             // One final progress report to ensure it looks nice
-            ReportProgress($"Attributed {xdataSymbolsAttributed}/{this.DataCache.XDataSymbolsByRVA.Count} XDATA symbols to source files.", itemsAlreadyProgressedThrough + xdataSymbolsAttributed, this._totalNumberOfItemsToReportProgressOn);
+            ReportProgress($"Attributed {xdataSymbolsAttributed:N0}/{this.DataCache.XDataSymbolsByRVA.Count:N0} XDATA symbols to source files.", itemsAlreadyProgressedThrough + xdataSymbolsAttributed, this._totalNumberOfItemsToReportProgressOn);
 
             // Some source files may not have any XDATA contributions - so we'll skip any that have an empty list.
             foreach (var sourceFileXDataContribution in sourceFileXDataContributions.Where(kvp => kvp.Value.Count > 0))
             {
-                var compilandToAttributeTo = sourceFileXDataContribution.Key._compilands[0]; // TODO: SourceFile: this is wrong, how do we know what compiland to attribute the xdata to?
+                var compilandToAttributeTo = sourceFileXDataContribution.Key._compilands.First(); // TODO: SourceFile: this is wrong, how do we know what compiland to attribute the xdata to?
 
                 var sectionContribution = sourceFileXDataContribution.Key.GetOrCreateSectionContribution(xdataCOFFGroup.Section);
                 sectionContribution.AddRVARanges(sourceFileXDataContribution.Value);
@@ -267,7 +278,7 @@ internal sealed class EnumerateSourceFilesSessionTask : SessionTask<List<SourceF
                                        COFFGroup? pdataCOFFGroup,
                                        ILogger logger)
     {
-        if (this.DataCache.PDataSymbolsByRVA!.Count == 0)
+        if (this.DataCache.PDataSymbolsByRVA.Count == 0)
         {
             logger.Log("No PDATA symbols to attribute");
             return;
@@ -304,7 +315,7 @@ internal sealed class EnumerateSourceFilesSessionTask : SessionTask<List<SourceF
             {
                 if (pdataSymbolsAttributed >= nextLoggerOutput)
                 {
-                    ReportProgress($"Attributed {pdataSymbolsAttributed}/{this.DataCache.PDataSymbolsByRVA.Count} PDATA symbols to source files.", itemsAlreadyProgressedThrough + pdataSymbolsAttributed, this._totalNumberOfItemsToReportProgressOn);
+                    ReportProgress($"Attributed {pdataSymbolsAttributed:N0}/{this.DataCache.PDataSymbolsByRVA.Count:N0} PDATA symbols to source files.", itemsAlreadyProgressedThrough + pdataSymbolsAttributed, this._totalNumberOfItemsToReportProgressOn);
                     nextLoggerOutput += loggerOutputVelocity;
                     this.CancellationToken.ThrowIfCancellationRequested();
                 }
@@ -352,12 +363,12 @@ internal sealed class EnumerateSourceFilesSessionTask : SessionTask<List<SourceF
             }
 
             // One final progress report to ensure it looks nice at 100%
-            ReportProgress($"Attributed {pdataSymbolsAttributed}/{this.DataCache.PDataSymbolsByRVA.Count} PDATA symbols to source files.", itemsAlreadyProgressedThrough + pdataSymbolsAttributed, this._totalNumberOfItemsToReportProgressOn);
+            ReportProgress($"Attributed {pdataSymbolsAttributed:N0}/{this.DataCache.PDataSymbolsByRVA.Count:N0} PDATA symbols to source files.", itemsAlreadyProgressedThrough + pdataSymbolsAttributed, this._totalNumberOfItemsToReportProgressOn);
 
             // Some source files may not have any PDATA contributions - so we'll skip any that have an empty list.
             foreach (var sourceFilePDataContribution in sourceFilePDataContributions.Where(kvp => kvp.Value.Count > 0))
             {
-                var compilandToAttributeTo = sourceFilePDataContribution.Key._compilands[0]; // TODO: SourceFile: this is wrong, how do we know what compiland to attribute the pdata to?
+                var compilandToAttributeTo = sourceFilePDataContribution.Key._compilands.First(); // TODO: SourceFile: this is wrong, how do we know what compiland to attribute the pdata to?
 
                 var sectionContribution = sourceFilePDataContribution.Key.GetOrCreateSectionContribution(pdataSection);
                 sectionContribution.AddRVARanges(sourceFilePDataContribution.Value);

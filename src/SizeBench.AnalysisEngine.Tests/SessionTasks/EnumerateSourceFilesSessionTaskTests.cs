@@ -1,6 +1,5 @@
 ﻿using System.Reflection.PortableExecutable;
 using SizeBench.AnalysisEngine.DIAInterop;
-using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.Logging;
 using SizeBench.TestDataCommon;
 
@@ -62,12 +61,10 @@ public sealed class EnumerateSourceFilesSessionTaskTests : IDisposable
                 new RawSectionContribution(libName: @"c:\dummy\a.lib", compilandName: @"c:\dummy\a2.obj", compilandSymIndexId: nextCompilandSymIndexId++, rva: 0x0500, length: 0x1000),
             };
 
-        this.DataCache.PDataRVARange = new RVARange(0, 0);
-        this.DataCache.PDataSymbolsByRVA = new SortedList<uint, PDataSymbol>();
-        this.DataCache.XDataRVARanges = new RVARangeSet();
-        this.DataCache.XDataSymbolsByRVA = new SortedList<uint, XDataSymbol>();
-        this.DataCache.RsrcRVARange = new RVARange(0, 0);
-        this.DataCache.RsrcSymbolsByRVA = new SortedList<uint, RsrcSymbolBase>();
+        this.DataCache.PDataHasBeenInitialized = true;
+        this.DataCache.XDataHasBeenInitialized = true;
+        this.DataCache.RsrcHasBeenInitialized = true;
+        this.DataCache.OtherPESymbolsHaveBeenInitialized = true;
     }
 
     [TestMethod]
@@ -201,7 +198,7 @@ public sealed class EnumerateSourceFilesSessionTaskTests : IDisposable
         Assert.AreEqual<ulong>(0x200, cgContrib.Value.RVARanges[0].Size);
 
         Assert.AreEqual(1, a1SourceFile.Compilands.Count);
-        Assert.AreEqual(a1Compiland, a1SourceFile.Compilands[0]);
+        Assert.AreEqual(a1Compiland, a1SourceFile.Compilands.First());
 
         Assert.AreEqual(1, a1SourceFile.CompilandContributions.Count);
         var compilandContrib = a1SourceFile.CompilandContributions.First();
@@ -236,7 +233,7 @@ public sealed class EnumerateSourceFilesSessionTaskTests : IDisposable
         Assert.AreEqual<ulong>(0x50, cgContrib.Value.RVARanges[1].Size);
 
         Assert.AreEqual(1, a2SourceFile.Compilands.Count);
-        Assert.AreEqual(a2Compiland, a2SourceFile.Compilands[0]);
+        Assert.AreEqual(a2Compiland, a2SourceFile.Compilands.First());
 
         Assert.AreEqual(1, a2SourceFile.CompilandContributions.Count);
         compilandContrib = a2SourceFile.CompilandContributions.First();

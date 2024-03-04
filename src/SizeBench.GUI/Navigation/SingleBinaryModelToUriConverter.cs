@@ -1,5 +1,6 @@
 ﻿using SizeBench.AnalysisEngine;
 using SizeBench.AnalysisEngine.Symbols;
+using SizeBench.GUI.Models;
 
 namespace SizeBench.GUI.Navigation;
 
@@ -141,6 +142,10 @@ public static class SingleBinaryModelToUriConverter
         else if (model is TemplatedUserDefinedTypeSymbol templatedUDT)
         {
             return new Uri($@"Symbols/TemplatedUserDefinedTypeSymbol?TemplateName={SizeBenchUrlEncode(templatedUDT.TemplateName)}", UriKind.Relative);
+        }
+        else if (model is InlineSiteGroup inlineSiteGroup)
+        {
+            return new Uri($@"Symbols/InlineSiteGroup?Name={SizeBenchUrlEncode(inlineSiteGroup.InlinedFunctionName)}", UriKind.Relative);
         }
         // It's important that ISymbol is very late in this list of "if/else if/else if/..." so that
         // any special-cases for specific types of symbols (like functions and code blocks above) will hit first, and these

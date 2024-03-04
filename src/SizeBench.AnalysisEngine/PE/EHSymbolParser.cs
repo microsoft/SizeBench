@@ -96,6 +96,7 @@ internal abstract unsafe class EHSymbolParser
 
     protected PEFile PEFile { get; }
     protected MachineType MachineType => this.PEFile.MachineType;
+    protected SymbolSourcesSupported SymbolSourcesSupported { get; }
     private SortedList<uint, XDataSymbol> XdataSymbols { get; } = new SortedList<uint, XDataSymbol>();
     private readonly IDIAAdapter _diaAdapter;
     protected byte* LibraryBaseAddress { get; }
@@ -115,11 +116,13 @@ internal abstract unsafe class EHSymbolParser
 
     protected EHSymbolParser(IDIAAdapter diaAdapter,
                              byte* libraryBaseAddress,
-                             PEFile peFile)
+                             PEFile peFile,
+                             SymbolSourcesSupported symbolSourcesSupported)
     {
         this._diaAdapter = diaAdapter;
         this.LibraryBaseAddress = libraryBaseAddress;
         this.PEFile = peFile;
+        this.SymbolSourcesSupported = symbolSourcesSupported;
 
         // These handlers are all handlers that don't have language-specific data.  Sometimes called "KnownExceptionHandlers" in some MS-internal tools.
         this.NoLanguageSpecificDataHandlers = new List<uint>()
@@ -164,29 +167,43 @@ internal abstract unsafe class EHSymbolParser
         // needs to know the PDATA to establish section and COFF Group contributions)
         using (logger.StartTaskLog("Parsing PDATA"))
         {
+            // Even if we don't support PDATA symbol source, we go into here
+            // to parse the PDATA RVA range out (it's very cheap to calculate),
+            // since it's hugely beneficial in avoiding expensive DIA queries
+            // sometimes.
+            // Inside here we'll still check for the supported symbol source
+            // and skip generating all the PDATA symbols if appropriate.
             cache.PDataSymbolsByRVA = ParsePDataForArchitecture(cache);
         }
 
-        using (logger.StartTaskLog("Parsing XDATA"))
+        if (cache.SymbolSourcesSupported.HasFlag(SymbolSourcesSupported.XDATA))
         {
-            ParseXDataForArchitecture(XDataRVARange, cache);
-
-            var xdataRanges = new List<RVARange>();
-
-            if (XDataRVARange != null)
+            using (logger.StartTaskLog("Parsing XDATA"))
             {
-                xdataRanges.Add(XDataRVARange);
-            }
+                ParseXDataForArchitecture(XDataRVARange, cache);
 
-            foreach (var symbol in this.XdataSymbols.Values)
-            {
-                xdataRanges.Add(new RVARange(symbol.RVA, symbol.RVAEnd));
-            }
+                var xdataRanges = new List<RVARange>();
 
-            cache.XDataRVARanges = RVARangeSet.FromListOfRVARanges(xdataRanges, maxPaddingToMerge: 8);
+                if (XDataRVARange.HasValue)
+                {
+                    xdataRanges.Add(XDataRVARange.Value);
+                }
+
+                foreach (var symbol in this.XdataSymbols.Values)
+                {
+                    xdataRanges.Add(new RVARange(symbol.RVA, symbol.RVAEnd));
+                }
+
+                cache.XDataRVARanges = RVARangeSet.FromListOfRVARanges(xdataRanges, maxPaddingToMerge: 8);
+            }
+        }
+        else
+        {
+            logger.Log($"Skipping XDATA parsing, per {nameof(this.SymbolSourcesSupported)}");
         }
 
         cache.XDataSymbolsByRVA = this.XdataSymbols;
+        cache.XDataHasBeenInitialized = true;
 
         DebugValidateAllXDataSymbolsContainedInXDataRanges(cache);
     }
@@ -196,10 +213,10 @@ internal abstract unsafe class EHSymbolParser
     {
         // In debug mode, let's check that every symbol we actually found is represented in the RVA ranges - if it's not
         // then we've found a straggler in our logic for calculating where XData symbols are.
-        foreach (var xdataSymbol in cache.XDataSymbolsByRVA!.Values)
+        foreach (var xdataSymbol in cache.XDataSymbolsByRVA.Values)
         {
-            Debug.Assert(cache.XDataRVARanges!.Contains(xdataSymbol.RVA));
-            Debug.Assert(cache.XDataRVARanges!.Contains(xdataSymbol.RVAEnd));
+            Debug.Assert(cache.XDataRVARanges.Contains(xdataSymbol.RVA));
+            Debug.Assert(cache.XDataRVARanges.Contains(xdataSymbol.RVAEnd));
         }
     }
 
@@ -222,32 +239,38 @@ internal abstract unsafe class EHSymbolParser
     protected T[] ParsePDATA<T>(byte* libraryBaseAddress, SessionDataCache cache)
     {
         var exceptionDirectory = this.PEFile.ExceptionDirectory;
+        var arr = Array.Empty<T>();
 
         // If we don't find an Exception directory, then this binary has no pdata.  An example of this is an apiset DLL like
         // api-ms-win-core-fibers-l1-1-0.dll
         if (exceptionDirectory.RelativeVirtualAddress == 0)
         {
-            cache.PDataRVARange = new RVARange(0, 0);
-            cache.PDataSymbolsByRVA = new SortedList<uint, PDataSymbol>();
-            cache.XDataRVARanges = new RVARangeSet();
-            cache.XDataSymbolsByRVA = new SortedList<uint, XDataSymbol>();
-            return Array.Empty<T>();
+            cache.PDataHasBeenInitialized = true;
+            return arr;
         }
 
-        var pdataAddress = new IntPtr(libraryBaseAddress + exceptionDirectory.RelativeVirtualAddress);
-        var arr = new T[exceptionDirectory.Size / Marshal.SizeOf<T>()];
-        var handle = GCHandle.Alloc(arr, GCHandleType.Pinned);
-        try
+        if (cache.SymbolSourcesSupported.HasFlag(SymbolSourcesSupported.PDATA))
         {
-            var arrPtr = handle.AddrOfPinnedObject();
-            PInvokes.memcpy(arrPtr, pdataAddress, new UIntPtr((uint)exceptionDirectory.Size));
-        }
-        finally
-        {
-            handle.Free();
+            var pdataAddress = new IntPtr(libraryBaseAddress + exceptionDirectory.RelativeVirtualAddress);
+            arr = new T[exceptionDirectory.Size / Marshal.SizeOf<T>()];
+            var handle = GCHandle.Alloc(arr, GCHandleType.Pinned);
+            try
+            {
+                var arrPtr = handle.AddrOfPinnedObject();
+                PInvokes.memcpy(arrPtr, pdataAddress, new UIntPtr((uint)exceptionDirectory.Size));
+            }
+            finally
+            {
+                handle.Free();
+            }
         }
 
+        // We still initialize the PDataRVARange even if we don't support PDATA symbol source because it allows for massive
+        // optimizations when querying DIA (since DIA is insanely slow when asking for a symbol within the PDATA block, it walks
+        // byte by byte trying in vain to find something).  It's also so cheap to calculate this RVA + length that it's not
+        // important as an optimization, and SymbolSourcesSupported is primarily intended as a perf optimization.
         cache.PDataRVARange = RVARange.FromRVAAndSize((uint)exceptionDirectory.RelativeVirtualAddress, (uint)exceptionDirectory.Size);
+        cache.PDataHasBeenInitialized = true;
         return arr;
     }
 
@@ -379,37 +402,37 @@ internal abstract unsafe class EHSymbolParser
             sizeOfGSData = sizeof(uint) + GetGSDataSizeAdjusted(gsdata);
         }
 
-        AddXData(new UnwindInfoSymbol(targetSymbol, rfStartRva, rfUnwindInfoRva, (uint)(pLSData - unwindInfoStart + sizeOfLanguageSpecificData + sizeOfGSData)));
+        AddXData(new UnwindInfoSymbol(targetSymbol, rfStartRva, rfUnwindInfoRva, (uint)(pLSData - unwindInfoStart + sizeOfLanguageSpecificData + sizeOfGSData), this.SymbolSourcesSupported));
     }
 
     protected void ParseCppXdataV3(Symbol? targetSymbol, uint runtimeFuncionStartRva, FUNCINFO* CppXdata, uint cppxdataRva)
     {
         // [cppxdata]
-        AddXData(new CppXdataSymbol(targetSymbol, runtimeFuncionStartRva, cppxdataRva, (uint)Marshal.SizeOf<FUNCINFO>()));
+        AddXData(new CppXdataSymbol(targetSymbol, runtimeFuncionStartRva, cppxdataRva, (uint)Marshal.SizeOf<FUNCINFO>(), this.SymbolSourcesSupported));
 
         // [stateUnwindMap], if one is present
         if (CppXdata->dwMaxState > 0 && CppXdata->pumeRva > 0)
         {
-            AddXData(new StateUnwindMapSymbol(targetSymbol, runtimeFuncionStartRva, CppXdata->pumeRva, (uint)(CppXdata->dwMaxState * Marshal.SizeOf<UnwindMapEntry>())));
+            AddXData(new StateUnwindMapSymbol(targetSymbol, runtimeFuncionStartRva, CppXdata->pumeRva, (uint)(CppXdata->dwMaxState * Marshal.SizeOf<UnwindMapEntry>()), this.SymbolSourcesSupported));
         }
 
         // [tryMap], if one is present
         if (CppXdata->dwTryBlocks > 0 && CppXdata->ptbmeRva > 0)
         {
-            AddXData(new TryMapSymbol(targetSymbol, runtimeFuncionStartRva, CppXdata->ptbmeRva, (uint)(CppXdata->dwTryBlocks * Marshal.SizeOf<TryBlockMapEntry>())));
+            AddXData(new TryMapSymbol(targetSymbol, runtimeFuncionStartRva, CppXdata->ptbmeRva, (uint)(CppXdata->dwTryBlocks * Marshal.SizeOf<TryBlockMapEntry>()), this.SymbolSourcesSupported));
 
             var tryBlockMap = (TryBlockMapEntry*)(this.LibraryBaseAddress + CppXdata->ptbmeRva);
             // [handlerMap]
             if (tryBlockMap->nCatches > 0 && tryBlockMap->handlerArrayRVA > 0)
             {
-                AddXData(new HandlerMapSymbol(targetSymbol, runtimeFuncionStartRva, tryBlockMap->handlerArrayRVA, (uint)(tryBlockMap->nCatches * Marshal.SizeOf<HandlerType>())));
+                AddXData(new HandlerMapSymbol(targetSymbol, runtimeFuncionStartRva, tryBlockMap->handlerArrayRVA, (uint)(tryBlockMap->nCatches * Marshal.SizeOf<HandlerType>()), this.SymbolSourcesSupported));
             }
         }
 
         // [ip2StateMap]
         if (CppXdata->dwIPToStateEntries > 0 && CppXdata->ip2statemeRva > 0)
         {
-            AddXData(new IpToStateMapSymbol(targetSymbol, runtimeFuncionStartRva, CppXdata->ip2statemeRva, (uint)(CppXdata->dwIPToStateEntries * Marshal.SizeOf<IpToStateMapEntry>())));
+            AddXData(new IpToStateMapSymbol(targetSymbol, runtimeFuncionStartRva, CppXdata->ip2statemeRva, (uint)(CppXdata->dwIPToStateEntries * Marshal.SizeOf<IpToStateMapEntry>()), this.SymbolSourcesSupported));
         }
     }
 
@@ -878,13 +901,13 @@ internal abstract unsafe class EHSymbolParser
         var buffer = this.LibraryBaseAddress + cppxdataRva;
         var lengthOfFuncInfo4 = DecompFuncInfo(buffer, ref fi4, this.LibraryBaseAddress, runtimeFunctionStartRva);
 
-        AddXData(new CppXdataSymbol(targetSymbol, runtimeFunctionStartRva, cppxdataRva, lengthOfFuncInfo4));
+        AddXData(new CppXdataSymbol(targetSymbol, runtimeFunctionStartRva, cppxdataRva, lengthOfFuncInfo4, this.SymbolSourcesSupported));
 
         // [stateUnwindMap], if one is present
         if (fi4.UnwindMap)
         {
             var unwindMapRva = (uint)fi4.dispUnwindMap;
-            AddXData(new StateUnwindMapSymbol(targetSymbol, runtimeFunctionStartRva, unwindMapRva, new UWMap4(fi4, this.LibraryBaseAddress).Size));
+            AddXData(new StateUnwindMapSymbol(targetSymbol, runtimeFunctionStartRva, unwindMapRva, new UWMap4(fi4, this.LibraryBaseAddress).Size, this.SymbolSourcesSupported));
         }
 
         // [tryMap], if one is present
@@ -894,7 +917,7 @@ internal abstract unsafe class EHSymbolParser
             if (!this.XdataSymbols.ContainsKey(tryBlockMapRva))
             {
                 var tryBlockMap = new TryBlockMap4(fi4, this.LibraryBaseAddress);
-                AddXData(new TryMapSymbol(targetSymbol, runtimeFunctionStartRva, tryBlockMapRva, tryBlockMap.Size));
+                AddXData(new TryMapSymbol(targetSymbol, runtimeFunctionStartRva, tryBlockMapRva, tryBlockMap.Size, this.SymbolSourcesSupported));
 
                 if (tryBlockMap.Entries != null)
                 {
@@ -904,7 +927,7 @@ internal abstract unsafe class EHSymbolParser
                         if (tryBlock.dispHandlerArray != 0)
                         {
                             var handlerMapRva = (uint)tryBlock.dispHandlerArray;
-                            AddXData(new HandlerMapSymbol(targetSymbol, runtimeFunctionStartRva, handlerMapRva, new HandlerMap4(tryBlock, this.LibraryBaseAddress).Size));
+                            AddXData(new HandlerMapSymbol(targetSymbol, runtimeFunctionStartRva, handlerMapRva, new HandlerMap4(tryBlock, this.LibraryBaseAddress).Size, this.SymbolSourcesSupported));
                         }
                     }
                 }
@@ -919,13 +942,13 @@ internal abstract unsafe class EHSymbolParser
             // If this is separated code (PGO'd), then we will also have a SeparatedIpToStateMap table
             if (fi4.isSeparated)
             {
-                AddXData(new SeparatedIpToStateMapSymbol(targetSymbol, runtimeFunctionStartRva, (uint)fi4.dispIPtoStateMap, fi4.SeparatedIP2StateMap.Value));
+                AddXData(new SeparatedIpToStateMapSymbol(targetSymbol, runtimeFunctionStartRva, (uint)fi4.dispIPtoStateMap, fi4.SeparatedIP2StateMap.Value, this.SymbolSourcesSupported));
             }
 
             foreach (var ip2StateMap in fi4.SeparatedIP2StateMap.Value.Entries)
             {
                 var ipToStateMapRva = (uint)ip2StateMap.dispOfIPMap;
-                AddXData(new IpToStateMapSymbol(targetSymbol, (uint)ip2StateMap.addrStartRVA, ipToStateMapRva, new IPToStateMap4(ip2StateMap, this.LibraryBaseAddress).Size));
+                AddXData(new IpToStateMapSymbol(targetSymbol, (uint)ip2StateMap.addrStartRVA, ipToStateMapRva, new IPToStateMap4(ip2StateMap, this.LibraryBaseAddress).Size, this.SymbolSourcesSupported));
             }
         }
     }

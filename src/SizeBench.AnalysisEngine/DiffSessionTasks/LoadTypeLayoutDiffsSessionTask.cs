@@ -54,7 +54,7 @@ internal sealed class LoadTypeLayoutDiffsSessionTask : DiffSessionTask<List<Type
 
                 if (beforeTLIsParsed >= nextLoggerOutput)
                 {
-                    ReportProgress($"Parsed {beforeTLIsParsed}/{beforeTLIsCount} 'before' type layout items and {afterTLIsParsed}/{afterTLIsCount} 'after' type layout items into diffs.", beforeTLIsParsed + afterTLIsParsed, totalTLIsToDiff);
+                    ReportProgress($"Parsed {beforeTLIsParsed:N0}/{beforeTLIsCount:N0} 'before' type layout items and {afterTLIsParsed:N0}/{afterTLIsCount:N0} 'after' type layout items into diffs.", beforeTLIsParsed + afterTLIsParsed, totalTLIsToDiff);
                     nextLoggerOutput += loggerOutputVelocity;
                 }
 
@@ -123,7 +123,7 @@ internal sealed class LoadTypeLayoutDiffsSessionTask : DiffSessionTask<List<Type
 
                 if (afterTLIsParsed >= nextLoggerOutput)
                 {
-                    ReportProgress($"Parsed {afterTLIsParsed}/{afterTLIsCount} 'after' type layout items into diffs.", afterTLIsParsed + beforeTLIsCount, totalTLIsToDiff);
+                    ReportProgress($"Parsed {afterTLIsParsed:N0}/{afterTLIsCount:N0} 'after' type layout items into diffs.", afterTLIsParsed + beforeTLIsCount, totalTLIsToDiff);
                     nextLoggerOutput += loggerOutputVelocity;
                 }
 
@@ -135,9 +135,9 @@ internal sealed class LoadTypeLayoutDiffsSessionTask : DiffSessionTask<List<Type
         }
 
         // One final progress report so the log shows a nice summary at the end
-        ReportProgress($"Parsed {beforeTLIsCount} 'before' type layout items and {afterTLIsCount} 'after' type layout items, generating  {TLIDiffs.Count} diffs.", totalTLIsToDiff, totalTLIsToDiff);
+        ReportProgress($"Parsed {beforeTLIsCount:N0} 'before' type layout items and {afterTLIsCount:N0} 'after' type layout items, generating  {TLIDiffs.Count:N0} diffs.", totalTLIsToDiff, totalTLIsToDiff);
 
-        logger.Log($"Finished enumerating {TLIDiffs.Count} type layout item diffs.");
+        logger.Log($"Finished enumerating {TLIDiffs.Count:N0} type layout item diffs.");
 
         return TLIDiffs;
     }

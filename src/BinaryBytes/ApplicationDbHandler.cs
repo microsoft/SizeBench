@@ -1,5 +1,7 @@
 ﻿using System.Globalization;
 using Microsoft.Data.Sqlite;
+using SizeBench.AnalysisEngine;
+using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.Logging;
 
 namespace BinaryBytes;
@@ -8,7 +10,10 @@ internal static class ApplicationDbHandler
 {
     private static SqliteConnection? _Connection;
     private static string? _DbFilename;
-    private const string TableName = "BinaryBytes";
+    private const string BinariesTableName = "Binaries";
+    private const string SymbolInfoTableName = "Symbols";
+    private const string StringTableName = "Strings";
+    private const string InlineTableName = "InlineSiteInfos";
 
     internal static void SetupDb(string dbFilename, ILogger logger)
     {
@@ -27,19 +32,80 @@ internal static class ApplicationDbHandler
                 {
                     _Connection.Open();
 
-                    var createTableQuery = $"CREATE TABLE {TableName} (Binary VARCHAR(50), " +
-                                              "PESection VARCHAR(15), " +
-                                              "COFFGroup VARCHAR(20), " +
-                                              "SymbolName VARCHAR(100), " +
-                                              "RVA INT, " +
-                                              "VirtualSize INT, " +
-                                              "Libraryname VARCHAR(100), " +
-                                              "CompilandName VARCHAR(100), " +
-                                              "IsPadding BOOL NOT NULL DEFAULT 0, " +
-                                              "IsPGO BOOL NOT NULL DEFAULT 0, " +
-                                              "IsOptimizedForSpeed BOOL NOT NULL DEFAULT 0)";
-                    using var command = new SqliteCommand(createTableQuery, _Connection);
-                    command.ExecuteNonQuery();
+                    var createTableQuery = $"""
+                                            CREATE TABLE {StringTableName} (
+                                            StringID INTEGER PRIMARY KEY AUTOINCREMENT,
+                                            String VARCHAR(1000) NOT NULL
+                                            )
+                                            """;
+                    {
+                        using var command = new SqliteCommand(createTableQuery, _Connection);
+                        command.ExecuteNonQuery();
+                    }
+
+                    createTableQuery = $"""
+                                        CREATE TABLE {BinariesTableName} (
+                                        BinaryID INTEGER PRIMARY KEY AUTOINCREMENT,
+                                        BinaryNameStringID INT NOT NULL,
+                                        CONSTRAINT fk_BinaryNameStringID
+                                          FOREIGN KEY (BinaryNameStringID)
+                                          REFERENCES {StringTableName}(StringID)
+                                        )
+                                        """;
+
+                    {
+                        using var command = new SqliteCommand(createTableQuery, _Connection);
+                        command.ExecuteNonQuery();
+                    }
+
+                    // TODO: convert PESection, COFFGroup, LibrayrName, CompilandName to StringID in the string table
+                    createTableQuery = $"""
+                                        CREATE TABLE {SymbolInfoTableName} (
+                                        SymbolID INTEGER PRIMARY KEY AUTOINCREMENT,
+                                        BinaryID INT NOT NULL,
+                                        PESection VARCHAR(50),
+                                        COFFGroup VARCHAR(100),
+                                        SymbolNameStringID INT NOT NULL,
+                                        RVA INT,
+                                        VirtualSize INT,
+                                        LibraryName VARCHAR(100),
+                                        CompilandName VARCHAR(100),
+                                        IsPadding BOOL NOT NULL DEFAULT 0,
+                                        IsPGO BOOL NOT NULL DEFAULT 0,
+                                        IsOptimizedForSpeed BOOL NOT NULL DEFAULT 0,
+                                        CONSTRAINT fk_BinaryID
+                                          FOREIGN KEY (BinaryID)
+                                          REFERENCES {BinariesTableName}(BinaryID),
+                                        CONSTRAINT fk_SymbolNameStringID
+                                          FOREIGN KEY (SymbolNameStringID)
+                                          REFERENCES {StringTableName}(StringID)
+                                        )
+                                        """;
+                    {
+                        using var command = new SqliteCommand(createTableQuery, _Connection);
+                        command.ExecuteNonQuery();
+                    }
+
+                    createTableQuery = $"""
+                                        CREATE TABLE {InlineTableName} (
+                                        BinaryID INTEGER NOT NULL,
+                                        InlinedIntoSymbolID INTEGER NOT NULL,
+                                        InlinedSymbolNameStringID INTEGER NOT NULL,
+                                        CONSTRAINT fk_binaryID
+                                          FOREIGN KEY (BinaryID)
+                                          REFERENCES {BinariesTableName}(BinaryID),
+                                        CONSTRAINT fk_inlinedIntoSymbolID
+                                          FOREIGN KEY (InlinedIntoSymbolID)
+                                          REFERENCES {SymbolInfoTableName}(SymbolID),
+                                        CONSTRAINT fk_inlinedSymbolNameStringID
+                                          FOREIGN KEY (InlinedSymbolNameStringID)
+                                          REFERENCES {StringTableName}(StringID)
+                                        )
+                                        """;
+                    {
+                        using var command = new SqliteCommand(createTableQuery, _Connection);
+                        command.ExecuteNonQuery();
+                    }
                 }
             }
             catch (Exception ex)
@@ -54,7 +120,7 @@ internal static class ApplicationDbHandler
         }
     }
 
-    internal static void AddData(string binary, IEnumerable<SectionBytes> binaryBytes, ILogger logger)
+    internal static async Task AddData(string binary, IEnumerable<SectionBytes> binaryBytes, IEnumerable<InlineSiteSymbol> inlineSites, Session session, ILogger logger)
     {
         using var addDataLog = logger.StartTaskLog("Insert data into SQLite Db...");
         if (_Connection != null)
@@ -66,49 +132,124 @@ internal static class ApplicationDbHandler
                     DataSource = _DbFilename
                 }.ToString()))
                 {
-                    _Connection.Open();
-                    var transaction = _Connection.BeginTransaction();
-                    var command = _Connection.CreateCommand();
-                    command.Transaction = transaction;
+                    var stringToID = new Dictionary<string, int>(StringComparer.Ordinal);
+                    var symbolRVAToID = new Dictionary<uint, int>();
 
-                    command.CommandText =
-                        $"INSERT INTO {TableName} " +
-                        $"(Binary, PESection, COFFGroup, SymbolName, RVA, VirtualSize, Libraryname, CompilandName, IsPadding, IsPGO, IsOptimizedForSpeed) " +
-                        $"VALUES " +
-                        $"(@Binary, @SectionName, @CoffgroupName, @SymbolName, @RVA, @VirtualSize, @LibraryFilename, " +
-                        $"@CompilandName, @IsPadding, @IsPGO, @IsOptimizedForSpeed)";
-
-                    command.Parameters.AddWithValue("@Binary", "");
-                    command.Parameters.AddWithValue("@SectionName", "");
-                    command.Parameters.AddWithValue("@CoffgroupName", "");
-                    command.Parameters.AddWithValue("@SymbolName", "");
-                    command.Parameters.AddWithValue("@RVA", "");
-                    command.Parameters.AddWithValue("@VirtualSize", "");
-                    command.Parameters.AddWithValue("@LibraryFilename", "");
-                    command.Parameters.AddWithValue("@CompilandName", "");
-                    command.Parameters.AddWithValue("@IsPadding", "");
-                    command.Parameters.AddWithValue("@IsPGO", "");
-                    command.Parameters.AddWithValue("@IsOptimizedForSpeed", "");
-
-                    foreach (var section in binaryBytes)
+                    await _Connection.OpenAsync();
                     {
-                        foreach (var item in section.Items)
-                        {
-                            var isPadding = item.IsPadding ? 1 : 0;
-                            var isPGO = item.IsPGO ? 1 : 0;
-                            var isOptimizedForSpeed = item.IsOptimizedForSpeed ? 1 : 0;
-                            var escapedName = item.Name.Replace("'", "''", StringComparison.Ordinal);
-
-                            InsertItem(binary, section.SectionName, item.CoffgroupName, escapedName, item.RVA,
-                                item.VirtualSize, item.LibraryFilename, item.CompilandName, isPadding, isPGO,
-                                isOptimizedForSpeed, command);
-                        }
+                        // Disable on-disk journaling for perf
+                        var pragmaCommand = _Connection.CreateCommand();
+                        pragmaCommand.CommandText = "PRAGMA journal_mode = MEMORY;";
+                        await pragmaCommand.ExecuteNonQueryAsync();
                     }
 
-                    transaction.Commit();
-                    command.Dispose();
+                    {
+                        // Transactions massively increase bulk insert performance, see here: https://learn.microsoft.com/en-us/dotnet/standard/data/sqlite/bulk-insert
+#pragma warning disable CA1849 // Call async methods when in an async method - the async version returns DbTransaction, we need a SqliteTransaction.
+                        using var transaction = _Connection.BeginTransaction();
+#pragma warning restore CA1849 // Call async methods when in an async method
+                        using var insertStringCommand = _Connection.CreateCommand();
+                        insertStringCommand.Transaction = transaction;
+                        insertStringCommand.CommandText =
+                            $"""
+                            INSERT INTO {StringTableName}
+                            (String)
+                            VALUES
+                            (@String)
+                            ; SELECT last_insert_rowid();
+                            """;
+                        insertStringCommand.Parameters.AddWithValue("@String", "");
 
-                    _Connection.Close();
+                        var binaryNameID = InsertString(binary, stringToID, insertStringCommand);
+                        int binaryID;
+
+                        {
+                            using var insertBinaryCommand = _Connection.CreateCommand();
+                            insertBinaryCommand.Transaction = transaction;
+                            insertBinaryCommand.CommandText =
+                                $"""
+                                INSERT INTO {BinariesTableName}
+                                (BinaryNameStringID)
+                                VALUES
+                                (@BinaryNameStringID)
+                                ; SELECT last_insert_rowid();
+                                """;
+
+                            insertBinaryCommand.Parameters.AddWithValue("@BinaryNameStringID", binaryNameID);
+#pragma warning disable CA1849 // Call async methods when in an async method - this method should be extremely fast
+                            binaryID = Convert.ToInt32(insertBinaryCommand.ExecuteScalar()!, CultureInfo.InvariantCulture);
+#pragma warning restore CA1849 // Call async methods when in an async method
+                        }
+
+                        using var insertSymbolInfoCommand = _Connection.CreateCommand();
+                        insertSymbolInfoCommand.Transaction = transaction;
+                        insertSymbolInfoCommand.CommandText =
+                            $"""
+                             INSERT INTO {SymbolInfoTableName}
+                             (BinaryID, PESection, COFFGroup, SymbolNameStringID, RVA, VirtualSize, LibraryName, 
+                              CompilandName, IsPadding, IsPGO, IsOptimizedForSpeed)
+                             VALUES
+                             (@BinaryID, @SectionName, @CoffgroupName, @SymbolNameStringID, @RVA, @VirtualSize, @LibraryFilename,
+                              @CompilandName, @IsPadding, @IsPGO, @IsOptimizedForSpeed)
+                             ; SELECT last_insert_rowid();
+                            """;
+
+                        insertSymbolInfoCommand.Parameters.AddWithValue("@BinaryID", binaryID); // This is set once here and does not need to be calculated again per symbol
+                        insertSymbolInfoCommand.Parameters.AddWithValue("@SectionName", "");
+                        insertSymbolInfoCommand.Parameters.AddWithValue("@CoffgroupName", "");
+                        insertSymbolInfoCommand.Parameters.AddWithValue("@SymbolNameStringID", "");
+                        insertSymbolInfoCommand.Parameters.AddWithValue("@RVA", "");
+                        insertSymbolInfoCommand.Parameters.AddWithValue("@VirtualSize", "");
+                        insertSymbolInfoCommand.Parameters.AddWithValue("@LibraryFilename", "");
+                        insertSymbolInfoCommand.Parameters.AddWithValue("@CompilandName", "");
+                        insertSymbolInfoCommand.Parameters.AddWithValue("@IsPadding", "");
+                        insertSymbolInfoCommand.Parameters.AddWithValue("@IsPGO", "");
+                        insertSymbolInfoCommand.Parameters.AddWithValue("@IsOptimizedForSpeed", "");
+
+                        using var insertInlineInfoCommand = _Connection.CreateCommand();
+                        insertInlineInfoCommand.Transaction = transaction;
+                        insertInlineInfoCommand.CommandText =
+                            $"""
+                             INSERT INTO {InlineTableName}
+                             (BinaryID, InlinedIntoSymbolID, InlinedSymbolNameStringID)
+                             VALUES
+                             (@BinaryID, @InlinedIntoSymbolID, @InlinedSymbolNameStringID)
+                             """;
+
+                        insertInlineInfoCommand.Parameters.AddWithValue("@BinaryID", binaryID); // Similarly, set once here and reused for each inline site
+                        insertInlineInfoCommand.Parameters.AddWithValue("@InlinedIntoSymbolID", "");
+                        insertInlineInfoCommand.Parameters.AddWithValue("@InlinedSymbolNameStringID", "");
+
+                        foreach (var section in binaryBytes)
+                        {
+                            Program.LogIt($"Persisting data to database for section {section.SectionName}...");
+                            foreach (var item in section.Items)
+                            {
+                                var isPadding = item.IsPadding ? 1 : 0;
+                                var isPGO = item.IsPGO ? 1 : 0;
+                                var isOptimizedForSpeed = item.IsOptimizedForSpeed ? 1 : 0;
+                                var escapedName = item.Name.Replace("'", "''", StringComparison.Ordinal);
+
+                                var symbolID = InsertItem(section.SectionName, item.CoffGroupName, escapedName, item.RVA,
+                                    item.VirtualSize, item.LibraryFilename, item.CompilandName, isPadding, isPGO,
+                                    isOptimizedForSpeed,
+                                    stringToID,
+                                    insertStringCommand, insertSymbolInfoCommand);
+
+                                 symbolRVAToID.Add(item.RVA, symbolID);
+                            }
+                        }
+
+                        Program.LogIt($"Persisting inline sites to database...");
+                        foreach (var inlineSite in inlineSites)
+                        {
+                            await InsertInlineSite(inlineSite, session, stringToID, symbolRVAToID, insertStringCommand, insertInlineInfoCommand);
+                        }
+
+                        await transaction.CommitAsync();
+                    }
+
+                    await _Connection.CloseAsync();
                 }
             }
 #pragma warning disable CA1031 // Do not catch general exception types - If we fail to add data for one row, keep going to see if we can get most of them
@@ -120,21 +261,70 @@ internal static class ApplicationDbHandler
         }
     }
 
-    private static int InsertItem(string binary, string secton, string coff, string symbolname,
-        uint rva, ulong virtualSize, string lib, string compiland, int isPadding, int isPgo, int isOptimizedForSpeed, SqliteCommand command)
+    private static int InsertItem(string secton, string coff, string symbolname,
+        uint rva, ulong virtualSize, string lib, string compiland, int isPadding, int isPgo, int isOptimizedForSpeed, 
+        Dictionary<string, int> symbolNameToID,
+        SqliteCommand insertStringCommand, SqliteCommand insertSymbolInfoCommand)
     {
-        command.Parameters["@Binary"].Value = binary;
-        command.Parameters["@SectionName"].Value = secton;
-        command.Parameters["@CoffgroupName"].Value = coff;
-        command.Parameters["@SymbolName"].Value = symbolname;
-        command.Parameters["@RVA"].Value = rva;
-        command.Parameters["@VirtualSize"].Value = virtualSize;
-        command.Parameters["@LibraryFilename"].Value = lib;
-        command.Parameters["@CompilandName"].Value = compiland;
-        command.Parameters["@IsPadding"].Value = isPadding;
-        command.Parameters["@IsPGO"].Value = isPgo;
-        command.Parameters["@IsOptimizedForSpeed"].Value = isOptimizedForSpeed;
+        var symbolNameStringID = InsertString(symbolname, symbolNameToID, insertStringCommand);
 
-        return command.ExecuteNonQuery();
+        insertSymbolInfoCommand.Parameters["@SectionName"].Value = secton;
+        insertSymbolInfoCommand.Parameters["@CoffgroupName"].Value = coff;
+        insertSymbolInfoCommand.Parameters["@SymbolNameStringID"].Value = symbolNameStringID;
+        insertSymbolInfoCommand.Parameters["@RVA"].Value = rva;
+        insertSymbolInfoCommand.Parameters["@VirtualSize"].Value = virtualSize;
+        insertSymbolInfoCommand.Parameters["@LibraryFilename"].Value = lib;
+        insertSymbolInfoCommand.Parameters["@CompilandName"].Value = compiland;
+        insertSymbolInfoCommand.Parameters["@IsPadding"].Value = isPadding;
+        insertSymbolInfoCommand.Parameters["@IsPGO"].Value = isPgo;
+        insertSymbolInfoCommand.Parameters["@IsOptimizedForSpeed"].Value = isOptimizedForSpeed;
+
+        return Convert.ToInt32(insertSymbolInfoCommand.ExecuteScalar()!, CultureInfo.InvariantCulture);
+    }
+
+    private static async ValueTask InsertInlineSite(InlineSiteSymbol inlineSite, Session session, Dictionary<string, int> stringToID,
+        Dictionary<uint, int> symbolRVAToID,
+        SqliteCommand insertStringCommand, SqliteCommand insertInlineSiteCommand)
+    {
+        var inlinedFunctionStringID = InsertString(inlineSite.Name, stringToID, insertStringCommand);
+
+        // We use the RVA, not the Function/Block Symbol itself, because the inline site may be COMDAT folded into another function,
+        // and we exclude all functions with IsCOMDATFolded from being in the database for space reasons.
+        if (symbolRVAToID.TryGetValue(inlineSite.CanonicalSymbolInlinedInto.RVA, out var inlinedIntoSymbolID))
+        {
+            insertInlineSiteCommand.Parameters["@InlinedIntoSymbolID"].Value = inlinedIntoSymbolID;
+        }
+        else
+        {
+            var placement = await session.LookupSymbolPlacementInBinary(inlineSite.BlockInlinedInto, CancellationToken.None);
+
+            Program.LogIt($"""
+                           Unable to locate FunctionInlinedInto in symbolToID map!
+                                 InlineSite: {inlineSite.Name}, inlined into {inlineSite.BlockInlinedInto.Name}
+                                 Canonical Inlined Into: {inlineSite.CanonicalSymbolInlinedInto.Name}
+                                 BlockInlinedInto RVA: 0x{inlineSite.BlockInlinedInto.RVA:X}
+                                 BlockInlinedInto IsCOMDATFolded: {inlineSite.BlockInlinedInto.IsCOMDATFolded}
+                                 BlockInlinedInto Placement: {placement.BinarySection?.Name ?? "no section"}, {placement.COFFGroup?.Name ?? "no COFF group"}
+                           """);
+            return;
+        }
+
+        insertInlineSiteCommand.Parameters["@InlinedSymbolNameStringID"].Value = inlinedFunctionStringID;
+
+#pragma warning disable CA1849 // Call async methods when in an async method - this method will be sync except in the rare case of a failure to find a FunctionInlinedInto, let's not pay the cost of a Task<T>
+        insertInlineSiteCommand.ExecuteNonQuery();
+#pragma warning restore CA1849 // Call async methods when in an async method
+    }
+
+    private static int InsertString(string str, Dictionary<string, int> stringToID, SqliteCommand insertStringCommand)
+    {
+        if (!stringToID.TryGetValue(str, out var stringID))
+        {
+            insertStringCommand.Parameters["@String"].Value = str;
+            stringID = Convert.ToInt32(insertStringCommand.ExecuteScalar()!, CultureInfo.InvariantCulture);
+            stringToID.Add(str, stringID);
+        }
+
+        return stringID;
     }
 }

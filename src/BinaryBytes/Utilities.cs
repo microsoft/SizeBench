@@ -105,6 +105,7 @@ internal static class Utilities
             CompilandName = contributor.CompilandName,
             IsPGO = functionSymbol?.IsPGO ?? false,
             IsOptimizedForSpeed = functionSymbol?.IsOptimizedForSpeed ?? false,
+            DynamicInstructionCount = functionSymbol?.DynamicInstructionCount ?? 0,
         };
     }
 

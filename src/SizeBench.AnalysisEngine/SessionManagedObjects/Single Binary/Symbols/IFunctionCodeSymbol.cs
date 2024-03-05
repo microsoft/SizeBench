@@ -20,6 +20,7 @@ public interface IFunctionCodeSymbol
     bool IsSealed { get; }
     bool IsPGO { get; }
     bool IsOptimizedForSpeed { get; }
+    ulong DynamicInstructionCount { get; }
 
     FunctionTypeSymbol? FunctionType { get; }
     IReadOnlyList<ParameterDataSymbol>? ArgumentNames { get; }

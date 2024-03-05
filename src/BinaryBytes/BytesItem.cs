@@ -11,4 +11,5 @@ internal sealed class BytesItem
     public bool IsPadding { get; set; }
     public bool IsPGO { get; set; }
     public bool IsOptimizedForSpeed { get; set; }
+    public ulong DynamicInstructionCount { get; set; }
 }

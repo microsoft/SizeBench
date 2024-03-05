@@ -158,6 +158,11 @@ internal sealed class FunctionSymbolPageViewModel : SingleBinaryViewModelBase
         if (this.Function.IsPGO)
         {
             attributes.Add("has been PGO'd");
+
+            if (this.Function.DynamicInstructionCount > 0)
+            {
+                attributes.Add($"has PGO dynamic instruction count of {this.Function.DynamicInstructionCount:N0}");
+            }
         }
 
         if (this.Function.IsOptimizedForSpeed)

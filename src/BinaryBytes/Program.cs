@@ -101,9 +101,13 @@ public static class Program
             IEnumerable<InlineSiteSymbol> inlineSites = Array.Empty<InlineSiteSymbol>();
             var options = new SessionOptions() { SymbolSourcesSupported = symbolSourcesSupported };
 
+            Program.LogIt($"Opening binary {binaryFilePath}...", endWithNewline: false);
+            var sw = Stopwatch.StartNew();
             await using var session = await Session.Create(binaryFilePath, pdbFilePath, options, sessionLogger);
             var sections = await session.EnumerateBinarySectionsAndCOFFGroups(CancellationToken.None);
             var compilands = await session.EnumerateCompilands(CancellationToken.None);
+            sw.Stop();
+            Program.LogIt($"took {sw.Elapsed}, and found {sections.Count:N0} binary sections and {compilands.Count:N0} compilands.");
 
             Dictionary<uint, SymbolContributor> rvaToContributorMap;
             using (sessionLogger.StartTaskLog("BinaryBytes Creating RVA To Contributor Map"))
@@ -212,6 +216,7 @@ public static class Program
         var adjustedSymbols = new List<BytesItem>();
         foreach (var coffgroup in section.COFFGroups)
         {
+            var countOfSymbolsAtStartOfCOFFGroup = adjustedSymbols.Count;
             Program.LogIt($"Processing COFF Group {coffgroup.Name}...", endWithNewline: false);
             var sw = Stopwatch.StartNew();
 
@@ -231,7 +236,7 @@ public static class Program
             }
 
             sw.Stop();
-            Console.WriteLine($"took {sw.Elapsed}, and found {adjustedSymbols.Count:N0} symbols");
+            Console.WriteLine($"took {sw.Elapsed}, and found {(adjustedSymbols.Count - countOfSymbolsAtStartOfCOFFGroup):N0} symbols");
         }
 
         return adjustedSymbols;

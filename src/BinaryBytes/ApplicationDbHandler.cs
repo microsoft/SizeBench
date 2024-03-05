@@ -11,9 +11,9 @@ internal static class ApplicationDbHandler
     private static SqliteConnection? _Connection;
     private static string? _DbFilename;
     private const string BinariesTableName = "Binaries";
-    private const string SymbolInfoTableName = "Symbols";
+    private const string SymbolInfoTableName = "SymbolDetails";
     private const string StringTableName = "Strings";
-    private const string InlineTableName = "InlineSiteInfos";
+    private const string InlineTableName = "InlineSiteDetails";
 
     internal static void SetupDb(string dbFilename, ILogger logger)
     {
@@ -73,6 +73,7 @@ internal static class ApplicationDbHandler
                                         IsPadding BOOL NOT NULL DEFAULT 0,
                                         IsPGO BOOL NOT NULL DEFAULT 0,
                                         IsOptimizedForSpeed BOOL NOT NULL DEFAULT 0,
+                                        DynamicInstructionCount ULONG,
                                         CONSTRAINT fk_BinaryID
                                           FOREIGN KEY (BinaryID)
                                           REFERENCES {BinariesTableName}(BinaryID),
@@ -101,6 +102,49 @@ internal static class ApplicationDbHandler
                                           FOREIGN KEY (InlinedSymbolNameStringID)
                                           REFERENCES {StringTableName}(StringID)
                                         )
+                                        """;
+                    {
+                        using var command = new SqliteCommand(createTableQuery, _Connection);
+                        command.ExecuteNonQuery();
+                    }
+
+                    // Now some views that make interacting with this denormalized data more user-friendly in a tool like DB Browser for SQLite
+                    createTableQuery = $"""
+                                        CREATE VIEW Symbols AS
+                                        SELECT BinaryNameStrings.String AS BinaryName, 
+                                               {SymbolInfoTableName}.PESection, {SymbolInfoTableName}.COFFGroup, SymbolNameStrings.String AS SymbolName,
+                                               {SymbolInfoTableName}.RVA, {SymbolInfoTableName}.VirtualSize, {SymbolInfoTableName}.LibraryName,
+                                               {SymbolInfoTableName}.CompilandName, {SymbolInfoTableName}.IsPadding, {SymbolInfoTableName}.IsPGO, 
+                                               {SymbolInfoTableName}.IsOptimizedForSpeed, {SymbolInfoTableName}.DynamicInstructionCount
+                                        FROM {BinariesTableName}
+                                        INNER JOIN {StringTableName} AS BinaryNameStrings ON {BinariesTableName}.BinaryNameStringID = BinaryNameStrings.StringID
+                                        INNER JOIN {SymbolInfoTableName} ON {SymbolInfoTableName}.BinaryID = {BinariesTableName}.BinaryID
+                                        INNER JOIN {StringTableName} AS SymbolNameStrings ON {SymbolInfoTableName}.SymbolNameStringID = SymbolNameStrings.StringID
+                                        """;
+                    {
+                        using var command = new SqliteCommand(createTableQuery, _Connection);
+                        command.ExecuteNonQuery();
+                    }
+
+                    createTableQuery = $"""
+                                        CREATE VIEW Inlines AS
+                                        SELECT BinaryNameStrings.String AS BinaryName,
+                                               InlineNameStrings.String AS InlinedFunctionName,
+                                               {SymbolInfoTableName}.PESection AS InlinedIntoPESection, 
+                                               {SymbolInfoTableName}.COFFGroup AS InlinedIntoCOFFGroup,
+                                               SymbolNameStrings.String AS InlinedIntoSymbolName,
+                                               {SymbolInfoTableName}.LibraryName AS InlinedIntoLibraryName,
+                                               {SymbolInfoTableName}.CompilandName AS InlinedIntoCompilandName,
+                                               {SymbolInfoTableName}.IsPadding AS InlinedIntoIsPadding, 
+                                               {SymbolInfoTableName}.IsPGO AS InlinedIntoIsPGO, 
+                                               {SymbolInfoTableName}.IsOptimizedForSpeed AS InlinedIntoIsOptimizedForSpeed,
+                                               {SymbolInfoTableName}.DynamicInstructionCount AS InlinedIntoDynamicInstructionCount
+                                        FROM {BinariesTableName}
+                                        INNER JOIN {StringTableName} AS BinaryNameStrings ON {BinariesTableName}.BinaryNameStringID = BinaryNameStrings.StringID
+                                        INNER JOIN {InlineTableName} ON {InlineTableName}.BinaryID = {BinariesTableName}.BinaryID
+                                        INNER JOIN {SymbolInfoTableName} ON {SymbolInfoTableName}.SymbolID = {InlineTableName}.InlinedIntoSymbolID
+                                        INNER JOIN {StringTableName} AS SymbolNameStrings ON {SymbolInfoTableName}.SymbolNameStringID = SymbolNameStrings.StringID
+                                        INNER JOIN {StringTableName} AS InlineNameStrings ON {InlineTableName}.InlinedSymbolNameStringID = InlineNameStrings.StringID
                                         """;
                     {
                         using var command = new SqliteCommand(createTableQuery, _Connection);
@@ -187,10 +231,10 @@ internal static class ApplicationDbHandler
                             $"""
                              INSERT INTO {SymbolInfoTableName}
                              (BinaryID, PESection, COFFGroup, SymbolNameStringID, RVA, VirtualSize, LibraryName, 
-                              CompilandName, IsPadding, IsPGO, IsOptimizedForSpeed)
+                              CompilandName, IsPadding, IsPGO, IsOptimizedForSpeed, DynamicInstructionCount)
                              VALUES
                              (@BinaryID, @SectionName, @CoffgroupName, @SymbolNameStringID, @RVA, @VirtualSize, @LibraryFilename,
-                              @CompilandName, @IsPadding, @IsPGO, @IsOptimizedForSpeed)
+                              @CompilandName, @IsPadding, @IsPGO, @IsOptimizedForSpeed, @DynamicInstructionCount)
                              ; SELECT last_insert_rowid();
                             """;
 
@@ -205,6 +249,7 @@ internal static class ApplicationDbHandler
                         insertSymbolInfoCommand.Parameters.AddWithValue("@IsPadding", "");
                         insertSymbolInfoCommand.Parameters.AddWithValue("@IsPGO", "");
                         insertSymbolInfoCommand.Parameters.AddWithValue("@IsOptimizedForSpeed", "");
+                        insertSymbolInfoCommand.Parameters.AddWithValue("@DynamicInstructionCount", "");
 
                         using var insertInlineInfoCommand = _Connection.CreateCommand();
                         insertInlineInfoCommand.Transaction = transaction;
@@ -232,7 +277,7 @@ internal static class ApplicationDbHandler
 
                                 var symbolID = InsertItem(section.SectionName, item.CoffGroupName, escapedName, item.RVA,
                                     item.VirtualSize, item.LibraryFilename, item.CompilandName, isPadding, isPGO,
-                                    isOptimizedForSpeed,
+                                    isOptimizedForSpeed, item.DynamicInstructionCount,
                                     stringToID,
                                     insertStringCommand, insertSymbolInfoCommand);
 
@@ -262,7 +307,7 @@ internal static class ApplicationDbHandler
     }
 
     private static int InsertItem(string secton, string coff, string symbolname,
-        uint rva, ulong virtualSize, string lib, string compiland, int isPadding, int isPgo, int isOptimizedForSpeed, 
+        uint rva, ulong virtualSize, string lib, string compiland, int isPadding, int isPgo, int isOptimizedForSpeed, ulong dynamicInstructionCount,
         Dictionary<string, int> symbolNameToID,
         SqliteCommand insertStringCommand, SqliteCommand insertSymbolInfoCommand)
     {
@@ -278,6 +323,7 @@ internal static class ApplicationDbHandler
         insertSymbolInfoCommand.Parameters["@IsPadding"].Value = isPadding;
         insertSymbolInfoCommand.Parameters["@IsPGO"].Value = isPgo;
         insertSymbolInfoCommand.Parameters["@IsOptimizedForSpeed"].Value = isOptimizedForSpeed;
+        insertSymbolInfoCommand.Parameters["@DynamicInstructionCount"].Value = dynamicInstructionCount;
 
         return Convert.ToInt32(insertSymbolInfoCommand.ExecuteScalar()!, CultureInfo.InvariantCulture);
     }

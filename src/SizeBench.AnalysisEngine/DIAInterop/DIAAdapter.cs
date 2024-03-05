@@ -938,6 +938,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         var isSealed = primaryBlockSymbol.@sealed != 0;
         var isPGO = primaryBlockSymbol.isPGO != 0;
         var isOptimizedForSpeed = primaryBlockSymbol.isOptimizedForSpeed != 0;
+        var dynamicInstructionCount = isPGO && primaryBlockSymbol.hasValidPGOCounts ==1 ? primaryBlockSymbol.PGODynamicInstructionCount : 0;
 
         if (separatedBlocks is null)
         {
@@ -949,7 +950,8 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                                                 isVirtual: isVirtual,
                                                 isSealed: isSealed,
                                                 isPGO: isPGO,
-                                                isOptimizedForSpeed: isOptimizedForSpeed);
+                                                isOptimizedForSpeed: isOptimizedForSpeed,
+                                                dynamicInstructionCount: dynamicInstructionCount);
         }
         else
         {
@@ -973,7 +975,8 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                                                  isVirtual: isVirtual,
                                                  isSealed: isSealed,
                                                  isPGO: isPGO,
-                                                 isOptimizedForSpeed: isOptimizedForSpeed);
+                                                 isOptimizedForSpeed: isOptimizedForSpeed,
+                                                 dynamicInstructionCount: dynamicInstructionCount);
         }
     }
 

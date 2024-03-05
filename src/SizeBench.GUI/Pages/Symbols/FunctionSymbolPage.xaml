@@ -78,12 +78,8 @@
                 <StackPanel>
                     <TextBlock TextWrapping="Wrap" Width="{Binding ViewportWidth, ElementName=scroller}"
                                HorizontalAlignment="Left">
-                        <Run>Functions can be complex and composed of multiple things - the code in them, of course, but functions also create data in many
-                        cases.  This page shows only the function's code.</Run>
-                        <LineBreak/>
-                        <Run>SizeBench currently does not attempt to account for the size of inlines - so if this function was inlined at multiple callsites,
-                        those costs are not added up here.  Thus, you can think of the total size shown above, and the list of blocks of code below, as a lower
-                        bound for the total cost of this function if you were able to delete it in its entirety.</Run>
+                        Functions can be complex and composed of multiple things - the code in them, of course, but functions also create data in many
+                        cases.  This page shows only the function's code.
                     </TextBlock>
 
                     <Expander Header="Code blocks" IsExpanded="True" Width="{Binding ViewportWidth, ElementName=scroller}"

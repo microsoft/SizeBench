@@ -16,6 +16,7 @@ public sealed class ComplexFunctionCodeSymbol : IFunctionCodeSymbol
     public bool IsSealed { get; }
     public bool IsPGO { get; }
     public bool IsOptimizedForSpeed { get; }
+    public ulong DynamicInstructionCount { get; }
 
     [Display(Name = "Function Type")]
     public FunctionTypeSymbol? FunctionType { get; }
@@ -52,7 +53,8 @@ public sealed class ComplexFunctionCodeSymbol : IFunctionCodeSymbol
                                        bool isVirtual = false,
                                        bool isSealed = false,
                                        bool isPGO = false,
-                                       bool isOptimizedForSpeed = false)
+                                       bool isOptimizedForSpeed = false,
+                                       ulong dynamicInstructionCount = 0)
     {
 #if DEBUG
         Debug.Assert(cache.SymbolSourcesSupported.HasFlag(SymbolSourcesSupported.Code));
@@ -77,6 +79,7 @@ public sealed class ComplexFunctionCodeSymbol : IFunctionCodeSymbol
         this.IsSealed = isSealed;
         this.IsPGO = isPGO;
         this.IsOptimizedForSpeed = isOptimizedForSpeed;
+        this.DynamicInstructionCount = dynamicInstructionCount;
         FunctionSymbolHelper.VerifyNotInInconsistentState(this);
 
         this.FunctionType = functionType;

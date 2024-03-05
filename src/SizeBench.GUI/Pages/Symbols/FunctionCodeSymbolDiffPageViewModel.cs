@@ -330,6 +330,11 @@ internal sealed class FunctionCodeSymbolDiffPageViewModel : BinaryDiffViewModelB
         if (function.IsPGO)
         {
             attributes.Add("has been PGO'd");
+
+            if (function.DynamicInstructionCount > 0)
+            {
+                attributes.Add($"has PGO dynamic instruction count of {function.DynamicInstructionCount:N0}");
+            }
         }
 
         if (function.IsOptimizedForSpeed)

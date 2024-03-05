@@ -20,6 +20,7 @@ public sealed class SimpleFunctionCodeSymbol : CodeBlockSymbol, IFunctionCodeSym
     public bool IsSealed { get; }
     public bool IsPGO { get; }
     public bool IsOptimizedForSpeed { get; }
+    public ulong DynamicInstructionCount { get; }
 
     [Display(Name = "Function Type")]
     public FunctionTypeSymbol? FunctionType { get; }
@@ -57,7 +58,8 @@ public sealed class SimpleFunctionCodeSymbol : CodeBlockSymbol, IFunctionCodeSym
                                       bool isVirtual = false,
                                       bool isSealed = false,
                                       bool isPGO = false,
-                                      bool isOptimizedForSpeed = false) : base(cache, rva, size, symIndexId: symIndexId)
+                                      bool isOptimizedForSpeed = false,
+                                      ulong dynamicInstructionCount = 0) : base(cache, rva, size, symIndexId: symIndexId)
     {
 #if DEBUG
         Debug.Assert(cache.SymbolSourcesSupported.HasFlag(SymbolSourcesSupported.Code));
@@ -78,6 +80,7 @@ public sealed class SimpleFunctionCodeSymbol : CodeBlockSymbol, IFunctionCodeSym
         this.IsSealed = isSealed;
         this.IsPGO = isPGO;
         this.IsOptimizedForSpeed = isOptimizedForSpeed;
+        this.DynamicInstructionCount = dynamicInstructionCount;
         FunctionSymbolHelper.VerifyNotInInconsistentState(this);
 
         this.FunctionType = functionType;
@@ -100,6 +103,7 @@ public sealed class SimpleFunctionCodeSymbol : CodeBlockSymbol, IFunctionCodeSym
         }
 
         cache.AllFunctionSymbolsBySymIndexIdOfPrimaryBlock.Add(symIndexId, this);
+        this.DynamicInstructionCount = dynamicInstructionCount;
     }
 
     public override bool IsVeryLikelyTheSameAs(ISymbol otherSymbol)

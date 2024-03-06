@@ -79,7 +79,7 @@ internal sealed class AllLibsPageViewModel : SingleBinaryViewModelBase
             {
                 this.DataGridSizeColumnDescriptions.Add(new DataGridColumnDescription(
                     header: $"Section: {section.Name}",
-                    propertyPath: $"SectionContributionsByName[{section.Name}].Size",
+                    propertyPath: $"SectionContributionsByName[{PageViewModelUtilities.EscapeXAMLIndexer(section.Name)}].Size",
                     valueConverter: SizeToFriendlySizeConverter.Instance,
                     isRightAligned: true));
             }
@@ -87,7 +87,7 @@ internal sealed class AllLibsPageViewModel : SingleBinaryViewModelBase
             {
                 this.DataGridVirtualSizeColumnDescriptions.Add(new DataGridColumnDescription(
                     header: $"Section: {section.Name}",
-                    propertyPath: $"SectionContributionsByName[{section.Name}].VirtualSize",
+                    propertyPath: $"SectionContributionsByName[{PageViewModelUtilities.EscapeXAMLIndexer(section.Name)}].VirtualSize",
                     valueConverter: SizeToFriendlySizeConverter.Instance,
                     isRightAligned: true));
             }
@@ -99,7 +99,7 @@ internal sealed class AllLibsPageViewModel : SingleBinaryViewModelBase
             {
                 this.DataGridSizeColumnDescriptions.Add(new DataGridColumnDescription(
                     header: $"COFF Group: {coffGroup.Name}",
-                    propertyPath: $"COFFGroupContributionsByName[{coffGroup.Name}].Size",
+                    propertyPath: $"COFFGroupContributionsByName[{PageViewModelUtilities.EscapeXAMLIndexer(coffGroup.Name)}].Size",
                     valueConverter: SizeToFriendlySizeConverter.Instance,
                     isRightAligned: true));
             }
@@ -107,7 +107,7 @@ internal sealed class AllLibsPageViewModel : SingleBinaryViewModelBase
             {
                 this.DataGridVirtualSizeColumnDescriptions.Add(new DataGridColumnDescription(
                     header: $"COFF Group: {coffGroup.Name}",
-                    propertyPath: $"COFFGroupContributionsByName[{coffGroup.Name}].VirtualSize",
+                    propertyPath: $"COFFGroupContributionsByName[{PageViewModelUtilities.EscapeXAMLIndexer(coffGroup.Name)}].VirtualSize",
                     valueConverter: SizeToFriendlySizeConverter.Instance,
                     isRightAligned: true));
             }

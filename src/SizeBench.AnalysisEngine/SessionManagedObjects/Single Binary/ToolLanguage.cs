@@ -40,5 +40,7 @@ public enum ToolLanguage
     ALIASOBJ = 0x14,
 
     Rust = 0x15, // Rust
+
+    Zig = Int32.MaxValue - 1, // Zig, which does not yet have a CV_CFL_LANG value so SizeBench detects it using tool name
     Unknown = Int32.MaxValue
 }

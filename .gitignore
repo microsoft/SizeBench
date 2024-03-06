@@ -396,3 +396,5 @@ FodyWeavers.xsd
 **/TestPEs/Merged*
 **/TestPEs/Unmerged*
 *.*recipe
+**/zig-cache*
+**/zig-out*

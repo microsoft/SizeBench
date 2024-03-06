@@ -18,8 +18,9 @@ engineering systems (such as Windows and Office) so it's important that SizeBenc
 maintain a high level of accuracy and regression prevention.
 
 * Everyone should be able to use SizeBench, regardless of what they
-work on or what language they work in.  Initially, C++ binaries are the target, 
-but the goal is to deal with managed binaries, Rust binaries, and so on too.
+work on or what language they work in.  Initially, native binaries like C, C++,
+Rust, and Zig are the target, but the goal is to deal with managed binaries, 
+and so on too.
 
 * Performance is important as this tool is run on every binary 
 in Windows in every branch on every build, and we want that to be as cheap as 

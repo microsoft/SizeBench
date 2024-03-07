@@ -26,8 +26,8 @@ internal sealed class COFFGroupPageViewModel : SingleBinaryViewModelBase
         }
     }
 
-    public string ContributionSizeSortMemberPath => $"COFFGroupContributionsByName[{this.COFFGroup?.Name}].Size";
-    public string ContributionVirtualSizeSortMemberPath => $"COFFGroupContributionsByName[{this.COFFGroup?.Name}].VirtualSize";
+    public string ContributionSizeSortMemberPath => $"COFFGroupContributionsByName[{PageViewModelUtilities.EscapeXAMLIndexer(this.COFFGroup?.Name)}].Size";
+    public string ContributionVirtualSizeSortMemberPath => $"COFFGroupContributionsByName[{PageViewModelUtilities.EscapeXAMLIndexer(this.COFFGroup?.Name)}].VirtualSize";
 
     private IReadOnlyList<ISymbol>? _symbols;
     public IReadOnlyList<ISymbol>? Symbols

@@ -2079,6 +2079,13 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         {
             language = (CompilandLanguage)compilandDetails.language;
             toolName = compilandDetails.compilerName;
+
+            if (language == CompilandLanguage.CV_CFL_C &&
+                toolName.StartsWith("zig", StringComparison.Ordinal))
+            {
+                language = CompilandLanguage.SizeBench_Zig;
+            }
+
             checked
             {
                 backEndVersion = new Version(
@@ -2640,7 +2647,12 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                         name.Append("double");
                         break;
                     case 10:
-                        name.Append("tbyte [MASM]");
+                        // In MASM this can be called "tbyte", which is short for "ten byte".
+                        // I choose the GCC name "__float80" because it's more legible and I bet more folks use GCC than MASM.
+                        name.Append("__float80");
+                        break;
+                    case 16:
+                        name.Append("__float128"); // GCC extension: https://gcc.gnu.org/onlinedocs/gcc/Floating-Types.html
                         break;
                     default:
                         throw new InvalidOperationException($"unknown floating point type of length {symbolLength}!");

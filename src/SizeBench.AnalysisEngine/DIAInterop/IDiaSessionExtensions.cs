@@ -83,7 +83,16 @@ internal static class IDiaSessionExtensions
                     break;
                 }
 
-                return (CompilandLanguage)detailsSymbol.language;
+                var language = (CompilandLanguage)detailsSymbol.language;
+                var toolName = detailsSymbol.compilerName;
+
+                if (language == CompilandLanguage.CV_CFL_C &&
+                    toolName.StartsWith("zig", StringComparison.Ordinal))
+                {
+                    language = CompilandLanguage.SizeBench_Zig;
+                }
+
+                return language;
             }
         }
         finally

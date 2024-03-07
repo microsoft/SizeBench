@@ -17,6 +17,12 @@ Rust - for testing Rust code, for scenarios like "enums with methods" that can't
        To build this use "cargo build --release" and get the DLL and PDB out of the target\release folder.
 ClangClx64 - for testing an x64 DLL built with clang-cl and lld-link, to test things like Clang language extensions (e.g. _Float16)
 InlineSites - for testing function inlining and InlineSiteSymbols
+Zig - for testing Zig code
+      To build this, you need to do a couple steps because at the time of this writing (March 6, 2024) Zig unintentionally does incremental linking, which SizeBench rejects.
+      1. zig build install --verbose-link
+         This will give you the full lld-link command line it's trying to run.  Append "-INCREMENTAL:NO" to the end of that.
+      2. zig lld-link <new command line that includes INCREMENTAL:NO>
+      The output will then be in a folder in the zig-cache, check where the -PDB is getting output from that lld-link command line.  Copy both the PDB and EXE to TestPEs folder.
 
 Diff Testing
 ------------

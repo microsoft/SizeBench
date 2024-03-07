@@ -49,4 +49,5 @@ The next expected work should be roughly this:
 1. Move to GitHub Actions for CI and PR pipelines.
 1. Create and publish NuGet package for the Analysis Engine.
 1. Support diffing of SourceFiles.
+1. Support diffing of Inline Sites.
 1. Improved support for binaries containing Rust code.

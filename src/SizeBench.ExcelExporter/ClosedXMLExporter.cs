@@ -12,6 +12,11 @@ namespace SizeBench.ExcelExporter;
 
 internal sealed class ClosedXMLExporter : IExcelExporter
 {
+    private const int MaxExcelCellLength = 32_767;
+
+    private static string TruncateStringToExcelMaxLength(string str) =>
+        str.Length > MaxExcelCellLength ? String.Concat(str.AsSpan(0, MaxExcelCellLength - "...".Length), "...") : str;
+
     [ExcludeFromCodeCoverage]
     public void ExportToExcel<T>(IReadOnlyList<T> items, ISessionWithProgress session, string currentDeeplink, string currentPageTitle, IProgress<SessionTaskProgress> progressReporter, CancellationToken token)
     {
@@ -105,17 +110,17 @@ internal sealed class ClosedXMLExporter : IExcelExporter
     {
         metadataWorksheet.Cell(1, 1).Value = "Exported data is from...";
 
-        metadataWorksheet.Cell(2, 1).Value = currentDeeplink;
+        metadataWorksheet.Cell(2, 1).Value = TruncateStringToExcelMaxLength(currentDeeplink);
         metadataWorksheet.Cell(2, 1).SetHyperlink(new XLHyperlink(currentDeeplink));
 
         metadataWorksheet.Cell(3, 1).Value = "Page Title:";
-        metadataWorksheet.Cell(3, 2).Value = currentPageTitle;
+        metadataWorksheet.Cell(3, 2).Value = TruncateStringToExcelMaxLength(currentPageTitle);
 
         metadataWorksheet.Cell(4, 1).Value = "Binary Path:";
-        metadataWorksheet.Cell(4, 2).Value = session.BinaryPath;
+        metadataWorksheet.Cell(4, 2).Value = TruncateStringToExcelMaxLength(session.BinaryPath);
 
         metadataWorksheet.Cell(5, 1).Value = "PDB Path:";
-        metadataWorksheet.Cell(5, 2).Value = session.PdbPath;
+        metadataWorksheet.Cell(5, 2).Value = TruncateStringToExcelMaxLength(session.PdbPath);
 
         metadataWorksheet.Column(1).Width = 12;
     }
@@ -125,22 +130,23 @@ internal sealed class ClosedXMLExporter : IExcelExporter
     {
         metadataWorksheet.Cell(1, 1).Value = "Exported data is from a diff between...";
 
-        metadataWorksheet.Cell(2, 1).Value = currentDeeplink;
+        metadataWorksheet.Cell(2, 1).Value = TruncateStringToExcelMaxLength(currentDeeplink);
         metadataWorksheet.Cell(2, 1).SetHyperlink(new XLHyperlink(currentDeeplink));
 
-        metadataWorksheet.Cell(3, 1).Value = $"Page Title: {currentPageTitle}";
+        metadataWorksheet.Cell(3, 1).Value = "Page Title:";
+        metadataWorksheet.Cell(3, 2).Value = TruncateStringToExcelMaxLength(currentPageTitle);
 
         metadataWorksheet.Cell(4, 1).Value = "Before Binary Path: ";
-        metadataWorksheet.Cell(4, 2).Value = session.BeforeSession.BinaryPath;
+        metadataWorksheet.Cell(4, 2).Value = TruncateStringToExcelMaxLength(session.BeforeSession.BinaryPath);
 
         metadataWorksheet.Cell(5, 1).Value = "Before PDB Path: ";
-        metadataWorksheet.Cell(5, 2).Value = session.BeforeSession.PdbPath;
+        metadataWorksheet.Cell(5, 2).Value = TruncateStringToExcelMaxLength(session.BeforeSession.PdbPath);
 
         metadataWorksheet.Cell(6, 1).Value = "After Binary Path: ";
-        metadataWorksheet.Cell(6, 2).Value = session.BeforeSession.BinaryPath;
+        metadataWorksheet.Cell(6, 2).Value = TruncateStringToExcelMaxLength(session.BeforeSession.BinaryPath);
 
         metadataWorksheet.Cell(7, 1).Value = "After PDB Path: ";
-        metadataWorksheet.Cell(7, 2).Value = session.BeforeSession.PdbPath;
+        metadataWorksheet.Cell(7, 2).Value = TruncateStringToExcelMaxLength(session.BeforeSession.PdbPath);
 
         metadataWorksheet.Column(1).Width = 25;
     }
@@ -268,7 +274,14 @@ internal sealed class ClosedXMLExporter : IExcelExporter
         {
             for (var columnIndex = 0; columnIndex < columnHeaders.Length; columnIndex++)
             {
-                dataWorksheet.Cell(2 + rowIndex, 1 + columnIndex).Value = XLCellValue.FromObject(dataRows[rowIndex, columnIndex], CultureInfo.InvariantCulture);
+                if (dataRows[rowIndex, columnIndex] is string str)
+                {
+                    dataWorksheet.Cell(2 + rowIndex, 1 + columnIndex).Value = TruncateStringToExcelMaxLength(str);
+                }
+                else
+                {
+                    dataWorksheet.Cell(2 + rowIndex, 1 + columnIndex).Value = XLCellValue.FromObject(dataRows[rowIndex, columnIndex], CultureInfo.InvariantCulture);
+                }
             }
         }
 

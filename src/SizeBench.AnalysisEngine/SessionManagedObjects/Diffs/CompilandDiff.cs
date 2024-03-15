@@ -42,16 +42,31 @@ public sealed class CompilandDiff
         }
     }
 
+#if DEBUG
+    private static bool SymIndexIDListsAreEquivalent(Compiland a, Compiland b)
+    {
+        foreach (var symIndexId in a.SymIndexIds)
+        {
+            if (!b.SymIndexIds.Contains(symIndexId))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+#endif
+
     internal CompilandDiff(Compiland? before, Compiland? after, LibDiff libDiff, List<BinarySectionDiff> sectionDiffs, DiffSessionDataCache cache)
     {
 #if DEBUG
         // As with (non-diff) Compilands, "Import:<anything>" can be special and appear multiple times in a binary by name.
         // Thus the more complex check here than just the names.
         if (cache.CompilandDiffsConstructedEver.Any(cd =>
-        {
-            return (before != null && cd.BeforeCompiland != null && cd.BeforeCompiland.SymIndexId == before.SymIndexId) ||
-                   (after != null && cd.AfterCompiland != null && cd.AfterCompiland.SymIndexId == after.SymIndexId);
-        }) ||
+            {
+                return (before is not null && cd.BeforeCompiland is not null && SymIndexIDListsAreEquivalent(cd.BeforeCompiland, before)) ||
+                       (after is not null && cd.AfterCompiland is not null && SymIndexIDListsAreEquivalent(cd.AfterCompiland, after));
+            }) ||
             cache.CompilandDiffsConstructedEver.Any(cd => cd.Name == (before?.Name ?? after?.Name) &&
                                                           cd.LibDiff.Name == (before?.Lib.Name ?? after?.Lib.Name)))
         {

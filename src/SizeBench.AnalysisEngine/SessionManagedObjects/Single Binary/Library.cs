@@ -81,6 +81,7 @@ public sealed class Library : IEquatable<Library>
 
         if (this._compilands.TryGetValue(compilandName, out var existingCompiland))
         {
+            cache.RecordAdditionalSymIndexIdForCompiland(existingCompiland, compilandSymIndexId);
             return existingCompiland;
         }
 

@@ -20,11 +20,15 @@ internal sealed class SessionDataCache : IDisposable
         => this._coffGroupsConstructedEver ?? new List<COFFGroup>();
 
     public List<Compiland>? _compilandsConstructedEver = new List<Compiland>(capacity: 100);
+    // Note that the same Compiland may appear in this dictionary multiple times, with different SymIndexIds, because
+    // for example we map the null name and the empty string name to "...no name found..." as a single Compiland entity
+    // in SizeBench.
     private Dictionary<uint, Compiland>? _compilandsBySymIndexId = new Dictionary<uint, Compiland>(capacity: 100);
+    internal IReadOnlyDictionary<uint, Compiland> CompilandsBySymIndexId => this._compilandsBySymIndexId!;
     public IReadOnlyList<Compiland> CompilandsConstructedEver => this._compilandsConstructedEver ?? new List<Compiland>();
     public Compiland? FindCompilandBySymIndexId(uint symIndexId)
     {
-        if (this._compilandsBySymIndexId != null &&
+        if (this._compilandsBySymIndexId is not null &&
             this._compilandsBySymIndexId.TryGetValue(symIndexId, out var compiland) == true)
         {
             return compiland;
@@ -60,10 +64,15 @@ internal sealed class SessionDataCache : IDisposable
         => this._binarySectionsConstructedEver!.Add(section);
     public void RecordCOFFGroupConstructed(COFFGroup coffGroup)
         => this._coffGroupsConstructedEver!.Add(coffGroup);
-    public void RecordCompilandConstructed(Compiland compiland)
+    public void RecordCompilandConstructed(Compiland compiland, uint symIndexId)
     {
         this._compilandsConstructedEver!.Add(compiland);
-        this._compilandsBySymIndexId!.Add(compiland.SymIndexId, compiland);
+        this._compilandsBySymIndexId!.Add(symIndexId, compiland);
+    }
+    public void RecordAdditionalSymIndexIdForCompiland(Compiland compiland, uint additionalSymIndexId)
+    {
+        compiland.AddSymIndexId(additionalSymIndexId);
+        this._compilandsBySymIndexId!.TryAdd(additionalSymIndexId, compiland);
     }
     public void RecordSourceFileConstructed(SourceFile sourceFile)
     {

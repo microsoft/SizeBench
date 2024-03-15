@@ -174,6 +174,8 @@ public sealed class Compiland : IEquatable<Compiland>
 
     internal Compiland(SessionDataCache cache, string name, Library lib, CommandLine commandLine, uint compilandSymIndex)
     {
+        name = String.IsNullOrEmpty(name) ? UnknownName : name;
+
 #if DEBUG
         // Compilands that start with "Import:" are sort of special, since they can exist multiple times in a binary
         // and that's fine.
@@ -188,7 +190,7 @@ public sealed class Compiland : IEquatable<Compiland>
         }
 #endif
 
-        this.Name = String.IsNullOrEmpty(name) ? UnknownName : name;
+        this.Name = name;
         this._commandLine = commandLine;
         this.SymIndexId = compilandSymIndex;
         this.Lib = lib;

@@ -68,7 +68,7 @@
                         </Hyperlink>
                     </Label>
                     <Label Style="{StaticResource LinkLabelStyle}">
-                        <Hyperlink NavigateUri="https://github.com/microsoft/SizeBench/blob/main/docs/Contributing.md"
+                        <Hyperlink NavigateUri="https://github.com/microsoft/SizeBench/blob/main/CONTRIBUTING.md"
                                    Style="{StaticResource LinkLabelStyle}">
                             <i:Interaction.Behaviors>
                                 <navigationControls:ExternalHyperlinkNavigationBehavior/>

@@ -15,7 +15,7 @@ public sealed class Compiland : IEquatable<Compiland>
 
     private bool _fullyConstructed;
 
-    internal readonly uint SymIndexId;
+    internal readonly HashSet<uint> SymIndexIds = new HashSet<uint>();
 
     public string Name { get; }
 
@@ -174,13 +174,15 @@ public sealed class Compiland : IEquatable<Compiland>
 
     internal Compiland(SessionDataCache cache, string name, Library lib, CommandLine commandLine, uint compilandSymIndex)
     {
+        name = String.IsNullOrEmpty(name) ? UnknownName : name;
+
 #if DEBUG
         // Compilands that start with "Import:" are sort of special, since they can exist multiple times in a binary
         // and that's fine.
         // Technically, what maks a Compiland unique is the compilandId, but for most users this is difficult to visually
         // parse so we hope that most binaries only have compilands that are unique by name (including the name of the lib
         // they're part of) - note that name is a fully-qualified path, so that's not too crazy to assume.
-        if (cache.CompilandsConstructedEver.Any(c => c.SymIndexId == compilandSymIndex) ||
+        if (cache.CompilandsConstructedEver.Any(c => c.SymIndexIds.Contains(compilandSymIndex)) ||
             cache.CompilandsConstructedEver.Any(c => c.Name.Equals(name, StringComparison.OrdinalIgnoreCase) &&
                                                      c.Lib.Name.Equals(lib.Name, StringComparison.OrdinalIgnoreCase)))
         {
@@ -188,12 +190,22 @@ public sealed class Compiland : IEquatable<Compiland>
         }
 #endif
 
-        this.Name = String.IsNullOrEmpty(name) ? UnknownName : name;
+        this.Name = name;
         this._commandLine = commandLine;
-        this.SymIndexId = compilandSymIndex;
+        this.SymIndexIds.Add(compilandSymIndex);
         this.Lib = lib;
 
-        cache.RecordCompilandConstructed(this);
+        cache.RecordCompilandConstructed(this, compilandSymIndex);
+    }
+
+    internal void AddSymIndexId(uint compilandSymIndex)
+    {
+        if (this._fullyConstructed)
+        {
+            throw new ObjectFullyConstructedAlreadyException();
+        }
+
+        this.SymIndexIds.Add(compilandSymIndex);
     }
 
     internal CompilandSectionContribution GetOrCreateSectionContribution(BinarySection section)

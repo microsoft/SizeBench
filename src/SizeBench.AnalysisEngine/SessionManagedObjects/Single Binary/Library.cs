@@ -74,8 +74,14 @@ public sealed class Library : IEquatable<Library>
             throw new ObjectFullyConstructedAlreadyException();
         }
 
+        if (String.IsNullOrEmpty(compilandName))
+        {
+            compilandName = Compiland.UnknownName;
+        }
+
         if (this._compilands.TryGetValue(compilandName, out var existingCompiland))
         {
+            cache.RecordAdditionalSymIndexIdForCompiland(existingCompiland, compilandSymIndexId);
             return existingCompiland;
         }
 

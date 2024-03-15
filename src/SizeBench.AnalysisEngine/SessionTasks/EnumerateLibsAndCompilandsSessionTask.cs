@@ -34,7 +34,7 @@ internal sealed class EnumerateLibsAndCompilandsSessionTask : SessionTask<HashSe
         var binarySections = new EnumerateBinarySectionsAndCOFFGroupsSessionTask(this._sessionTaskParameters, this.CancellationToken).Execute(logger);
 
         var libs = new Dictionary<string, Library>(StringComparer.OrdinalIgnoreCase);
-        var compilands = new Dictionary<uint, Compiland>();
+        var compilands = new HashSet<Compiland>(capacity: 1000);
 
         uint contribsParsed = 0;
         const int loggerOutputVelocity = 100;
@@ -71,7 +71,7 @@ internal sealed class EnumerateLibsAndCompilandsSessionTask : SessionTask<HashSe
         }
 
         logger.Log("Marking all compilands and libs as fully constructed.");
-        foreach (var compiland in compilands.Values)
+        foreach (var compiland in compilands)
         {
             compiland.MarkFullyConstructed();
         }
@@ -82,7 +82,7 @@ internal sealed class EnumerateLibsAndCompilandsSessionTask : SessionTask<HashSe
         }
 
         this.DataCache.AllLibs = libs.Values.ToHashSet();
-        this.DataCache.AllCompilands = compilands.Values.ToHashSet();
+        this.DataCache.AllCompilands = compilands;
 
         logger.Log($"Finished parsing {libs.Count:N0} libs and {compilands.Count:N0} compilands");
 
@@ -91,7 +91,7 @@ internal sealed class EnumerateLibsAndCompilandsSessionTask : SessionTask<HashSe
 
     private void ParseSectionContrib(RawSectionContribution sectionContrib,
                                      Dictionary<string, Library> libs,
-                                     Dictionary<uint, Compiland> compilands,
+                                     HashSet<Compiland> compilands,
                                      IReadOnlyList<COFFGroup> coffGroups)
     {
 
@@ -134,14 +134,14 @@ internal sealed class EnumerateLibsAndCompilandsSessionTask : SessionTask<HashSe
         }
 
         var contributingCompiland = lib.GetOrCreateCompiland(this.DataCache, sectionContrib.CompilandName, sectionContrib.CompilandSymIndexId, this._sessionTaskParameters.DIAAdapter);
-        compilands.TryAdd(sectionContrib.CompilandSymIndexId, contributingCompiland);
+        compilands.Add(contributingCompiland);
         var rvaRange = RVARange.FromRVAAndSize(sectionContrib.RVA, sectionContrib.Length, isVirtualSize: coffGroup.IsVirtualSizeOnly);
 
         contributingCompiland.GetOrCreateSectionContribution(section).AddRVARange(rvaRange);
         contributingCompiland.GetOrCreateCOFFGroupContribution(coffGroup).AddRVARange(rvaRange);
     }
 
-    private void AttributePDataSymbols(Dictionary<uint, Compiland> compilands,
+    private void AttributePDataSymbols(HashSet<Compiland> compilands,
                                        Dictionary<string, Library> libs,
                                        BinarySection pdataSection,
                                        COFFGroup? pdataCOFFGroup,
@@ -170,9 +170,9 @@ internal sealed class EnumerateLibsAndCompilandsSessionTask : SessionTask<HashSe
             ReportProgress("Attributing PDATA symbols to compilands.", contribsParsed, this._totalNumberOfItemsToReportProgressOn);
             // We'll pre-fill this with empty lists to make the logic below simpler to read.
             var compilandPDataContributions = new Dictionary<Compiland, List<RVARange>>(capacity: compilands.Count);
-            foreach (var compilandBySymIndexId in compilands)
+            foreach (var c in compilands)
             {
-                compilandPDataContributions.Add(compilandBySymIndexId.Value, new List<RVARange>());
+                compilandPDataContributions.Add(c, new List<RVARange>());
             }
 
             Compiland? compiland = null;
@@ -183,7 +183,7 @@ internal sealed class EnumerateLibsAndCompilandsSessionTask : SessionTask<HashSe
             //
             // We'll restrict ourselves to only looking at compilands that contain any executable code as another way to filter how much we have
             // to look through.
-            var compilandsWithExecutableCode = compilands.Values.Where(c => c.ContainsExecutableCode).ToList();
+            var compilandsWithExecutableCode = compilands.Where(c => c.ContainsExecutableCode).ToList();
 
             uint pdataSymbolsAttributed = 0;
             const int loggerOutputVelocity = 1000;

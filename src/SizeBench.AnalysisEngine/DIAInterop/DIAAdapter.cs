@@ -705,33 +705,36 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
 
         var ranges = new List<RVARange>();
 
-        this.DiaSession.symbolById(compiland.SymIndexId, out var diaCompiland);
-        foreach (var diaFileId in sourceFile.DiaFileIds)
+        foreach (var diaCompilandSymIndexId in compiland.SymIndexIds)
         {
-            this.DiaSession.findFileById(diaFileId, out var diaSourceFile);
-            this.DiaSession.findLines(diaCompiland, diaSourceFile, out var diaEnumLineNumbers);
-
-            foreach (var diaLineNumObject in diaEnumLineNumbers)
+            this.DiaSession.symbolById(diaCompilandSymIndexId, out var diaCompiland);
+            foreach (var diaFileId in sourceFile.DiaFileIds)
             {
-                token.ThrowIfCancellationRequested();
-                if (diaLineNumObject != null)
-                {
-                    if (diaLineNumObject is IDiaLineNumber diaLineNum)
-                    {
-                        // How do I know if this is virtual size here?  At the moment it seems that line number enumerations only ever find
-                        // code, so it's all 'real size' so passing false for isVirtualSize is fine.
-                        if (diaLineNum.length > 0)
-                        {
-                            var rva = diaLineNum.relativeVirtualAddress;
+                this.DiaSession.findFileById(diaFileId, out var diaSourceFile);
+                this.DiaSession.findLines(diaCompiland, diaSourceFile, out var diaEnumLineNumbers);
 
-                            // When things are COMDAT-folded this gets tricky.  The line number was actaully used in multiple source files, but only
-                            // one of them actually 'holds' the contribution - so we need to check if this compiland believes it owns this RVA from
-                            // its section contributions.  If it does not, then this line number RVA was COMDAT folded elsewhere and we'll find it
-                            // and attribute it there instead.
-                            if (compiland.ContainsExecutableCodeAtRVA(rva))
+                foreach (var diaLineNumObject in diaEnumLineNumbers)
+                {
+                    token.ThrowIfCancellationRequested();
+                    if (diaLineNumObject != null)
+                    {
+                        if (diaLineNumObject is IDiaLineNumber diaLineNum)
+                        {
+                            // How do I know if this is virtual size here?  At the moment it seems that line number enumerations only ever find
+                            // code, so it's all 'real size' so passing false for isVirtualSize is fine.
+                            if (diaLineNum.length > 0)
                             {
-                                var newRange = RVARange.FromRVAAndSize(rva, diaLineNum.length, isVirtualSize: false);
-                                ranges.Add(newRange);
+                                var rva = diaLineNum.relativeVirtualAddress;
+
+                                // When things are COMDAT-folded this gets tricky.  The line number was actaully used in multiple source files, but only
+                                // one of them actually 'holds' the contribution - so we need to check if this compiland believes it owns this RVA from
+                                // its section contributions.  If it does not, then this line number RVA was COMDAT folded elsewhere and we'll find it
+                                // and attribute it there instead.
+                                if (compiland.ContainsExecutableCodeAtRVA(rva))
+                                {
+                                    var newRange = RVARange.FromRVAAndSize(rva, diaLineNum.length, isVirtualSize: false);
+                                    ranges.Add(newRange);
+                                }
                             }
                         }
                     }
@@ -766,8 +769,6 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                 SymTagEnum.SymTagData
         };
 
-        this.DiaSession.symbolById(compiland.SymIndexId, out var rootSymbol);
-
         void processDataSymbol(IDiaSymbol diaSymbol)
         {
             var locationType = (LocationType)diaSymbol.locationType;
@@ -782,7 +783,11 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             }
         }
 
-        RecursivelyFindSymbols(rootSymbol, symTagsToSearchThrough, SymTagEnum.SymTagData, cancellationToken, processDataSymbol);
+        foreach (var diaCompilandSymIndexId in compiland.SymIndexIds)
+        {
+            this.DiaSession.symbolById(diaCompilandSymIndexId, out var rootSymbol);
+            RecursivelyFindSymbols(rootSymbol, symTagsToSearchThrough, SymTagEnum.SymTagData, cancellationToken, processDataSymbol);
+        }
 
         return allSymbols;
     }
@@ -3103,7 +3108,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                     // It's possible to be unable to get a referencedIn compiland, if the PDB does not contain any compiland information, such
                     // as the PDBs currently produced by lld-link.  So we'll do our best here, but if we can't find one, the DataSymbol will
                     // lack this information.  We did our best.
-                    referencedIn = this.DataCache.AllCompilands!.FirstOrDefault(c => c.SymIndexId == lexicalParent.symIndexId);
+                    this.DataCache.CompilandsBySymIndexId.TryGetValue(lexicalParent.symIndexId, out referencedIn);
                 }
                 else if (parentSymTag == SymTagEnum.SymTagFunction && this.SupportsCodeSymbols)
                 {

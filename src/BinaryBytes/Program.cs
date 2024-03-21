@@ -222,7 +222,9 @@ public static class Program
 
             // Ignore COMDAT-folded symbols because they don't take up space and they can add a lot of bloat to the database.
             var symbols = (await session.EnumerateSymbolsInCOFFGroup(coffgroup, CancellationToken.None))
-                          .Where(symbol => !symbol.IsCOMDATFolded).ToList();
+                          .Where(symbol => !symbol.IsCOMDATFolded && symbol.VirtualSize > 0)
+                          .OrderBy(x => x.RVA) // We depend on ordering in IdentifyPaddingAroundSymbols
+                          .ToList();
 
             if (symbols.Count > 0)
             {

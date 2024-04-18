@@ -499,16 +499,14 @@ internal sealed partial class PEFile : IPEFile
             if (descriptor->ImportNameTableRVA != 0)
             {
                 var nameTableThunkPtrRva = descriptor->ImportNameTableRVA;
-                var nameTableThunkRva = this.BytesPerWord is 8 ? (uint)*(UInt64*)(GetDataMemberPtrByRVA(nameTableThunkPtrRva)) : *(UInt32*)(GetDataMemberPtrByRVA(nameTableThunkPtrRva));
 
                 var iatThunkPtrRva = hasIAT ? descriptor->ImportAddressTableRVA : 0;
-                var iatThunkRva = hasIAT ? (this.BytesPerWord is 8 ? (uint)*(UInt64*)(GetDataMemberPtrByRVA(iatThunkPtrRva)) : *(UInt32*)(GetDataMemberPtrByRVA(iatThunkPtrRva))) : 0;
 
                 while (true)
                 {
                     Debug.Assert(this.BytesPerWord is 8 or 4);
                     var thunk64 = this.BytesPerWord is 8 ? (IMAGE_THUNK_DATA64*)(UInt64*)GetDataMemberPtrByRVA(nameTableThunkPtrRva) : null;
-                    var thunk32 = this.BytesPerWord is not 8 ? (IMAGE_THUNK_DATA32*)GetDataMemberPtrByRVA(nameTableThunkRva) : null;
+                    var thunk32 = this.BytesPerWord is not 8 ? (IMAGE_THUNK_DATA32*)GetDataMemberPtrByRVA(nameTableThunkPtrRva) : null;
                     var thunkSize = this.BytesPerWord is 8 ? (uint)Marshal.SizeOf<IMAGE_THUNK_DATA64>() : (uint)Marshal.SizeOf<IMAGE_THUNK_DATA32>();
 
                     var ordinal = (ushort)((this.BytesPerWord is 8 ? thunk64->Ordinal : thunk32->Ordinal) & 0xFFFF);
@@ -575,7 +573,7 @@ internal sealed partial class PEFile : IPEFile
             }
 
             descriptor++;
-            descriptorRva += (uint)Marshal.SizeOf<IMAGE_IMPORT_DESCRIPTOR>();
+            descriptorRva += (uint)Marshal.SizeOf<IMAGE_DELAYLOAD_DESCRIPTOR>();
         }
 
         if (thunks.Count > 0)

@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text;
 using Microsoft.Data.Sqlite;
 using SizeBench.AnalysisEngine;
 using SizeBench.AnalysisEngine.Symbols;
@@ -281,7 +282,26 @@ internal static class ApplicationDbHandler
                                     stringToID,
                                     insertStringCommand, insertSymbolInfoCommand);
 
-                                 symbolRVAToID.Add(item.RVA, symbolID);
+                                if(!symbolRVAToID.TryAdd(item.RVA, symbolID))
+                                {
+                                    // We somehow got multiple symbols at the same RVA, which we don't expect because
+                                    // of how we filter out COMDAT folded symbols and 0-byte symbols.
+                                    // So, we'll add additional logging here to help diagnose the issue, then fail.
+
+                                    var errorTextBuilder = new StringBuilder();
+                                    errorTextBuilder.AppendLine(CultureInfo.InvariantCulture, $"Multiple symbols at the same RVA {item.RVA:X} detected!  This should not happen.");
+                                    
+                                    foreach (var symbolAtRVA in section.Items.Where(x => x.RVA == item.RVA).OrderBy(x => x.Name))
+                                    {
+                                        errorTextBuilder.AppendLine(CultureInfo.InvariantCulture, $"  Symbol at {symbolAtRVA.RVA:X}, Length {symbolAtRVA.VirtualSize:N0}: {symbolAtRVA.Name}");
+                                    }
+
+                                    var errorText = errorTextBuilder.ToString();
+                                    var exToThrow = new InvalidOperationException($"Unable to establish RVA -> Symbol ID mapping for RVA 0x{item.RVA:X}, see logs for details.");
+                                    Program.LogErrorAndReportToConsoleOutput(errorText, exToThrow, addDataLog);
+
+                                    throw exToThrow;
+                                }
                             }
                         }
 

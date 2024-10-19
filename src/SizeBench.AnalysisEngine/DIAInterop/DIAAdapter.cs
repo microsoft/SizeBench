@@ -3591,9 +3591,23 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             this._session = null;
         }
 
-        this._globalScope = null;
-        this._diaSession = null;
-        this._diaDataSource = null;
+        if (this._globalScope is not null)
+        {
+            Marshal.ReleaseComObject(this._globalScope);
+            this._globalScope = null;
+        }
+
+        if (this._diaSession is not null)
+        {
+            Marshal.ReleaseComObject(this._diaSession);
+            this._diaSession = null;
+        }
+
+        if (this._diaDataSource is not null)
+        {
+            Marshal.ReleaseComObject(this._diaDataSource);
+            this._diaDataSource = null;
+        }
 
         this.IsDisposing = false;
         this.IsDisposed = true;

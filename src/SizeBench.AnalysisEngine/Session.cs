@@ -99,8 +99,6 @@ public sealed class Session : ISession
     private int _diaManagedThreadId;
     private DIAAdapter? _diaAdapter;
 
-    internal IDIAAdapter DIAAdapter => this._diaAdapter ?? throw new InvalidOperationException("There should always be a DIA Adapter by the time we call this.");
-
     #endregion
 
     #region Create and Open Session

@@ -66,7 +66,7 @@ internal sealed class EnumerateWastefulVirtualDiffsSessionTask : DiffSessionTask
                     afterWVIsParsed++; // Because we removed one, let's keep the total marching towards "totalSymbolsToDiff"
                 }
 
-                var wviDiff = new WastefulVirtualItemDiff(beforeWVI, matchingAfterWVI, this.DataCache, this._diffSessionTaskParameters.BeforeDIAAdapter, this._diffSessionTaskParameters.AfterDIAAdapter);
+                var wviDiff = new WastefulVirtualItemDiff(beforeWVI, matchingAfterWVI, this.DataCache);
 
                 //We'll only return ones that are interesting to look at - they meet one of these conditions:
                 // 1. Size diff is not 0, so clearly something of interest happened.
@@ -99,7 +99,7 @@ internal sealed class EnumerateWastefulVirtualDiffsSessionTask : DiffSessionTask
                 afterWVIsParsed++;
 
                 // This entire type wasn't found in 'before' so it's new in the 'after'
-                WVIDiffs.Add(new WastefulVirtualItemDiff(null, afterWVI, this.DataCache, this._diffSessionTaskParameters.BeforeDIAAdapter, this._diffSessionTaskParameters.AfterDIAAdapter));
+                WVIDiffs.Add(new WastefulVirtualItemDiff(null, afterWVI, this.DataCache));
             }
         }
 

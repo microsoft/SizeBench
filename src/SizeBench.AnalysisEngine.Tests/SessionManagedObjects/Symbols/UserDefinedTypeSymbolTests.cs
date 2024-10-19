@@ -52,7 +52,7 @@ public sealed class UserDefinedTypeSymbolTests : IDisposable
         this.Derived1And2UDT!.LoadBaseTypes(this.DataCache, this.TestDIAAdapter!, CancellationToken.None);
 
         Assert.IsNotNull(this.Derived1And2UDT.BaseTypes);
-        Assert.AreEqual(2, this.Derived1And2UDT.BaseTypes.Count);
+        Assert.AreEqual(2, this.Derived1And2UDT.BaseTypes.Length);
         Assert.IsTrue(this.Derived1And2UDT.BaseTypes.Any(bt => bt._baseTypeSymbol == this.Base1UDT && bt._offset == 0));
         Assert.IsTrue(this.Derived1And2UDT.BaseTypes.Any(bt => bt._baseTypeSymbol == this.Base2UDT && bt._offset == 8));
     }
@@ -68,7 +68,7 @@ public sealed class UserDefinedTypeSymbolTests : IDisposable
         this.Derived1And2UDT!.LoadBaseTypes(this.DataCache, this.TestDIAAdapter, CancellationToken.None);
 
         Assert.IsNotNull(this.Derived1And2UDT.BaseTypes);
-        Assert.AreEqual(2, this.Derived1And2UDT.BaseTypes.Count);
+        Assert.AreEqual(2, this.Derived1And2UDT.BaseTypes.Length);
         Assert.IsTrue(this.Derived1And2UDT.BaseTypes.Any(bt => bt._baseTypeSymbol == this.Base1UDT && bt._offset == 0));
         Assert.IsTrue(this.Derived1And2UDT.BaseTypes.Any(bt => bt._baseTypeSymbol == this.Base2UDT && bt._offset == 8));
     }
@@ -76,7 +76,7 @@ public sealed class UserDefinedTypeSymbolTests : IDisposable
 
 
     [TestMethod]
-    public void EnumerateDerivedTypesThrowsIfCalledWithoutMarkingDerivedTypesAsCompletelyLoaded() => Assert.ThrowsException<InvalidOperationException>(() => this.Base1UDT!.EnumerateDerivedTypes(this.TestDIAAdapter!, CancellationToken.None).First());
+    public void DerivedTypesPropertyThrowsIfCalledWithoutMarkingDerivedTypesAsCompletelyLoaded() => Assert.ThrowsException<InvalidOperationException>(() => this.Base1UDT!.DerivedTypes);
 
     [TestMethod]
     public void AddingTheSameDerivedTypeTwiceIsOK()
@@ -85,9 +85,10 @@ public sealed class UserDefinedTypeSymbolTests : IDisposable
         this.Base1UDT.AddDerivedType(this.Derived1And2UDT!);
         this.Base1UDT.MarkDerivedTypesLoaded();
 
+        Assert.IsNotNull(this.Base1UDT.DerivedTypes);
         Assert.AreEqual(1, this.Base1UDT.DerivedTypeCount);
-        Assert.IsTrue(ReferenceEquals(this.Base1UDT.EnumerateDerivedTypes(this.TestDIAAdapter!, CancellationToken.None).First(), this.Derived1And2UDT));
-        Assert.IsTrue(ReferenceEquals(this.Base1UDT.EnumerateDerivedTypes(this.TestDIAAdapter!, CancellationToken.None).Single(x => x.SymIndexId == this.Derived1And2UDT!.SymIndexId), this.Derived1And2UDT));
+        Assert.IsTrue(ReferenceEquals(this.Base1UDT.DerivedTypes.First(), this.Derived1And2UDT));
+        Assert.IsTrue(ReferenceEquals(this.Base1UDT.DerivedTypes.Single(x => x.SymIndexId == this.Derived1And2UDT!.SymIndexId), this.Derived1And2UDT));
     }
 
     [TestMethod]
@@ -97,9 +98,10 @@ public sealed class UserDefinedTypeSymbolTests : IDisposable
         this.Base2UDT.AddDerivedType(this.Derived2UDT!);
         this.Base2UDT.MarkDerivedTypesLoaded();
 
+        Assert.IsNotNull(this.Base2UDT.DerivedTypes);
         Assert.AreEqual(2, this.Base2UDT.DerivedTypeCount);
-        Assert.IsNotNull(this.Base2UDT.EnumerateDerivedTypes(this.TestDIAAdapter!, CancellationToken.None).SingleOrDefault(x => ReferenceEquals(x, this.Derived1And2UDT)));
-        Assert.IsNotNull(this.Base2UDT.EnumerateDerivedTypes(this.TestDIAAdapter!, CancellationToken.None).SingleOrDefault(x => ReferenceEquals(x, this.Derived2UDT)));
+        Assert.IsNotNull(this.Base2UDT.DerivedTypes.SingleOrDefault(x => ReferenceEquals(x, this.Derived1And2UDT)));
+        Assert.IsNotNull(this.Base2UDT.DerivedTypes.SingleOrDefault(x => ReferenceEquals(x, this.Derived2UDT)));
     }
 
     [TestMethod]

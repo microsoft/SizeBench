@@ -40,7 +40,7 @@ public sealed class DiffSession : IDiffSession
         this.AfterSession.PropertyChanged += BeforeOrAfterSession_PropertyChanged;
 
         this._logger = logger;
-        this._taskParameters = new DiffSessionTaskParameters(diffSession: this, dataCache: this._dataCache, before.DIAAdapter, after.DIAAdapter);
+        this._taskParameters = new DiffSessionTaskParameters(diffSession: this, dataCache: this._dataCache);
 
         this._taskScheduler = new QueuedTaskScheduler(threadCount: 1);
         this._taskFactory = new TaskFactory(this._taskScheduler);

@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using SizeBench.AnalysisEngine.DIAInterop;
 using SizeBench.AnalysisEngine.Symbols;
 
 namespace SizeBench.AnalysisEngine;
@@ -117,7 +116,7 @@ public sealed class WastefulVirtualItemDiff
 
     private static IEnumerable<IFunctionCodeSymbol> AllWastedOverrides(WastefulVirtualItem wvi) => wvi.WastedOverridesPureWithExactlyOneOverride.Concat(wvi.WastedOverridesNonPureWithNoOverrides);
 
-    internal WastefulVirtualItemDiff(WastefulVirtualItem? before, WastefulVirtualItem? after, DiffSessionDataCache cache, IDIAAdapter beforeDIAAdapter, IDIAAdapter afterDIAAdapter)
+    internal WastefulVirtualItemDiff(WastefulVirtualItem? before, WastefulVirtualItem? after, DiffSessionDataCache cache)
     {
         if (before is null && after is null)
         {
@@ -180,32 +179,38 @@ public sealed class WastefulVirtualItemDiff
             }
 
             // Start by figuring out which derived types are added/removed
-            foreach (var derivedTypeFromBefore in before.UserDefinedType.EnumerateDerivedTypes(beforeDIAAdapter, CancellationToken.None))
+            if (before.UserDefinedType.DerivedTypes is not null)
             {
-                var matchingTypeInAfter = after.UserDefinedType.EnumerateDerivedTypes(afterDIAAdapter, CancellationToken.None).FirstOrDefault(udt => udt.IsVeryLikelyTheSameAs(derivedTypeFromBefore));
-                if (matchingTypeInAfter is null)
+                foreach (var derivedTypeFromBefore in before.UserDefinedType.DerivedTypes)
                 {
-                    // This type was in the 'before' as a derived type, but is not in 'after' - so it's a savings!
-                    // Each wasted override (in the 'before' list only) is gone, so the savings is one word for
-                    // each of those.
-                    // We already attributed savings for the wasted override changes above, so deduct those from
-                    // the type savings to avoid double-counting.
-                    typeHierarchyChanges.Add(new TypeHierarchyChange(new TypeSymbolDiff(derivedTypeFromBefore, null),
-                                                                     0 - ((AllWastedOverrides(before).Count() - wastedOverridesGoneSinceBefore) * before.BytesPerWord)));
+                    var matchingTypeInAfter = after.UserDefinedType.DerivedTypes?.FirstOrDefault(udt => udt.IsVeryLikelyTheSameAs(derivedTypeFromBefore));
+                    if (matchingTypeInAfter is null)
+                    {
+                        // This type was in the 'before' as a derived type, but is not in 'after' - so it's a savings!
+                        // Each wasted override (in the 'before' list only) is gone, so the savings is one word for
+                        // each of those.
+                        // We already attributed savings for the wasted override changes above, so deduct those from
+                        // the type savings to avoid double-counting.
+                        typeHierarchyChanges.Add(new TypeHierarchyChange(new TypeSymbolDiff(derivedTypeFromBefore, null),
+                                                                         0 - ((AllWastedOverrides(before).Count() - wastedOverridesGoneSinceBefore) * before.BytesPerWord)));
+                    }
                 }
             }
 
-            foreach (var derivedTypeFromAfter in after.UserDefinedType.EnumerateDerivedTypes(afterDIAAdapter, CancellationToken.None))
+            if (after.UserDefinedType.DerivedTypes is not null)
             {
-                var matchingTypeInBefore = before.UserDefinedType.EnumerateDerivedTypes(beforeDIAAdapter, CancellationToken.None).FirstOrDefault(udt => udt.IsVeryLikelyTheSameAs(derivedTypeFromAfter));
-                if (matchingTypeInBefore is null)
+                foreach (var derivedTypeFromAfter in after.UserDefinedType.DerivedTypes)
                 {
-                    // This type was NOT in the 'before' as a derived type, but it IS in 'after' - so it's all brand new waste :(
-                    // Each wasted override (in the 'after' list only) is gone, so the savings is one word for each of those.
-                    // We already attributed waste for the wasted override changes above, so deduct those from
-                    // the waste calculation to avoid double-counting.
-                    typeHierarchyChanges.Add(new TypeHierarchyChange(new TypeSymbolDiff(null, derivedTypeFromAfter),
-                                                                     (AllWastedOverrides(after).Count() - newWastedOverridesInAfter) * after.BytesPerWord));
+                    var matchingTypeInBefore = before.UserDefinedType.DerivedTypes?.FirstOrDefault(udt => udt.IsVeryLikelyTheSameAs(derivedTypeFromAfter));
+                    if (matchingTypeInBefore is null)
+                    {
+                        // This type was NOT in the 'before' as a derived type, but it IS in 'after' - so it's all brand new waste :(
+                        // Each wasted override (in the 'after' list only) is gone, so the savings is one word for each of those.
+                        // We already attributed waste for the wasted override changes above, so deduct those from
+                        // the waste calculation to avoid double-counting.
+                        typeHierarchyChanges.Add(new TypeHierarchyChange(new TypeSymbolDiff(null, derivedTypeFromAfter),
+                                                                         (AllWastedOverrides(after).Count() - newWastedOverridesInAfter) * after.BytesPerWord));
+                    }
                 }
             }
         }

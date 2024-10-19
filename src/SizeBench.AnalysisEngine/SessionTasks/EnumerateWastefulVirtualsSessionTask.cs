@@ -44,7 +44,7 @@ internal sealed class EnumerateWastefulVirtualsSessionTask : SessionTask<List<Wa
         // Restricting how many clasess we load functions for is important since functions are plentiful and loading hundreds of thousands of them takes a lot
         // of memory and CPU time querying DIA and constructing FunctionSymbol instances.
 
-        var classesWorthLoadingFunctionsFor = udts.Where(x => x.DerivedTypeCount > 0 || x.BaseTypes?.Count > 0).ToList();
+        var classesWorthLoadingFunctionsFor = udts.Where(x => x.DerivedTypeCount > 0 || x.BaseTypes?.Length > 0).ToList();
 
         using (var taskLog = logger.StartTaskLog("Loading all functions"))
         {
@@ -142,22 +142,25 @@ internal sealed class EnumerateWastefulVirtualsSessionTask : SessionTask<List<Wa
             // If we get this far, this type is the one introducing this pure virtual - now see if <= 1 derived types have an override.
             // If so, this is wasteful as you could just devirtualize onto the single child implementing it (in many cases) and save vtable
             // slots, reloc entries, and more.
-            foreach (var derivedType in udt.EnumerateDerivedTypes(this.DIAAdapter, this.CancellationToken).Where(type => type.Functions?.Count > 0))
+            if (udt.DerivedTypes is not null)
             {
-                var firstOverrideFound = derivedType.Functions.FirstOrDefault(f =>
-                    !IsPureVirtualFunction(f) &&
-                    f.FormattedName.GetFormattedName(WastefulVirtualItem.NameFormattingForWastedOverrides).Equals(functionNameFormatted, StringComparison.Ordinal));
-
-                if (firstOverrideFound != null)
+                foreach (var derivedType in udt.DerivedTypes.Where(static type => type.Functions?.Count > 0))
                 {
-                    overriddenFunction = firstOverrideFound;
-                    countOfOverrides++;
-                }
+                    var firstOverrideFound = derivedType.Functions.FirstOrDefault(f =>
+                        !IsPureVirtualFunction(f) &&
+                        f.FormattedName.GetFormattedName(WastefulVirtualItem.NameFormattingForWastedOverrides).Equals(functionNameFormatted, StringComparison.Ordinal));
 
-                // Once we've found a couple overrides we don't need to keep looking - we only care about the 0-1 cases below.
-                if (countOfOverrides > 1)
-                {
-                    break;
+                    if (firstOverrideFound != null)
+                    {
+                        overriddenFunction = firstOverrideFound;
+                        countOfOverrides++;
+                    }
+
+                    // Once we've found a couple overrides we don't need to keep looking - we only care about the 0-1 cases below.
+                    if (countOfOverrides > 1)
+                    {
+                        break;
+                    }
                 }
             }
 
@@ -200,9 +203,9 @@ internal sealed class EnumerateWastefulVirtualsSessionTask : SessionTask<List<Wa
             return false;
         }
 
-        for (var i = 0; i < thisClass.BaseTypes.Count; i++)
+        foreach (var baseType in thisClass.BaseTypes.AsSpan())
         {
-            if (IsCOMTypeHeuristicGuess(thisClass.BaseTypes[i]._baseTypeSymbol))
+            if (IsCOMTypeHeuristicGuess(baseType._baseTypeSymbol))
             {
                 return true;
             }
@@ -296,9 +299,9 @@ internal sealed class EnumerateWastefulVirtualsSessionTask : SessionTask<List<Wa
         udt.EnsureFunctionsLoaded(this.CancellationToken);
         if (udt.BaseTypes != null)
         {
-            for (var i = 0; i < udt.BaseTypes.Count; i++)
+            foreach (var baseType in udt.BaseTypes.AsSpan())
             {
-                LoadFunctionsForOneTypeAndAllItsBaseTypes(udt.BaseTypes[i]._baseTypeSymbol);
+                LoadFunctionsForOneTypeAndAllItsBaseTypes(baseType._baseTypeSymbol);
             }
         }
     }

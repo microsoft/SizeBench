@@ -16,34 +16,27 @@ public sealed class Session_RVADuplicationTests
     private CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
 
     // PGO'd binaries are complicated and slow to open, so we don't want to re-open this for each test method.
-    private static Session? ReactNativeXamlSession;
-    private static NoOpLogger? SessionLogger;
+    // But we can't afford to make this a class-level piece of state because MSTest may not clean it up while it's
+    // running test methods in another class and that could cause us to have two huge sessions active in memory
+    // at once (or more) which we can't afford on the Azure DevOps agenst that have only ~7GB of memory.
+    // So we have just one TestMethod which just calls a bunch of "test methodlets" that all roll up to a single
+    // result of pass/fail.  If it fails, unfortunately the callstack will be the way to tell which "test methodlet"
+    // failed.  But this seems to be the only option to get the tests to fit into the memory constraints of the ADO agents.
 
-    [ClassInitialize]
-    public static async Task ClassInitialize(TestContext testContext)
-    {
-        ArgumentNullException.ThrowIfNull(testContext);
-
-        SessionLogger = new NoOpLogger();
-        ReactNativeXamlSession = await Session.Create(Path.Combine(testContext.DeploymentDirectory!, "ReactNativeXaml.dll"),
-                                                      Path.Combine(testContext.DeploymentDirectory!, "ReactNativeXaml.pdb"),
-                                                      SessionLogger);
-    }
-
-    [ClassCleanup]
-    public static async Task ClassCleanup()
-    {
-        if (ReactNativeXamlSession != null)
-        {
-            await ReactNativeXamlSession.DisposeAsync();
-            SessionLogger?.Dispose();
-        }
-    }
-
-
-    // Regression test cases for duplicated symbols issue (https://msblox.visualstudio.com/SizeBench/_workitems/edit/3582)
     [TestMethod]
-    public async Task VerifySingleSymbolEntry()
+    public async Task RunAllRVADuplicationTests()
+    {
+        using var SessionLogger = new NoOpLogger();
+        await using var ReactNativeXamlSession = await Session.Create(Path.Combine(this.TestContext!.DeploymentDirectory!, "ReactNativeXaml.dll"),
+                                                                      Path.Combine(this.TestContext!.DeploymentDirectory!, "ReactNativeXaml.pdb"),
+                                                                      SessionLogger);
+
+        await VerifySingleSymbolEntry(ReactNativeXamlSession);
+        await VerifyNoDuplicationPerRVA(ReactNativeXamlSession);
+    }
+
+
+    private async Task VerifySingleSymbolEntry(Session ReactNativeXamlSession)
     {
         var compilands = await ReactNativeXamlSession!.EnumerateCompilands(this.CancellationToken);
         var xamlMetadata = compilands.Single(c => c.Name.Contains("XamlMetadata.obj", StringComparison.Ordinal));
@@ -52,8 +45,7 @@ public sealed class Session_RVADuplicationTests
         Assert.AreEqual(1, propertyMap.Count(), "Verifying that xamlPropertyMap symbol occurs exactly once in XamlMetadata.obj symbols list.");
     }
 
-    [TestMethod]
-    public async Task VerifyNoDuplicationPerRVA()
+    private async Task VerifyNoDuplicationPerRVA(Session ReactNativeXamlSession)
     {
         var compilands = await ReactNativeXamlSession!.EnumerateCompilands(this.CancellationToken);
         var xamlMetadata = compilands.Single(c => c.Name.Contains("XamlMetadata.obj", StringComparison.Ordinal));

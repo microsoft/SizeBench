@@ -5,7 +5,6 @@ namespace SizeBench.AnalysisEngine.RealPETests.Single_Binary;
 
 [DeploymentItem(@"Test PEs\External\x64\Microsoft.UI.Xaml.dll")]
 [DeploymentItem(@"Test PEs\External\x64\Microsoft.UI.Xaml.pdb")]
-[DoNotParallelize]
 [TestCategory(CommonTestCategories.SlowTests)]
 [TestClass]
 public sealed class PGOTests_SymbolSourcesSupported

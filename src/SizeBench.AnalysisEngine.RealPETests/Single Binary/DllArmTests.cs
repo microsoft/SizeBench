@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SizeBench.AnalysisEngine;
 using SizeBench.AnalysisEngine.RealPETests.Single_Binary;
 using SizeBench.AnalysisEngine.Symbols;
@@ -13,35 +14,13 @@ public sealed class DllArmTests
 {
     public TestContext? TestContext { get; set; }
 
-    private static Session? DllArm32Session;
-
-    private static NoOpLogger? SessionLogger;
-
-    [ClassInitialize]
-    public static async Task ClassInitialize(TestContext testContext)
-    {
-        ArgumentNullException.ThrowIfNull(testContext);
-
-        SessionLogger = new NoOpLogger();
-        DllArm32Session = await Session.Create(Path.Combine(testContext.DeploymentDirectory!, "PEParser.Tests.Dllarm32.dll"),
-                                               Path.Combine(testContext.DeploymentDirectory!, "PEParser.Tests.Dllarm32.pdb"),
-                                               SessionLogger);
-    }
-
-    [ClassCleanup]
-    public static async Task ClassCleanup()
-    {
-        if (DllArm32Session != null)
-        {
-            await DllArm32Session.DisposeAsync();
-            SessionLogger?.Dispose();
-        }
-    }
-
     [TestMethod]
-    public void DllArmPDATAAndXDATACanBeParsed()
+    public async Task DllArmPDATAAndXDATACanBeParsed()
     {
-        Assert.IsNotNull(DllArm32Session);
+        using var SessionLogger = new NoOpLogger();
+        await using var DllArm32Session = await Session.Create(Path.Combine(this.TestContext!.DeploymentDirectory!, "PEParser.Tests.Dllarm32.dll"),
+                                                               Path.Combine(this.TestContext!.DeploymentDirectory!, "PEParser.Tests.Dllarm32.pdb"),
+                                                               SessionLogger);
 
         // These are gotten from "link /dump /headers PEParser.Tests.Dllarm32.dll" and looking at the "Exception" directory
         Assert.AreEqual(0x7000u, DllArm32Session.DataCache.PDataRVARange.RVAStart);
@@ -165,7 +144,10 @@ public sealed class DllArmTests
     [TestMethod]
     public async Task DllArmRelativeRVAsCanBeLoadedFromVTable()
     {
-        Assert.IsNotNull(DllArm32Session);
+        using var SessionLogger = new NoOpLogger();
+        await using var DllArm32Session = await Session.Create(Path.Combine(this.TestContext!.DeploymentDirectory!, "PEParser.Tests.Dllarm32.dll"),
+                                                               Path.Combine(this.TestContext!.DeploymentDirectory!, "PEParser.Tests.Dllarm32.pdb"),
+                                                               SessionLogger);
 
         // The RVA passed in as a parameter here is that of DllArm_DerivedClass::'vftable'
         // When updating this test, just get this value from the map file.

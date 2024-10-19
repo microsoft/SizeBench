@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SizeBench.AnalysisEngine;
 using SizeBench.AnalysisEngine.RealPETests.Single_Binary;
 using SizeBench.AnalysisEngine.Symbols;

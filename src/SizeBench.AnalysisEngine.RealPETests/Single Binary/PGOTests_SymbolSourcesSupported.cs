@@ -18,10 +18,15 @@ public sealed class PGOTests_SymbolSourcesSupported
 
     [TestMethod]
     [DynamicData(nameof(DynamicDataSourceForSymbolSourcesSupportedTests_Slimmed))]
-    public Task SymbolSourcesSupportedWorks(SymbolSourcesSupported symbolSources) =>
-        SymbolSourcesSupportedCommonTests.VerifyNoUnexpectedSymbolTypesCanBeMaterialized(
+    public async Task SymbolSourcesSupportedWorks(SymbolSourcesSupported symbolSources)
+    {
+        await SymbolSourcesSupportedCommonTests.VerifyNoUnexpectedSymbolTypesCanBeMaterialized(
             Path.Combine(this.TestContext!.DeploymentDirectory!, "Microsoft.UI.Xaml.dll"),
             Path.Combine(this.TestContext!.DeploymentDirectory!, "Microsoft.UI.Xaml.pdb"),
             symbolSources,
             this.CancellationToken);
+
+        // Force GC since these big binaries create so much memory pressure in the ADO pipelines
+        GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+    }
 }

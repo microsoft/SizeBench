@@ -996,7 +996,7 @@ internal sealed class DiffTestDataGenerator : IDisposable
             this.AfterDIAAdapter,
             this.AfterDataCache);
 
-        this.DiffSessionTaskParameters = new DiffSessionTaskParameters(this.MockDiffSession.Object, this.DiffDataCache);
+        this.DiffSessionTaskParameters = new DiffSessionTaskParameters(this.MockDiffSession.Object, this.DiffDataCache, this.BeforeDIAAdapter, this.AfterDIAAdapter);
     }
 
     internal List<SymbolDiff> GenerateSymbolDiffsInBinarySectionList(BinarySectionDiff diffSection)
@@ -1466,7 +1466,7 @@ internal sealed class DiffTestDataGenerator : IDisposable
                 }
             }
 
-            var diff = new WastefulVirtualItemDiff(before, after, this.DiffDataCache);
+            var diff = new WastefulVirtualItemDiff(before, after, this.DiffDataCache, this.BeforeDIAAdapter, this.AfterDIAAdapter);
 
             if (before != null)
             {

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using SizeBench.AnalysisEngine.DIAInterop;
 using SizeBench.Logging;
 
 namespace SizeBench.AnalysisEngine.DiffSessionTasks;
@@ -7,11 +8,15 @@ internal class DiffSessionTaskParameters
 {
     public IDiffSession DiffSession { get; }
     public DiffSessionDataCache DataCache { get; }
+    public IDIAAdapter BeforeDIAAdapter { get; }
+    public IDIAAdapter AfterDIAAdapter { get; }
 
-    public DiffSessionTaskParameters(IDiffSession diffSession, DiffSessionDataCache dataCache)
+    public DiffSessionTaskParameters(IDiffSession diffSession, DiffSessionDataCache dataCache, IDIAAdapter beforeDIAAdapter, IDIAAdapter afterDIAAdapter)
     {
         this.DiffSession = diffSession;
         this.DataCache = dataCache;
+        this.BeforeDIAAdapter = beforeDIAAdapter;
+        this.AfterDIAAdapter = afterDIAAdapter;
     }
 }
 

@@ -29,7 +29,7 @@ public sealed class ZigTests
 
         Assert.AreEqual("__float128 fmaq(__float128, __float128, __float128)", fmaq.FullName);
         Assert.IsNull(fmaq.ArgumentNames);
-        Assert.AreEqual(1, fmaq.Blocks.Count);
+        Assert.AreEqual(1, fmaq.BlockCount);
         Assert.IsTrue(fmaq.CanBeFolded);
         Assert.IsFalse(fmaq.IsCOMDATFolded);
         Assert.IsFalse(fmaq.IsIntroVirtual);

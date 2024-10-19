@@ -26,13 +26,18 @@ public sealed class Session_RVADuplicationTests
     [TestMethod]
     public async Task RunAllRVADuplicationTests()
     {
-        using var SessionLogger = new NoOpLogger();
-        await using var ReactNativeXamlSession = await Session.Create(Path.Combine(this.TestContext!.DeploymentDirectory!, "ReactNativeXaml.dll"),
-                                                                      Path.Combine(this.TestContext!.DeploymentDirectory!, "ReactNativeXaml.pdb"),
-                                                                      SessionLogger);
+        {
+            using var SessionLogger = new NoOpLogger();
+            await using var ReactNativeXamlSession = await Session.Create(Path.Combine(this.TestContext!.DeploymentDirectory!, "ReactNativeXaml.dll"),
+                                                                          Path.Combine(this.TestContext!.DeploymentDirectory!, "ReactNativeXaml.pdb"),
+                                                                          SessionLogger);
 
-        await VerifySingleSymbolEntry(ReactNativeXamlSession);
-        await VerifyNoDuplicationPerRVA(ReactNativeXamlSession);
+            await VerifySingleSymbolEntry(ReactNativeXamlSession);
+            await VerifyNoDuplicationPerRVA(ReactNativeXamlSession);
+        }
+
+        // Force GC since these big binaries create so much memory pressure in the ADO pipelines
+        GC.Collect(2, GCCollectionMode.Forced, blocking: true);
     }
 
 

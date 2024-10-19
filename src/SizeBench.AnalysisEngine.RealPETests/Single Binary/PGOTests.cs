@@ -26,20 +26,25 @@ public sealed class PGOTests
     [TestMethod]
     public async Task RunAllPGOTests()
     {
-        using var SessionLogger = new NoOpLogger();
-        await using var MUXSession = await Session.Create(Path.Combine(this.TestContext!.DeploymentDirectory!, "Microsoft.UI.Xaml.dll"),
-                                                          Path.Combine(this.TestContext!.DeploymentDirectory!, "Microsoft.UI.Xaml.pdb"),
-                                                          SessionLogger);
+        {
+            using var SessionLogger = new NoOpLogger();
+            await using var MUXSession = await Session.Create(Path.Combine(this.TestContext!.DeploymentDirectory!, "Microsoft.UI.Xaml.dll"),
+                                                              Path.Combine(this.TestContext!.DeploymentDirectory!, "Microsoft.UI.Xaml.pdb"),
+                                                              SessionLogger);
 
-        await ColdFunctionCanBeParsedIncludingFrameHandler4XDATA(MUXSession);
-        await ColdFunctionsThatAreCOMDATFoldedCanBeParsed(MUXSession);
-        await HotFunctionCanBeParsed(MUXSession);
-        await ComplexFunctionCanBeParsed(MUXSession);
-        await BlocksThatAreCOMDATFoldedCanBeParsedIncludingFrameHandler4XDATA(MUXSession);
-        await LoadSymbolByRVAAlwaysReturnsTheNonCOMDATFoldedSymbol(MUXSession);
-        await VTableLengthsAreRightIncludingWhenCOMDATFolded(MUXSession);
-        await AllRDataSymbolsCanBeEnumerated(MUXSession);
-        await ImportSymbolsCanBeEnumerated(MUXSession);
+            await ColdFunctionCanBeParsedIncludingFrameHandler4XDATA(MUXSession);
+            await ColdFunctionsThatAreCOMDATFoldedCanBeParsed(MUXSession);
+            await HotFunctionCanBeParsed(MUXSession);
+            await ComplexFunctionCanBeParsed(MUXSession);
+            await BlocksThatAreCOMDATFoldedCanBeParsedIncludingFrameHandler4XDATA(MUXSession);
+            await LoadSymbolByRVAAlwaysReturnsTheNonCOMDATFoldedSymbol(MUXSession);
+            await VTableLengthsAreRightIncludingWhenCOMDATFolded(MUXSession);
+            await AllRDataSymbolsCanBeEnumerated(MUXSession);
+            await ImportSymbolsCanBeEnumerated(MUXSession);
+        }
+
+        // Force GC since these big binaries create so much memory pressure in the ADO pipelines
+        GC.Collect(2, GCCollectionMode.Forced, blocking: true);
     }
 
     private static async Task ColdFunctionCanBeParsedIncludingFrameHandler4XDATA(Session MUXSession)
@@ -50,7 +55,7 @@ public sealed class PGOTests
         var TeachingTip_UpdateTail_Function = await MUXSession.LoadSymbolByRVA(0x33E9E8) as SimpleFunctionCodeSymbol;
         Assert.AreEqual(AccessModifier.Private, TeachingTip_UpdateTail_Function!.AccessModifier);
         Assert.IsNull(TeachingTip_UpdateTail_Function.ArgumentNames);
-        Assert.AreEqual(1, TeachingTip_UpdateTail_Function.Blocks.Count);
+        Assert.AreEqual(1, TeachingTip_UpdateTail_Function.BlockCount);
         Assert.IsTrue(TeachingTip_UpdateTail_Function.CanBeFolded);
         Assert.AreEqual(TeachingTip_UpdateTail_Function.Name, TeachingTip_UpdateTail_Function.CanonicalName);
         Assert.IsNotNull(TeachingTip_UpdateTail_Function.FunctionType);
@@ -109,7 +114,7 @@ public sealed class PGOTests
         Assert.AreEqual(AccessModifier.Public, PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function!.AccessModifier);
         Assert.IsNotNull(PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.ArgumentNames);
         Assert.AreEqual(2, PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.ArgumentNames.Count);
-        Assert.AreEqual(1, PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.Blocks.Count);
+        Assert.AreEqual(1, PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.BlockCount);
         Assert.IsTrue(PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.CanBeFolded);
         Assert.AreEqual(PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.Name, PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.CanonicalName);
         Assert.IsNotNull(PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.FunctionType);
@@ -148,7 +153,7 @@ public sealed class PGOTests
         Assert.AreEqual(AccessModifier.Public, PipsPagerProperties_OnNextButtonStylePropertyChanged_Function!.AccessModifier);
         Assert.IsNotNull(PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.ArgumentNames);
         Assert.AreEqual(2, PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.ArgumentNames.Count);
-        Assert.AreEqual(1, PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.Blocks.Count);
+        Assert.AreEqual(1, PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.BlockCount);
         Assert.IsTrue(PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.CanBeFolded);
         Assert.AreEqual(PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.Name, PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.CanonicalName); // Note the canonical name is for the 'primary' function above
         Assert.IsNotNull(PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.FunctionType);
@@ -187,7 +192,7 @@ public sealed class PGOTests
         var XamlMetadataProviderGenerated_RegisterTypes_Function = await MUXSession!.LoadSymbolByRVA(0x51590) as SimpleFunctionCodeSymbol;
         Assert.AreEqual(AccessModifier.Public, XamlMetadataProviderGenerated_RegisterTypes_Function!.AccessModifier);
         Assert.IsNull(XamlMetadataProviderGenerated_RegisterTypes_Function.ArgumentNames);
-        Assert.AreEqual(1, XamlMetadataProviderGenerated_RegisterTypes_Function.Blocks.Count);
+        Assert.AreEqual(1, XamlMetadataProviderGenerated_RegisterTypes_Function.BlockCount);
         Assert.IsTrue(XamlMetadataProviderGenerated_RegisterTypes_Function.CanBeFolded);
         Assert.AreEqual(XamlMetadataProviderGenerated_RegisterTypes_Function.Name, XamlMetadataProviderGenerated_RegisterTypes_Function.CanonicalName);
         Assert.IsNotNull(XamlMetadataProviderGenerated_RegisterTypes_Function.FunctionType);
@@ -230,7 +235,7 @@ public sealed class PGOTests
         Assert.AreEqual(AccessModifier.Private, FlowLayoutAlgorithm_Generate_Function!.AccessModifier);
         Assert.IsNotNull(FlowLayoutAlgorithm_Generate_Function.ArgumentNames);
         Assert.AreEqual(8, FlowLayoutAlgorithm_Generate_Function.ArgumentNames.Count);
-        Assert.AreEqual(2, FlowLayoutAlgorithm_Generate_Function.Blocks.Count);
+        Assert.AreEqual(2, FlowLayoutAlgorithm_Generate_Function.BlockCount);
         Assert.IsNotNull(FlowLayoutAlgorithm_Generate_Function.FunctionType);
         Assert.IsNotNull(FlowLayoutAlgorithm_Generate_Function.FunctionType.ArgumentTypes);
         Assert.AreEqual(8, FlowLayoutAlgorithm_Generate_Function.FunctionType.ArgumentTypes.Count);

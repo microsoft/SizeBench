@@ -44,7 +44,7 @@ internal sealed class EnumerateWastefulVirtualsSessionTask : SessionTask<List<Wa
         // Restricting how many clasess we load functions for is important since functions are plentiful and loading hundreds of thousands of them takes a lot
         // of memory and CPU time querying DIA and constructing FunctionSymbol instances.
 
-        var classesWorthLoadingFunctionsFor = udts.Where(x => x.DerivedTypesBySymIndexId?.Count > 0 || x.BaseTypes?.Count > 0).ToList();
+        var classesWorthLoadingFunctionsFor = udts.Where(x => x.DerivedTypeCount > 0 || x.BaseTypes?.Count > 0).ToList();
 
         using (var taskLog = logger.StartTaskLog("Loading all functions"))
         {
@@ -132,7 +132,7 @@ internal sealed class EnumerateWastefulVirtualsSessionTask : SessionTask<List<Wa
             // If this type doesn't have any derived types, then nobody can possibly override it - so we'll just continue
             // looking.  Technically this could be wasteful if somebody marks 'virtual' on a leaf type but in practice it's
             // such a small gain and the expense to calculate it is modest, so let's not bother.
-            if (baseTypeContainsSameVirtualFunction || udt.DerivedTypesBySymIndexId is null)
+            if (baseTypeContainsSameVirtualFunction || udt.DerivedTypeCount == 0)
             {
                 continue;
             }
@@ -142,7 +142,7 @@ internal sealed class EnumerateWastefulVirtualsSessionTask : SessionTask<List<Wa
             // If we get this far, this type is the one introducing this pure virtual - now see if <= 1 derived types have an override.
             // If so, this is wasteful as you could just devirtualize onto the single child implementing it (in many cases) and save vtable
             // slots, reloc entries, and more.
-            foreach (var derivedType in udt.DerivedTypesBySymIndexId.Values.Where(type => type.Functions != null && type.Functions.Count > 0))
+            foreach (var derivedType in udt.EnumerateDerivedTypes(this.DIAAdapter, this.CancellationToken).Where(type => type.Functions?.Count > 0))
             {
                 var firstOverrideFound = derivedType.Functions.FirstOrDefault(f =>
                     !IsPureVirtualFunction(f) &&

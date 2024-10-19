@@ -66,7 +66,7 @@ public sealed class UserDefinedTypeSymbol : TypeSymbol
             }
             else
             {
-                var newUDT = diaAdapter.FindTypeSymbolBySymIndexId<UserDefinedTypeSymbol>(baseTypeId, cancellationToken) 
+                var newUDT = diaAdapter.FindTypeSymbolBySymIndexId<UserDefinedTypeSymbol>(baseTypeId, cancellationToken)
                     ?? throw new InvalidOperationException("Something went wrong loading a base type...");
 
                 newUDT.LoadBaseTypes(dataCache, diaAdapter, cancellationToken);
@@ -78,17 +78,34 @@ public sealed class UserDefinedTypeSymbol : TypeSymbol
     }
 
     private bool _areDerivedTypesLoaded;
-    private Dictionary<uint, UserDefinedTypeSymbol>? _derivedTypesBySymIndexId;
-    internal Dictionary<uint, UserDefinedTypeSymbol>? DerivedTypesBySymIndexId
+    private HashSet<uint>? _derivedTypeSymIndexIds;
+    internal int DerivedTypeCount
     {
         get
         {
             if (!this._areDerivedTypesLoaded)
             {
-                throw new InvalidOperationException($"Trying to access {nameof(this.DerivedTypesBySymIndexId)} but you haven't yet ensured all derived clasess are loaded!");
+                throw new InvalidOperationException($"Trying to access {nameof(this.DerivedTypeCount)} but you haven't yet ensured all derived clasess are loaded!");
             }
 
-            return this._derivedTypesBySymIndexId;
+            return this._derivedTypeSymIndexIds?.Count ?? 0;
+        }
+    }
+    internal IEnumerable<UserDefinedTypeSymbol> EnumerateDerivedTypes(IDIAAdapter diaAdapter, CancellationToken cancellationToken)
+    {
+        if (!this._areDerivedTypesLoaded)
+        {
+            throw new InvalidOperationException($"Trying to call {nameof(this.EnumerateDerivedTypes)} but you haven't yet ensured all derived clasess are loaded!");
+        }
+
+        if (this._derivedTypeSymIndexIds is null)
+        {
+            yield break;
+        }
+
+        foreach (var derivedSymIndexId in this._derivedTypeSymIndexIds)
+        {
+            yield return diaAdapter.FindTypeSymbolBySymIndexId<UserDefinedTypeSymbol>(derivedSymIndexId, cancellationToken);
         }
     }
 
@@ -96,33 +113,19 @@ public sealed class UserDefinedTypeSymbol : TypeSymbol
     {
         // If someone tries to call this to add a derived type that we arleady know about, we'll let that slide even
         // if AreDerivedClassesLoaded == true, it makes the calling code simpler to write.
-        if (this._derivedTypesBySymIndexId?.ContainsKey(typeDerivedFromThisOne.SymIndexId) == true)
+        this._derivedTypeSymIndexIds ??= new HashSet<uint>();
+        if (this._derivedTypeSymIndexIds.Add(typeDerivedFromThisOne.SymIndexId))
         {
-            return;
-        }
-
-        if (this._areDerivedTypesLoaded)
-        {
-            throw new InvalidOperationException("Can't add a derived type after the type has set AreDerivedTypesLoaded==true");
-        }
-
-        if (this._derivedTypesBySymIndexId is null)
-        {
-            this._derivedTypesBySymIndexId = new Dictionary<uint, UserDefinedTypeSymbol>(capacity: 5)
-                {
-                    { typeDerivedFromThisOne.SymIndexId, typeDerivedFromThisOne }
-                };
-        }
-        else
-        {
-            this._derivedTypesBySymIndexId.TryAdd(typeDerivedFromThisOne.SymIndexId, typeDerivedFromThisOne);
+            if (this._areDerivedTypesLoaded)
+            {
+                throw new InvalidOperationException("Can't add a derived type after the type has set AreDerivedTypesLoaded==true");
+            }
         }
     }
 
     // We don't just have a property setter because we only want this to be able to go from false->true, never the other direction.
     internal void MarkDerivedTypesLoaded()
     {
-        this._derivedTypesBySymIndexId?.TrimExcess();
         this._areDerivedTypesLoaded = true;
     }
 

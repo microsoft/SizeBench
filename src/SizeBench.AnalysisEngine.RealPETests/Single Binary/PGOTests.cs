@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.Logging;
 using SizeBench.TestInfrastructure;

@@ -24,8 +24,6 @@ public sealed class UserDefinedTypeSymbol : TypeSymbol
         }
     }
 
-    private Dictionary<uint, uint>? _baseTypeIDs;
-
     private bool _areBaseTypesLoaded;
 
     private List<BaseType>? _baseTypes;
@@ -50,51 +48,38 @@ public sealed class UserDefinedTypeSymbol : TypeSymbol
             return;
         }
 
-        if (this._baseTypeIDs is null || this._baseTypeIDs.Count == 0)
+        foreach ((var baseTypeId, var offset) in diaAdapter.FindAllBaseTypeIDsForUDT(this))
         {
-            this._baseTypeIDs = null; // Allow it to be GC'd if it was somehow an empty collection
-            this._areBaseTypesLoaded = true;
-            return;
-        }
+            this._baseTypes ??= new List<BaseType>();
 
-        this._baseTypes = new List<BaseType>(this._baseTypeIDs.Count);
-
-        foreach (var kvp in this._baseTypeIDs)
-        {
-            if (dataCache.AllTypesBySymIndexId.TryGetValue(kvp.Key, out var baseTypeSymbol))
+            if (dataCache.AllTypesBySymIndexId.TryGetValue(baseTypeId, out var baseTypeSymbol))
             {
-
                 // The code hasn't been written yet to handle a base type that's not a UDT - is it possible to have any other type
                 // of base type?
                 if (baseTypeSymbol is not UserDefinedTypeSymbol baseTypeUDT)
                 {
-                    throw new InvalidOperationException("Something has gone wrong...");
+                    throw new InvalidOperationException($"Something has gone wrong, a UserDefinedType's base type has been found to be a {baseTypeSymbol.GetType().Name}...");
                 }
 
                 baseTypeUDT.LoadBaseTypes(dataCache, diaAdapter, cancellationToken);
-                this._baseTypes.Add(new BaseType(baseTypeUDT, kvp.Value));
+                this._baseTypes.Add(new BaseType(baseTypeUDT, offset));
             }
             else
             {
-                var newUDT = diaAdapter.FindTypeSymbolBySymIndexId<UserDefinedTypeSymbol>(kvp.Key, cancellationToken);
-
-                if (newUDT is null)
-                {
-                    throw new InvalidOperationException("Something went wrong loading a base type...");
-                }
+                var newUDT = diaAdapter.FindTypeSymbolBySymIndexId<UserDefinedTypeSymbol>(baseTypeId, cancellationToken) 
+                    ?? throw new InvalidOperationException("Something went wrong loading a base type...");
 
                 newUDT.LoadBaseTypes(dataCache, diaAdapter, cancellationToken);
-                this._baseTypes.Add(new BaseType(newUDT, kvp.Value));
+                this._baseTypes.Add(new BaseType(newUDT, offset));
             }
         }
-        this._baseTypeIDs = null; // we don't need this anymore, we can let it get GC'd.
 
         this._areBaseTypesLoaded = true;
     }
 
     private bool _areDerivedTypesLoaded;
-    private SortedList<uint, UserDefinedTypeSymbol>? _derivedTypesBySymIndexId;
-    internal SortedList<uint, UserDefinedTypeSymbol>? DerivedTypesBySymIndexId
+    private Dictionary<uint, UserDefinedTypeSymbol>? _derivedTypesBySymIndexId;
+    internal Dictionary<uint, UserDefinedTypeSymbol>? DerivedTypesBySymIndexId
     {
         get
         {
@@ -123,14 +108,14 @@ public sealed class UserDefinedTypeSymbol : TypeSymbol
 
         if (this._derivedTypesBySymIndexId is null)
         {
-            this._derivedTypesBySymIndexId = new SortedList<uint, UserDefinedTypeSymbol>(capacity: 5)
+            this._derivedTypesBySymIndexId = new Dictionary<uint, UserDefinedTypeSymbol>(capacity: 5)
                 {
                     { typeDerivedFromThisOne.SymIndexId, typeDerivedFromThisOne }
                 };
         }
-        else if (!this._derivedTypesBySymIndexId.ContainsKey(typeDerivedFromThisOne.SymIndexId))
+        else
         {
-            this._derivedTypesBySymIndexId.Add(typeDerivedFromThisOne.SymIndexId, typeDerivedFromThisOne);
+            this._derivedTypesBySymIndexId.TryAdd(typeDerivedFromThisOne.SymIndexId, typeDerivedFromThisOne);
         }
     }
 
@@ -164,10 +149,7 @@ public sealed class UserDefinedTypeSymbol : TypeSymbol
 
     public async ValueTask<IReadOnlyList<IFunctionCodeSymbol>> GetFunctionsAsync(CancellationToken token)
     {
-        if (this._functions is null)
-        {
-            this._functions = (await this._session.EnumerateFunctionsFromUserDefinedType(this, token).ConfigureAwait(true)).ToList();
-        }
+        this._functions ??= (await this._session.EnumerateFunctionsFromUserDefinedType(this, token).ConfigureAwait(true)).ToList();
 
         return this._functions;
     }
@@ -253,10 +235,8 @@ public sealed class UserDefinedTypeSymbol : TypeSymbol
                                    string name,
                                    uint instanceSize,
                                    uint symIndexId,
-                                   UserDefinedTypeKind udtKind,
-                                   Dictionary<uint, uint>? baseTypeIDs) : base(dataCache, name, instanceSize, symIndexId)
+                                   UserDefinedTypeKind udtKind) : base(dataCache, name, instanceSize, symIndexId)
     {
-        this._baseTypeIDs = baseTypeIDs;
         this._userDefinedTypeKind = udtKind;
         this._diaAdapter = diaAdapter;
         this._session = session;

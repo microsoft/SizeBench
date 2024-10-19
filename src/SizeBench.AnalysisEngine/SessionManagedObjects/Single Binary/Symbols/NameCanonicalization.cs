@@ -9,21 +9,29 @@ internal sealed class NameCanonicalization
 {
     private bool _hasEverHadAnyNonPublicSymbolNameAdded;
     private bool _hasEverHadAnyNonThunkSymbolNameAdded;
-    private readonly List<KeyValuePair<uint, string>> _namesBySymIndexId = new List<KeyValuePair<uint, string>>();
-    public IReadOnlyList<KeyValuePair<uint, string>> NamesBySymIndexID => this._namesBySymIndexId;
+    private readonly List<(uint symIndexId, SymTagEnum symTag, string name)> _namesBySymIndexId = new();
+    public IReadOnlyList<(uint symIndexId, SymTagEnum symTag, string name)> NamesBySymIndexID => this._namesBySymIndexId;
     public uint CanonicalSymIndexID { get; private set; }
     public string CanonicalName { get; private set; } = String.Empty;
 
-    public void AddName(uint symIndexId, SymTagEnum symTag, IDiaSymbol? diaSymbol = null, IDiaSession? diaSession = null, SessionDataCache? dataCache = null,
+    public bool IsNameEvenGoingToBeConsidered(SymTagEnum symTag)
+    {
+        // PublicSymbols have ugly names that don't sort well because they start with things like "public:" and "virtual" and include the function's
+        // return type.  We don't want any of that, so if we are getting a PublicSymbol but we've seen any non-public symbol we don't want this name,
+        // just throw it away.
+        return !((symTag == SymTagEnum.SymTagPublicSymbol && this._hasEverHadAnyNonPublicSymbolNameAdded) ||
+                 (symTag == SymTagEnum.SymTagThunk && this._hasEverHadAnyNonThunkSymbolNameAdded));
+    }
+
+    public bool AddName(uint symIndexId, SymTagEnum symTag, IDiaSymbol? diaSymbol = null, IDiaSession? diaSession = null, SessionDataCache? dataCache = null,
                         string? name = null, Func<IDiaSymbol, IDiaSession, SessionDataCache, string>? nameCreator = null)
     {
         // PublicSymbols have ugly names that don't sort well because they start with things like "public:" and "virtual" and include the function's
         // return type.  We don't want any of that, so if we are getting a PublicSymbol but we've seen any non-public symbol we don't want this name,
         // just throw it away.
-        if ((symTag == SymTagEnum.SymTagPublicSymbol && this._hasEverHadAnyNonPublicSymbolNameAdded) ||
-            (symTag == SymTagEnum.SymTagThunk && this._hasEverHadAnyNonThunkSymbolNameAdded))
+        if (!IsNameEvenGoingToBeConsidered(symTag))
         {
-            return;
+            return false;
         }
 
         if (name is null)
@@ -40,40 +48,49 @@ internal sealed class NameCanonicalization
         // SymIndexIDs which is annoying but as far as I know harmless.
         for (var i = 0; i < this._namesBySymIndexId.Count; i++)
         {
-            if (this._namesBySymIndexId[i].Value.Equals(name, StringComparison.Ordinal))
+            if (this._namesBySymIndexId[i].name.Equals(name, StringComparison.Ordinal))
             {
-                return;
+                return false;
             }
         }
 
-        this._namesBySymIndexId.Add(new KeyValuePair<uint, string>(symIndexId, name));
+        this._namesBySymIndexId.Add((symIndexId, symTag, name));
         this._hasEverHadAnyNonPublicSymbolNameAdded |= symTag != SymTagEnum.SymTagPublicSymbol;
         this._hasEverHadAnyNonThunkSymbolNameAdded |= symTag != SymTagEnum.SymTagThunk;
+        return true;
     }
 
     public void Canonicalize()
     {
         uint? canonicalSymIndexId = null;
+        SymTagEnum? canonicalSymTag = null;
         string? canonicalName = null;
 
-        foreach ((var symIndex, var name) in this._namesBySymIndexId)
+        foreach ((var symIndex, var symTag, var name) in this._namesBySymIndexId)
         {
             // If we find a "[thunk]" we want to avoid using that as the canonical name if we can, because the real name of the function is
             // after that prefix, so we take that out of the name if it's there.
             var nameToCompare = name.AsSpan();
-            if (nameToCompare.StartsWith("[thunk]:", StringComparison.Ordinal))
+            if (symTag is SymTagEnum.SymTagThunk)
             {
-                nameToCompare = nameToCompare["[thunk]:".Length..];
+                if (nameToCompare.StartsWith("[thunk]:", StringComparison.Ordinal))
+                {
+                    nameToCompare = nameToCompare["[thunk]:".Length..];
+                }
+                if (nameToCompare.StartsWith("[thunk]", StringComparison.Ordinal))
+                {
+                    nameToCompare = nameToCompare["[thunk]".Length..];
+                }
+                nameToCompare = nameToCompare.TrimStart();
             }
-            if (nameToCompare.StartsWith("[thunk]", StringComparison.Ordinal))
-            {
-                nameToCompare = nameToCompare["[thunk]".Length..];
-            }
-            nameToCompare = nameToCompare.TrimStart();
 
-            if (canonicalName is null ||  canonicalName.AsSpan().CompareTo(nameToCompare, StringComparison.Ordinal) > 0)
+            // If the canonical sym tag is a block, but we've found a function at the same RVA, we want to use the function name instead.
+            if (canonicalName is null || 
+                (canonicalSymTag is SymTagEnum.SymTagBlock && symTag == SymTagEnum.SymTagFunction) ||
+                canonicalName.AsSpan().CompareTo(nameToCompare, StringComparison.Ordinal) > 0)
             {
                 canonicalSymIndexId = symIndex;
+                canonicalSymTag = symTag;
                 canonicalName = nameToCompare.ToString();
             }
         }

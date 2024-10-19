@@ -7,8 +7,12 @@ internal sealed class LookupSymbolPlacementInBinarySessionTask : SessionTask<Sym
 {
     private readonly SessionTaskParameters _sessionTaskParameters;
     private readonly ISymbol _symbol;
+    private readonly bool _shouldLookupSectionAndCOFFGroup;
+    private readonly bool _shouldLookupLibAndCompiland;
+    private readonly bool _shouldLookupSourceFile;
 
     public LookupSymbolPlacementInBinarySessionTask(ISymbol symbol,
+                                                    LookupSymbolPlacementOptions? options,
                                                     SessionTaskParameters parameters,
                                                     CancellationToken token,
                                                     IProgress<SessionTaskProgress>? progress)
@@ -17,6 +21,9 @@ internal sealed class LookupSymbolPlacementInBinarySessionTask : SessionTask<Sym
         this.TaskName = $"Lookup placement in the binary of symbol: {symbol.Name}";
         this._sessionTaskParameters = parameters;
         this._symbol = symbol;
+        this._shouldLookupSectionAndCOFFGroup = options?.IncludeBinarySectionAndCOFFGroup ?? true;
+        this._shouldLookupLibAndCompiland = options?.IncludeLibAndCompiland ?? true;
+        this._shouldLookupSourceFile = options?.IncludeSourceFile ?? true;
     }
 
     protected override SymbolPlacement ExecuteCore(ILogger logger)
@@ -24,34 +31,48 @@ internal sealed class LookupSymbolPlacementInBinarySessionTask : SessionTask<Sym
         const int numSteps = 4;
         var lookupStepsCompleted = 0u;
         ReportProgress("Finding binary sections and COFF groups in the binary to find symbol's location", lookupStepsCompleted, numSteps);
-        var binarySections = new EnumerateBinarySectionsAndCOFFGroupsSessionTask(this._sessionTaskParameters, this.CancellationToken).Execute(logger);
-        var coffGroups = binarySections.SelectMany(bs => bs.COFFGroups).ToList();
+        List<BinarySection>? binarySections = null;
+        List<COFFGroup>? coffGroups = null;
+        if (this._shouldLookupSectionAndCOFFGroup)
+        {
+            binarySections = new EnumerateBinarySectionsAndCOFFGroupsSessionTask(this._sessionTaskParameters, this.CancellationToken).Execute(logger);
+            coffGroups = binarySections.SelectMany(bs => bs.COFFGroups).ToList();
+        }
         lookupStepsCompleted++;
 
         ReportProgress("Finding libs and compilands in the binary to find symbol's location", lookupStepsCompleted, numSteps);
-        var libs = new EnumerateLibsAndCompilandsSessionTask(this._sessionTaskParameters, this.CancellationToken, this.ProgressReporter).Execute(logger);
-        var compilands = libs.SelectMany(l => l.Compilands.Values).ToList();
+        HashSet<Library>? libs = null;
+        List<Compiland>? compilands = null;
+        if (this._shouldLookupLibAndCompiland)
+        {
+            libs = new EnumerateLibsAndCompilandsSessionTask(this._sessionTaskParameters, this.CancellationToken, this.ProgressReporter).Execute(logger);
+            compilands = libs.SelectMany(l => l.Compilands.Values).ToList();
+        }
         lookupStepsCompleted++;
 
         ReportProgress("Finding source files in the binary to find symbol's location", lookupStepsCompleted, numSteps);
-        var sourceFiles = new EnumerateSourceFilesSessionTask(this._sessionTaskParameters, this.CancellationToken, this.ProgressReporter).Execute(logger);
+        List<SourceFile>? sourceFiles = null;
+        if (this._shouldLookupSourceFile)
+        {
+            sourceFiles = new EnumerateSourceFilesSessionTask(this._sessionTaskParameters, this.CancellationToken, this.ProgressReporter).Execute(logger);
+        }
         lookupStepsCompleted++;
 
         ReportProgress("Finding this symbol's precise location", lookupStepsCompleted, numSteps);
-        var coffGroup = (from cg in coffGroups
+        var coffGroup = this._shouldLookupSectionAndCOFFGroup ? (from cg in coffGroups
                          where this._symbol.RVA >= cg.RVA &&
                                this._symbol.RVAEnd <= (cg.RVA + cg.VirtualSize)
-                         select cg).FirstOrDefault();
+                         select cg).FirstOrDefault() : null;
         var section = coffGroup?.Section;
 
-        var compiland = (from c in compilands
+        var compiland = this._shouldLookupLibAndCompiland ? (from c in compilands
                          where c.Contains(this._symbol.RVA, this._symbol.VirtualSize)
-                         select c).FirstOrDefault();
+                         select c).FirstOrDefault() : null;
         var lib = compiland?.Lib;
 
-        var sourceFile = (from sf in sourceFiles
+        var sourceFile = this._shouldLookupSourceFile ? (from sf in sourceFiles
                           where sf.Contains(this._symbol.RVA, this._symbol.VirtualSize)
-                          select sf).FirstOrDefault();
+                          select sf).FirstOrDefault() : null;
 
         var placement = new SymbolPlacement(section, coffGroup, lib, compiland, sourceFile);
         lookupStepsCompleted++;

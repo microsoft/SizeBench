@@ -32,7 +32,7 @@ public sealed class UserDefinedTypeSymbolPageViewModelTests : IDisposable
     public async Task WorksWhenTypeIsFoundByName()
     {
         uint nextSymIndexId = 0;
-        var aComplexTypeOfSomeUDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "AComplex::Type<SomeUDT>", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var aComplexTypeOfSomeUDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "AComplex::Type<SomeUDT>", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
         var superImportantFunction1 = new SimpleFunctionCodeSymbol(this.DataCache, "SuperImporantFunction1", rva: 100, size: 50, symIndexId: nextSymIndexId++);
         var superImportantFunction2 = new SimpleFunctionCodeSymbol(this.DataCache, "SuperImportantFunction2", rva: 150, size: 100, symIndexId: nextSymIndexId++);
         var functionRemovedInFinalBinary = new SimpleFunctionCodeSymbol(this.DataCache, "FunctionRemovedInFinalBinary", rva: 0, size: 0, symIndexId: nextSymIndexId++);

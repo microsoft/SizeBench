@@ -32,13 +32,7 @@ public sealed class UriMapper : UriMapperBase
 
     public override Uri MapUri(Uri uri)
     {
-        var mappings = this.UriMappings;
-
-        if (mappings is null)
-        {
-            throw new InvalidOperationException("UriMapper must not have a null collection of UriMappings");
-        }
-
+        var mappings = this.UriMappings ?? throw new InvalidOperationException("UriMapper must not have a null collection of UriMappings");
         ArgumentNullException.ThrowIfNull(uri);
 
         Uri? mappedUri;

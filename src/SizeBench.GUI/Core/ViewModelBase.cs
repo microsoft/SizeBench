@@ -18,10 +18,7 @@ internal abstract class ViewModelBase : INotifyPropertyChanged
     // Intended to only be called by the navigation framework
     internal Task SetCurrentFragment(string? newFragment)
     {
-        if (newFragment is null)
-        {
-            newFragment = String.Empty;
-        }
+        newFragment ??= String.Empty;
 
         if (this.CurrentFragment != newFragment)
         {

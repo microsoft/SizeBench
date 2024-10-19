@@ -40,14 +40,7 @@ class TextEditorWrapper
     public TextEditorWrapper(object textContainer, FrameworkElement uiScope, bool isUndoEnabled)
     {
         var editor = Activator.CreateInstance(TextEditorType, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.CreateInstance,
-            null, new[] { textContainer, uiScope, isUndoEnabled }, null);
-
-#pragma warning disable CA1508 // Avoid dead conditional code - the analyzer seems to believe editor cannot be null here, but if this is removed then it complains that this._editor could be assigned null below.  Can't win.  So let's suppress.
-        if (editor is null)
-        {
-            throw new InvalidOperationException("Unable to create TextEditor");
-        }
-#pragma warning restore CA1508
+            null, new[] { textContainer, uiScope, isUndoEnabled }, null) ?? throw new InvalidOperationException("Unable to create TextEditor");
 
         this._editor = editor;
     }

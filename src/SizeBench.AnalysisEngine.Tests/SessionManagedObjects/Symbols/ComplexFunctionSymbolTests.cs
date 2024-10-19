@@ -62,7 +62,7 @@ public sealed class ComplexFunctionSymbolTests : IDisposable
         var args = new TypeSymbol[]
         {
                 new BasicTypeSymbol(this.SessionDataCache, "int", 4, nextSymIndexId++),
-                new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter, mockSession.Object, "MyCustomType", 24, nextSymIndexId++, UserDefinedTypeKind.UdtClass, baseTypeIDs: null)
+                new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter, mockSession.Object, "MyCustomType", 24, nextSymIndexId++, UserDefinedTypeKind.UdtClass)
         };
         function = BuildComplexFunction(ref nextSymIndexId, "FunctionName1", isIntroVirtual: true,
                                        functionType: new FunctionTypeSymbol(this.SessionDataCache, String.Empty, 0, symIndexId: nextSymIndexId++, isConst: false, isVolatile: false, argumentTypes: args, returnValueType: voidType),
@@ -98,7 +98,7 @@ public sealed class ComplexFunctionSymbolTests : IDisposable
         args = new TypeSymbol[]
         {
                 new BasicTypeSymbol(this.SessionDataCache, "int", 4, nextSymIndexId++),
-                new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter, mockSession.Object, "MyCustomType", 24, nextSymIndexId++, UserDefinedTypeKind.UdtClass, baseTypeIDs: null)
+                new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter, mockSession.Object, "MyCustomType", 24, nextSymIndexId++, UserDefinedTypeKind.UdtClass)
         };
         function = BuildComplexFunction(ref nextSymIndexId, "FunctionName1",
                                        functionType: new FunctionTypeSymbol(this.SessionDataCache, String.Empty, 0, symIndexId: nextSymIndexId++, isConst: false, isVolatile: false, argumentTypes: args, returnValueType: voidType));
@@ -128,7 +128,7 @@ public sealed class ComplexFunctionSymbolTests : IDisposable
         args = new TypeSymbol[]
         {
                 new BasicTypeSymbol(this.SessionDataCache, "int", 4, nextSymIndexId++),
-                new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter, mockSession.Object, "MyCustomType", 24, nextSymIndexId++, UserDefinedTypeKind.UdtClass, baseTypeIDs: null)
+                new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter, mockSession.Object, "MyCustomType", 24, nextSymIndexId++, UserDefinedTypeKind.UdtClass)
         };
         function = BuildComplexFunction(ref nextSymIndexId, "FunctionName1", isSealed: true,
                                        functionType: new FunctionTypeSymbol(this.SessionDataCache, String.Empty, 0, symIndexId: nextSymIndexId++, isConst: false, isVolatile: false, argumentTypes: args, returnValueType: voidType));

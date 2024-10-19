@@ -578,12 +578,12 @@ internal sealed partial class PEFile : IPEFile
 
         if (thunks.Count > 0)
         {
-            this._delayLoadImportThunksRVARangeSet = RVARangeSet.FromListOfRVARanges(thunks.Select(thunk => new RVARange(thunk.RVA, thunk.RVAEnd)), maxPaddingToMerge: 8);
+            this._delayLoadImportThunksRVARangeSet = RVARangeSet.FromListOfRVARanges(thunks.Select(thunk => new RVARange(thunk.RVA, thunk.RVAEnd)).ToList(), maxPaddingToMerge: 8);
         }
 
         if (strings.Count > 0)
         {
-            this._delayLoadImportStringsRVARangeSet = RVARangeSet.FromListOfRVARanges(strings.Select(str => new RVARange(str.RVA, str.RVAEnd)), maxPaddingToMerge: 8);
+            this._delayLoadImportStringsRVARangeSet = RVARangeSet.FromListOfRVARanges(strings.Select(str => new RVARange(str.RVA, str.RVAEnd)).ToList(), maxPaddingToMerge: 8);
         }
 
         if (moduleHandleRanges.Count > 0)

@@ -265,30 +265,73 @@ internal static class IDiaSessionExtensions
 
     #region Enumerate Raw Section Contributions
 
+    private static unsafe IDiaSectionContrib? AdvanceToNewElementInChunk(IDiaEnumSectionContribsHandCoded enumSectionContribs,
+        uint chunkSize,
+        nint[] intPtrs,
+        ref uint celt,
+        ref int currentIntPtrsIndex)
+    {
+        IDiaSectionContrib? diaSectionContrib;
+        currentIntPtrsIndex++;
+        if (currentIntPtrsIndex < chunkSize && currentIntPtrsIndex < celt)
+        {
+            diaSectionContrib = (IDiaSectionContrib)Marshal.GetObjectForIUnknown(intPtrs[currentIntPtrsIndex]);
+        }
+        else
+        {
+            enumSectionContribs.Next(chunkSize, Marshal.UnsafeAddrOfPinnedArrayElement(intPtrs, 0), out celt);
+            if (celt > 0)
+            {
+                diaSectionContrib = (IDiaSectionContrib)Marshal.GetObjectForIUnknown(intPtrs[0]);
+                currentIntPtrsIndex = 0;
+            }
+            else
+            {
+                diaSectionContrib = null;
+                currentIntPtrsIndex = int.MaxValue;
+            }
+        }
+
+        return diaSectionContrib;
+    }
+
     public static IEnumerable<IDiaSectionContrib> EnumerateSectionContributions(this IDiaSession session, ILogger logger)
     {
-        var enumSectionContribs = session.FindTable<IDiaEnumSectionContribs>(logger);
+        var enumSectionContribs = session.FindTable<IDiaEnumSectionContribsHandCoded>(logger);
 
         if (enumSectionContribs is null)
         {
             yield break;
         }
 
-        foreach (IDiaSectionContrib? contrib in enumSectionContribs)
+        IDiaSectionContrib? contrib;
+        var celt = 0u;
+        const int chunkSize = 1_000;
+        var intPtrs = new IntPtr[chunkSize];
+        var currentIntPtrsIndex = chunkSize;
+        var pin = GCHandle.Alloc(intPtrs, GCHandleType.Pinned);
+
+        try
         {
-            if (contrib != null)
+            while (true)
             {
+                contrib = AdvanceToNewElementInChunk(enumSectionContribs, chunkSize, intPtrs, ref celt, ref currentIntPtrsIndex);
+
+                if (contrib is null || celt == 0)
+                {
+                    break;
+                }
                 // Sometimes LLD records contribs with zero size - we can ignore these as there is nothing interesting about
                 // something without a size.
-                if (contrib.length != 0)
+                else if (contrib.length != 0)
                 {
                     yield return contrib;
                 }
             }
-            else
-            {
-                yield break;
-            }
+        }
+        finally
+        {
+            pin.Free();
         }
     }
 

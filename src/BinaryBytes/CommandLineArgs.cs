@@ -40,7 +40,7 @@ internal static class CommandLineArgs
                             SymbolSourcesSupported = SymbolSourcesSupported.All;
                             break;
                         case "/include-data-symbols":
-                            SymbolSourcesSupported &= SymbolSourcesSupported.DataSymbols;
+                            SymbolSourcesSupported |= SymbolSourcesSupported.DataSymbols;
                             break;
                         default:
                             PrintUsage(isInvalidCommand: true);

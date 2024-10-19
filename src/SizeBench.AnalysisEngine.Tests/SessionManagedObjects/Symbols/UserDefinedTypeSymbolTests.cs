@@ -18,19 +18,22 @@ public sealed class UserDefinedTypeSymbolTests : IDisposable
         var mockSession = new Mock<ISession>();
         this.DataCache = new SessionDataCache();
         this.TestDIAAdapter = new TestDIAAdapter();
-        this.Base1UDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, mockSession.Object, "TestBase1", 8, symIndexId: 123, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
-        this.Base2UDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, mockSession.Object, "TestBase2", 8, symIndexId: 456, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
-        var baseTypeIDs = new Dictionary<uint, uint>()
+        this.Base1UDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, mockSession.Object, "TestBase1", 8, symIndexId: 123, udtKind: UserDefinedTypeKind.UdtClass);
+        this.Base2UDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, mockSession.Object, "TestBase2", 8, symIndexId: 456, udtKind: UserDefinedTypeKind.UdtClass);
+        var baseTypeIDs = new List<(uint, uint)>()
             {
-                { this.Base1UDT.SymIndexId, 0 },
-                { this.Base2UDT.SymIndexId, 8 }
+                (this.Base1UDT.SymIndexId, 0),
+                (this.Base2UDT.SymIndexId, 8)
             };
-        this.Derived1And2UDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, mockSession.Object, "TestDerived1And2", 10, symIndexId: 0, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: baseTypeIDs);
-        baseTypeIDs = new Dictionary<uint, uint>()
+        this.Derived1And2UDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, mockSession.Object, "TestDerived1And2", 10, symIndexId: 0, udtKind: UserDefinedTypeKind.UdtClass);
+        this.TestDIAAdapter.BaseTypeIDsToFindByUDT.Add(this.Derived1And2UDT, baseTypeIDs);
+
+        baseTypeIDs = new List<(uint, uint)>()
             {
-                { this.Base2UDT.SymIndexId, 0 }
+                (this.Base2UDT.SymIndexId, 0)
             };
-        this.Derived2UDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, mockSession.Object, "TestDerived2", 10, symIndexId: 5, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: baseTypeIDs);
+        this.Derived2UDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, mockSession.Object, "TestDerived2", 10, symIndexId: 5, udtKind: UserDefinedTypeKind.UdtClass);
+        this.TestDIAAdapter.BaseTypeIDsToFindByUDT.Add(this.Derived2UDT, baseTypeIDs);
 
         this.TestDIAAdapter.TypeSymbolsToFindBySymIndexId.Add(this.Base1UDT.SymIndexId, this.Base1UDT);
         this.TestDIAAdapter.TypeSymbolsToFindBySymIndexId.Add(this.Base2UDT.SymIndexId, this.Base2UDT);
@@ -83,7 +86,7 @@ public sealed class UserDefinedTypeSymbolTests : IDisposable
 
         Assert.IsNotNull(this.Base1UDT.DerivedTypesBySymIndexId);
         Assert.AreEqual(1, this.Base1UDT.DerivedTypesBySymIndexId.Count);
-        Assert.IsTrue(ReferenceEquals(this.Base1UDT.DerivedTypesBySymIndexId.Values[0], this.Derived1And2UDT));
+        Assert.IsTrue(ReferenceEquals(this.Base1UDT.DerivedTypesBySymIndexId.Values.First(), this.Derived1And2UDT));
         Assert.IsTrue(ReferenceEquals(this.Base1UDT.DerivedTypesBySymIndexId[this.Derived1And2UDT!.SymIndexId], this.Derived1And2UDT));
     }
 

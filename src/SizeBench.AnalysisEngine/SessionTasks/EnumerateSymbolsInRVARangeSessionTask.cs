@@ -161,18 +161,19 @@ internal class EnumerateSymbolsInRVARangeSessionTask : SessionTask<List<ISymbol>
 
     private void EnumerateDIASymbols(ILogger logger, int nextLoggerOutput, int loggerOutputVelocity, List<ISymbol> symbolsEnumerated)
     {
+        var otherPESymbolsByRVA = this.DataCache.OtherPESymbolsByRVA;
+
         foreach ((var symbol, var amountOfRVARangeExplored) in this.DIAAdapter.FindSymbolsInRVARange(this._rvaRange, this.CancellationToken))
         {
             if (this.CancellationToken.IsCancellationRequested)
             {
                 logger.Log($"Cancellation requested after enumerating {symbolsEnumerated.Count} symbols, stopping now.");
+                this.CancellationToken.ThrowIfCancellationRequested();
             }
-
-            this.CancellationToken.ThrowIfCancellationRequested();
 
             // If we already found this symbol in OtherPESymbols, then that one will be preferred and this DIA version of the symbol will be
             // ignored, as we can better control those symbols to have useful names, ordinals for import thunks, and so on.
-            if (false == this.DataCache.OtherPESymbolsByRVA.ContainsKey(symbol.RVA))
+            if (false == otherPESymbolsByRVA.ContainsKey(symbol.RVA))
             {
                 symbolsEnumerated.Add(symbol);
             }

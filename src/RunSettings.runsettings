@@ -80,6 +80,8 @@
                 <Function>^Microsoft::VisualStudio::CppCodeCoverageFramework::.*</Function>
                 <Function>^Microsoft::VisualStudio::CppUnitTestFramework::.*</Function>
                 <Function>^System.Text.RegularExpressions.Generated.*</Function>
+                <!-- WinRT interop code generates these WinRT.* functions, we can exclude them since we don't use most of them anyway -->
+                <Function>^WinRT.*</Function>
               </Exclude>
             </Functions>
 

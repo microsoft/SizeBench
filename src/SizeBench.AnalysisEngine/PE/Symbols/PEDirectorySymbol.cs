@@ -1,7 +1,12 @@
-﻿namespace SizeBench.AnalysisEngine.Symbols;
+﻿using System.Diagnostics;
 
+namespace SizeBench.AnalysisEngine.Symbols;
+
+[DebuggerDisplay("{DebuggerDisplay,nq}")]
 public sealed class PEDirectorySymbol : ISymbol
 {
+    private string DebuggerDisplay => $"{GetType().Name}: {this.Name}";
+
     public string Name { get; }
 
     public uint RVA { get; }

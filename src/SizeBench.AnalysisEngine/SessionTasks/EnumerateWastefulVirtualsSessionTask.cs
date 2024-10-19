@@ -169,10 +169,7 @@ internal sealed class EnumerateWastefulVirtualsSessionTask : SessionTask<List<Wa
                 // If, however, countOfOverrides is exactly 1...then it seems like this function need not be virtual and could simply be declared
                 //              directly on that derived type.  This would save a vtable slot in this class, as well as the entire hierarchy on down.
 
-                if (item is null)
-                {
-                    item = new WastefulVirtualItem(udt, IsCOMTypeHeuristicGuess(udt), this.Session.BytesPerWord);
-                }
+                item ??= new WastefulVirtualItem(udt, IsCOMTypeHeuristicGuess(udt), this.Session.BytesPerWord);
 
                 // Note that we want to add the override to the list of functions, not the pure version - because pure functions don't have an RVA
                 // so we can't go look them up later very well.
@@ -182,10 +179,7 @@ internal sealed class EnumerateWastefulVirtualsSessionTask : SessionTask<List<Wa
             {
                 // If this is not a pure function, and it's never overridden, that's also wasteful
 
-                if (item is null)
-                {
-                    item = new WastefulVirtualItem(udt, IsCOMTypeHeuristicGuess(udt), this.Session.BytesPerWord);
-                }
+                item ??= new WastefulVirtualItem(udt, IsCOMTypeHeuristicGuess(udt), this.Session.BytesPerWord);
 
                 item.AddWastedOverrideThatIsNotPureWithNoOverrides(function);
             }

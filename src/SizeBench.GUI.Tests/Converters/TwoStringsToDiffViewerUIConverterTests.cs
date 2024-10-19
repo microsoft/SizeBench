@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using SizeBench.TestInfrastructure;
 
 namespace SizeBench.GUI.Converters.Tests;
 #nullable disable // WPF's IValueConverter is not correctly nullable-annotated, so we disable nullable for the source and tests of the value converters.

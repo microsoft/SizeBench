@@ -13,35 +13,13 @@ public sealed class ClangClTests
 {
     public TestContext? TestContext { get; set; }
 
-    private static Session? ClangClx64Session;
-
-    private static NoOpLogger? SessionLogger;
-
-    [ClassInitialize]
-    public static async Task ClassInitialize(TestContext testContext)
-    {
-        ArgumentNullException.ThrowIfNull(testContext);
-
-        SessionLogger = new NoOpLogger();
-        ClangClx64Session = await Session.Create(Path.Combine(testContext.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.ClangClx64.dll"),
-                                                 Path.Combine(testContext.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.ClangClx64.pdb"),
-                                                 SessionLogger);
-    }
-
-    [ClassCleanup]
-    public static async Task ClassCleanup()
-    {
-        if (ClangClx64Session != null)
-        {
-            await ClangClx64Session.DisposeAsync();
-            SessionLogger?.Dispose();
-        }
-    }
-
     [TestMethod]
-    public void ClangClx64PDATAAndXDATACanBeParsed()
+    public async Task ClangClx64PDATAAndXDATACanBeParsed()
     {
-        Assert.IsNotNull(ClangClx64Session);
+        using var SessionLogger = new NoOpLogger();
+        await using var ClangClx64Session = await Session.Create(Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.ClangClx64.dll"),
+                                                                 Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.ClangClx64.pdb"),
+                                                                 SessionLogger);
 
         // These are gotten from "link /dump /headers SizeBenchV2.AnalysisEngine.Tests.ClangClx64.dll" and looking at the "Exception" directory
         Assert.AreEqual(0x5000u, ClangClx64Session.DataCache.PDataRVARange.RVAStart);
@@ -169,6 +147,11 @@ public sealed class ClangClTests
     [TestMethod]
     public async Task ClangClx64RelativeRVAsCanBeLoadedFromVTable()
     {
+        using var SessionLogger = new NoOpLogger();
+        await using var ClangClx64Session = await Session.Create(Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.ClangClx64.dll"),
+                                                                 Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.ClangClx64.pdb"),
+                                                                 SessionLogger);
+
         // The RVA passed in as a parameter here is that of Dllx64_DerivedClass::'vftable'
         const int derivedClassVftableRVA = 0x30F8;
         var firstEntry = await ClangClx64Session!.LoadSymbolForVTableSlotAsync(derivedClassVftableRVA, slotIndex: 0);
@@ -190,6 +173,11 @@ public sealed class ClangClTests
     [TestMethod]
     public async Task Float16Works()
     {
+        using var SessionLogger = new NoOpLogger();
+        await using var ClangClx64Session = await Session.Create(Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.ClangClx64.dll"),
+                                                                 Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.ClangClx64.pdb"),
+                                                                 SessionLogger);
+
         var typeWithClangExtensionsLayouts = await ClangClx64Session!.LoadTypeLayoutsByName("TypeWithClangExtensions", CancellationToken.None);
 
         Assert.AreEqual(1, typeWithClangExtensionsLayouts.Count);

@@ -35,13 +35,15 @@ public sealed class WastefulVirtualPageViewModelTests : IDisposable
         this.nextSymIndexId = 0;
 
         var diaAdapter = new TestDIAAdapter();
-        this.UDT = new UserDefinedTypeSymbol(this.DataCache, diaAdapter, this.MockSession.Object, name: "CBase", instanceSize: 100, symIndexId: this.nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
-        var baseclasses = new Dictionary<uint, uint>(capacity: 1)
+        this.UDT = new UserDefinedTypeSymbol(this.DataCache, diaAdapter, this.MockSession.Object, name: "CBase", instanceSize: 100, symIndexId: this.nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
+        var baseclasses = new List<(uint, uint)>(capacity: 1)
             {
-                { this.UDT.SymIndexId, 0 }
+                (this.UDT.SymIndexId, 0)
             };
-        this.DerivedUDT1 = new UserDefinedTypeSymbol(this.DataCache, diaAdapter, this.MockSession.Object, name: "CDerived1", instanceSize: 120, symIndexId: this.nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: baseclasses);
-        this.DerivedUDT2 = new UserDefinedTypeSymbol(this.DataCache, diaAdapter, this.MockSession.Object, name: "CDerived2", instanceSize: 110, symIndexId: this.nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: baseclasses);
+        this.DerivedUDT1 = new UserDefinedTypeSymbol(this.DataCache, diaAdapter, this.MockSession.Object, name: "CDerived1", instanceSize: 120, symIndexId: this.nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
+        diaAdapter.BaseTypeIDsToFindByUDT.Add(this.DerivedUDT1, baseclasses);
+        this.DerivedUDT2 = new UserDefinedTypeSymbol(this.DataCache, diaAdapter, this.MockSession.Object, name: "CDerived2", instanceSize: 110, symIndexId: this.nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
+        diaAdapter.BaseTypeIDsToFindByUDT.Add(this.DerivedUDT2, baseclasses);
 
         this.WastedFunction1 = new SimpleFunctionCodeSymbol(this.DataCache, "WastedFunction1", rva: 100, size: 50, symIndexId: this.nextSymIndexId++);
 

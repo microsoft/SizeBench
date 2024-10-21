@@ -23,13 +23,15 @@ public sealed class WastefulVirtualItemTests : IDisposable
         };
         this.MockSession = new Mock<ISession>();
         var diaAdapter = new TestDIAAdapter();
-        this.UDT = new UserDefinedTypeSymbol(this.DataCache, diaAdapter, this.MockSession.Object, name: "CBase", instanceSize: 100, symIndexId: 1, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
-        var baseclasses = new Dictionary<uint, uint>(capacity: 1)
+        this.UDT = new UserDefinedTypeSymbol(this.DataCache, diaAdapter, this.MockSession.Object, name: "CBase", instanceSize: 100, symIndexId: 1, udtKind: UserDefinedTypeKind.UdtClass);
+        var baseclasses = new List<(uint, uint)>(capacity: 1)
             {
-                { this.UDT.SymIndexId, 0 }
+                (this.UDT.SymIndexId, 0)
             };
-        this.DerivedUDT1 = new UserDefinedTypeSymbol(this.DataCache, diaAdapter, this.MockSession.Object, name: "CDerived1", instanceSize: 120, symIndexId: 2, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: baseclasses);
-        this.DerivedUDT2 = new UserDefinedTypeSymbol(this.DataCache, diaAdapter, this.MockSession.Object, name: "CDerived2", instanceSize: 110, symIndexId: 3, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: baseclasses);
+        this.DerivedUDT1 = new UserDefinedTypeSymbol(this.DataCache, diaAdapter, this.MockSession.Object, name: "CDerived1", instanceSize: 120, symIndexId: 2, udtKind: UserDefinedTypeKind.UdtClass);
+        this.DerivedUDT2 = new UserDefinedTypeSymbol(this.DataCache, diaAdapter, this.MockSession.Object, name: "CDerived2", instanceSize: 110, symIndexId: 3, udtKind: UserDefinedTypeKind.UdtClass);
+        diaAdapter.BaseTypeIDsToFindByUDT.Add(this.DerivedUDT1, baseclasses);
+        diaAdapter.BaseTypeIDsToFindByUDT.Add(this.DerivedUDT2, baseclasses);
 
         this.WastedFunction1 = new SimpleFunctionCodeSymbol(this.DataCache, "WastedFunction1", rva: 100, size: 50, symIndexId: 4);
         this.WastedFunction2 = new SimpleFunctionCodeSymbol(this.DataCache, "WastedFunction2", rva: 150, size: 100, symIndexId: 5);

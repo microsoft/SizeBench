@@ -308,7 +308,10 @@ dotnet_diagnostic.CA1507.severity=error
 dotnet_diagnostic.CA1001.severity=error
 dotnet_diagnostic.CA1065.severity=error
 dotnet_diagnostic.IDE0090.severity=none
-dotnet_diagnostic.IDE0028.severity = none
+dotnet_diagnostic.IDE0028.severity=none
+dotnet_diagnostic.IDE0130.severity=none
+dotnet_diagnostic.CsWinRT1028.severity=none
+dotnet_diagnostic.CSWinRT1030.severity=none
 csharp_style_namespace_declarations=file_scoped:error
 
 dotnet_diagnostic.CS1591.severity = silent # CS1591: Missing XML comment for publicly visible type or member

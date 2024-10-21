@@ -29,7 +29,7 @@ public sealed class CanLoadLayoutTests
 
         // UDTs can always have their layout loaded, they're custom so we can't know anything about them.  Some of them won't have data members or functions or either, but that distinction is
         // finer than we care to distinguish so far.
-        var udt = new UserDefinedTypeSymbol(dataCache, diaAdapter, mockSession.Object, "MyCustomType", 10, nextSymIndexId++, UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var udt = new UserDefinedTypeSymbol(dataCache, diaAdapter, mockSession.Object, "MyCustomType", 10, nextSymIndexId++, UserDefinedTypeKind.UdtClass);
         Assert.IsTrue(udt.CanLoadLayout);
 
         // Arrays can have their layout loaded, but only if the element type has a layout - then what we can do is just load

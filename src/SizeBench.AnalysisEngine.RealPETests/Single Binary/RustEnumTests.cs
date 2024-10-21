@@ -28,7 +28,7 @@ public class RustEnumTests
         var testRustEnumWithMethod_Call = textSymbols.OfType<SimpleFunctionCodeSymbol>().Single(s => s.Name.Contains("TestRustEnumWithMethod::call", StringComparison.OrdinalIgnoreCase));
 
         Assert.IsNull(testRustEnumWithMethod_Call.ArgumentNames);
-        Assert.AreEqual(1, testRustEnumWithMethod_Call.Blocks.Count);
+        Assert.AreEqual(1, testRustEnumWithMethod_Call.BlockCount);
         Assert.IsTrue(testRustEnumWithMethod_Call.CanBeFolded);
         Assert.IsFalse(testRustEnumWithMethod_Call.IsCOMDATFolded);
         Assert.IsFalse(testRustEnumWithMethod_Call.IsIntroVirtual);

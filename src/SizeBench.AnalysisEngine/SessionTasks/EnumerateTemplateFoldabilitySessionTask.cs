@@ -116,7 +116,7 @@ internal sealed class EnumerateTemplateFoldabilitySessionTask : SessionTask<List
         // we'll end up with two "groups" to compare - which is all that's interesting, as moving a function from one of
         // these groups to the other wouldn't affect size - only structural changes that eliminate a group (or shrink all
         // groups) really save space.
-        var functionsGroupedByRVA = allFunctionsToCompare.GroupBy(func => (func.PrimaryBlock.RVA, BlockCount: func.Blocks.Count));
+        var functionsGroupedByRVA = allFunctionsToCompare.GroupBy(static func => (func.PrimaryBlock.RVA, func.BlockCount));
 
         // If there's only one function group (after COMDAT-folding), then it's of course 100% the same as itself, so
         // filter out the degenerate case

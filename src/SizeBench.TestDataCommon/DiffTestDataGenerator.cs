@@ -1158,15 +1158,15 @@ internal sealed class DiffTestDataGenerator : IDisposable
 
         if (shouldBeCOMTypes && this.BeforeIUnknownUDT is null)
         {
-            this.BeforeIUnknownUDT = new UserDefinedTypeSymbol(this.BeforeDataCache, this.BeforeDIAAdapter, this.MockBeforeSession.Object, "IUnknown", 8, this._beforeNextSymIndexId++, UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+            this.BeforeIUnknownUDT = new UserDefinedTypeSymbol(this.BeforeDataCache, this.BeforeDIAAdapter, this.MockBeforeSession.Object, "IUnknown", 8, this._beforeNextSymIndexId++, UserDefinedTypeKind.UdtClass);
             udts.Add(this.BeforeIUnknownUDT);
         }
 
-        var iunknownBaseTypeIDs = new Dictionary<uint, uint>();
+        var iunknownBaseTypeIDs = new List<(uint, uint)>();
 
         if (shouldBeCOMTypes)
         {
-            iunknownBaseTypeIDs.Add(this.BeforeIUnknownUDT.SymIndexId, 0);
+            iunknownBaseTypeIDs.Add((this.BeforeIUnknownUDT.SymIndexId, 0));
         };
 
         var endIndex = this._nextBeforeUDTIndex + 3;
@@ -1176,19 +1176,22 @@ internal sealed class DiffTestDataGenerator : IDisposable
             uint size = 10;
             var udt = new UserDefinedTypeSymbol(this.BeforeDataCache, this.BeforeDIAAdapter, this.MockBeforeSession.Object,
                                                 $"{namePrefix}UDT{(shouldBeCOMTypes ? "COMType" : "")}{this._nextBeforeUDTIndex}",
-                                                size, this._beforeNextSymIndexId++, UserDefinedTypeKind.UdtClass,
-                                                baseTypeIDs: shouldBeCOMTypes ? iunknownBaseTypeIDs : null);
+                                                size, this._beforeNextSymIndexId++, UserDefinedTypeKind.UdtClass);
+            if (shouldBeCOMTypes)
+            {
+                this.BeforeDIAAdapter.BaseTypeIDsToFindByUDT.Add(udt, iunknownBaseTypeIDs);
+            }
             udt.LoadBaseTypes(this.BeforeDataCache, this.BeforeDIAAdapter, CancellationToken.None);
 
-            var baseTypeIDs = new Dictionary<uint, uint>()
+            var baseTypeIDs = new List<(uint, uint)>()
                 {
-                    { udt.SymIndexId, 0 }
+                    (udt.SymIndexId, 0)
                 };
 
             var derivedUDT = new UserDefinedTypeSymbol(this.BeforeDataCache, this.BeforeDIAAdapter, this.MockBeforeSession.Object,
                                                        $"{namePrefix}UDT{(shouldBeCOMTypes ? "COMType" : "")}{this._nextBeforeUDTIndex}_Derived",
-                                                       size, this._beforeNextSymIndexId++, UserDefinedTypeKind.UdtClass,
-                                                       baseTypeIDs: baseTypeIDs);
+                                                       size, this._beforeNextSymIndexId++, UserDefinedTypeKind.UdtClass);
+            this.BeforeDIAAdapter.BaseTypeIDsToFindByUDT.Add(derivedUDT, baseTypeIDs);
             derivedUDT.LoadBaseTypes(this.BeforeDataCache, this.BeforeDIAAdapter, CancellationToken.None);
             udt.AddDerivedType(derivedUDT);
 
@@ -1212,15 +1215,15 @@ internal sealed class DiffTestDataGenerator : IDisposable
 
         if (shouldBeCOMTypes && this.AfterIUnknownUDT is null)
         {
-            this.AfterIUnknownUDT = new UserDefinedTypeSymbol(this.AfterDataCache, this.AfterDIAAdapter, this.MockAfterSession.Object, "IUnknown", 8, this._afterNextSymIndexId++, UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+            this.AfterIUnknownUDT = new UserDefinedTypeSymbol(this.AfterDataCache, this.AfterDIAAdapter, this.MockAfterSession.Object, "IUnknown", 8, this._afterNextSymIndexId++, UserDefinedTypeKind.UdtClass);
             udts.Add(this.AfterIUnknownUDT);
         }
 
-        var iunknownBaseTypeIDs = new Dictionary<uint, uint>();
+        var iunknownBaseTypeIDs = new List<(uint, uint)>();
 
         if (shouldBeCOMTypes)
         {
-            iunknownBaseTypeIDs.Add(this.AfterIUnknownUDT.SymIndexId, 0);
+            iunknownBaseTypeIDs.Add((this.AfterIUnknownUDT.SymIndexId, 0));
         };
 
         var endIndex = this._nextAfterUDTIndex + 3;
@@ -1230,19 +1233,22 @@ internal sealed class DiffTestDataGenerator : IDisposable
             uint size = 10;
             var udt = new UserDefinedTypeSymbol(this.AfterDataCache, this.AfterDIAAdapter, this.MockAfterSession.Object,
                                                 $"{namePrefix}UDT{(shouldBeCOMTypes ? "COMType" : "")}{this._nextAfterUDTIndex}",
-                                                size, this._afterNextSymIndexId++, UserDefinedTypeKind.UdtClass,
-                                                baseTypeIDs: shouldBeCOMTypes ? iunknownBaseTypeIDs : null);
+                                                size, this._afterNextSymIndexId++, UserDefinedTypeKind.UdtClass);
+            if (shouldBeCOMTypes)
+            {
+                this.AfterDIAAdapter.BaseTypeIDsToFindByUDT.Add(udt, iunknownBaseTypeIDs);
+            }
             udt.LoadBaseTypes(this.AfterDataCache, this.AfterDIAAdapter, CancellationToken.None);
 
-            var baseTypeIDs = new Dictionary<uint, uint>()
+            var baseTypeIDs = new List<(uint, uint)>()
                 {
-                    { udt.SymIndexId, 0 }
+                    (udt.SymIndexId, 0)
                 };
 
             var derivedUDT = new UserDefinedTypeSymbol(this.AfterDataCache, this.AfterDIAAdapter, this.MockAfterSession.Object,
                                                        $"{namePrefix}UDT{(shouldBeCOMTypes ? "COMType" : "")}{this._nextAfterUDTIndex}_Derived",
-                                                       size, this._afterNextSymIndexId++, UserDefinedTypeKind.UdtClass,
-                                                       baseTypeIDs: baseTypeIDs);
+                                                       size, this._afterNextSymIndexId++, UserDefinedTypeKind.UdtClass);
+            this.AfterDIAAdapter.BaseTypeIDsToFindByUDT.Add(derivedUDT, baseTypeIDs);
             derivedUDT.LoadBaseTypes(this.AfterDataCache, this.AfterDIAAdapter, CancellationToken.None);
             udt.AddDerivedType(derivedUDT);
 
@@ -1638,7 +1644,7 @@ internal sealed class DiffTestDataGenerator : IDisposable
         var boolType = new BasicTypeSymbol(this.BeforeDataCache, "bool", size: 1, symIndexId: this._beforeNextSymIndexId++);
         var intType = new BasicTypeSymbol(this.BeforeDataCache, "int", size: 1, symIndexId: this._beforeNextSymIndexId++);
         var voidType = new BasicTypeSymbol(this.BeforeDataCache, "void", size: 0, symIndexId: this._beforeNextSymIndexId++);
-        var aComplexType = new UserDefinedTypeSymbol(this.BeforeDataCache, this.BeforeDIAAdapter, this.MockBeforeSession.Object, "AComplex::Type", instanceSize: 10, symIndexId: this._beforeNextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var aComplexType = new UserDefinedTypeSymbol(this.BeforeDataCache, this.BeforeDIAAdapter, this.MockBeforeSession.Object, "AComplex::Type", instanceSize: 10, symIndexId: this._beforeNextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
 
         return new List<IFunctionCodeSymbol>()
             {
@@ -1673,7 +1679,7 @@ internal sealed class DiffTestDataGenerator : IDisposable
         var boolType = new BasicTypeSymbol(this.AfterDataCache, "bool", size: 1, symIndexId: this._afterNextSymIndexId++);
         var intType = new BasicTypeSymbol(this.AfterDataCache, "int", size: 1, symIndexId: this._afterNextSymIndexId++);
         var voidType = new BasicTypeSymbol(this.AfterDataCache, "void", size: 0, symIndexId: this._afterNextSymIndexId++);
-        var aComplexType = new UserDefinedTypeSymbol(this.AfterDataCache, this.AfterDIAAdapter, this.MockAfterSession.Object, "AComplex::Type", instanceSize: 10, symIndexId: this._afterNextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var aComplexType = new UserDefinedTypeSymbol(this.AfterDataCache, this.AfterDIAAdapter, this.MockAfterSession.Object, "AComplex::Type", instanceSize: 10, symIndexId: this._afterNextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
 
         return new List<IFunctionCodeSymbol>()
             {

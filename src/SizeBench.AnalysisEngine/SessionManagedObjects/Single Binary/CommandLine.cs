@@ -60,7 +60,8 @@ internal class CommandLine
             var slashCount = 0;
 
             var result = new List<string>();
-            var sb = new StringBuilder();
+            tls_nameStringBuilder ??= new StringBuilder(capacity: 100);
+            tls_nameStringBuilder.Clear();
 
             foreach (var c in input)
             {
@@ -70,8 +71,8 @@ internal class CommandLine
                 }
                 else if (whitespaceMode == WhitespaceMode.EndArgument && Char.IsWhiteSpace(c))
                 {
-                    AddSlashes(sb, ref slashCount);
-                    EmitArgument(result, sb);
+                    AddSlashes(tls_nameStringBuilder, ref slashCount);
+                    EmitArgument(result, tls_nameStringBuilder);
                     whitespaceMode = WhitespaceMode.Ignore;
                 }
                 else if (c == '\\')
@@ -87,11 +88,11 @@ internal class CommandLine
                     var quoteIsEscaped = (slashCount & 1) == 1;
                     slashCount >>= 1; // Using >> to avoid C# bankers rounding
                                       // 2n backslashes followed by a quotation mark produce n slashes followed by a quotation mark
-                    AddSlashes(sb, ref slashCount);
+                    AddSlashes(tls_nameStringBuilder, ref slashCount);
 
                     if (quoteIsEscaped)
                     {
-                        sb.Append(c);
+                        tls_nameStringBuilder.Append(c);
                     }
                     else if (whitespaceMode == WhitespaceMode.PartOfArgument)
                     {
@@ -104,8 +105,8 @@ internal class CommandLine
                 }
                 else
                 {
-                    AddSlashes(sb, ref slashCount);
-                    sb.Append(c);
+                    AddSlashes(tls_nameStringBuilder, ref slashCount);
+                    tls_nameStringBuilder.Append(c);
                     if (whitespaceMode == WhitespaceMode.Ignore)
                     {
                         whitespaceMode = WhitespaceMode.EndArgument;
@@ -113,10 +114,10 @@ internal class CommandLine
                 }
             }
 
-            AddSlashes(sb, ref slashCount);
-            if (sb.Length != 0)
+            AddSlashes(tls_nameStringBuilder, ref slashCount);
+            if (tls_nameStringBuilder.Length != 0)
             {
-                EmitArgument(result, sb);
+                EmitArgument(result, tls_nameStringBuilder);
             }
 
             return result;
@@ -187,6 +188,9 @@ internal class CommandLine
         return c is '/' or '-';
     }
 
+    [ThreadStatic]
+    private static StringBuilder? tls_nameStringBuilder;
+
     internal CommandLineSwitchState GetSwitchState(string[] switchNames, CommandLineSwitchState defaultState, CommandLineOrderOfPrecedence precedence, StringComparison stringComparison = StringComparison.Ordinal)
     {
         // TODO-paddymcd-MSFT - This is an OK first pass.
@@ -197,32 +201,24 @@ internal class CommandLine
 
         if (switchNames != null && switchNames.Length > 0)
         {
-            // array of strings for the switch name without the preceding switchPrefix to make comparison easier
-            var switchArray = new string[switchNames.Length];
-
-            for (var index = 0; index < switchNames.Length; index++)
-            {
-                // if present remove the slash or minus
-                switchArray[index] = switchNames[index].TrimStart(switchPrefix);
-            }
-
             foreach (var arg in this.SplitArguments)
             {
                 if (IsCommandLineOption(arg))
                 {
-                    var realArg = arg.TrimStart(switchPrefix);
+                    var realArg = arg.AsSpan().TrimStart(switchPrefix);
 
                     // Check if this matches one of the names switches
-                    for (var index = 0; index < switchArray.Length; index++)
+                    for (var index = 0; index < switchNames.Length; index++)
                     {
-                        if (realArg.StartsWith(switchArray[index], stringComparison))
+                        var switchI = switchNames[index].AsSpan().TrimStart(switchPrefix);
+                        if (realArg.StartsWith(switchI, stringComparison))
                         {
                             // partial stem match - now check if this is a full match or a match with a "-" on the end
-                            if (realArg.Equals(switchArray[index], stringComparison))
+                            if (realArg.Equals(switchI, stringComparison))
                             {
                                 namedswitchesState = CommandLineSwitchState.SwitchEnabled;
                             }
-                            else if (realArg[switchArray[index].Length] == '-')
+                            else if (realArg[switchI.Length] == '-')
                             {
                                 namedswitchesState = CommandLineSwitchState.SwitchDisabled;
                             }

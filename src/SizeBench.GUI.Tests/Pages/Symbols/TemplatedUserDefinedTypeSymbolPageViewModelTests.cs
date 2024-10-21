@@ -33,12 +33,12 @@ public sealed class TemplatedUserDefinedTypeSymbolPageViewModelTests : IDisposab
     {
         uint nextSymIndexId = 0;
         // Two UDTs that are from the same template
-        var typeOfIntUDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "ANamespace::Type<int>", instanceSize: 20, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var typeOfIntUDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "ANamespace::Type<int>", instanceSize: 20, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
         var fn1OfInt = new SimpleFunctionCodeSymbol(this.DataCache, "Fn1", rva: 200, size: 50, symIndexId: nextSymIndexId++);
         this.MockSession.Setup(s => s.EnumerateFunctionsFromUserDefinedType(typeOfIntUDT, It.IsAny<CancellationToken>()))
                         .Returns(Task.FromResult<IReadOnlyList<IFunctionCodeSymbol>>(new List<IFunctionCodeSymbol>() { fn1OfInt }));
 
-        var typeOfFloatUDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "ANamespace::Type<float>", instanceSize: 20, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var typeOfFloatUDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "ANamespace::Type<float>", instanceSize: 20, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
         var fn1OfFloat = new SimpleFunctionCodeSymbol(this.DataCache, "Fn1", rva: 0, size: 0, symIndexId: nextSymIndexId++); // RVA == 0 because this folded with the one from the <int> version
         var fn2OfFloat = new SimpleFunctionCodeSymbol(this.DataCache, "Fn2", rva: 250, size: 10, symIndexId: nextSymIndexId++); // RVA == 0 because this folded with the one from the <int> version
         this.MockSession.Setup(s => s.EnumerateFunctionsFromUserDefinedType(typeOfFloatUDT, It.IsAny<CancellationToken>()))

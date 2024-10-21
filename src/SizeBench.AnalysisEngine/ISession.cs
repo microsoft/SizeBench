@@ -75,6 +75,7 @@ public interface ISession : ISessionWithProgress
     Task<IReadOnlyList<SourceFile>> EnumerateSourceFiles(CancellationToken token);
 
     Task<SymbolPlacement> LookupSymbolPlacementInBinary(ISymbol symbol, CancellationToken token);
+    Task<SymbolPlacement> LookupSymbolPlacementInBinary(ISymbol symbol, LookupSymbolPlacementOptions options, CancellationToken token);
 
     Task<ISymbol?> LoadSymbolByRVA(uint rva);
     Task<ISymbol?> LoadSymbolByRVA(uint rva, CancellationToken token, ILogger? parentLogger);

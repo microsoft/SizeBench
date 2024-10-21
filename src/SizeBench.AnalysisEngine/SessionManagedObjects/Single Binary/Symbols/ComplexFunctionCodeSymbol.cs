@@ -27,12 +27,22 @@ public sealed class ComplexFunctionCodeSymbol : IFunctionCodeSymbol
     public TypeSymbol? ParentType { get; }
     public bool IsMemberFunction => this.ParentType != null;
 
+    public int BlockCount => this._separatedBlocks.Count + 1; /* +1 for the primary block */
     public CodeBlockSymbol PrimaryBlock { get; }
     private readonly List<SeparatedCodeBlockSymbol> _separatedBlocks;
     public IReadOnlyList<SeparatedCodeBlockSymbol> SeparatedBlocks => this._separatedBlocks;
 
-    private readonly List<CodeBlockSymbol> _blocks;
-    public IReadOnlyList<CodeBlockSymbol> Blocks => this._blocks;
+    public IEnumerable<CodeBlockSymbol> Blocks
+    {
+        get
+        {
+            yield return this.PrimaryBlock;
+            foreach (var separatedBlock in this._separatedBlocks)
+            {
+                yield return separatedBlock;
+            }
+        }
+    }
 
     public FunctionCodeFormattedName FormattedName { get; }
 
@@ -65,11 +75,6 @@ public sealed class ComplexFunctionCodeSymbol : IFunctionCodeSymbol
         }
 #endif
 
-        this._blocks = new List<CodeBlockSymbol>(capacity: separatedBlocks.Count + 1)
-            {
-                primaryBlock
-            };
-        this._blocks.AddRange(separatedBlocks);
         this.FunctionName = name;
         this.AccessModifier = accessModifier;
         this.IsIntroVirtual = isIntroVirtual;

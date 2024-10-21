@@ -51,9 +51,9 @@ internal sealed class CodeBlockSymbolDiffPageViewModel : BinaryDiffViewModelBase
         }
     }
 
-    public bool IsBeforeParentFunctionComplex => this.ParentFunctionSymbolDiff?.BeforeSymbol?.Blocks.Count > 1;
+    public bool IsBeforeParentFunctionComplex => this.ParentFunctionSymbolDiff?.BeforeSymbol?.BlockCount > 1;
 
-    public bool IsAfterParentFunctionComplex => this.ParentFunctionSymbolDiff?.AfterSymbol?.Blocks.Count > 1;
+    public bool IsAfterParentFunctionComplex => this.ParentFunctionSymbolDiff?.AfterSymbol?.BlockCount > 1;
 
     private SymbolPlacement? _beforePlacement;
     public SymbolPlacement? BeforePlacement

@@ -95,7 +95,7 @@ public abstract class Contribution
             return;
         }
 
-        this._rvaRangesUnsafe_AvailableBeforeFullyConstructed = RVARangeSet.CoalesceRVARangesFromList(this._rvaRangesUnsafe_AvailableBeforeFullyConstructed, 1).ToList();
+        this._rvaRangesUnsafe_AvailableBeforeFullyConstructed = RVARangeSet.CoalesceRVARangesFromList(this._rvaRangesUnsafe_AvailableBeforeFullyConstructed, 1);
     }
 
     internal void MarkFullyConstructed()
@@ -117,7 +117,6 @@ public abstract class Contribution
             this._rvaRanges.AddRange(RVARangeSet.CoalesceRVARangesFromList(this._rvaRangesUnsafe_AvailableBeforeFullyConstructed));
         }
 
-        this._rvaRangesUnsafe_AvailableBeforeFullyConstructed.Clear();
         this._rvaRangesUnsafe_AvailableBeforeFullyConstructed = null;
         this._fullyConstructed = true;
     }

@@ -33,10 +33,16 @@ public sealed class SimpleFunctionCodeSymbol : CodeBlockSymbol, IFunctionCodeSym
     public TypeSymbol? ParentType { get; }
     public bool IsMemberFunction => this.ParentType != null;
 
+    public int BlockCount => 1;
     public CodeBlockSymbol PrimaryBlock => this;
 
-    private readonly List<CodeBlockSymbol> _blocks;
-    public IReadOnlyList<CodeBlockSymbol> Blocks => this._blocks;
+    public IEnumerable<CodeBlockSymbol> Blocks
+    {
+        get
+        {
+            yield return this;
+        }
+    }
 
     public FunctionCodeFormattedName FormattedName { get; }
 
@@ -71,7 +77,6 @@ public sealed class SimpleFunctionCodeSymbol : CodeBlockSymbol, IFunctionCodeSym
 #endif
 
         this.FunctionName = name;
-        this._blocks = new List<CodeBlockSymbol>(capacity: 1) { this };
         this.AccessModifier = accessModifier;
         this.IsIntroVirtual = isIntroVirtual;
         this.IsPure = isPure;

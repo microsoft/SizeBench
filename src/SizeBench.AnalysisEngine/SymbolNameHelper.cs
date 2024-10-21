@@ -5,6 +5,9 @@ namespace SizeBench.AnalysisEngine;
 
 public static class SymbolNameHelper
 {
+    [ThreadStatic]
+    private static StringBuilder? tls_nameStringBuilder;
+
     public static string FunctionToGenericTemplatedName(IFunctionCodeSymbol function)
     {
         // This is surprisingly complicated.  The first important question is whether these are free functions or member functions.
@@ -43,8 +46,10 @@ public static class SymbolNameHelper
 
         // Now calculate the arguments, but with the anonymized names above (to enable proper grouping across the template instantiations)
         // TODO: TemplateFoldability: see about refactoring this somewhere since it's shared between FunctionSymbol and here...
-        var sb = new StringBuilder();
-        sb.Append('(');
+        tls_nameStringBuilder ??= new StringBuilder(capacity: 100);
+        tls_nameStringBuilder.Clear();
+
+        tls_nameStringBuilder.Append('(');
         if (function.FunctionType?.ArgumentTypes != null)
         {
             for (var argumentIndex = 0; argumentIndex < function.FunctionType.ArgumentTypes.Count; argumentIndex++)
@@ -52,14 +57,14 @@ public static class SymbolNameHelper
                 // Separate arguments with a comma and a space
                 if (argumentIndex > 0)
                 {
-                    sb.Append(", ");
+                    tls_nameStringBuilder.Append(", ");
                 }
 
                 var argTypeName = function.FunctionType.ArgumentTypes[argumentIndex].Name;
 
                 if (templateParamAnonymizedNames.TryGetValue(argTypeName, out var value))
                 {
-                    sb.Append(value);
+                    tls_nameStringBuilder.Append(value);
                 }
                 else
                 {
@@ -70,23 +75,23 @@ public static class SymbolNameHelper
                         argTypeName = argTypeName.Replace(anonymizedType.Key, anonymizedType.Value, StringComparison.Ordinal);
                     }
 
-                    sb.Append(argTypeName);
+                    tls_nameStringBuilder.Append(argTypeName);
                 }
             }
         }
-        sb.Append(')');
+        tls_nameStringBuilder.Append(')');
 
         if (function.FunctionType?.IsConst == true)
         {
-            sb.Append(" const");
+            tls_nameStringBuilder.Append(" const");
         }
 
         if (function.FunctionType?.IsVolatile == true)
         {
-            sb.Append(" volatile");
+            tls_nameStringBuilder.Append(" volatile");
         }
 
-        var finalGroupName = typeOrNamespace + (String.IsNullOrEmpty(typeOrNamespace) ? String.Empty : "::") + functionSegment + sb.ToString();
+        var finalGroupName = typeOrNamespace + (String.IsNullOrEmpty(typeOrNamespace) ? String.Empty : "::") + functionSegment + tls_nameStringBuilder.ToString();
 
         return finalGroupName;
     }
@@ -101,7 +106,10 @@ public static class SymbolNameHelper
     private static string GenericizeNamespaceAndTypeName(string name, out Dictionary<string, string> templateParamAnonymizedNames, out List<string> segments)
     {
         segments = new List<string>();
-        var sb = new StringBuilder();
+
+        tls_nameStringBuilder ??= new StringBuilder(capacity: 100);
+        tls_nameStringBuilder.Clear();
+
         var templateDepth = 0;
         var templateParameterCount = 0;
         var templateParamTotalCountAcrossAllSegments = 0;
@@ -128,12 +136,12 @@ public static class SymbolNameHelper
                 {
                     templateParamConcreteNames.Add(templateParameterCount, name[templateParamStartIndex..i].Trim());
 
-                    sb.Append('<');
+                    tls_nameStringBuilder.Append('<');
                     for (var paramCount = 1; paramCount <= templateParameterCount; paramCount++)
                     {
                         if (paramCount > 1)
                         {
-                            sb.Append(',');
+                            tls_nameStringBuilder.Append(',');
                         }
 
                         var anonymizedNameToAppend = String.Empty;
@@ -154,9 +162,9 @@ public static class SymbolNameHelper
                             }
                         }
 
-                        sb.Append(anonymizedNameToAppend);
+                        tls_nameStringBuilder.Append(anonymizedNameToAppend);
                     }
-                    sb.Append('>');
+                    tls_nameStringBuilder.Append('>');
 
                     templateParameterCount = 1;
                     templateParamConcreteNames.Clear();
@@ -176,17 +184,17 @@ public static class SymbolNameHelper
                 i++;
                 if (templateDepth == 0)
                 {
-                    segments.Add(sb.ToString());
-                    sb.Clear();
+                    segments.Add(tls_nameStringBuilder.ToString());
+                    tls_nameStringBuilder.Clear();
                 }
             }
             else if (templateDepth == 0)
             {
-                sb.Append(c);
+                tls_nameStringBuilder.Append(c);
             }
         }
 
-        segments.Add(sb.ToString());
+        segments.Add(tls_nameStringBuilder.ToString());
 
         var typeOrNamespace = String.Empty;
         var functionOrTypeNameSegment = segments[^1];

@@ -4,13 +4,23 @@ namespace SizeBench.AnalysisEngine;
 
 internal sealed class RVARangeSet : IEnumerable<RVARange>
 {
-    private HashSet<RVARange> _rvaRanges = new HashSet<RVARange>();
+    private readonly HashSet<RVARange> _rvaRanges;
+
+    public RVARangeSet()
+    {
+        this._rvaRanges = new HashSet<RVARange>(capacity: 7);
+    }
+
+    public RVARangeSet(int capacity)
+    {
+        this._rvaRanges = new HashSet<RVARange>(capacity);
+    }
 
     public int Count => this._rvaRanges.Count;
 
     public void Add(RVARange range)
     {
-        foreach(var r in this._rvaRanges)
+        foreach (var r in this._rvaRanges)
         {
             if (r.IsAdjacentTo(range) || r.Contains(range) || range.Contains(r))
             {
@@ -66,7 +76,7 @@ internal sealed class RVARangeSet : IEnumerable<RVARange>
 
         foreach (var range in rvaRangeSet._rvaRanges)
         {
-            foreach(var r in this._rvaRanges)
+            foreach (var r in this._rvaRanges)
             {
                 if (r != range &&
                     (r.IsAdjacentTo(range) ||
@@ -78,10 +88,7 @@ internal sealed class RVARangeSet : IEnumerable<RVARange>
             }
         }
 
-        var copy = new HashSet<RVARange>(this._rvaRanges);
-        copy.UnionWith(rvaRangeSet._rvaRanges);
-
-        this._rvaRanges = copy;
+        this._rvaRanges.UnionWith(rvaRangeSet._rvaRanges);
     }
 
     public bool AtLeastPartiallyOverlapsWith(RVARange incoming)
@@ -108,11 +115,19 @@ internal sealed class RVARangeSet : IEnumerable<RVARange>
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    public static List<RVARange> CoalesceRVARangesFromList(IEnumerable<RVARange> ranges, uint maxPaddingToMerge = 0)
+    public static List<RVARange> CoalesceRVARangesFromList(List<RVARange> ranges, uint maxPaddingToMerge = 1)
     {
-        var rangesToReturn = new List<RVARange>();
+        if(ranges.Count <= 1)
+        {
+            return ranges;
+        }
 
-        foreach (var range in ranges.OrderBy(range => range.RVAStart))
+        // Guess that we'll have half as many after we combine things, just to avoid some allocations in here as we build it up.
+        var rangesToReturn = new List<RVARange>(ranges.Count / 2);
+
+        ranges.Sort(static (RVARange x, RVARange y) => x.RVAStart.CompareTo(y.RVAStart));
+
+        foreach (var range in ranges)
         {
             if (rangesToReturn.Count > 0 && rangesToReturn[^1].CanBeCombinedWith(range, maxPaddingToMerge))
             {
@@ -127,10 +142,11 @@ internal sealed class RVARangeSet : IEnumerable<RVARange>
         return rangesToReturn;
     }
 
-    public static RVARangeSet FromListOfRVARanges(IEnumerable<RVARange> ranges, uint maxPaddingToMerge)
+    public static RVARangeSet FromListOfRVARanges(List<RVARange> ranges, uint maxPaddingToMerge)
     {
-        var set = new RVARangeSet();
-        foreach (var coalescedRange in CoalesceRVARangesFromList(ranges, maxPaddingToMerge))
+        var coalescedRanges = CoalesceRVARangesFromList(ranges, maxPaddingToMerge);
+        var set = new RVARangeSet(coalescedRanges.Count);
+        foreach (var coalescedRange in coalescedRanges)
         {
             set.Add(coalescedRange);
         }

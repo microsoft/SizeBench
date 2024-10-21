@@ -475,11 +475,28 @@ public sealed class Session : ISession
     #region Lookup a symbol's placement in the binary
 
     public Task<SymbolPlacement> LookupSymbolPlacementInBinary(ISymbol symbol,
+                                                               LookupSymbolPlacementOptions options,
+                                                               CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(symbol);
+        ArgumentNullException.ThrowIfNull(options);
+
+        var task = new LookupSymbolPlacementInBinarySessionTask(symbol,
+                                                                options,
+                                                                this._taskParameters!,
+                                                                token,
+                                                                this.ProgressReporter);
+
+        return PerformSessionTaskOnDIAThread(task, token);
+    }
+
+    public Task<SymbolPlacement> LookupSymbolPlacementInBinary(ISymbol symbol,
                                                                CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(symbol);
 
         var task = new LookupSymbolPlacementInBinarySessionTask(symbol,
+                                                                options: null,
                                                                 this._taskParameters!,
                                                                 token,
                                                                 this.ProgressReporter);

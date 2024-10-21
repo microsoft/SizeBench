@@ -3,7 +3,6 @@ using Nito.AsyncEx;
 using SizeBench.AnalysisEngine;
 using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.Logging;
-using SizeBench.TestInfrastructure;
 
 namespace SizeBench.GUI.RealPETests;
 

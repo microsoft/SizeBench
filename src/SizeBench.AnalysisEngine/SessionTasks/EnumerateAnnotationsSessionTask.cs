@@ -26,10 +26,7 @@ internal sealed class EnumerateAnnotationsSessionTask : SessionTask<List<Annotat
         var allAnnotations = this.DIAAdapter.FindAllAnnotations(logger, this.CancellationToken);
 
         // If the DIA Adapter didn't already put this into the cache, do it here
-        if (this.DataCache.AllAnnotations is null)
-        {
-            this.DataCache.AllAnnotations = allAnnotations.ToList();
-        }
+        this.DataCache.AllAnnotations ??= allAnnotations.ToList();
 
         return this.DataCache.AllAnnotations;
     }

@@ -1,4 +1,6 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Text;
 using Microsoft.Data.Sqlite;
 using SizeBench.AnalysisEngine;
@@ -184,7 +186,7 @@ internal static class ApplicationDbHandler
                     {
                         // Disable on-disk journaling for perf
                         var pragmaCommand = _Connection.CreateCommand();
-                        pragmaCommand.CommandText = "PRAGMA journal_mode = MEMORY;";
+                        pragmaCommand.CommandText = "PRAGMA journal_mode = OFF; PRAGMA synchronous = OFF;";
                         await pragmaCommand.ExecuteNonQueryAsync();
                     }
 
@@ -288,19 +290,7 @@ internal static class ApplicationDbHandler
                                     // of how we filter out COMDAT folded symbols and 0-byte symbols.
                                     // So, we'll add additional logging here to help diagnose the issue, then fail.
 
-                                    var errorTextBuilder = new StringBuilder();
-                                    errorTextBuilder.AppendLine(CultureInfo.InvariantCulture, $"Multiple symbols at the same RVA {item.RVA:X} detected!  This should not happen.");
-                                    
-                                    foreach (var symbolAtRVA in section.Items.Where(x => x.RVA == item.RVA).OrderBy(x => x.Name))
-                                    {
-                                        errorTextBuilder.AppendLine(CultureInfo.InvariantCulture, $"  Symbol at {symbolAtRVA.RVA:X}, Length {symbolAtRVA.VirtualSize:N0}: {symbolAtRVA.Name}");
-                                    }
-
-                                    var errorText = errorTextBuilder.ToString();
-                                    var exToThrow = new InvalidOperationException($"Unable to establish RVA -> Symbol ID mapping for RVA 0x{item.RVA:X}, see logs for details.");
-                                    Program.LogErrorAndReportToConsoleOutput(errorText, exToThrow, addDataLog);
-
-                                    throw exToThrow;
+                                    ThrowFailureForMultipleSymbolsAtSameRVA(addDataLog, section, item);
                                 }
                             }
                         }
@@ -326,6 +316,24 @@ internal static class ApplicationDbHandler
         }
     }
 
+    [DoesNotReturn]
+    private static void ThrowFailureForMultipleSymbolsAtSameRVA(ILogger addDataLog, SectionBytes section, BytesItem item)
+    {
+        var errorTextBuilder = new StringBuilder();
+        errorTextBuilder.AppendLine(CultureInfo.InvariantCulture, $"Multiple symbols at the same RVA {item.RVA:X} detected!  This should not happen.");
+
+        foreach (var symbolAtRVA in section.Items.Where(x => x.RVA == item.RVA).OrderBy(static x => x.Name))
+        {
+            errorTextBuilder.AppendLine(CultureInfo.InvariantCulture, $"  Symbol at {symbolAtRVA.RVA:X}, Length {symbolAtRVA.VirtualSize:N0}: {symbolAtRVA.Name}");
+        }
+
+        var errorText = errorTextBuilder.ToString();
+        var exToThrow = new InvalidOperationException($"Unable to establish RVA -> Symbol ID mapping for RVA 0x{item.RVA:X}, see logs for details.");
+        Program.LogErrorAndReportToConsoleOutput(errorText, exToThrow, addDataLog);
+
+        throw exToThrow;
+    }
+
     private static int InsertItem(string secton, string coff, string symbolname,
         uint rva, ulong virtualSize, string lib, string compiland, int isPadding, int isPgo, int isOptimizedForSpeed, ulong dynamicInstructionCount,
         Dictionary<string, int> symbolNameToID,
@@ -348,6 +356,14 @@ internal static class ApplicationDbHandler
         return Convert.ToInt32(insertSymbolInfoCommand.ExecuteScalar()!, CultureInfo.InvariantCulture);
     }
 
+    // When we use this it's only in an error state and we don't display anything about the lib, compiland or source file,
+    // and looking those up (especially source files) in very large binaries is a substantial perf cost so we skip those.
+    private static readonly LookupSymbolPlacementOptions _lookupSymbolPlacementOptions = new LookupSymbolPlacementOptions()
+    {
+        IncludeLibAndCompiland = false,
+        IncludeSourceFile = false,
+    };
+
     private static async ValueTask InsertInlineSite(InlineSiteSymbol inlineSite, Session session, Dictionary<string, int> stringToID,
         Dictionary<uint, int> symbolRVAToID,
         SqliteCommand insertStringCommand, SqliteCommand insertInlineSiteCommand)
@@ -356,13 +372,16 @@ internal static class ApplicationDbHandler
 
         // We use the RVA, not the Function/Block Symbol itself, because the inline site may be COMDAT folded into another function,
         // and we exclude all functions with IsCOMDATFolded from being in the database for space reasons.
+
+        Debug.Assert(inlineSite.CanonicalSymbolInlinedInto.IsCOMDATFolded == false, "We never expect the canonical symbol for an inline site to be COMDAT folded - canonical symbols, by definition, should never be folded (other things can fold with them).");
+
         if (symbolRVAToID.TryGetValue(inlineSite.CanonicalSymbolInlinedInto.RVA, out var inlinedIntoSymbolID))
         {
             insertInlineSiteCommand.Parameters["@InlinedIntoSymbolID"].Value = inlinedIntoSymbolID;
         }
         else
         {
-            var placement = await session.LookupSymbolPlacementInBinary(inlineSite.BlockInlinedInto, CancellationToken.None);
+            var placement = await session.LookupSymbolPlacementInBinary(inlineSite.BlockInlinedInto, _lookupSymbolPlacementOptions, CancellationToken.None);
 
             Program.LogIt($"""
                            Unable to locate FunctionInlinedInto in symbolToID map!

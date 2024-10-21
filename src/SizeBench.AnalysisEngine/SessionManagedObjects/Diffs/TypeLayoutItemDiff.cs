@@ -166,6 +166,19 @@ public sealed class TypeLayoutItemDiff
         }
     }
 
+    private static int IndexOfItem(IReadOnlyList<TypeLayoutItemMember> items, TypeLayoutItemMember item)
+    {
+        for(var i = 0; i < items.Count; i++)
+        {
+            if (object.ReferenceEquals(item, items[i]))
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
     private void CreateAllMemberDiffs(ref bool isUnchanged)
     {
         var memberDiffs = new List<TypeLayoutItemMemberDiff>();
@@ -220,13 +233,14 @@ public sealed class TypeLayoutItemDiff
                         // It's safe to deref AfterTypeLayout.MemberLayouts here since we are iterating over
                         // the afterMembersLeft collection which is constructed originally from the
                         // AfterTypeLayout.MemberLayouts.
-                        var indexOfAfterMember = this.AfterTypeLayout.MemberLayouts!.IndexOf(afterMember);
+                        var afterLayoutMembers = this.AfterTypeLayout.MemberLayouts!;
+                        var indexOfAfterMember = IndexOfItem(afterLayoutMembers, afterMember);
 
                         var prevBeforeMember = i > 0 ? this.BeforeTypeLayout.MemberLayouts[i - 1] : null;
-                        var prevAfterMember = indexOfAfterMember > 0 ? this.AfterTypeLayout.MemberLayouts[indexOfAfterMember - 1] : null;
+                        var prevAfterMember = indexOfAfterMember > 0 ? afterLayoutMembers[indexOfAfterMember - 1] : null;
 
                         var nextBeforeMember = i < this.BeforeTypeLayout.MemberLayouts.Count - 1 ? this.BeforeTypeLayout.MemberLayouts[i + 1] : null;
-                        var nextAfterMember = indexOfAfterMember < this.AfterTypeLayout.MemberLayouts.Count - 1 ? this.AfterTypeLayout.MemberLayouts[indexOfAfterMember + 1] : null;
+                        var nextAfterMember = indexOfAfterMember < afterLayoutMembers.Count - 1 ? afterLayoutMembers[indexOfAfterMember + 1] : null;
                         return IsSameMember(beforeMember, afterMember, prevBeforeMember, prevAfterMember, nextBeforeMember, nextAfterMember);
                     });
 

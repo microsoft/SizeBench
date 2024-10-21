@@ -34,6 +34,7 @@ public sealed class InlineSiteSymbol
         this.SymIndexId = symIndexId;
         this.BlockInlinedInto = blockInlinedInto;
         this.CanonicalSymbolInlinedInto = canonicalSymbolInlinedInto;
+        Debug.Assert(this.CanonicalSymbolInlinedInto.IsCOMDATFolded == false, "Canonical symbols should never be COMDAT folded");
         this.Size = 0;
         foreach (var range in rvaRanges)
         {

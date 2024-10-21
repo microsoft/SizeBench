@@ -381,7 +381,7 @@ internal class LoadTypeLayoutSessionTask : SessionTask<List<TypeLayoutItem>>
             return null;
         }
 
-        var baseTypeLayouts = new TypeLayoutItem[udt.BaseTypes.Count];
+        var baseTypeLayouts = new TypeLayoutItem[udt.BaseTypes.Length];
 
         uint baseTypeIndex = 0;
         foreach (var baseTypeAndOffset in udt.BaseTypes)

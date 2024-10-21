@@ -25,7 +25,11 @@ internal static class SymbolSourcesSupportedCommonTests
     // or partition the tests into multiple Jobs in the YAML to allow these to complete in time.  For now we'll test only
     // each individual type of symbol, not all combinations of flags.
     internal static IEnumerable<object[]> DynamicDataSourceForSymbolSourcesSupportedTests_Slimmed { get; } =
-        Enum.GetValuesAsUnderlyingType<SymbolSourcesSupported>().Cast<SymbolSourcesSupported>().Select(x => new object[] { x }).ToArray();
+        Enum.GetValuesAsUnderlyingType<SymbolSourcesSupported>()
+            .Cast<SymbolSourcesSupported>()
+            .Where(x => x != SymbolSourcesSupported.All)
+            .Select(x => new object[] { x })
+            .ToArray();
 
     public static List<T> GetAllEnumCombinations<T>() where T : struct
     {

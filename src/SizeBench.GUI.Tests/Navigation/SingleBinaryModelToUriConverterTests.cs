@@ -239,7 +239,7 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     [TestMethod]
     public void CanNavigateToWastefulVirtualItem()
     {
-        var udt = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter: new TestDIAAdapter(), session: new Mock<ISession>().Object, name: "MyNS::MyUDT", instanceSize: 24, symIndexId: 3, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: new Dictionary<uint, uint>());
+        var udt = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter: new TestDIAAdapter(), session: new Mock<ISession>().Object, name: "MyNS::MyUDT", instanceSize: 24, symIndexId: 3, udtKind: UserDefinedTypeKind.UdtClass);
 
         Assert.AreEqual(new Uri($@"WastefulVirtual?TypeName=MyNS%3A%3AMyUDT", UriKind.Relative), SingleBinaryModelToUriConverter.ModelToUri(new WastefulVirtualItem(udt, isCOMType: false, bytesPerWord: 8)));
     }
@@ -255,7 +255,7 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     [TestMethod]
     public void CanNavigateToUDT()
     {
-        var udt = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter: new TestDIAAdapter(), session: new Mock<ISession>().Object, name: "MyNS::MyUDT", instanceSize: 24, symIndexId: 3, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: new Dictionary<uint, uint>());
+        var udt = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter: new TestDIAAdapter(), session: new Mock<ISession>().Object, name: "MyNS::MyUDT", instanceSize: 24, symIndexId: 3, udtKind: UserDefinedTypeKind.UdtClass);
 
         Assert.AreEqual(new Uri($@"Symbols/UserDefinedTypeSymbol?Name=MyNS%3A%3AMyUDT", UriKind.Relative), SingleBinaryModelToUriConverter.ModelToUri(udt));
     }
@@ -263,8 +263,8 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     [TestMethod]
     public void CanNavigateToTemplatedUDT()
     {
-        var udt1 = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter: new TestDIAAdapter(), session: new Mock<ISession>().Object, name: "MyNS::MyUDT<float>", instanceSize: 24, symIndexId: 3, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: new Dictionary<uint, uint>());
-        var udt2 = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter: new TestDIAAdapter(), session: new Mock<ISession>().Object, name: "MyNS::MyUDT<int>", instanceSize: 24, symIndexId: 4, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: new Dictionary<uint, uint>());
+        var udt1 = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter: new TestDIAAdapter(), session: new Mock<ISession>().Object, name: "MyNS::MyUDT<float>", instanceSize: 24, symIndexId: 3, udtKind: UserDefinedTypeKind.UdtClass);
+        var udt2 = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter: new TestDIAAdapter(), session: new Mock<ISession>().Object, name: "MyNS::MyUDT<int>", instanceSize: 24, symIndexId: 4, udtKind: UserDefinedTypeKind.UdtClass);
         var templatedUDT = new TemplatedUserDefinedTypeSymbol("MyNS::MyUDT<T1>", new List<UserDefinedTypeSymbol>() { udt1, udt2 });
 
         Assert.AreEqual(new Uri($@"Symbols/TemplatedUserDefinedTypeSymbol?TemplateName=MyNS%3A%3AMyUDT%3CT1%3E", UriKind.Relative), SingleBinaryModelToUriConverter.ModelToUri(templatedUDT));

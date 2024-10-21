@@ -17,9 +17,9 @@ internal static class TestTemplateFoldabilityItems
         var intPointerType = new PointerTypeSymbol(dataCache, intType, "int*", instanceSize: 8, symIndexId: nextSymIndexId++);
         var boolPointerType = new PointerTypeSymbol(dataCache, boolType, "bool*", instanceSize: 8, symIndexId: nextSymIndexId++);
         var constBoolPointerType = new PointerTypeSymbol(dataCache, constBoolType, "const bool*", instanceSize: 8, symIndexId: nextSymIndexId++);
-        var aComplexTypeOfInt = new UserDefinedTypeSymbol(dataCache, diaAdapter, session, "AComplex::Type<int>", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
-        var aComplexTypeOfFloat = new UserDefinedTypeSymbol(dataCache, diaAdapter, session, "AComplex::Type<float>", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
-        var aComplexTypeOfSomeUDT = new UserDefinedTypeSymbol(dataCache, diaAdapter, session, "AComplex::Type<SomeUDT>", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var aComplexTypeOfInt = new UserDefinedTypeSymbol(dataCache, diaAdapter, session, "AComplex::Type<int>", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
+        var aComplexTypeOfFloat = new UserDefinedTypeSymbol(dataCache, diaAdapter, session, "AComplex::Type<float>", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
+        var aComplexTypeOfSomeUDT = new UserDefinedTypeSymbol(dataCache, diaAdapter, session, "AComplex::Type<SomeUDT>", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
         var functions = new List<IFunctionCodeSymbol>()
             {
                 // RVA 100: MyType::MyFunction<int>(bool, int) -> MyType::MyFunction<T1>(bool, T1)

@@ -62,32 +62,32 @@ public class SizeBenchFrame : ContentControl
 
     public event EventHandler<SizeBenchNavigationEventArgs> Navigated
     {
-        add { this.NavigationService.Navigated += value; }
-        remove { this.NavigationService.Navigated -= value; }
+        add => this.NavigationService.Navigated += value;
+        remove => this.NavigationService.Navigated -= value;
     }
 
     public event EventHandler<SizeBenchNavigatingCancelEventArgs> Navigating
     {
-        add { this.NavigationService.Navigating += value; }
-        remove { this.NavigationService.Navigating -= value; }
+        add => this.NavigationService.Navigating += value;
+        remove => this.NavigationService.Navigating -= value;
     }
 
     public event EventHandler<SizeBenchNavigationFailedEventArgs> NavigationFailed
     {
-        add { this.NavigationService.NavigationFailed += value; }
-        remove { this.NavigationService.NavigationFailed -= value; }
+        add => this.NavigationService.NavigationFailed += value;
+        remove => this.NavigationService.NavigationFailed -= value;
     }
 
     public event EventHandler<SizeBenchNavigationEventArgs> NavigationStopped
     {
-        add { this.NavigationService.NavigationStopped += value; }
-        remove { this.NavigationService.NavigationStopped -= value; }
+        add => this.NavigationService.NavigationStopped += value;
+        remove => this.NavigationService.NavigationStopped -= value;
     }
 
     public event EventHandler<SizeBenchFragmentNavigationEventArgs> FragmentNavigation
     {
-        add { this.NavigationService.FragmentNavigation += value; }
-        remove { this.NavigationService.FragmentNavigation -= value; }
+        add => this.NavigationService.FragmentNavigation += value;
+        remove => this.NavigationService.FragmentNavigation -= value;
     }
 
     #endregion Events
@@ -289,13 +289,10 @@ public class SizeBenchFrame : ContentControl
     private static void ContentLoaderPropertyChanged(DependencyObject depObj, DependencyPropertyChangedEventArgs e)
     {
         var frame = (SizeBenchFrame)depObj;
-        var contentLoader = (INavigationContentLoader)e.NewValue;
-        if (contentLoader is null)
-        {
+
 #pragma warning disable CA2208 // Instantiate argument exceptions correctly - this is the correct name of the property, DP change callbacks just have a different structure than what Code Analysis can understand
-            throw new ArgumentNullException(nameof(ContentLoader));
+        var contentLoader = (INavigationContentLoader)e.NewValue ?? throw new ArgumentNullException(nameof(ContentLoader));
 #pragma warning restore CA2208 // Instantiate argument exceptions correctly
-        }
 
         if (frame.NavigationService.IsNavigating)
         {
@@ -497,10 +494,7 @@ public class SizeBenchFrame : ContentControl
     {
         this.NavigationService.InitializeJournal();
 
-        if (this.ContentLoader is null)
-        {
-            this.ContentLoader = new PageResourceContentLoader();
-        }
+        this.ContentLoader ??= new PageResourceContentLoader();
 
         this.NavigationService.InitializeNavigationCache();
 

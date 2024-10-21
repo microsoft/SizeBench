@@ -71,6 +71,20 @@ internal class TestDIAAdapter : IDIAAdapter
         }
     }
 
+    public Dictionary<UserDefinedTypeSymbol, IEnumerable<(uint typeId, uint offset)>> BaseTypeIDsToFindByUDT = new Dictionary<UserDefinedTypeSymbol, IEnumerable<(uint typeId, uint offset)>>();
+
+    public IEnumerable<(uint typeId, uint offset)> FindAllBaseTypeIDsForUDT(UserDefinedTypeSymbol udt)
+    {
+        if (this.BaseTypeIDsToFindByUDT.TryGetValue(udt, out var baseTypeIds))
+        {
+            return baseTypeIds;
+        }
+        else
+        {
+            return new List<(uint typeId, uint offset)>();
+        }
+    }
+
     public Dictionary<Compiland, IEnumerable<StaticDataSymbol>> StaticDataSymbolsToFindByCompiland = new Dictionary<Compiland, IEnumerable<StaticDataSymbol>>();
 
     public IEnumerable<StaticDataSymbol> FindAllStaticDataSymbolsWithinCompiland(Compiland compiland, CancellationToken cancellation)
@@ -239,10 +253,6 @@ internal class TestDIAAdapter : IDIAAdapter
             return 0;
         }
     }
-
-    public SortedList<uint, NameCanonicalization> CanonicalNamesToFind = new SortedList<uint, NameCanonicalization>();
-    public SortedList<uint, NameCanonicalization> FindCanonicalNamesForFoldableRVAs(ILogger logger, CancellationToken token) =>
-        this.CanonicalNamesToFind;
 
     public Dictionary<uint, CommandLine> CompilandCommandLinesToFind = new Dictionary<uint, CommandLine>();
     public CommandLine FindCommandLineForCompilandByID(uint compilandSymIndexId)

@@ -31,8 +31,9 @@ public interface IFunctionCodeSymbol
     TypeSymbol? ParentType { get; }
     bool IsMemberFunction { get; }
 
+    int BlockCount { get; }
     CodeBlockSymbol PrimaryBlock { get; }
-    IReadOnlyList<CodeBlockSymbol> Blocks { get; }
+    IEnumerable<CodeBlockSymbol> Blocks { get; }
 
     bool IsVeryLikelyTheSameAs(IFunctionCodeSymbol otherSymbol);
 }

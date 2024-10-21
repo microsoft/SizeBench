@@ -61,7 +61,7 @@ public sealed class TypeLayoutPageViewModelTests
     {
         using var cache = new SessionDataCache();
         var mockDIAAdapter = new Mock<IDIAAdapter>();
-        var udt = new UserDefinedTypeSymbol(cache, mockDIAAdapter.Object, this.MockSession.Object, "TypeNameToLoad", 4, symIndexId: 1, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var udt = new UserDefinedTypeSymbol(cache, mockDIAAdapter.Object, this.MockSession.Object, "TypeNameToLoad", 4, symIndexId: 1, udtKind: UserDefinedTypeKind.UdtClass);
 
         var tli = new TypeLayoutItem(udt, 0, 0, baseTypeLayouts: null, memberLayouts: null);
 
@@ -94,11 +94,11 @@ public sealed class TypeLayoutPageViewModelTests
         var mockDIAAdapter = new Mock<IDIAAdapter>();
         uint nextSymIndexId = 1;
         // 0-size members are not interesting to see in the TreeView, they add clutter, so we'll filter them out
-        var udtZeroSize = new UserDefinedTypeSymbol(cache, mockDIAAdapter.Object, this.MockSession.Object, "ZeroSize", 0, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
-        var udt = new UserDefinedTypeSymbol(cache, mockDIAAdapter.Object, this.MockSession.Object, "TypeNameToLoad", 4, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var udtZeroSize = new UserDefinedTypeSymbol(cache, mockDIAAdapter.Object, this.MockSession.Object, "ZeroSize", 0, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
+        var udt = new UserDefinedTypeSymbol(cache, mockDIAAdapter.Object, this.MockSession.Object, "TypeNameToLoad", 4, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
         // A member that has a size of 1, with only an alignment member, is very likely an empty base class, which again is not interesting for looking at
         // size in the UI, so it's filtered out.
-        var udtEBC = new UserDefinedTypeSymbol(cache, mockDIAAdapter.Object, this.MockSession.Object, "EBC", 1, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var udtEBC = new UserDefinedTypeSymbol(cache, mockDIAAdapter.Object, this.MockSession.Object, "EBC", 1, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
 
         var tliZeroSize = new TypeLayoutItem(udtZeroSize, 0, 0, null, null);
         var tli = new TypeLayoutItem(udt, 0, 0, baseTypeLayouts: null, memberLayouts: null);
@@ -123,7 +123,7 @@ public sealed class TypeLayoutPageViewModelTests
     {
         using var cache = new SessionDataCache();
         var mockDIAAdapter = new Mock<IDIAAdapter>();
-        var udt = new UserDefinedTypeSymbol(cache, mockDIAAdapter.Object, this.MockSession.Object, "MyTypeName", 4, symIndexId: 1, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var udt = new UserDefinedTypeSymbol(cache, mockDIAAdapter.Object, this.MockSession.Object, "MyTypeName", 4, symIndexId: 1, udtKind: UserDefinedTypeKind.UdtClass);
         var vm = CreateViewModelForTest();
 
         var tli = new TypeLayoutItem(udt, 0, 0, baseTypeLayouts: null, memberLayouts: null);
@@ -142,7 +142,7 @@ public sealed class TypeLayoutPageViewModelTests
         using var cache = new SessionDataCache();
         var mockDIAAdapter = new Mock<IDIAAdapter>();
         uint nextSymIndexId = 1;
-        var udt = new UserDefinedTypeSymbol(cache, mockDIAAdapter.Object, this.MockSession.Object, "MyTypeName", 4, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var udt = new UserDefinedTypeSymbol(cache, mockDIAAdapter.Object, this.MockSession.Object, "MyTypeName", 4, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
         var pointerToUDT = new PointerTypeSymbol(cache, udt, "MyTypeName*", 8, nextSymIndexId++);
         var constUDT = new ModifiedTypeSymbol(cache, udt, "const MyTypeName", 4, nextSymIndexId++);
         var arrayOfUDTs = new ArrayTypeSymbol(cache, "MyTypeName[]", udt.InstanceSize * 3, nextSymIndexId++, udt, elementCount: 3);

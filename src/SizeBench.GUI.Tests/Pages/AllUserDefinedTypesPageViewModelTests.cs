@@ -42,19 +42,19 @@ public sealed class AllUserDefinedTypesPageViewModelTests : IDisposable
         uint nextSymIndexId = 1;
 
         // A non-templated UDT
-        this.someTypeUDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "SomeType", instanceSize: 100, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        this.someTypeUDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "SomeType", instanceSize: 100, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
         var UDT1Function1 = new SimpleFunctionCodeSymbol(this.DataCache, "SuperImporantFunction1", rva: 100, size: 50, symIndexId: nextSymIndexId++);
         var UDT1Function2 = new SimpleFunctionCodeSymbol(this.DataCache, "SuperImportantFunction2", rva: 150, size: 100, symIndexId: nextSymIndexId++);
         this.MockSession.Setup(s => s.EnumerateFunctionsFromUserDefinedType(this.someTypeUDT, It.IsAny<CancellationToken>()))
                         .Returns(Task.FromResult<IReadOnlyList<IFunctionCodeSymbol>>(new List<IFunctionCodeSymbol>() { UDT1Function1, UDT1Function2 }));
 
         // Two UDTs that are from the same template
-        this.typeOfIntUDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "ANamespace::Type<int>", instanceSize: 20, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        this.typeOfIntUDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "ANamespace::Type<int>", instanceSize: 20, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
         var UDT2Function1 = new SimpleFunctionCodeSymbol(this.DataCache, "Fn1", rva: 200, size: 50, symIndexId: nextSymIndexId++);
         this.MockSession.Setup(s => s.EnumerateFunctionsFromUserDefinedType(this.typeOfIntUDT, It.IsAny<CancellationToken>()))
                         .Returns(Task.FromResult<IReadOnlyList<IFunctionCodeSymbol>>(new List<IFunctionCodeSymbol>() { UDT2Function1 }));
 
-        this.typeOfFloatUDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "ANamespace::Type<float>", instanceSize: 20, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        this.typeOfFloatUDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "ANamespace::Type<float>", instanceSize: 20, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
         var UDT3Function1 = new SimpleFunctionCodeSymbol(this.DataCache, "Fn1", rva: 0, size: 0, symIndexId: nextSymIndexId++); // RVA == 0 because this folded with the one from the <int> version
         var UDT3Function2 = new SimpleFunctionCodeSymbol(this.DataCache, "Fn2", rva: 250, size: 10, symIndexId: nextSymIndexId++); // RVA == 0 because this folded with the one from the <int> version
         this.MockSession.Setup(s => s.EnumerateFunctionsFromUserDefinedType(this.typeOfFloatUDT, It.IsAny<CancellationToken>()))

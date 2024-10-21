@@ -179,11 +179,11 @@ public sealed class WastefulVirtualItemDiff
             }
 
             // Start by figuring out which derived types are added/removed
-            if (before.UserDefinedType.DerivedTypesBySymIndexId != null)
+            if (before.UserDefinedType.DerivedTypes is not null)
             {
-                foreach (var derivedTypeFromBefore in before.UserDefinedType.DerivedTypesBySymIndexId.Values)
+                foreach (var derivedTypeFromBefore in before.UserDefinedType.DerivedTypes)
                 {
-                    var matchingTypeInAfter = after.UserDefinedType.DerivedTypesBySymIndexId?.Values?.FirstOrDefault(udt => udt.IsVeryLikelyTheSameAs(derivedTypeFromBefore));
+                    var matchingTypeInAfter = after.UserDefinedType.DerivedTypes?.FirstOrDefault(udt => udt.IsVeryLikelyTheSameAs(derivedTypeFromBefore));
                     if (matchingTypeInAfter is null)
                     {
                         // This type was in the 'before' as a derived type, but is not in 'after' - so it's a savings!
@@ -197,11 +197,11 @@ public sealed class WastefulVirtualItemDiff
                 }
             }
 
-            if (after.UserDefinedType.DerivedTypesBySymIndexId != null)
+            if (after.UserDefinedType.DerivedTypes is not null)
             {
-                foreach (var derivedTypeFromAfter in after.UserDefinedType.DerivedTypesBySymIndexId.Values)
+                foreach (var derivedTypeFromAfter in after.UserDefinedType.DerivedTypes)
                 {
-                    var matchingTypeInBefore = before.UserDefinedType.DerivedTypesBySymIndexId?.Values?.FirstOrDefault(udt => udt.IsVeryLikelyTheSameAs(derivedTypeFromAfter));
+                    var matchingTypeInBefore = before.UserDefinedType.DerivedTypes?.FirstOrDefault(udt => udt.IsVeryLikelyTheSameAs(derivedTypeFromAfter));
                     if (matchingTypeInBefore is null)
                     {
                         // This type was NOT in the 'before' as a derived type, but it IS in 'after' - so it's all brand new waste :(

@@ -77,6 +77,9 @@ public sealed class FunctionCodeFormattedName
                          this._functionCode.IsVirtual,
                          this._functionCode.IsSealed);
 
+    [ThreadStatic]
+    private static StringBuilder? tls_nameStringBuilder;
+
     internal static string GetFormattedName(FunctionCodeNameFormatting flags,
                                             bool isStatic,
                                             bool isIntroVirtual,
@@ -87,35 +90,36 @@ public sealed class FunctionCodeFormattedName
                                             bool isVirtual,
                                             bool isSealed)
     {
-        var sb = new StringBuilder(capacity: 100);
+        tls_nameStringBuilder ??= new StringBuilder(capacity: 100);
+        tls_nameStringBuilder.Clear();
 
         if (flags.HasFlag(FunctionCodeNameFormatting.IncludeStatic) && isStatic)
         {
-            sb.Append("static ");
+            tls_nameStringBuilder.Append("static ");
         }
 
         if (flags.HasFlag(FunctionCodeNameFormatting.IncludeVirtualOverride) && isIntroVirtual)
         {
-            sb.Append("virtual ");
+            tls_nameStringBuilder.Append("virtual ");
         }
 
         if (flags.HasFlag(FunctionCodeNameFormatting.IncludeReturnType) && functionType != null)
         {
-            sb.Append(functionType.ReturnValueType.Name);
-            sb.Append(' ');
+            tls_nameStringBuilder.Append(functionType.ReturnValueType.Name);
+            tls_nameStringBuilder.Append(' ');
         }
 
         if (flags.HasFlag(FunctionCodeNameFormatting.IncludeParentType) && parentType != null)
         {
-            sb.Append(parentType.Name);
-            sb.Append("::");
+            tls_nameStringBuilder.Append(parentType.Name);
+            tls_nameStringBuilder.Append("::");
         }
 
-        sb.Append(functionName);
+        tls_nameStringBuilder.Append(functionName);
 
         if (flags.HasFlag(FunctionCodeNameFormatting.IncludeArgumentTypes))
         {
-            sb.Append('(');
+            tls_nameStringBuilder.Append('(');
 
             if (functionType?.ArgumentTypes != null)
             {
@@ -124,57 +128,54 @@ public sealed class FunctionCodeFormattedName
                     // Separate arguments with a comma and a space
                     if (argumentIndex > 0)
                     {
-                        sb.Append(", ");
+                        tls_nameStringBuilder.Append(", ");
                     }
 
                     var argumentType = functionType.ArgumentTypes[argumentIndex];
 
-                    sb.Append(argumentType.Name);
+                    tls_nameStringBuilder.Append(argumentType.Name);
 
                     if (flags.HasFlag(FunctionCodeNameFormatting.IncludeArgumentNames) &&
                         argumentNames != null &&
                         argumentIndex < argumentNames.Count &&
                         argumentNames[argumentIndex].Type == argumentType)
                     {
-                        sb.Append(CultureInfo.InvariantCulture, $" {argumentNames[argumentIndex].Name}");
+                        tls_nameStringBuilder.Append(CultureInfo.InvariantCulture, $" {argumentNames[argumentIndex].Name}");
                     }
                 }
             }
 
-            sb.Append(')');
+            tls_nameStringBuilder.Append(')');
         }
 
         if (flags.HasFlag(FunctionCodeNameFormatting.IncludeCVQualifiers) && functionType?.IsConst == true)
         {
-            sb.Append(" const");
+            tls_nameStringBuilder.Append(" const");
         }
 
         if (flags.HasFlag(FunctionCodeNameFormatting.IncludeCVQualifiers) && functionType?.IsVolatile == true)
         {
-            sb.Append(" volatile");
+            tls_nameStringBuilder.Append(" volatile");
         }
 
         if (flags.HasFlag(FunctionCodeNameFormatting.IncludeVirtualOverride) && isVirtual && !isIntroVirtual)
         {
-            sb.Append(" override");
+            tls_nameStringBuilder.Append(" override");
         }
 
         if (flags.HasFlag(FunctionCodeNameFormatting.IncludeSealed) && isSealed)
         {
-            sb.Append(" final");
+            tls_nameStringBuilder.Append(" final");
         }
 
         //TODO: should this support "__unaligned" like some other bits that deal with functions do?
 
-        return sb.ToString();
+        return tls_nameStringBuilder.ToString();
     }
 
     private string GetCachedFormattedName(FunctionCodeNameFormatting flags, ref string? cache)
     {
-        if (cache is null)
-        {
-            cache = GetFormattedName(flags);
-        }
+        cache ??= GetFormattedName(flags);
 
         return cache;
     }

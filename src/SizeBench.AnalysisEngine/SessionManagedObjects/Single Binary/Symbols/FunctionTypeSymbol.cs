@@ -1,6 +1,4 @@
-﻿using System.Collections.ObjectModel;
-
-namespace SizeBench.AnalysisEngine.Symbols;
+﻿namespace SizeBench.AnalysisEngine.Symbols;
 
 public sealed class FunctionTypeSymbol : TypeSymbol
 {
@@ -15,11 +13,11 @@ public sealed class FunctionTypeSymbol : TypeSymbol
     {
         this.IsConst = isConst;
         this.IsVolatile = isVolatile;
-        this.ArgumentTypes = argumentTypes is null ? null : Array.AsReadOnly(argumentTypes);
+        this.ArgumentTypes = argumentTypes;
         this.ReturnValueType = returnValueType;
     }
 
-    public ReadOnlyCollection<TypeSymbol>? ArgumentTypes { get; }
+    public IReadOnlyList<TypeSymbol>? ArgumentTypes { get; }
     public TypeSymbol ReturnValueType { get; }
 
     public bool IsConst { get; }

@@ -1135,7 +1135,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                 while (true)
                 {
                     cancellation.ThrowIfCancellationRequested();
-                    diaLineNumber = AdvanceToNewElementInChunk(enumLineNumbersHandCoded, chunkSize, intPtrs, ref celt, ref currentIntPtrsIndex);
+                    diaLineNumber = DiaChunkMarshaling.AdvanceToNewElementInChunk(enumLineNumbersHandCoded, chunkSize, intPtrs, ref celt, ref currentIntPtrsIndex);
 
                     if (diaLineNumber is null || celt == 0)
                     {
@@ -1727,125 +1727,6 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         }
     }
 
-    #region Bulk marshaling for DIA enumerators
-
-    // It's possible all these AdvanceToNewElementInChunk could be changed into custom marshalers
-    // using [return: MarshalAs(UnmanagedType.CustomMarshaler, ...)] on the managed interfaces, but
-    // this would require some perf measurements to see if the way that custom marshalers get allocated
-    // and used is ok.  It could be nice because we could then use standard "foreach" loops to iterate
-    // over the collections just like the built-in marshaler, while maintaining the chunking benefits
-    // to reduce chattiness of the P/Invokes.  But for now, this is what we've got because it works.
-
-    private static IDiaSymbol? AdvanceToNewElementInChunk(IDiaEnumSymbolsByAddr2HandCoded enumSymbolsByAddr2,
-    uint chunkSize,
-    nint[] intPtrs, /* MUST be a pinned array! */
-    ref uint celt,
-    ref int currentIntPtrsIndex)
-    {
-        IDiaSymbol? diaSymbol;
-        currentIntPtrsIndex++;
-        if (currentIntPtrsIndex < chunkSize && currentIntPtrsIndex < celt)
-        {
-            diaSymbol = (IDiaSymbol)Marshal.GetObjectForIUnknown(intPtrs[currentIntPtrsIndex]);
-        }
-        else
-        {
-            enumSymbolsByAddr2.NextEx(fPromoteBlockSym: 0, chunkSize, Marshal.UnsafeAddrOfPinnedArrayElement(intPtrs, 0), out celt);
-            if (celt > 0)
-            {
-                diaSymbol = (IDiaSymbol)Marshal.GetObjectForIUnknown(intPtrs[0]);
-                currentIntPtrsIndex = 0;
-            }
-            else if (celt > 0 && celt < chunkSize)
-            {
-                // The last time we got a chunk out, we got less than chunkSize elements, so there can't be any more chunks.  We're done.
-                diaSymbol = null;
-                currentIntPtrsIndex = int.MaxValue;
-            }
-            else
-            {
-                diaSymbol = null;
-                currentIntPtrsIndex = int.MaxValue;
-            }
-        }
-
-        return diaSymbol;
-    }
-
-    private static IDiaSymbol? AdvanceToNewElementInChunk(IDiaEnumSymbolsHandCoded enumSymbols,
-        uint chunkSize,
-        nint[] intPtrs, /* MUST be a pinned array! */
-        ref uint celt,
-        ref int currentIntPtrsIndex)
-    {
-        IDiaSymbol? diaSymbol;
-        currentIntPtrsIndex++;
-        if (currentIntPtrsIndex < chunkSize && currentIntPtrsIndex < celt)
-        {
-            diaSymbol = (IDiaSymbol)Marshal.GetObjectForIUnknown(intPtrs[currentIntPtrsIndex]);
-        }
-        else if (celt > 0 && celt < chunkSize)
-        {
-            // The last time we got a chunk out, we got less than chunkSize elements, so there can't be any more chunks.  We're done.
-            diaSymbol = null;
-            currentIntPtrsIndex = int.MaxValue;
-        }
-        else
-        {
-            enumSymbols.Next(chunkSize, Marshal.UnsafeAddrOfPinnedArrayElement(intPtrs, 0), out celt);
-            if (celt > 0)
-            {
-                diaSymbol = (IDiaSymbol)Marshal.GetObjectForIUnknown(intPtrs[0]);
-                currentIntPtrsIndex = 0;
-            }
-            else
-            {
-                diaSymbol = null;
-                currentIntPtrsIndex = int.MaxValue;
-            }
-        }
-
-        return diaSymbol;
-    }
-
-    private static IDiaLineNumber? AdvanceToNewElementInChunk(IDiaEnumLineNumbersHandCoded enumLineNumbers,
-        uint chunkSize,
-        nint[] intPtrs, /* MUST be a pinned array! */
-        ref uint celt,
-        ref int currentIntPtrsIndex)
-    {
-        IDiaLineNumber? diaLineNumber;
-        currentIntPtrsIndex++;
-        if (currentIntPtrsIndex < chunkSize && currentIntPtrsIndex < celt)
-        {
-            diaLineNumber = (IDiaLineNumber)Marshal.GetObjectForIUnknown(intPtrs[currentIntPtrsIndex]);
-        }
-        else if (celt > 0 && celt < chunkSize)
-        {
-            // The last time we got a chunk out, we got less than chunkSize elements, so there can't be any more chunks.  We're done.
-            diaLineNumber = null;
-            currentIntPtrsIndex = int.MaxValue;
-        }
-        else
-        {
-            enumLineNumbers.Next(chunkSize, Marshal.UnsafeAddrOfPinnedArrayElement(intPtrs, 0), out celt);
-            if (celt > 0)
-            {
-                diaLineNumber = (IDiaLineNumber)Marshal.GetObjectForIUnknown(intPtrs[0]);
-                currentIntPtrsIndex = 0;
-            }
-            else
-            {
-                diaLineNumber = null;
-                currentIntPtrsIndex = int.MaxValue;
-            }
-        }
-
-        return diaLineNumber;
-    }
-
-    #endregion
-
     #region Finding Symbol By RVA, and in an RVA Range
 
     public ISymbol? FindSymbolByRVA(uint rva, bool allowFindingNearest, CancellationToken cancellationToken)
@@ -2031,7 +1912,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                         }
                     }
 
-                    diaSymbol = AdvanceToNewElementInChunk(enumSymbolsByAddr2, chunkSize, intPtrs, ref celt, ref currentIntPtrsIndex);
+                    diaSymbol = DiaChunkMarshaling.AdvanceToNewElementInChunk(enumSymbolsByAddr2, chunkSize, intPtrs, ref celt, ref currentIntPtrsIndex);
                 }
             }
         }
@@ -2131,7 +2012,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                diaSymbol = AdvanceToNewElementInChunk(enumSymbols, chunkSize, intPtrs, ref celt, ref currentIntPtrsIndex);
+                diaSymbol = DiaChunkMarshaling.AdvanceToNewElementInChunk(enumSymbols, chunkSize, intPtrs, ref celt, ref currentIntPtrsIndex);
 
                 if (diaSymbol is null || celt == 0)
                 {
@@ -2154,7 +2035,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                     while (true)
                     {
                         cancellationToken.ThrowIfCancellationRequested();
-                        diaSymbol = AdvanceToNewElementInChunk(enumSymbols, chunkSize, intPtrs, ref celt, ref currentIntPtrsIndex);
+                        diaSymbol = DiaChunkMarshaling.AdvanceToNewElementInChunk(enumSymbols, chunkSize, intPtrs, ref celt, ref currentIntPtrsIndex);
 
                         if (diaSymbol is null || celt == 0)
                         {

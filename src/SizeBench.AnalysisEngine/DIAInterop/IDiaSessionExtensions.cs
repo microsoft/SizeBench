@@ -265,36 +265,6 @@ internal static class IDiaSessionExtensions
 
     #region Enumerate Raw Section Contributions
 
-    private static unsafe IDiaSectionContrib? AdvanceToNewElementInChunk(IDiaEnumSectionContribsHandCoded enumSectionContribs,
-        uint chunkSize,
-        nint[] intPtrs,
-        ref uint celt,
-        ref int currentIntPtrsIndex)
-    {
-        IDiaSectionContrib? diaSectionContrib;
-        currentIntPtrsIndex++;
-        if (currentIntPtrsIndex < chunkSize && currentIntPtrsIndex < celt)
-        {
-            diaSectionContrib = (IDiaSectionContrib)Marshal.GetObjectForIUnknown(intPtrs[currentIntPtrsIndex]);
-        }
-        else
-        {
-            enumSectionContribs.Next(chunkSize, Marshal.UnsafeAddrOfPinnedArrayElement(intPtrs, 0), out celt);
-            if (celt > 0)
-            {
-                diaSectionContrib = (IDiaSectionContrib)Marshal.GetObjectForIUnknown(intPtrs[0]);
-                currentIntPtrsIndex = 0;
-            }
-            else
-            {
-                diaSectionContrib = null;
-                currentIntPtrsIndex = int.MaxValue;
-            }
-        }
-
-        return diaSectionContrib;
-    }
-
     public static IEnumerable<IDiaSectionContrib> EnumerateSectionContributions(this IDiaSession session, ILogger logger)
     {
         var enumSectionContribs = session.FindTable<IDiaEnumSectionContribsHandCoded>(logger);
@@ -315,7 +285,7 @@ internal static class IDiaSessionExtensions
         {
             while (true)
             {
-                contrib = AdvanceToNewElementInChunk(enumSectionContribs, chunkSize, intPtrs, ref celt, ref currentIntPtrsIndex);
+                contrib = DiaChunkMarshaling.AdvanceToNewElementInChunk(enumSectionContribs, chunkSize, intPtrs, ref celt, ref currentIntPtrsIndex);
 
                 if (contrib is null || celt == 0)
                 {

@@ -40,9 +40,6 @@ public sealed class DisassembleFunctionTests
             var disassembly = await session.DisassembleFunction(lambda1071Function, options, this.CancellationToken);
             VerifyDisassembly(disassembly, @"EventInfo_lambda1071_operator()_Disassembly.txt");
         });
-
-        // Force GC since these big binaries create so much memory pressure in the ADO pipelines
-        GC.Collect(2, GCCollectionMode.Forced, blocking: true);
     }
 
     // This tests a basic block with more than 100 instructions in it, which triggers the code in DisassembleFunction that handles basic blocks too long to get all instructions in one query to DbgX
@@ -63,9 +60,6 @@ public sealed class DisassembleFunctionTests
             var disassembly = await session.DisassembleFunction(asmVeryLongBasicBlockFunction, options, this.CancellationToken);
             VerifyDisassembly(disassembly, @"asmVeryLongBasicBlock_Disassembly.txt");
         });
-
-        // Force GC since these big binaries create so much memory pressure in the ADO pipelines
-        GC.Collect(2, GCCollectionMode.Forced, blocking: true);
     }
 
     private void VerifyDisassembly(string disassembly, string filenameOfExpectedOutput)

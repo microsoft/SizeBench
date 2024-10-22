@@ -36,7 +36,7 @@ internal sealed class FunctionSymbolPageViewModel : SingleBinaryViewModelBase
         }
     }
 
-    public bool DoesFunctionContainMultipleCodeBlocks => this.Function?.Blocks.Count > 1;
+    public bool DoesFunctionContainMultipleCodeBlocks => this.Function?.BlockCount > 1;
 
     public bool IsFunctionCodeUsedForMultipleFunctions => this.FoldedFunctions?.Count > 1;
 

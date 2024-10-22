@@ -7,7 +7,7 @@ a colleague.
 * Every object is built to allow quick navigation to nearby associated objects - as
 an example, a binary section has a quick way to navigate to the COFF Groups within
 it, and each COFF group has a quick way to navigate back to the containing binary 
-section.  Think of these objects as forming a big 'web of data' inside the binary,
+section.  Think of these objects as forming a big graph of data inside the binary,
 and following links through the binary is like following breadcrumbs on a trail - 
 you might find something interesting by wandering around, but you can also quickly
 go back to where you came from like browsing the web.
@@ -30,7 +30,7 @@ their desk to be able to quickly navigate, to encourage spelunking and learning.
 * Every situation should be well-understood and tested, or it should throw.  If
 you ever reach a point where you think "I wonder how we can get here?" and there's
 no answer that has an associated test, then that should be throwing an exception.
-This is very helpful in learning about new situations tha may invalidate assumptions
+This is very helpful in learning about new situations that may invalidate assumptions
 as the tool gets run on binaries from various sources.
 
 * Debug sanity checks are amazing - see the performance note above. If there's

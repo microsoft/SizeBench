@@ -1,4 +1,5 @@
-﻿using SizeBench.AnalysisEngine.Symbols;
+﻿using System.Diagnostics.CodeAnalysis;
+using SizeBench.AnalysisEngine.Symbols;
 
 namespace SizeBench.AnalysisEngine;
 
@@ -94,13 +95,13 @@ internal sealed class SessionDataCache : IDisposable
 
     #region Symbols of specific types, and the big cache with all symbols
 
-    public SortedList<uint, TypeSymbol> AllTypesBySymIndexId { get; } = new SortedList<uint, TypeSymbol>(capacity: 1_000);
-    public SortedList<uint, AnnotationSymbol> AllAnnotationsBySymIndexId { get; } = new SortedList<uint, AnnotationSymbol>();
-    public SortedList<uint, ISymbol> AllSymbolsBySymIndexId { get; } = new SortedList<uint, ISymbol>(capacity: 10_000);
-    public SortedList<uint, MemberDataSymbol> AllMemberDataSymbolsBySymIndexId { get; } = new SortedList<uint, MemberDataSymbol>(capacity: 1_000);
-    public SortedList<uint, ParameterDataSymbol> AllParameterDataSymbolsbySymIndexId { get; } = new SortedList<uint, ParameterDataSymbol>(capacity: 1_000);
-    public SortedList<uint, IFunctionCodeSymbol> AllFunctionSymbolsBySymIndexIdOfPrimaryBlock { get; } = new SortedList<uint, IFunctionCodeSymbol>(capacity: 1_000);
-    public SortedList<uint, InlineSiteSymbol> AllInlineSiteSymbolsBySymIndexId { get; } = new SortedList<uint, InlineSiteSymbol>(capacity: 100);
+    public Dictionary<uint, TypeSymbol> AllTypesBySymIndexId { get; } = new Dictionary<uint, TypeSymbol>(capacity: 1_000);
+    public Dictionary<uint, AnnotationSymbol> AllAnnotationsBySymIndexId { get; } = new Dictionary<uint, AnnotationSymbol>();
+    public Dictionary<uint, ISymbol> AllSymbolsBySymIndexId { get; } = new Dictionary<uint, ISymbol>(capacity: 10_000);
+    public Dictionary<uint, MemberDataSymbol> AllMemberDataSymbolsBySymIndexId { get; } = new Dictionary<uint, MemberDataSymbol>(capacity: 1_000);
+    public Dictionary<uint, ParameterDataSymbol> AllParameterDataSymbolsbySymIndexId { get; } = new Dictionary<uint, ParameterDataSymbol>(capacity: 1_000);
+    public Dictionary<uint, IFunctionCodeSymbol> AllFunctionSymbolsBySymIndexIdOfPrimaryBlock { get; } = new Dictionary<uint, IFunctionCodeSymbol>(capacity: 1_000);
+    public Dictionary<uint, InlineSiteSymbol> AllInlineSiteSymbolsBySymIndexId { get; } = new Dictionary<uint, InlineSiteSymbol>(capacity: 100);
 
     internal UserDefinedTypeSymbol[]? AllUserDefinedTypes { get; set; }
     internal List<UserDefinedTypeGrouping>? AllUserDefinedTypeGroupings { get; set; }
@@ -132,6 +133,82 @@ internal sealed class SessionDataCache : IDisposable
 
     #endregion
 
+    #region Pre-Processed Symbol Info
+
+    private List<(uint rva, List<uint> symIndices)>? _allSymIndexIDsByRVA;
+    private HashSet<uint>? _rvasOfLabelSymbols;
+
+    public bool LabelExistsAtRVA(uint rva) => this._rvasOfLabelSymbols?.Contains(rva) ?? false;
+
+    internal void InitializeRVARanges(
+        Dictionary<uint, List<uint>> symIndexIDsByRVA,
+        HashSet<uint> rvasOfLabelSymbols)
+    {
+        this._rvasOfLabelSymbols = rvasOfLabelSymbols;
+
+        if (symIndexIDsByRVA.Count == 0)
+        {
+            // We'll leave it at null internally since we have nothing to find.
+            return;
+        }
+
+        this._allSymIndexIDsByRVA = new List<(uint, List<uint>)>(symIndexIDsByRVA.Count);
+        foreach (var kvp in symIndexIDsByRVA.OrderBy(x => x.Key))
+        {
+            this._allSymIndexIDsByRVA!.Add((kvp.Key, kvp.Value));
+        }
+    }
+
+    internal bool TryFindSymIndicesInRVARange(RVARange range, [NotNullWhen(true)] out List<(uint rva, List<uint> symIndices)>? symIndicesByRVA, out int minIdx, out int maxIdx)
+    {
+        // If we have nothing or the very first RVA is beyond the end of the range we're looking for, then we've found nothing.
+        if (this._allSymIndexIDsByRVA is null || this._allSymIndexIDsByRVA[0].rva > range.RVAEnd)
+        {
+            symIndicesByRVA = null;
+            minIdx = maxIdx = 0;
+            return false;
+        }
+
+        var minIdxFound = false;
+        minIdx = 0;
+        maxIdx = this._allSymIndexIDsByRVA.Count - 1;
+
+        // This is a linear walk, but we could probably make it even faster by using a binary search.
+        for (var i = 0; i < this._allSymIndexIDsByRVA.Count; i++)
+        {
+            var r = this._allSymIndexIDsByRVA[i];
+            if (!minIdxFound && range.Contains(r.rva))
+            {
+                minIdx = i;
+                minIdxFound = true;
+            }
+
+            if (r.rva > range.RVAEnd)
+            {
+                maxIdx = i - 1;
+                break;
+            }
+        }
+
+        // We may find that our range is between two RVAs - if so, we found nothing.
+        if (!minIdxFound || (minIdx == maxIdx && !range.Contains(this._allSymIndexIDsByRVA[minIdx].rva)))
+        {
+            symIndicesByRVA = null;
+            minIdx = maxIdx = 0;
+            return false;
+        }
+
+        System.Diagnostics.Debug.Assert(!minIdxFound || minIdx == 0 || this._allSymIndexIDsByRVA[minIdx - 1].rva <= range.RVAStart);
+        System.Diagnostics.Debug.Assert(this._allSymIndexIDsByRVA[minIdx].rva >= range.RVAStart);
+        System.Diagnostics.Debug.Assert(this._allSymIndexIDsByRVA[maxIdx].rva <= range.RVAEnd);
+        System.Diagnostics.Debug.Assert(maxIdx == this._allSymIndexIDsByRVA.Count - 1 || this._allSymIndexIDsByRVA[maxIdx + 1].rva > range.RVAEnd);
+
+        symIndicesByRVA = this._allSymIndexIDsByRVA;
+        return true;
+    }
+
+    #endregion
+
     internal RVARangeSet? RVARangesThatAreOnlyVirtualSize { get; set; }
 
     internal SessionDataCache(SymbolSourcesSupported symbolSourcesSupported = SymbolSourcesSupported.All)
@@ -154,6 +231,8 @@ internal sealed class SessionDataCache : IDisposable
             this._compilandsBySymIndexId = null;
             this._sourceFilesConstructedEver = null;
             this._sourceFilesByFilename = null;
+            this._allSymIndexIDsByRVA = null;
+            this._rvasOfLabelSymbols = null;
 
             this.AllBinarySections = null;
             this.AllCOFFGroups = null;

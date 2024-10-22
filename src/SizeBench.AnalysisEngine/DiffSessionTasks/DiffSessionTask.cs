@@ -3,7 +3,7 @@ using SizeBench.Logging;
 
 namespace SizeBench.AnalysisEngine.DiffSessionTasks;
 
-internal class DiffSessionTaskParameters
+internal sealed class DiffSessionTaskParameters
 {
     public IDiffSession DiffSession { get; }
     public DiffSessionDataCache DataCache { get; }

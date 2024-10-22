@@ -38,7 +38,7 @@ public sealed class LookupSymbolPlacementInBinarySessionTaskTests : IDisposable
         mockSymbolToLookup.Setup(s => s.VirtualSize).Returns(100);
 
         using var logger = new NoOpLogger();
-        var output = new LookupSymbolPlacementInBinarySessionTask(mockSymbolToLookup.Object, parameters: this.SessionTaskParameters!, token: CancellationToken.None, progress: null).Execute(logger);
+        var output = new LookupSymbolPlacementInBinarySessionTask(mockSymbolToLookup.Object, options: null, parameters: this.SessionTaskParameters!, token: CancellationToken.None, progress: null).Execute(logger);
 
         Assert.AreEqual(this._generator.BeforeTextSection, output.BinarySection);
         Assert.AreEqual(this._generator.BeforeTextMnCG, output.COFFGroup);
@@ -58,12 +58,80 @@ public sealed class LookupSymbolPlacementInBinarySessionTaskTests : IDisposable
         mockSymbolToLookup.Setup(s => s.VirtualSize).Returns(10);
 
         using var logger = new NoOpLogger();
-        var output = new LookupSymbolPlacementInBinarySessionTask(mockSymbolToLookup.Object, parameters: this.SessionTaskParameters!, token: CancellationToken.None, progress: null).Execute(logger);
+        var output = new LookupSymbolPlacementInBinarySessionTask(mockSymbolToLookup.Object, options: null, parameters: this.SessionTaskParameters!, token: CancellationToken.None, progress: null).Execute(logger);
 
         Assert.IsTrue(ReferenceEquals(this._generator.BeforeRDataSection, output.BinarySection));
         Assert.IsTrue(ReferenceEquals(this._generator.BeforeRDataBefCG, output.COFFGroup));
         Assert.AreEqual(this._generator.BeforeALib, output.Lib);
         Assert.AreEqual(this._generator.BeforeA3Compiland, output.Compiland);
+    }
+
+    [TestMethod]
+    // All true
+    [DataRow(true,true,true, DisplayName = "Everything")]
+
+    // Two of three are true
+    [DataRow(true,true,false, DisplayName = "Exclude Source File")]
+    [DataRow(true,false,true, DisplayName = "Exclude Lib/Compiland")]
+    [DataRow(false,true,true, DisplayName = "Exclude Section/COFF Group")]
+
+    // One of three is true
+    [DataRow(true,false,false, DisplayName = "Only Section/COFF Group")]
+    [DataRow(false,true,false, DisplayName = "Only Lib/Compiland")]
+    [DataRow(false,false,true, DisplayName = "Only Source File")]
+
+    // All are false
+    [DataRow(false,false,false, DisplayName = "Nothing")]
+    public void LookupWithOptionsWorks(bool shouldLoadSectionAndCG, bool shouldLoadLibAndCompiland, bool shouldLoadSourceFile)
+    {
+        var mockSymbolToLookup = new Mock<ISymbol>();
+        mockSymbolToLookup.Setup(s => s.RVA).Returns(11000);
+        mockSymbolToLookup.Setup(s => s.RVAEnd).Returns(11009);
+        mockSymbolToLookup.Setup(s => s.Size).Returns(10);
+        mockSymbolToLookup.Setup(s => s.VirtualSize).Returns(10);
+
+        using var logger = new NoOpLogger();
+        var options = new LookupSymbolPlacementOptions()
+        {
+            IncludeBinarySectionAndCOFFGroup = shouldLoadSectionAndCG,
+            IncludeLibAndCompiland = shouldLoadLibAndCompiland,
+            IncludeSourceFile = shouldLoadSourceFile
+        };
+        var output = new LookupSymbolPlacementInBinarySessionTask(mockSymbolToLookup.Object, options: options, parameters: this.SessionTaskParameters!, token: CancellationToken.None, progress: null).Execute(logger);
+
+        if (shouldLoadSectionAndCG)
+        {
+            Assert.IsTrue(ReferenceEquals(this._generator.BeforeRDataSection, output.BinarySection));
+            Assert.IsTrue(ReferenceEquals(this._generator.BeforeRDataBefCG, output.COFFGroup));
+        }
+        else
+        {
+            Assert.IsNull(output.BinarySection);
+            Assert.IsNull(output.COFFGroup);
+        }
+
+        if (shouldLoadLibAndCompiland)
+        {
+            Assert.AreEqual(this._generator.BeforeALib, output.Lib);
+            Assert.AreEqual(this._generator.BeforeA3Compiland, output.Compiland);
+        }
+        else
+        {
+            Assert.IsNull(output.Lib);
+            Assert.IsNull(output.Compiland);
+        }
+
+        if (shouldLoadSourceFile)
+        {
+            // The test data we have doesn't have any source files, so we can't test this now.
+            // Adding source files and RVA ranges to the generator would be good for several tests,
+            // but I don't have the time right now.
+            Assert.IsNull(output.SourceFile);
+        }
+        else
+        {
+            Assert.IsNull(output.SourceFile);
+        }
     }
 
     public void Dispose() => this._generator.Dispose();

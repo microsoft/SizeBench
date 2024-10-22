@@ -112,11 +112,11 @@ internal sealed class BatchProcess
         var symbolSourcesSupported = SymbolSourcesSupported.None;
         if (this.IncludeCodeSymbols || this.IncludeWastefulVirtuals)
         {
-            symbolSourcesSupported &= SymbolSourcesSupported.Code;
+            symbolSourcesSupported |= SymbolSourcesSupported.Code;
         }
         if (this.IncludeDuplicateDataItems)
         {
-            symbolSourcesSupported &= SymbolSourcesSupported.DataSymbols | SymbolSourcesSupported.XDATA;
+            symbolSourcesSupported |= SymbolSourcesSupported.DataSymbols | SymbolSourcesSupported.XDATA;
         }
 
         var sessionOptions = new SessionOptions() { SymbolSourcesSupported = symbolSourcesSupported };
@@ -165,7 +165,7 @@ internal sealed class BatchProcess
                     }
 
                     var openingWatch = Stopwatch.StartNew();
-                    var session = await Session.Create(binaryPath, pdbPath, sessionOptions, log);
+                    await using var session = await Session.Create(binaryPath, pdbPath, sessionOptions, log);
                     openingWatch.Stop();
                     results.openingTookMs = openingWatch.ElapsedMilliseconds;
                     await AnalyzeOneBinary(results, session, log);

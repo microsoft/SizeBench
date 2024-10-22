@@ -58,6 +58,9 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
 
     private static readonly string[] debugFastlinkSwitchNames = ["/debug:fastlink"];
 
+    [ThreadStatic]
+    private static StringBuilder? tls_nameStringBuilder;
+
     private void ThrowIfOnWrongThread()
     {
         if (Environment.CurrentManagedThreadId != this._affinitizedThreadId)
@@ -238,11 +241,9 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             logger.Log($"Skipping load of PublicSymbols for ambiguous vtables, per {nameof(this.PEFile.SymbolSourcesSupported)}");
         }
 
-#pragma warning disable IDE0063 // Use simple 'using' statement - the scoping of this using helps be clearer about the duration in the log.
-        using (var canonicalNamesTaskLog = logger.StartTaskLog("Loading all canonical names after accounting for Identical COMDAT Folding (ICF)"))
-#pragma warning restore IDE0063 // Use simple 'using' statement
         {
-            FindCanonicalNamesForFoldableRVAs(canonicalNamesTaskLog, CancellationToken.None);
+            using var preProcessLog = logger.StartTaskLog("Pre-processing appropriate symbols");
+            PreProcessSymbols(preProcessLog, CancellationToken.None);
         }
 
         // It is important that this comes after RVARangesThatAreOnlyVirtualSize is set up, as some of the EH Symbols may need
@@ -580,7 +581,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         }
 
         var final = new List<RawCOFFGroup>();
-        var namesSeen = new List<string>(capacity: 10);
+        var namesSeen = new HashSet<string>(capacity: 10);
 
         for (var i = 0; i < almostFinal.Count; i++)
         {
@@ -625,9 +626,13 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         return this.DiaSession.EnumerateSectionContributions(parentLogger)
                               .WithCancellation(token)
                               .WithLogging(parentLogger, "Section Contributions")
-                              .Select(sc => new RawSectionContribution(sc.compiland.libraryName ?? String.Empty,
-                                                                       sc.compiland.name ?? String.Empty,
-                                                                       sc.compilandId, sc.relativeVirtualAddress, sc.length));
+                              .Select(static sc =>
+                              {
+                                  var compiland = sc.compiland;
+                                  return new RawSectionContribution(compiland.libraryName ?? String.Empty,
+                                                                    compiland.name ?? String.Empty,
+                                                                    sc.compilandId, sc.relativeVirtualAddress, sc.length);
+                              });
     }
 
     #endregion
@@ -943,7 +948,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         var isSealed = primaryBlockSymbol.@sealed != 0;
         var isPGO = primaryBlockSymbol.isPGO != 0;
         var isOptimizedForSpeed = primaryBlockSymbol.isOptimizedForSpeed != 0;
-        var dynamicInstructionCount = isPGO && primaryBlockSymbol.hasValidPGOCounts ==1 ? primaryBlockSymbol.PGODynamicInstructionCount : 0;
+        var dynamicInstructionCount = isPGO && primaryBlockSymbol.hasValidPGOCounts == 1 ? primaryBlockSymbol.PGODynamicInstructionCount : 0;
 
         if (separatedBlocks is null)
         {
@@ -1097,6 +1102,11 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         return ParseInlineSiteSymbol(diaSymbol, cancellationToken);
     }
 
+
+
+    [ThreadStatic]
+    private static List<RVARange>? tls_inlineSiteRVARanges;
+
     private InlineSiteSymbol ParseInlineSiteSymbol(IDiaSymbol inlineSiteSymbol, CancellationToken cancellation)
     {
         // InlineSite symbols don't record their length/size anywhere, the closest approximation we can get is to enumerate all the line numbers
@@ -1107,25 +1117,48 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         // But, this seems better than not reporting any size for inlined things, in case it helps someone see that an inlined function actually
         // costs a lot of the space in the binary and is worth optimizing due to how many inline sites it has or something.
 
-        var rvaRanges = new List<RVARange>(capacity: 10);
+        tls_inlineSiteRVARanges ??= new List<RVARange>(capacity: 10);
+        tls_inlineSiteRVARanges.Clear();
         this.DiaSession.findInlineeLines(inlineSiteSymbol, out var enumLines);
-        foreach (IDiaLineNumber? diaLineNumber in enumLines)
+
         {
-            cancellation.ThrowIfCancellationRequested();
-            if (diaLineNumber is not null)
+            var enumLineNumbersHandCoded = (IDiaEnumLineNumbersHandCoded)enumLines;
+            IDiaLineNumber? diaLineNumber;
+            var celt = 0u;
+            const int chunkSize = 100;
+            var intPtrs = new IntPtr[chunkSize];
+            var currentIntPtrsIndex = chunkSize;
+            var pin = GCHandle.Alloc(intPtrs, GCHandleType.Pinned);
+
+            try
             {
-                cancellation.ThrowIfCancellationRequested();
-                rvaRanges.Add(RVARange.FromRVAAndSize(diaLineNumber.relativeVirtualAddress, diaLineNumber.length));
+                while (true)
+                {
+                    cancellation.ThrowIfCancellationRequested();
+                    diaLineNumber = DiaChunkMarshaling.AdvanceToNewElementInChunk(enumLineNumbersHandCoded, chunkSize, intPtrs, ref celt, ref currentIntPtrsIndex);
+
+                    if (diaLineNumber is null || celt == 0)
+                    {
+                        break;
+                    }
+
+                    tls_inlineSiteRVARanges.Add(RVARange.FromRVAAndSize(diaLineNumber.relativeVirtualAddress, diaLineNumber.length));
+                }
+            }
+            finally
+            {
+                pin.Free();
+#pragma warning disable IDE0059 // Unnecessary assignment of a value - nulling this out is intentional so we don't try to use it later in this function when the pin is gone.
+                intPtrs = null;
+#pragma warning restore IDE0059 // Unnecessary assignment of a value
             }
         }
 
-        var rvaRangeSet = RVARangeSet.FromListOfRVARanges(rvaRanges, maxPaddingToMerge: 1);
+        var rvaRangeSet = RVARangeSet.FromListOfRVARanges(tls_inlineSiteRVARanges, maxPaddingToMerge: 1);
 
         // Now look up what block of code contains this inline site - this could be a simple function or it could be a separated block in a
         // PGO'd function.
-        var parentDiaSymbol = inlineSiteSymbol.lexicalParent;
-
-        var blockInlinedInto = GetOrCreateSymbol<CodeBlockSymbol>(parentDiaSymbol, cancellation);
+        var blockInlinedInto = FindSymbolBySymIndexId<CodeBlockSymbol>(inlineSiteSymbol.lexicalParentId, cancellation);
 
         // We also want to know the canonical symbol at the functionInlinedInto's RVA.  Some callers (like the SizeBench GUI) want to display
         // the function.  But other callers (like BinaryBytes) want to know what canonical symbol the bytes were attributed to, so we'll just
@@ -1222,14 +1255,15 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                                                 bool functionIsVolatile,
                                                 bool functionIsUnaligned)
     {
-        var sb = new StringBuilder(100);
+        tls_nameStringBuilder ??= new StringBuilder(capacity: 100);
+        tls_nameStringBuilder.Clear();
 
         // TODO: consider also having the calling convention as part of the name.  It's part of the type after all...
         //       but for now I don't have a good list of how CV_call_e (in IDiaSymbol.callingConvention) translates to
         //       strings like "__cdecl".
 
-        sb.Append(returnValueType.Name);
-        sb.Append(" (*function)(");
+        tls_nameStringBuilder.Append(returnValueType.Name);
+        tls_nameStringBuilder.Append(" (*function)(");
 
         if (argumentTypes?.Length > 0)
         {
@@ -1238,30 +1272,30 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                 // Separate arguments with a comma and a space
                 if (argumentIndex > 0)
                 {
-                    sb.Append(", ");
+                    tls_nameStringBuilder.Append(", ");
                 }
 
-                sb.Append(argumentTypes[argumentIndex].Name);
+                tls_nameStringBuilder.Append(argumentTypes[argumentIndex].Name);
             }
         }
 
-        sb.Append(')');
+        tls_nameStringBuilder.Append(')');
         if (functionIsConst)
         {
-            sb.Append(" const");
+            tls_nameStringBuilder.Append(" const");
         }
 
         if (functionIsVolatile)
         {
-            sb.Append(" volatile");
+            tls_nameStringBuilder.Append(" volatile");
         }
 
         if (functionIsUnaligned)
         {
-            sb.Append(" __unaligned");
+            tls_nameStringBuilder.Append(" __unaligned");
         }
 
-        return sb.ToString();
+        return tls_nameStringBuilder.ToString();
     }
 
 
@@ -1552,7 +1586,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             // We can't use RecursivelyFindSymbols here or create actual SizeBench Symbol objects (like PublicSymbol objects) because this step in opening a session is too early and we
             // need this information to then establish canonical names, which we in turn need to process symbols fully.  So here our only goal is to find all the disambiguated VTable names
             // for each RVA and stop, without the entire ISymbol object coming into existence.
-            var disambiguatingVTableNamesByRVA = new SortedList<uint, List<string>>();
+            var disambiguatingVTableNamesByRVA = new Dictionary<uint, List<string>>();
 
             this.DiaSession.findChildrenEx(this._globalScope, SymTagEnum.SymTagPublicSymbol, "*`vftable'{for*", (uint)(NameSearchOptions.nsfRegularExpression | NameSearchOptions.nsfUndecoratedName), out var enumDisambiguatingVTables);
 
@@ -1573,16 +1607,12 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                     publicSymName = publicSymName["const ".Length..];
                 }
 
-                if (!disambiguatingVTableNamesByRVA.TryGetValue(publicSymRVA, out var namesList))
-                {
-                    namesList = new List<string>();
-                    disambiguatingVTableNamesByRVA.Add(publicSymRVA, namesList);
-                }
-
+                ref var namesList = ref CollectionsMarshal.GetValueRefOrAddDefault(disambiguatingVTableNamesByRVA, publicSymRVA, out _);
+                namesList ??= new List<string>();
                 namesList.Add(publicSymName);
             }
 
-            this.DataCache.AllDisambiguatingVTablePublicSymbolNamesByRVA = disambiguatingVTableNamesByRVA;
+            this.DataCache.AllDisambiguatingVTablePublicSymbolNamesByRVA = new SortedList<uint, List<string>>(disambiguatingVTableNamesByRVA);
         }
 
         return this.DataCache.AllDisambiguatingVTablePublicSymbolNamesByRVA;
@@ -1593,6 +1623,11 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
     public TSymbol FindSymbolBySymIndexId<TSymbol>(uint symIndexId, CancellationToken token) where TSymbol : class, ISymbol
     {
         ThrowIfOnWrongThread();
+
+        if (this.DataCache.AllSymbolsBySymIndexId.TryGetValue(symIndexId, out var symbol))
+        {
+            return (TSymbol)symbol;
+        }
 
         this.DiaSession.symbolById(symIndexId, out var diaSymbol);
 
@@ -1609,6 +1644,11 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
     public TSymbol FindTypeSymbolBySymIndexId<TSymbol>(uint symIndexId, CancellationToken token) where TSymbol : TypeSymbol
     {
         ThrowIfOnWrongThread();
+
+        if(this.DataCache.AllTypesBySymIndexId.TryGetValue(symIndexId, out var typeSymbol))
+        {
+            return (TSymbol)typeSymbol;
+        }
 
         this.DiaSession.symbolById(symIndexId, out var diaSymbol);
 
@@ -1693,18 +1733,15 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
     {
         ThrowIfOnWrongThread();
 
-        IDiaSymbol? diaSymbol;
-        var displacement = 0;
-
         // If this RVA is home to multiple COMDAT-folded symbols, we want to find the one we counted as primary, that we attributed all the bytes to.
         if (this.DataCache.AllCanonicalNames!.TryGetValue(rva, out var nameCanonicalization))
         {
-            this.DiaSession.symbolById(nameCanonicalization.CanonicalSymIndexID, out diaSymbol);
+            // Since we have a SymIndexID here if we're lucky enough to have seen this already then we might be done before
+            // even going to DIA.
+            return FindSymbolBySymIndexId<ISymbol>(nameCanonicalization.CanonicalSymIndexID, cancellationToken);
         }
-        else
-        {
-            this.DiaSession.findSymbolByRVAEx(rva, SymTagEnum.SymTagNull, out diaSymbol, out displacement);
-        }
+
+        this.DiaSession.findSymbolByRVAEx(rva, SymTagEnum.SymTagNull, out var diaSymbol, out var displacement);
 
         if (diaSymbol is null ||
             (allowFindingNearest == false && (diaSymbol.relativeVirtualAddress != rva || displacement != 0)))
@@ -1726,118 +1763,187 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
     {
         ThrowIfOnWrongThread();
 
-        this.DiaSession.getSymbolsByAddr(out var enumSymbolsByAddr);
-        var enumSymbolsByAddr2 = (IDiaEnumSymbolsByAddr2)enumSymbolsByAddr;
-
-        var diaSymbol = enumSymbolsByAddr2.symbolByRVAEx(fPromoteBlockSym: 0, range.RVAStart);
-        uint celt = 1;
-
-        // Sometimes we get a symbol that is prior to where we wanted to start - if so, just keep advancing until we're within range.
-        while (diaSymbol != null && diaSymbol.relativeVirtualAddress < range.RVAStart && celt == 1)
-        {
-            enumSymbolsByAddr2.NextEx(fPromoteBlockSym: 0, 1, out diaSymbol, out celt);
-        }
-
         ISymbol? previousNonFoldedSymbolYielded = null;
 
-        while (diaSymbol != null && celt == 1)
+        if (this.DataCache.TryFindSymIndicesInRVARange(range, out var symIndicesByRVA, out var minIdx, out var maxIdx))
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            var symbolRVA = diaSymbol.relativeVirtualAddress;
-
-            // Sometimes DIA seems to return symbols that start before the range we asked for (in particular for __guard_fids_table?).  We can
-            // ignore these.
-            if (symbolRVA < range.RVAStart)
+            for (var i = minIdx; i <= maxIdx; i++)
             {
-                enumSymbolsByAddr2.NextEx(fPromoteBlockSym: 0, 1, out diaSymbol, out celt);
-                continue;
-            }
+                cancellationToken.ThrowIfCancellationRequested();
 
-#pragma warning disable IDE0007 // Use implicit type - explicitly using "string?" here since diaSymbol.name can return null and that's not obvious because of the property signature that tlbimp generates.
-            string? symbolName = diaSymbol.name;
-#pragma warning restore IDE0007 // Use implicit type
-            if (symbolName?.Equals("$xdatasym", StringComparison.Ordinal) == true)
-            {
-                // We don't want to find this symbol, this is a sentinel in DIA that has little value.  We already hand-parse XDATA out of the
-                // binary to get useful stuff.  So skip this one.
-                enumSymbolsByAddr2.NextEx(fPromoteBlockSym: 0, 1, out diaSymbol, out celt);
-                continue;
-            }
-
-            var length = GetSymbolLength(diaSymbol, symbolName);
-
-            // Note we need to add 1 to the RVAEnd when we compare against (symbolRVA + GetSymbolLength) because
-            // the (RVA + length) points to the byte *after* the end of the symbol.
-            // We can't just subtract 1 from the (RVA + length) because that can occasionally be 0 and this would
-            // underflow.  So, the simplest way to make the math work out is to add 1 to RVAEnd for the comparison of
-            // whether or not we're 'past the end' of the range, without losing a symbol that exactly abuts the end
-            // of the range.
-            if (symbolRVA + length > range.RVAEnd + 1)
-            {
-                // We're past the end of the range we wanted to enumerate, so we're done.
-                yield break;
-            }
-
-            if (!IsSymbolSourceSuppored(diaSymbol))
-            {
-                // We don't want to find this symbol or do potentially-expensive processing on it, based on the symbol sources supported by
-                // this session, so skip this one.
-                enumSymbolsByAddr2.NextEx(fPromoteBlockSym: 0, 1, out diaSymbol, out celt);
-                continue;
-            }
-
-            var newSymbol = GetOrCreateSymbol<Symbol>(diaSymbol, cancellationToken);
-
-            // If this symbol is 'within' the previous one, we don't need to return it as all the space is already accounted for.
-            // This can happen with SymTagLabel symbols within a function - such as MyTestEntry or SomeAltEntry in the MASM tests.
-            if (previousNonFoldedSymbolYielded is not null &&
-                previousNonFoldedSymbolYielded.RVA <= newSymbol.RVA)
-            {
-                // If we're fully contained within, ignore it regardless of type.
-                if (previousNonFoldedSymbolYielded.RVAEnd >= newSymbol.RVAEnd)
+                // We know the symIndices are already filtered by supported symbol sources, so we don't have to check that here.
+                foreach (var symIndex in symIndicesByRVA[i].symIndices)
                 {
-                    enumSymbolsByAddr2.NextEx(fPromoteBlockSym: 0, 1, out diaSymbol, out celt);
-                    continue;
-                }
+                    var symbol = FindSymbolBySymIndexId<Symbol>(symIndex, cancellationToken);
 
-                // In some cases due to alignment requirements, the RVAEnd of the symbol we get back will be *past* the end
-                // of the previous symbol, but that's a lie - we do our best to confirm this hopefully-odd situation by
-                // ensuring we have a PublicSymbol and that it is for a Label before we ignore it.
-                if (newSymbol is PublicSymbol)
-                {
-                    this.DiaSession.findSymbolByRVAEx(newSymbol.RVA, SymTagEnum.SymTagLabel, out var labelSymbol, out var displacement);
-
-                    if (displacement == 0 && labelSymbol != null && labelSymbol.relativeVirtualAddress == newSymbol.RVA)
+                    // It's possible the symbol we get has an RVA start in the range, but extends beyond the range - if so, we don't
+                    // want to yield it here.
+                    if (symbol.RVAEnd > range.RVAEnd)
                     {
-                        enumSymbolsByAddr2.NextEx(fPromoteBlockSym: 0, 1, out diaSymbol, out celt);
                         continue;
                     }
-                }
-            }
 
-            yield return (newSymbol, newSymbol.RVAEnd - range.RVAStart);
-            previousNonFoldedSymbolYielded = newSymbol;
-
-            if (this.DataCache.AllCanonicalNames!.TryGetValue(newSymbol.RVA, out var nameCanonicalization))
-            {
-                foreach (var kvp in nameCanonicalization.NamesBySymIndexID)
-                {
-                    if (kvp.Key == newSymbol.SymIndexId)
+                    if (symbol.Name.Equals("$xdatasym", StringComparison.Ordinal))
                     {
-                        continue; // We already yielded this one to the caller, we only want to find other SymIndexIDs folded at this RVA
+                        // We don't want to find this symbol, this is a sentinel in DIA that has little value.  We already hand-parse XDATA out of the
+                        // binary to get useful stuff.  So skip this one.
+                        continue;
                     }
 
-                    this.DiaSession.symbolById(kvp.Key, out diaSymbol);
-                    var foldedSymbol = GetOrCreateSymbol<Symbol>(diaSymbol, cancellationToken);
+                    // If this symbol is 'within' the previous one, we don't need to return it as all the space is already accounted for.
+                    // This can happen with SymTagLabel symbols within a function - such as MyTestEntry or SomeAltEntry in the MASM tests.
+                    if (previousNonFoldedSymbolYielded is not null &&
+                        previousNonFoldedSymbolYielded.RVA <= symbol.RVA)
+                    {
+                        // If we're fully contained within, ignore it regardless of type.
+                        if (previousNonFoldedSymbolYielded.RVAEnd >= symbol.RVAEnd)
+                        {
+                            continue;
+                        }
 
-                    // Note the subtle use of "newSymbol.RVAEnd" instead of "foldedSymbol.RVAEnd" - this is because folded symbols have 0 size, so their RVAEnd == RVA, which means the
-                    // progress would go backwards from the "newSymbol" if we use that here.
-                    yield return (foldedSymbol, newSymbol.RVAEnd - range.RVAStart);
+                        // In some cases due to alignment requirements, the RVAEnd of the symbol we get back will be *past* the end
+                        // of the previous symbol, but that's a lie - we do our best to confirm this hopefully-odd situation by
+                        // ensuring we have a PublicSymbol and that it is for a Label before we ignore it.
+                        if (symbol is PublicSymbol && this.DataCache.LabelExistsAtRVA(symbol.RVA))
+                        {
+                            continue;
+                        }
+                    }
+
+                    yield return (symbol, symbol.RVAEnd - range.RVAStart);
+                    previousNonFoldedSymbolYielded = symbol;
+
+                    if (this.DataCache.AllCanonicalNames!.TryGetValue(symbol.RVA, out var nameCanonicalization))
+                    {
+                        foreach ((var foldedSymIndexId, _, _) in nameCanonicalization.NamesBySymIndexID)
+                        {
+                            if (foldedSymIndexId == symbol.SymIndexId)
+                            {
+                                continue; // We already yielded this one to the caller, we only want to find other SymIndexIDs folded at this RVA
+                            }
+
+                            var foldedSymbol = FindSymbolBySymIndexId<ISymbol>(foldedSymIndexId, cancellationToken);
+
+                            // If the folded symbol ended up with the same SymIndexId as the one we previously yielded, we're also good to skip it.
+                            // This can happen for example if we find a SymTagBlock and SymTagFunction that both represent the same simple function
+                            // (non-separated function with just one block).
+                            if (foldedSymbol is Symbol foldedSymbolAsSymbol && foldedSymbolAsSymbol.SymIndexId == symbol.SymIndexId)
+                            {
+                                continue;
+                            }
+
+                            // Note the subtle use of "symbol.RVAEnd" instead of "foldedSymbol.RVAEnd" - this is because folded symbols have 0 size, so their RVAEnd == RVA, which means the
+                            // progress would go backwards from the "symbol" if we use that here.
+                            yield return (foldedSymbol, symbol.RVAEnd - range.RVAStart);
+                        }
+                    }
                 }
             }
-
-            enumSymbolsByAddr2.NextEx(fPromoteBlockSym: 0, 1, out diaSymbol, out celt);
         }
+    }
+
+    public void PreProcessSymbols(ILogger logger, CancellationToken cancellationToken)
+    {
+        ThrowIfOnWrongThread();
+
+        this.DiaSession.getSymbolsByAddr(out var enumSymbolsByAddr);
+        var enumSymbolsByAddr2 = (IDiaEnumSymbolsByAddr2HandCoded)enumSymbolsByAddr;
+
+        var rvaToSymIndexIDs = new Dictionary<uint, List<uint>>();
+        var rvasOfLabels = new HashSet<uint>();
+
+        var symIndexIdsProcessed = new HashSet<uint>(capacity: 1000);
+        var nameCanonicalizationsByRVA = new Dictionary<uint, NameCanonicalization>();
+
+        // Anything that contains code or data could be ICF'd, so we'll enumerate all of those (except as noted by the symbol sources we're
+        // supporting).  The one exception is that we don't look at SymTagLabel currently, as SizeBench never uses SymTagLabel for anything.
+        // Should that change somedy, it could be added here.
+        var symTagsToEnumerateForFolding = new List<SymTagEnum>(capacity: 10);
+
+        if (this.SupportsCodeSymbols)
+        {
+            symTagsToEnumerateForFolding.Add(SymTagEnum.SymTagBlock);
+            symTagsToEnumerateForFolding.Add(SymTagEnum.SymTagFunction);
+
+            // Within code, we want thunks to be last so we can try to find a better name as a function or block first, since thunks have uglier
+            // names.
+            symTagsToEnumerateForFolding.Add(SymTagEnum.SymTagThunk);
+        }
+
+        if (this.SupportsDataSymbols)
+        {
+            symTagsToEnumerateForFolding.Add(SymTagEnum.SymTagData);
+        }
+
+        // It is important that PublicSymbols are enumerated last. Each NameCanonicalization will keep track of all the possible names,
+        // but the names of PublicSymbols include things like "public:" and "virtual" at the start of their names which does not sort
+        // well with names from thunks, functions, and data.  So, we will ignore public symbol names if we already found non-public
+        // symbols at that RVA.  By doing this last, we can readily discard these names for anything already found via another SymTag.
+        symTagsToEnumerateForFolding.Add(SymTagEnum.SymTagPublicSymbol);
+
+        var symTagsToEnumerateForFoldingHashSet = symTagsToEnumerateForFolding.ToHashSet();
+
+        var diaSymbol = enumSymbolsByAddr2.symbolByRVAEx(fPromoteBlockSym: 0, relativeVirtualAddress: 0);
+        var celt = diaSymbol is null ? 0u : 1u;
+        const int chunkSize = 1_000;
+        var intPtrs = new IntPtr[chunkSize];
+        var intPtrsPin = GCHandle.Alloc(intPtrs, GCHandleType.Pinned);
+        var currentIntPtrsIndex = chunkSize;
+
+        try
+        {
+            using (logger.StartTaskLog("Walking symbols by RVA"))
+            {
+                while (diaSymbol is not null)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (IsSymbolSourceSuppored(diaSymbol))
+                    {
+                        var symbolRVA = diaSymbol.relativeVirtualAddress;
+                        var symIndexOfThisSymbol = diaSymbol.symIndexId;
+                        var symTagOfThisSymbol = (SymTagEnum)diaSymbol.symTag;
+                        ref var list = ref CollectionsMarshal.GetValueRefOrAddDefault(rvaToSymIndexIDs, symbolRVA, out _);
+                        list ??= new List<uint>();
+                        list.Add(symIndexOfThisSymbol);
+
+                        if (symTagsToEnumerateForFoldingHashSet.Contains(symTagOfThisSymbol))
+                        {
+                            ProcessOneSymbolForCanonicalNameSearch(diaSymbol, symTagOfThisSymbol, symIndexOfThisSymbol, symbolRVA, nameCanonicalizationsByRVA, symIndexIdsProcessed, cancellationToken);
+                        }
+                    }
+
+                    diaSymbol = DiaChunkMarshaling.AdvanceToNewElementInChunk(enumSymbolsByAddr2, chunkSize, intPtrs, ref celt, ref currentIntPtrsIndex);
+                }
+            }
+        }
+        finally
+        {
+            intPtrsPin.Free();
+            intPtrs = null;
+        }
+
+        if (this.SupportsCodeSymbols)
+        {
+            using var labelLog = logger.StartTaskLog("Finding RVAs of Labels");
+
+            RecursivelyFindSymbols(this.DiaGlobalScope, [SymTagEnum.SymTagCompiland, SymTagEnum.SymTagFunction, SymTagEnum.SymTagBlock, SymTagEnum.SymTagLabel],
+            SymTagEnum.SymTagLabel, cancellationToken,
+            (diaSymbol) =>
+            {
+                var labelRVA = diaSymbol.relativeVirtualAddress;
+                if (labelRVA != 0)
+                {
+                    rvasOfLabels.Add(labelRVA);
+                }
+            });
+        }
+
+        using (var findCanonicalNamesLog = logger.StartTaskLog("Finding canonical names for foldable RVAs"))
+        {
+            FindCanonicalNamesForFoldableRVAs(findCanonicalNamesLog, nameCanonicalizationsByRVA, symIndexIdsProcessed, symTagsToEnumerateForFolding, cancellationToken);
+        }
+
+        this.DataCache.InitializeRVARanges(rvaToSymIndexIDs, rvasOfLabels);
     }
 
     #endregion
@@ -1872,7 +1978,12 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
 
     #region Finding all names for an RVA
 
-    public SortedList<uint, NameCanonicalization> FindCanonicalNamesForFoldableRVAs(ILogger logger, CancellationToken cancellationToken)
+    private SortedList<uint, NameCanonicalization> FindCanonicalNamesForFoldableRVAs(
+        ILogger logger,
+        Dictionary<uint, NameCanonicalization> results,
+        HashSet<uint> symIndexIdsProcessedAlreadyForFolding,
+        List<SymTagEnum> symTagsToEnumerateForFolding,
+        CancellationToken cancellationToken)
     {
         ThrowIfOnWrongThread();
 
@@ -1881,68 +1992,69 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             return this.DataCache.AllCanonicalNames;
         }
 
-        var results = new SortedDictionary<uint, NameCanonicalization>();
-        var symIndexIdsProcessedAlready = new HashSet<uint>(capacity: 1000);
-
-        // Anything that contains code or data could be ICF'd, so we'll enumerate all of those (except as noted by the symbol sources we're
-        // supporting).  The one exception is that we don't look at SymTagLabel currently, as SizeBench never uses SymTagLabel for anything.
-        // Should that change somedy, it could be added here.
-        var symTagsToEnumerateForFolding = new List<SymTagEnum>(capacity: 10);
-
-        if (this.DataCache.SymbolSourcesSupported.HasFlag(SymbolSourcesSupported.Code))
-        {
-            symTagsToEnumerateForFolding.Add(SymTagEnum.SymTagBlock);
-            symTagsToEnumerateForFolding.Add(SymTagEnum.SymTagFunction);
-
-            // Within code, we want thunks to be last so we can try to find a better name as a function or block first, since thunks have uglier
-            // names.
-            symTagsToEnumerateForFolding.Add(SymTagEnum.SymTagThunk);
-        }
-
-        if (this.DataCache.SymbolSourcesSupported.HasFlag(SymbolSourcesSupported.DataSymbols))
-        {
-            symTagsToEnumerateForFolding.Add(SymTagEnum.SymTagData);
-        }
-
-        // It is important that PublicSymbols are enumerated last. Each NameCanonicalization will keep track of all the possible names,
-        // but the names of PublicSymbols include things like "public:" and "virtual" at the start of their names which does not sort
-        // well with names from thunks, functions, and data.  So, we will ignore public symbol names if we already found non-public
-        // symbols at that RVA.  By doing this last, we can readily discard these names for anything already found via another SymTag.
-        symTagsToEnumerateForFolding.Add(SymTagEnum.SymTagPublicSymbol);
-
         logger.Log($"Finding canonical names for foldable RVAs for these SymTags: {string.Join(",", symTagsToEnumerateForFolding)}");
 
         // Some things like Functions are generally found in the global scope, but things like thunks and blocks are often found only within a compiland, so we will
         // search through the global scope as well as every compiland.
         var scopesToSearch = new List<IDiaSymbol>(capacity: 1000) { this.DiaGlobalScope };
         this.DiaSession.findChildren(this._globalScope, SymTagEnum.SymTagCompiland, name: null, compareFlags: 0, ppResult: out var diaCompilandEnum);
-        foreach (IDiaSymbol? compiland in diaCompilandEnum)
+
+        var enumSymbols = (IDiaEnumSymbolsHandCoded)diaCompilandEnum;
+        IDiaSymbol? diaSymbol;
+        var celt = 0u;
+        const int chunkSize = 1000;
+        var intPtrs = new IntPtr[chunkSize];
+        var currentIntPtrsIndex = chunkSize;
+        var pin = GCHandle.Alloc(intPtrs, GCHandleType.Pinned);
+
+        try
         {
-            if (compiland is null)
+            while (true)
             {
-                continue;
+                cancellationToken.ThrowIfCancellationRequested();
+                diaSymbol = DiaChunkMarshaling.AdvanceToNewElementInChunk(enumSymbols, chunkSize, intPtrs, ref celt, ref currentIntPtrsIndex);
+
+                if (diaSymbol is null || celt == 0)
+                {
+                    break;
+                }
+
+                scopesToSearch.Add(diaSymbol);
             }
 
-            scopesToSearch.Add(compiland);
-        }
-
-        foreach (var scope in scopesToSearch)
-        {
-            foreach (var symTag in symTagsToEnumerateForFolding)
+            foreach (var scope in scopesToSearch)
             {
-                scope.findChildren(symTag, name: null, compareFlags: 0, ppResult: out var diaEnum);
-
-                foreach (IDiaSymbol? diaSymbol in diaEnum)
+                foreach (var symTag in symTagsToEnumerateForFolding)
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    if (diaSymbol is null || !IsSymbolSourceSuppored(diaSymbol))
-                    {
-                        continue;
-                    }
+                    scope.findChildren(symTag, name: null, compareFlags: 0, ppResult: out var diaEnum);
+                    enumSymbols = (IDiaEnumSymbolsHandCoded)diaEnum;
+                    celt = 0;
+                    Array.Clear(intPtrs);
+                    currentIntPtrsIndex = chunkSize;
 
-                    ProcessOneSymbolForCanonicalNameSearch(diaSymbol, results, symIndexIdsProcessedAlready, cancellationToken);
+                    while (true)
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        diaSymbol = DiaChunkMarshaling.AdvanceToNewElementInChunk(enumSymbols, chunkSize, intPtrs, ref celt, ref currentIntPtrsIndex);
+
+                        if (diaSymbol is null || celt == 0)
+                        {
+                            break;
+                        }
+                        else if (!IsSymbolSourceSuppored(diaSymbol))
+                        {
+                            continue;
+                        }
+
+                        ProcessOneSymbolForCanonicalNameSearch(diaSymbol, symTag, diaSymbol.symIndexId, diaSymbol.relativeVirtualAddress, results, symIndexIdsProcessedAlreadyForFolding, cancellationToken);
+                    }
                 }
             }
+        }
+        finally
+        {
+            pin.Free();
+            intPtrs = null;
         }
 
         logger.Log($"Finished searching {scopesToSearch.Count:N0} scopes for canonical names");
@@ -1950,10 +2062,9 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         using (logger.StartTaskLog("Sorting and pruning canonical name list"))
         {
             // Remove any entries where the RVA had just one symbol, to reduce burden on people enumerating these later - that way a TryGetValue(rvaWithNothingFolded) will return false.
-            // This is also when we convert from a SortedDictionary to a SortedList because we know the RVAs are in order and we can end up with the SortedList in memory for reduced memory
-            // footprint for the rest of this Session's lifetime.
+            // This is also when we convert from a Dictionary to a SortedList since we build this once and consult it a lot.
             var resultsAsSortedList = new SortedList<uint, NameCanonicalization>(capacity: results.Count);
-            foreach (var resultEntry in results)
+            foreach (var resultEntry in results.OrderBy(static x => x.Key))
             {
                 if (resultEntry.Value.NamesBySymIndexID.Count > 1)
                 {
@@ -1970,17 +2081,17 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
     }
 
     private void ProcessOneSymbolForCanonicalNameSearch(IDiaSymbol diaSymbol,
-                                                        SortedDictionary<uint, NameCanonicalization> results,
+                                                        SymTagEnum symTag,
+                                                        uint symIndexId,
+                                                        uint rva,
+                                                        Dictionary<uint, NameCanonicalization> results,
                                                         HashSet<uint> symIndexIdsProcessedAlready,
                                                         CancellationToken cancellationToken)
     {
-        var rva = diaSymbol.relativeVirtualAddress;
         if (rva == 0)
         {
             return;
         }
-
-        var symIndexId = diaSymbol.symIndexId;
 
         if (!symIndexIdsProcessedAlready.Add(symIndexId))
         {
@@ -1988,7 +2099,15 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             return;
         }
 
-        var symTag = (SymTagEnum)diaSymbol.symTag;
+        if (results.TryGetValue(rva, out var nameCanonicalization) == false)
+        {
+            nameCanonicalization = new NameCanonicalization();
+            results.Add(rva, nameCanonicalization);
+        }
+        else if (false == nameCanonicalization.IsNameEvenGoingToBeConsidered(symTag))
+        {
+            return;
+        }
 
         // We wait to initialize the symbolName in case it might be a public symbol that we don't want the name of anyway, which can be quite expensive
         // to undecorate.  Instead, we defer lookup of the name until we know we want it.  But, we'll eagerly fetch names of blocks and functions
@@ -2041,12 +2160,6 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             {
                 symbolName = $"{CodeBlockSymbol.BlockOfCodePrefix}{symbolName}";
             }
-        }
-
-        if (results.TryGetValue(rva, out var nameCanonicalization) == false)
-        {
-            nameCanonicalization = new NameCanonicalization();
-            results.Add(rva, nameCanonicalization);
         }
 
         nameCanonicalization.AddName(symIndexId, symTag, diaSymbol, this.DiaSession, this.DataCache, symbolName, GetSymbolName);
@@ -2291,7 +2404,6 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                 return dataSymbolName;
             case SymTagEnum.SymTagFunction:
                 var diaName = diaSymbol.name.Replace(" __ptr64", String.Empty, StringComparison.Ordinal);
-                var finalFunctionName = diaName;
 
                 // Sometimes for member functions, DIA has just the function name (CFoo::DoTheThing has IDiaSymbol.name of DoTheThing), and sometimes it has
                 // the parent type's name included.  We want to be consistent so we need to also check if this has a parent type and if so, strip that type's
@@ -2300,23 +2412,36 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                 // Some binaries seem to generate corrupted/missing classParent objects that end up being a SymTagBaseType with baseType == btNoType, which has
                 // no name.  It should only make sense to look further if we've found a UDT, as no other type of parent would make sense to have a function on it,
                 // so if we find one of those bad/missing class parents we'll just skip attempting to clean up the name.  We did the best we could.
-                var parentClass = diaSymbol.classParent;
-                if (parentClass != null &&
-                    (SymTagEnum)parentClass.symTag == SymTagEnum.SymTagUDT &&
-                    diaName.Contains("::", StringComparison.Ordinal))
+                if (diaName.Contains("::", StringComparison.Ordinal) && diaSymbol.classParentId != 0)
                 {
-                    var parentClassName = GetSymbolName(parentClass, diaSession, dataCache);
-                    if (parentClassName != null)
+                    var parentClass = diaSymbol.classParent;
+                    if ((SymTagEnum)parentClass.symTag == SymTagEnum.SymTagUDT)
                     {
-                        var index = finalFunctionName.IndexOf(parentClassName, StringComparison.Ordinal);
-                        if (index >= 0)
+                        var parentClassName = GetSymbolName(parentClass, diaSession, dataCache);
+                        if (parentClassName != null)
                         {
-                            finalFunctionName = finalFunctionName.Remove(index, parentClassName.Length);
+                            var index = diaName.IndexOf(parentClassName, StringComparison.Ordinal);
+                            if (index >= 0)
+                            {
+                                if (diaName.Length > index + parentClassName.Length &&
+                                    diaName[index + parentClassName.Length] == ':')
+                                {
+                                    return diaName.Remove(index, parentClassName.Length + "::".Length);
+                                }
+                                else
+                                {
+                                    return diaName.Remove(index, parentClassName.Length);
+                                }
+                            }
                         }
                     }
-                }
 
-                return finalFunctionName.TrimStart(':'); // We may end up with errant "::" at the beginning of C++ symbols after trimming off the parent UDT's name.  Get rid of those.;
+                    return diaName;
+                }
+                else
+                {
+                    return diaName;
+                }
             case SymTagEnum.SymTagBlock:
                 var parentFunction = diaSymbol.lexicalParent;
                 while (parentFunction != null && (SymTagEnum)parentFunction.symTag != SymTagEnum.SymTagFunction)
@@ -2420,27 +2545,28 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
 
         if (diaSymbol.unmodifiedType != null)
         {
-            var name = new StringBuilder(50);
-
             var unmodifiedArrayType = GetOrCreateTypeSymbol<TypeSymbol>(diaSymbol.unmodifiedType, cancellationToken);
+
+            tls_nameStringBuilder ??= new StringBuilder(capacity: 100);
+            tls_nameStringBuilder.Clear();
 
             if (diaSymbol.constType != 0)
             {
-                name.Append("const ");
+                tls_nameStringBuilder.Append("const ");
             }
 
             if (diaSymbol.volatileType != 0)
             {
-                name.Append("volatile ");
+                tls_nameStringBuilder.Append("volatile ");
             }
 
             if (diaSymbol.unalignedType != 0)
             {
-                name.Append("__unaligned ");
+                tls_nameStringBuilder.Append("__unaligned ");
             }
 
-            name.Append(unmodifiedArrayType.Name);
-            return new ModifiedTypeSymbol(this.DataCache, unmodifiedArrayType, name.ToString(), symbolLength, diaSymbol.symIndexId);
+            tls_nameStringBuilder.Append(unmodifiedArrayType.Name);
+            return new ModifiedTypeSymbol(this.DataCache, unmodifiedArrayType, tls_nameStringBuilder.ToString(), symbolLength, diaSymbol.symIndexId);
         }
 
         var arrayElementTypeSymbol = diaSymbol.type;
@@ -2456,7 +2582,8 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
 
     private static string BuildArrayTypeName(IDiaSymbol arrayTypeSymbol, TypeSymbol elementType)
     {
-        var sb = new StringBuilder(100);
+        tls_nameStringBuilder ??= new StringBuilder(capacity: 100);
+        tls_nameStringBuilder.Clear();
 
         // If an array in C++ is multi-dimensional, like this:
         // float[3][2][8]
@@ -2471,10 +2598,10 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             mostFundamentalElementType = mostFundamentalArrayType.ElementType;
         }
 
-        sb.Append(mostFundamentalElementType.Name);
+        tls_nameStringBuilder.Append(mostFundamentalElementType.Name);
 
-        FillInArrayDimensions(arrayTypeSymbol, sb, elementType);
-        return sb.ToString();
+        FillInArrayDimensions(arrayTypeSymbol, tls_nameStringBuilder, elementType);
+        return tls_nameStringBuilder.ToString();
     }
 
     private static void FillInArrayDimensions(IDiaSymbol arrayTypeSymbol, StringBuilder sb, TypeSymbol elementType)
@@ -2587,53 +2714,57 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                                      uint symbolLength,
                                      CancellationToken cancellationToken)
     {
-        var name = new StringBuilder(50);
-
         if (diaSymbol.unmodifiedType != null)
         {
             var unmodifiedBasicType = GetOrCreateTypeSymbol<TypeSymbol>(diaSymbol.unmodifiedType, cancellationToken);
 
+            tls_nameStringBuilder ??= new StringBuilder(capacity: 100);
+            tls_nameStringBuilder.Clear();
+
             if (diaSymbol.constType != 0)
             {
-                name.Append("const ");
+                tls_nameStringBuilder.Append("const ");
             }
 
             if (diaSymbol.volatileType != 0)
             {
-                name.Append("volatile ");
+                tls_nameStringBuilder.Append("volatile ");
             }
 
             if (diaSymbol.unalignedType != 0)
             {
-                name.Append("__unaligned ");
+                tls_nameStringBuilder.Append("__unaligned ");
             }
 
-            name.Append(unmodifiedBasicType.Name);
-            return new ModifiedTypeSymbol(this.DataCache, unmodifiedBasicType, name.ToString(), symbolLength, diaSymbol.symIndexId);
+            tls_nameStringBuilder.Append(unmodifiedBasicType.Name);
+            return new ModifiedTypeSymbol(this.DataCache, unmodifiedBasicType, tls_nameStringBuilder.ToString(), symbolLength, diaSymbol.symIndexId);
         }
+
+        tls_nameStringBuilder ??= new StringBuilder(capacity: 100);
+        tls_nameStringBuilder.Clear();
 
         switch ((BasicTypes)diaSymbol.baseType)
         {
             case BasicTypes.btUInt:
-                name.Append("unsigned ");
+                tls_nameStringBuilder.Append("unsigned ");
                 goto case BasicTypes.btInt;
             case BasicTypes.btInt:
                 switch (symbolLength)
                 {
                     case 1:
-                        name.Append("char");
+                        tls_nameStringBuilder.Append("char");
                         break;
                     case 2:
-                        name.Append("short");
+                        tls_nameStringBuilder.Append("short");
                         break;
                     case 4:
-                        name.Append("int");
+                        tls_nameStringBuilder.Append("int");
                         break;
                     case 8:
-                        name.Append("int64");
+                        tls_nameStringBuilder.Append("int64");
                         break;
                     case 16:
-                        name.Append("int128");
+                        tls_nameStringBuilder.Append("int128");
                         break;
                     default:
                         throw new InvalidOperationException($"unknown integer type of length {symbolLength}!");
@@ -2643,32 +2774,32 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                 switch (symbolLength)
                 {
                     case 2:
-                        name.Append("_Float16"); // Clang extension: https://clang.llvm.org/docs/LanguageExtensions.html#half-precision-floating-point
+                        tls_nameStringBuilder.Append("_Float16"); // Clang extension: https://clang.llvm.org/docs/LanguageExtensions.html#half-precision-floating-point
                         break;
                     case 4:
-                        name.Append("float");
+                        tls_nameStringBuilder.Append("float");
                         break;
                     case 8:
-                        name.Append("double");
+                        tls_nameStringBuilder.Append("double");
                         break;
                     case 10:
                         // In MASM this can be called "tbyte", which is short for "ten byte".
                         // I choose the GCC name "__float80" because it's more legible and I bet more folks use GCC than MASM.
-                        name.Append("__float80");
+                        tls_nameStringBuilder.Append("__float80");
                         break;
                     case 16:
-                        name.Append("__float128"); // GCC extension: https://gcc.gnu.org/onlinedocs/gcc/Floating-Types.html
+                        tls_nameStringBuilder.Append("__float128"); // GCC extension: https://gcc.gnu.org/onlinedocs/gcc/Floating-Types.html
                         break;
                     default:
                         throw new InvalidOperationException($"unknown floating point type of length {symbolLength}!");
                 }
                 break;
             default:
-                name.Append(_basicTypeNames[diaSymbol.baseType]);
+                tls_nameStringBuilder.Append(_basicTypeNames[diaSymbol.baseType]);
                 break;
         }
 
-        return new BasicTypeSymbol(this.DataCache, name.ToString(), symbolLength, diaSymbol.symIndexId);
+        return new BasicTypeSymbol(this.DataCache, tls_nameStringBuilder.ToString(), symbolLength, diaSymbol.symIndexId);
     }
 
     #endregion
@@ -2688,34 +2819,35 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         {
             var unmodifiedPointerType = GetOrCreateTypeSymbol<TypeSymbol>(diaSymbol.unmodifiedType, cancellationToken);
 
-            var name = new StringBuilder(capacity: unmodifiedPointerType.Name.Length + 50);
+            tls_nameStringBuilder ??= new StringBuilder(capacity: unmodifiedPointerType.Name.Length + 50);
+            tls_nameStringBuilder.Clear();
 
-            name.Append(unmodifiedPointerType.Name);
+            tls_nameStringBuilder.Append(unmodifiedPointerType.Name);
             if (diaSymbol.reference != 0)
             {
-                name.Append('&');
+                tls_nameStringBuilder.Append('&');
             }
             else
             {
-                name.Append('*');
+                tls_nameStringBuilder.Append('*');
             }
 
             if (diaSymbol.constType != 0)
             {
-                name.Append(" const");
+                tls_nameStringBuilder.Append(" const");
             }
 
             if (diaSymbol.volatileType != 0)
             {
-                name.Append(" volatile");
+                tls_nameStringBuilder.Append(" volatile");
             }
 
             if (diaSymbol.unalignedType != 0)
             {
-                name.Append(" __unaligned");
+                tls_nameStringBuilder.Append(" __unaligned");
             }
 
-            return new ModifiedTypeSymbol(this.DataCache, unmodifiedPointerType, name.ToString(), symbolLength, diaSymbol.symIndexId);
+            return new ModifiedTypeSymbol(this.DataCache, unmodifiedPointerType, tls_nameStringBuilder.ToString(), symbolLength, diaSymbol.symIndexId);
         }
 
         var pointerTypeName = BuildPointerTypeName(diaSymbol, out var pointerTargetType, cancellationToken);
@@ -2731,35 +2863,37 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                                         out TypeSymbol pointerTargetTypeSymbol,
                                         CancellationToken cancellationToken)
     {
-        var sb = new StringBuilder(100);
         pointerTargetTypeSymbol = GetOrCreateTypeSymbol<TypeSymbol>(pointerTypeSymbol.type, cancellationToken);
 
-        sb.Append(pointerTargetTypeSymbol.Name);
+        tls_nameStringBuilder ??= new StringBuilder(capacity: 100);
+        tls_nameStringBuilder.Clear();
+
+        tls_nameStringBuilder.Append(pointerTargetTypeSymbol.Name);
         if (pointerTypeSymbol.reference != 0)
         {
-            sb.Append('&');
+            tls_nameStringBuilder.Append('&');
         }
         else
         {
-            sb.Append('*');
+            tls_nameStringBuilder.Append('*');
         }
 
         if (pointerTypeSymbol.constType != 0)
         {
-            sb.Append(" const");
+            tls_nameStringBuilder.Append(" const");
         }
 
         if (pointerTypeSymbol.volatileType != 0)
         {
-            sb.Append(" volatile");
+            tls_nameStringBuilder.Append(" volatile");
         }
 
         if (pointerTypeSymbol.unalignedType != 0)
         {
-            sb.Append(" __unaligned");
+            tls_nameStringBuilder.Append(" __unaligned");
         }
 
-        return sb.ToString();
+        return tls_nameStringBuilder.ToString();
     }
 
     #endregion
@@ -2771,29 +2905,30 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                                      uint symbolLength,
                                      CancellationToken cancellationToken)
     {
-        var name = new StringBuilder(50);
-
         if (diaSymbol.unmodifiedType != null)
         {
             var unmodifiedEnumType = GetOrCreateTypeSymbol<TypeSymbol>(diaSymbol.unmodifiedType, cancellationToken);
 
+            tls_nameStringBuilder ??= new StringBuilder(capacity: 100);
+            tls_nameStringBuilder.Clear();
+
             if (diaSymbol.constType != 0)
             {
-                name.Append("const ");
+                tls_nameStringBuilder.Append("const ");
             }
 
             if (diaSymbol.volatileType != 0)
             {
-                name.Append("volatile ");
+                tls_nameStringBuilder.Append("volatile ");
             }
 
             if (diaSymbol.unalignedType != 0)
             {
-                name.Append("__unaligned ");
+                tls_nameStringBuilder.Append("__unaligned ");
             }
 
-            name.Append(unmodifiedEnumType.Name);
-            return new ModifiedTypeSymbol(this.DataCache, unmodifiedEnumType, name.ToString(), symbolLength, diaSymbol.symIndexId);
+            tls_nameStringBuilder.Append(unmodifiedEnumType.Name);
+            return new ModifiedTypeSymbol(this.DataCache, unmodifiedEnumType, tls_nameStringBuilder.ToString(), symbolLength, diaSymbol.symIndexId);
         }
 
         return new EnumTypeSymbol(this.DataCache, $"enum {symbolName}", symbolLength, diaSymbol.symIndexId);
@@ -2814,25 +2949,26 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             // a modification...)
             var unmodifiedUDT = GetOrCreateTypeSymbol<TypeSymbol>(diaSymbol.unmodifiedType, cancellationToken);
 
-            var name = new StringBuilder(capacity: unmodifiedUDT.Name.Length + 50);
+            tls_nameStringBuilder ??= new StringBuilder(capacity: unmodifiedUDT.Name.Length + 50);
+            tls_nameStringBuilder.Clear();
 
             if (diaSymbol.constType != 0)
             {
-                name.Append("const ");
+                tls_nameStringBuilder.Append("const ");
             }
 
             if (diaSymbol.volatileType != 0)
             {
-                name.Append("volatile ");
+                tls_nameStringBuilder.Append("volatile ");
             }
 
             if (diaSymbol.unalignedType != 0)
             {
-                name.Append("__unaligned ");
+                tls_nameStringBuilder.Append("__unaligned ");
             }
 
-            name.Append(unmodifiedUDT.Name);
-            return new ModifiedTypeSymbol(this.DataCache, unmodifiedUDT, name.ToString(), symbolLength, diaSymbol.symIndexId);
+            tls_nameStringBuilder.Append(unmodifiedUDT.Name);
+            return new ModifiedTypeSymbol(this.DataCache, unmodifiedUDT, tls_nameStringBuilder.ToString(), symbolLength, diaSymbol.symIndexId);
         }
 
         return new UserDefinedTypeSymbol(this.DataCache,
@@ -2841,44 +2977,42 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                                          symbolName,
                                          symbolLength,
                                          diaSymbol.symIndexId,
-                                         (UserDefinedTypeKind)diaSymbol.udtKind,
-                                         GetBaseTypeIDs(diaSymbol, symbolName));
+                                         (UserDefinedTypeKind)diaSymbol.udtKind);
     }
 
     // Base types need two pieces of information to be most useful - the typeID of the base type (uint), and
-    // the offset for multi-inheritance situations.  So this is a Dictionary<typeID, offset>
-    private static Dictionary<uint, uint>? GetBaseTypeIDs(IDiaSymbol diaSymbol, string symbolName)
+    // the offset for multi-inheritance situations.  So this is an enumeration of (typeID, offset)
+    public IEnumerable<(uint typeId, uint offset)> FindAllBaseTypeIDsForUDT(UserDefinedTypeSymbol udt)
     {
+        ThrowIfOnWrongThread();
+        this.DiaSession.symbolById(udt.SymIndexId, out var diaSymbol);
         diaSymbol.findChildren(SymTagEnum.SymTagBaseClass, null /* name */, 0 /* compare flags */, out var enumBaseClasses);
 
-        Dictionary<uint, uint>? BaseTypeIDs = null;
-
-        foreach (IDiaSymbol? baseClass in enumBaseClasses)
+        try
         {
-            if (baseClass is null)
+            foreach (IDiaSymbol? baseClass in enumBaseClasses)
             {
-                continue;
+                if (baseClass is null)
+                {
+                    continue;
+                }
+
+                var baseClassTypeId = baseClass.typeId;
+
+                if (baseClass.offset < 0)
+                {
+                    throw new InvalidOperationException($"Base Type offset < 0 when loading the base types for {udt.Name}.  This should not be possible, and is a bug in SizeBench's implementation, not your use of it.");
+                }
+
+                var offset = (uint)baseClass.offset;
+                Marshal.FinalReleaseComObject(baseClass);
+                yield return (baseClassTypeId, offset);
             }
-
-            var baseClassTypeId = baseClass.typeId;
-
-            // Don't preallocate this to the size of enumBaseClasses, because enumBaseClasses.count ends up traversing the entire
-            // list in DIA.  This is painfully slow.  Just guess that a class will have 4 base types, and let Dictionary resize
-            // if needed, it's still faster that way.
-            BaseTypeIDs ??= new Dictionary<uint, uint>(4);
-
-            if (baseClass.offset < 0)
-            {
-                throw new InvalidOperationException($"Base Type offset < 0 when loading the base types for {symbolName}.  This should not be possible, and is a bug in SizeBench's implementation, not your use of it.");
-            }
-
-            BaseTypeIDs.Add(baseClassTypeId, (uint)baseClass.offset);
-            Marshal.FinalReleaseComObject(baseClass);
         }
-
-        Marshal.FinalReleaseComObject(enumBaseClasses);
-
-        return BaseTypeIDs;
+        finally
+        {
+            Marshal.FinalReleaseComObject(enumBaseClasses);
+        }
     }
 
     #endregion
@@ -3338,9 +3472,23 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             this._session = null;
         }
 
-        this._globalScope = null;
-        this._diaSession = null;
-        this._diaDataSource = null;
+        if (this._globalScope is not null)
+        {
+            Marshal.ReleaseComObject(this._globalScope);
+            this._globalScope = null;
+        }
+
+        if (this._diaSession is not null)
+        {
+            Marshal.ReleaseComObject(this._diaSession);
+            this._diaSession = null;
+        }
+
+        if (this._diaDataSource is not null)
+        {
+            Marshal.ReleaseComObject(this._diaDataSource);
+            this._diaDataSource = null;
+        }
 
         this.IsDisposing = false;
         this.IsDisposed = true;

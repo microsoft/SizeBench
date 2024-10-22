@@ -12,7 +12,7 @@ public sealed class InlineSiteSymbolTests
         };
         var nextSymIndexId = 123u;
         var blockInlinedInto = new SimpleFunctionCodeSymbol(cache, "functionInlinedInto", 0, 100, nextSymIndexId++);
-        var rvaRangesOccupied = RVARangeSet.FromListOfRVARanges(new[] { RVARange.FromRVAAndSize(100u, 10u), RVARange.FromRVAAndSize(120u, 5u) }, maxPaddingToMerge: 1);
+        var rvaRangesOccupied = RVARangeSet.FromListOfRVARanges([ RVARange.FromRVAAndSize(100u, 10u), RVARange.FromRVAAndSize(120u, 5u) ], maxPaddingToMerge: 1);
         var inlineSite = new InlineSiteSymbol(cache, "someInlinedFunction", nextSymIndexId++, blockInlinedInto,
                                               canonicalSymbolInlinedInto: blockInlinedInto,
                                               rvaRangesOccupied);

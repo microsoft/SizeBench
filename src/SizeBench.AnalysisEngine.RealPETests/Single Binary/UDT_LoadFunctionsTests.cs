@@ -73,7 +73,7 @@ public sealed class UDT_LoadFunctionsTests
 
         // ----------------------------------------------------------------------------------------------------------
         // Base1_Derived1 assertions
-        var base1_derived1UDT = base1UDT.DerivedTypesBySymIndexId!.Values.First(dt => dt.Name == "Base1_Derived1");
+        var base1_derived1UDT = base1UDT.DerivedTypes!.First(dt => dt.Name == "Base1_Derived1");
 
         // The four functions we hand-authored, plus 3 constructors, plus 2 operator= overloads (those 5 are put in by the language by default)
         Assert.AreEqual(9, (await base1_derived1UDT.GetFunctionsAsync(this.CancellationToken)).Count);
@@ -159,7 +159,7 @@ public sealed class UDT_LoadFunctionsTests
 
         // ----------------------------------------------------------------------------------------------------------
         // Base1_Derived2 assertions
-        var base1_derived2UDT = base1UDT.DerivedTypesBySymIndexId.Values.First(dt => dt.Name == "Base1_Derived2");
+        var base1_derived2UDT = base1UDT.DerivedTypes!.First(dt => dt.Name == "Base1_Derived2");
 
         // The function we hand-authored, plus 3 constructors, plus 2 operator= overloads (those 5 are put in by the language by default)
         Assert.AreEqual(6, (await base1_derived2UDT.GetFunctionsAsync(this.CancellationToken)).Count);
@@ -188,7 +188,7 @@ public sealed class UDT_LoadFunctionsTests
 
         // ----------------------------------------------------------------------------------------------------------
         // Base1_Derived1_MoreDerived1 assertions
-        var base1_derived1_moreDerived1UDT = base1UDT.DerivedTypesBySymIndexId.Values.First(dt => dt.Name == "Base1_Derived1_MoreDerived1");
+        var base1_derived1_moreDerived1UDT = base1UDT.DerivedTypes!.First(dt => dt.Name == "Base1_Derived1_MoreDerived1");
 
         // The four functions we hand-authored, plus 3 constructors, plus 2 operator= overloads (those 5 are put in by the language by default)
         Assert.AreEqual(9, (await base1_derived1_moreDerived1UDT.GetFunctionsAsync(this.CancellationToken)).Count);

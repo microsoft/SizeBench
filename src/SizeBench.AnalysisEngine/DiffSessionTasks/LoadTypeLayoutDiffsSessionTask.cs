@@ -71,10 +71,7 @@ internal sealed class LoadTypeLayoutDiffsSessionTask : DiffSessionTask<List<Type
                     if (afterTLIs[i].UserDefinedType.IsVeryLikelyTheSameAs(beforeUDT))
                     {
                         allPossibleMatchingAfters.Add(afterTLIs[i]);
-                        if (matchingAfterTLI is null)
-                        {
-                            matchingAfterTLI = afterTLIs[i];
-                        }
+                        matchingAfterTLI ??= afterTLIs[i];
                     }
 
                     // We know the type layouts come out sorted by their name - so once the name of the after is greater than the before name, we

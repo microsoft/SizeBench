@@ -44,7 +44,7 @@ internal sealed class EnumerateWastefulVirtualsSessionTask : SessionTask<List<Wa
         // Restricting how many clasess we load functions for is important since functions are plentiful and loading hundreds of thousands of them takes a lot
         // of memory and CPU time querying DIA and constructing FunctionSymbol instances.
 
-        var classesWorthLoadingFunctionsFor = udts.Where(x => x.DerivedTypesBySymIndexId?.Count > 0 || x.BaseTypes?.Count > 0).ToList();
+        var classesWorthLoadingFunctionsFor = udts.Where(x => x.DerivedTypeCount > 0 || x.BaseTypes?.Length > 0).ToList();
 
         using (var taskLog = logger.StartTaskLog("Loading all functions"))
         {
@@ -132,7 +132,7 @@ internal sealed class EnumerateWastefulVirtualsSessionTask : SessionTask<List<Wa
             // If this type doesn't have any derived types, then nobody can possibly override it - so we'll just continue
             // looking.  Technically this could be wasteful if somebody marks 'virtual' on a leaf type but in practice it's
             // such a small gain and the expense to calculate it is modest, so let's not bother.
-            if (baseTypeContainsSameVirtualFunction || udt.DerivedTypesBySymIndexId is null)
+            if (baseTypeContainsSameVirtualFunction || udt.DerivedTypeCount == 0)
             {
                 continue;
             }
@@ -142,22 +142,25 @@ internal sealed class EnumerateWastefulVirtualsSessionTask : SessionTask<List<Wa
             // If we get this far, this type is the one introducing this pure virtual - now see if <= 1 derived types have an override.
             // If so, this is wasteful as you could just devirtualize onto the single child implementing it (in many cases) and save vtable
             // slots, reloc entries, and more.
-            foreach (var derivedType in udt.DerivedTypesBySymIndexId.Values.Where(type => type.Functions != null && type.Functions.Count > 0))
+            if (udt.DerivedTypes is not null)
             {
-                var firstOverrideFound = derivedType.Functions.FirstOrDefault(f =>
-                    !IsPureVirtualFunction(f) &&
-                    f.FormattedName.GetFormattedName(WastefulVirtualItem.NameFormattingForWastedOverrides).Equals(functionNameFormatted, StringComparison.Ordinal));
-
-                if (firstOverrideFound != null)
+                foreach (var derivedType in udt.DerivedTypes.Where(static type => type.Functions?.Count > 0))
                 {
-                    overriddenFunction = firstOverrideFound;
-                    countOfOverrides++;
-                }
+                    var firstOverrideFound = derivedType.Functions.FirstOrDefault(f =>
+                        !IsPureVirtualFunction(f) &&
+                        f.FormattedName.GetFormattedName(WastefulVirtualItem.NameFormattingForWastedOverrides).Equals(functionNameFormatted, StringComparison.Ordinal));
 
-                // Once we've found a couple overrides we don't need to keep looking - we only care about the 0-1 cases below.
-                if (countOfOverrides > 1)
-                {
-                    break;
+                    if (firstOverrideFound != null)
+                    {
+                        overriddenFunction = firstOverrideFound;
+                        countOfOverrides++;
+                    }
+
+                    // Once we've found a couple overrides we don't need to keep looking - we only care about the 0-1 cases below.
+                    if (countOfOverrides > 1)
+                    {
+                        break;
+                    }
                 }
             }
 
@@ -169,10 +172,7 @@ internal sealed class EnumerateWastefulVirtualsSessionTask : SessionTask<List<Wa
                 // If, however, countOfOverrides is exactly 1...then it seems like this function need not be virtual and could simply be declared
                 //              directly on that derived type.  This would save a vtable slot in this class, as well as the entire hierarchy on down.
 
-                if (item is null)
-                {
-                    item = new WastefulVirtualItem(udt, IsCOMTypeHeuristicGuess(udt), this.Session.BytesPerWord);
-                }
+                item ??= new WastefulVirtualItem(udt, IsCOMTypeHeuristicGuess(udt), this.Session.BytesPerWord);
 
                 // Note that we want to add the override to the list of functions, not the pure version - because pure functions don't have an RVA
                 // so we can't go look them up later very well.
@@ -182,10 +182,7 @@ internal sealed class EnumerateWastefulVirtualsSessionTask : SessionTask<List<Wa
             {
                 // If this is not a pure function, and it's never overridden, that's also wasteful
 
-                if (item is null)
-                {
-                    item = new WastefulVirtualItem(udt, IsCOMTypeHeuristicGuess(udt), this.Session.BytesPerWord);
-                }
+                item ??= new WastefulVirtualItem(udt, IsCOMTypeHeuristicGuess(udt), this.Session.BytesPerWord);
 
                 item.AddWastedOverrideThatIsNotPureWithNoOverrides(function);
             }
@@ -206,9 +203,9 @@ internal sealed class EnumerateWastefulVirtualsSessionTask : SessionTask<List<Wa
             return false;
         }
 
-        for (var i = 0; i < thisClass.BaseTypes.Count; i++)
+        foreach (var baseType in thisClass.BaseTypes.AsSpan())
         {
-            if (IsCOMTypeHeuristicGuess(thisClass.BaseTypes[i]._baseTypeSymbol))
+            if (IsCOMTypeHeuristicGuess(baseType._baseTypeSymbol))
             {
                 return true;
             }
@@ -302,9 +299,9 @@ internal sealed class EnumerateWastefulVirtualsSessionTask : SessionTask<List<Wa
         udt.EnsureFunctionsLoaded(this.CancellationToken);
         if (udt.BaseTypes != null)
         {
-            for (var i = 0; i < udt.BaseTypes.Count; i++)
+            foreach (var baseType in udt.BaseTypes.AsSpan())
             {
-                LoadFunctionsForOneTypeAndAllItsBaseTypes(udt.BaseTypes[i]._baseTypeSymbol);
+                LoadFunctionsForOneTypeAndAllItsBaseTypes(baseType._baseTypeSymbol);
             }
         }
     }

@@ -267,28 +267,41 @@ internal static class IDiaSessionExtensions
 
     public static IEnumerable<IDiaSectionContrib> EnumerateSectionContributions(this IDiaSession session, ILogger logger)
     {
-        var enumSectionContribs = session.FindTable<IDiaEnumSectionContribs>(logger);
+        var enumSectionContribs = session.FindTable<IDiaEnumSectionContribsHandCoded>(logger);
 
         if (enumSectionContribs is null)
         {
             yield break;
         }
 
-        foreach (IDiaSectionContrib? contrib in enumSectionContribs)
+        IDiaSectionContrib? contrib;
+        var celt = 0u;
+        const int chunkSize = 1_000;
+        var intPtrs = new IntPtr[chunkSize];
+        var currentIntPtrsIndex = chunkSize;
+        var pin = GCHandle.Alloc(intPtrs, GCHandleType.Pinned);
+
+        try
         {
-            if (contrib != null)
+            while (true)
             {
+                contrib = DiaChunkMarshaling.AdvanceToNewElementInChunk(enumSectionContribs, chunkSize, intPtrs, ref celt, ref currentIntPtrsIndex);
+
+                if (contrib is null || celt == 0)
+                {
+                    break;
+                }
                 // Sometimes LLD records contribs with zero size - we can ignore these as there is nothing interesting about
                 // something without a size.
-                if (contrib.length != 0)
+                else if (contrib.length != 0)
                 {
                     yield return contrib;
                 }
             }
-            else
-            {
-                yield break;
-            }
+        }
+        finally
+        {
+            pin.Free();
         }
     }
 

@@ -55,7 +55,7 @@ public class FortranDllTests
         var subroutine1 = symbols.OfType<SimpleFunctionCodeSymbol>().Single(sym => sym.FunctionName == "SUBROUTINE1");
 
         Assert.AreEqual("void SUBROUTINE1(short* A_SHORT, long* AN_INT, int64[6]* ARR_OF_INT64, float[4][4]* SIMPLE_MATRIX, long[-3 .. 2][0 .. 4]* MATRIX_WITH_FANCY_BOUNDS, float[.tmp.0.MATRIX_WITH_PARAM_BOUNDS][.tmp.1.MATRIX_WITH_PARAM_BOUNDS]* MATRIX_WITH_PARAM_BOUNDS)", subroutine1.FullName);
-        Assert.AreEqual(1, subroutine1.Blocks.Count);
+        Assert.AreEqual(1, subroutine1.BlockCount);
         Assert.AreEqual(true, subroutine1.CanBeFolded);
         Assert.AreEqual(subroutine1.Name, subroutine1.CanonicalName);
         Assert.IsNotNull(subroutine1.FunctionType);
@@ -79,7 +79,7 @@ public class FortranDllTests
         var subroutine2 = symbols.OfType<SimpleFunctionCodeSymbol>().Single(sym => sym.FunctionName == "SUBROUTINE2");
 
         Assert.AreEqual("void SUBROUTINE2(double* SOME_DOUBLE, complex* SOME_COMPLEX, complex* SOME_DOUBLE_COMPLEX, bool* SOME_LOGICAL, bool* SOME_LOGICAL_KIND_4)", subroutine2.FullName);
-        Assert.AreEqual(1, subroutine2.Blocks.Count);
+        Assert.AreEqual(1, subroutine2.BlockCount);
         Assert.AreEqual(true, subroutine2.CanBeFolded);
         Assert.AreEqual(subroutine2.Name, subroutine2.CanonicalName);
         Assert.IsNotNull(subroutine2.FunctionType);
@@ -104,7 +104,7 @@ public class FortranDllTests
         // Not testing the full name because FORTRAN generates hidden parameters for string length at the end of the parameter list, and their name is unstable across builds
         // so the last parameter ends up with a name like ".tmp..T21__V$1b" which is too annoying to maintain in the tests.
         StringAssert.StartsWith(subroutine3.FullName, "void SUBROUTINE3(char[10]* SOME_STRING, [OEM_MS_FORTRAN90 defined type 0x5]* SOME_DEFERRED_LEN_STR, int64", StringComparison.Ordinal);
-        Assert.AreEqual(1, subroutine3.Blocks.Count);
+        Assert.AreEqual(1, subroutine3.BlockCount);
         Assert.AreEqual(true, subroutine3.CanBeFolded);
         Assert.AreEqual(subroutine3.Name, subroutine3.CanonicalName);
         Assert.IsNotNull(subroutine3.FunctionType);

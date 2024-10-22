@@ -16,40 +16,46 @@ public sealed class PGOTests
     private CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
 
     // PGO'd binaries are complicated and slow to open, so we don't want to re-open this for each test method.
-    private static Session? MUXSession;
-    private static NoOpLogger? SessionLogger;
-
-    [ClassInitialize]
-    public static async Task ClassInitialize(TestContext testContext)
-    {
-        ArgumentNullException.ThrowIfNull(testContext);
-
-        SessionLogger = new NoOpLogger();
-        MUXSession = await Session.Create(Path.Combine(testContext.DeploymentDirectory!, "Microsoft.UI.Xaml.dll"),
-                                          Path.Combine(testContext.DeploymentDirectory!, "Microsoft.UI.Xaml.pdb"),
-                                          SessionLogger);
-    }
-
-    [ClassCleanup]
-    public static async Task ClassCleanup()
-    {
-        if (MUXSession != null)
-        {
-            await MUXSession.DisposeAsync();
-            SessionLogger?.Dispose();
-        }
-    }
+    // But we can't afford to make this a class-level piece of state because MSTest may not clean it up while it's
+    // running test methods in another class and that could cause us to have two huge sessions active in memory
+    // at once (or more) which we can't afford on the Azure DevOps agenst that have only ~7GB of memory.
+    // So we have just one TestMethod which just calls a bunch of "test methodlets" that all roll up to a single
+    // result of pass/fail.  If it fails, unfortunately the callstack will be the way to tell which "test methodlet"
+    // failed.  But this seems to be the only option to get the tests to fit into the memory constraints of the ADO agents.
 
     [TestMethod]
-    public async Task ColdFunctionCanBeParsedIncludingFrameHandler4XDATA()
+    public async Task RunAllPGOTests()
+    {
+        {
+            using var SessionLogger = new NoOpLogger();
+            await using var MUXSession = await Session.Create(Path.Combine(this.TestContext!.DeploymentDirectory!, "Microsoft.UI.Xaml.dll"),
+                                                              Path.Combine(this.TestContext!.DeploymentDirectory!, "Microsoft.UI.Xaml.pdb"),
+                                                              SessionLogger);
+
+            await ColdFunctionCanBeParsedIncludingFrameHandler4XDATA(MUXSession);
+            await ColdFunctionsThatAreCOMDATFoldedCanBeParsed(MUXSession);
+            await HotFunctionCanBeParsed(MUXSession);
+            await ComplexFunctionCanBeParsed(MUXSession);
+            await BlocksThatAreCOMDATFoldedCanBeParsedIncludingFrameHandler4XDATA(MUXSession);
+            await LoadSymbolByRVAAlwaysReturnsTheNonCOMDATFoldedSymbol(MUXSession);
+            await VTableLengthsAreRightIncludingWhenCOMDATFolded(MUXSession);
+            await AllRDataSymbolsCanBeEnumerated(MUXSession);
+            await ImportSymbolsCanBeEnumerated(MUXSession);
+        }
+
+        // Force GC since these big binaries create so much memory pressure in the ADO pipelines
+        GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+    }
+
+    private static async Task ColdFunctionCanBeParsedIncludingFrameHandler4XDATA(Session MUXSession)
     {
         // Try to get a function that is cold ($zz) and verify stuff about it.
         // This function was specifically chosen because it also has __CxxFrameHandler4 metadata so we can validate PGO'd FH4 metadata.
 
-        var TeachingTip_UpdateTail_Function = await MUXSession!.LoadSymbolByRVA(0x33E9E8) as SimpleFunctionCodeSymbol;
+        var TeachingTip_UpdateTail_Function = await MUXSession.LoadSymbolByRVA(0x33E9E8) as SimpleFunctionCodeSymbol;
         Assert.AreEqual(AccessModifier.Private, TeachingTip_UpdateTail_Function!.AccessModifier);
         Assert.IsNull(TeachingTip_UpdateTail_Function.ArgumentNames);
-        Assert.AreEqual(1, TeachingTip_UpdateTail_Function.Blocks.Count);
+        Assert.AreEqual(1, TeachingTip_UpdateTail_Function.BlockCount);
         Assert.IsTrue(TeachingTip_UpdateTail_Function.CanBeFolded);
         Assert.AreEqual(TeachingTip_UpdateTail_Function.Name, TeachingTip_UpdateTail_Function.CanonicalName);
         Assert.IsNotNull(TeachingTip_UpdateTail_Function.FunctionType);
@@ -100,8 +106,7 @@ public sealed class PGOTests
         Assert.AreEqual($"[ip2state] {TeachingTip_UpdateTail_Function.Name}", ip2State.Name);
     }
 
-    [TestMethod]
-    public async Task ColdFunctionsThatAreCOMDATFoldedCanBeParsed()
+    private async Task ColdFunctionsThatAreCOMDATFoldedCanBeParsed(Session MUXSession)
     {
         // Try to get a function that is cold ($zz) that is COMDAT folded with other cold functions
 
@@ -109,7 +114,7 @@ public sealed class PGOTests
         Assert.AreEqual(AccessModifier.Public, PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function!.AccessModifier);
         Assert.IsNotNull(PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.ArgumentNames);
         Assert.AreEqual(2, PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.ArgumentNames.Count);
-        Assert.AreEqual(1, PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.Blocks.Count);
+        Assert.AreEqual(1, PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.BlockCount);
         Assert.IsTrue(PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.CanBeFolded);
         Assert.AreEqual(PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.Name, PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.CanonicalName);
         Assert.IsNotNull(PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.FunctionType);
@@ -148,7 +153,7 @@ public sealed class PGOTests
         Assert.AreEqual(AccessModifier.Public, PipsPagerProperties_OnNextButtonStylePropertyChanged_Function!.AccessModifier);
         Assert.IsNotNull(PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.ArgumentNames);
         Assert.AreEqual(2, PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.ArgumentNames.Count);
-        Assert.AreEqual(1, PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.Blocks.Count);
+        Assert.AreEqual(1, PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.BlockCount);
         Assert.IsTrue(PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.CanBeFolded);
         Assert.AreEqual(PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.Name, PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.CanonicalName); // Note the canonical name is for the 'primary' function above
         Assert.IsNotNull(PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.FunctionType);
@@ -180,15 +185,14 @@ public sealed class PGOTests
         Assert.AreEqual(0u, PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.VirtualSize);
     }
 
-    [TestMethod]
-    public async Task HotFunctionCanBeParsed()
+    private static async Task HotFunctionCanBeParsed(Session MUXSession)
     {
         // Try to get a function that is hot ($lp) and verify stuff about it
 
         var XamlMetadataProviderGenerated_RegisterTypes_Function = await MUXSession!.LoadSymbolByRVA(0x51590) as SimpleFunctionCodeSymbol;
         Assert.AreEqual(AccessModifier.Public, XamlMetadataProviderGenerated_RegisterTypes_Function!.AccessModifier);
         Assert.IsNull(XamlMetadataProviderGenerated_RegisterTypes_Function.ArgumentNames);
-        Assert.AreEqual(1, XamlMetadataProviderGenerated_RegisterTypes_Function.Blocks.Count);
+        Assert.AreEqual(1, XamlMetadataProviderGenerated_RegisterTypes_Function.BlockCount);
         Assert.IsTrue(XamlMetadataProviderGenerated_RegisterTypes_Function.CanBeFolded);
         Assert.AreEqual(XamlMetadataProviderGenerated_RegisterTypes_Function.Name, XamlMetadataProviderGenerated_RegisterTypes_Function.CanonicalName);
         Assert.IsNotNull(XamlMetadataProviderGenerated_RegisterTypes_Function.FunctionType);
@@ -219,8 +223,7 @@ public sealed class PGOTests
         Assert.AreEqual(13886u, XamlMetadataProviderGenerated_RegisterTypes_Function.VirtualSize);
     }
 
-    [TestMethod]
-    public async Task ComplexFunctionCanBeParsed()
+    private static async Task ComplexFunctionCanBeParsed(Session MUXSession)
     {
         // Try to get a function with separated blocks, verify things about the function and the blocks
 
@@ -232,7 +235,7 @@ public sealed class PGOTests
         Assert.AreEqual(AccessModifier.Private, FlowLayoutAlgorithm_Generate_Function!.AccessModifier);
         Assert.IsNotNull(FlowLayoutAlgorithm_Generate_Function.ArgumentNames);
         Assert.AreEqual(8, FlowLayoutAlgorithm_Generate_Function.ArgumentNames.Count);
-        Assert.AreEqual(2, FlowLayoutAlgorithm_Generate_Function.Blocks.Count);
+        Assert.AreEqual(2, FlowLayoutAlgorithm_Generate_Function.BlockCount);
         Assert.IsNotNull(FlowLayoutAlgorithm_Generate_Function.FunctionType);
         Assert.IsNotNull(FlowLayoutAlgorithm_Generate_Function.FunctionType.ArgumentTypes);
         Assert.AreEqual(8, FlowLayoutAlgorithm_Generate_Function.FunctionType.ArgumentTypes.Count);
@@ -280,8 +283,7 @@ public sealed class PGOTests
         Assert.AreEqual(0x689u, FlowLayoutAlgorithm_Generate_SeparatedBlock.VirtualSize);
     }
 
-    [TestMethod]
-    public async Task BlocksThatAreCOMDATFoldedCanBeParsedIncludingFrameHandler4XDATA()
+    private async Task BlocksThatAreCOMDATFoldedCanBeParsedIncludingFrameHandler4XDATA(Session MUXSession)
     {
         // Try to get a block that is COMDAT folded across multiple functions - this will expose that ParentFunction is busted, note this and file a bug.  Verify things about that block (size 0, etc.)
         // This block was specifically chosen because it also has __CxxFrameHandler4 metadata so we can validate PGO'd FH4 metadata, for things like chain unwind and separated IpToState tables.
@@ -358,8 +360,7 @@ public sealed class PGOTests
         Assert.AreEqual($"[stateUnwindMap] {AnimatedAcceptVisualSource_AnimatedVisual_ContainerVisual_16_PrimaryBlock.Name}", stateUnwindMap.Name);
     }
 
-    [TestMethod]
-    public async Task LoadSymbolByRVAAlwaysReturnsTheNonCOMDATFoldedSymbol()
+    private static async Task LoadSymbolByRVAAlwaysReturnsTheNonCOMDATFoldedSymbol(Session MUXSession)
     {
         // This RVA has many symbols folded at it, and the one that DIA would find with findSymbolByRVAEx is not the one
         // we choose to attribute the bytes to (because we do the name canonicalization process and ensure we attribute
@@ -376,8 +377,7 @@ public sealed class PGOTests
         Assert.AreEqual(symbol.Name, symbol.CanonicalName);
     }
 
-    [TestMethod]
-    public async Task VTableLengthsAreRightIncludingWhenCOMDATFolded()
+    private async Task VTableLengthsAreRightIncludingWhenCOMDATFolded(Session MUXSession)
     {
         // VTable lengths are super frustrating to get - the vtable SymTagData symbol does not have a length, so we have
         // to go hunting.  If we get it from the data symbol's "sym.type.length" then that is *also* wrong sometimes - it's
@@ -444,8 +444,7 @@ public sealed class PGOTests
         Assert.AreEqual(0u, disambiguatedButFolded.Size);
     }
 
-    [TestMethod]
-    public async Task AllRDataSymbolsCanBeEnumerated()
+    private async Task AllRDataSymbolsCanBeEnumerated(Session MUXSession)
     {
         // During some rigorous testing, I found that the .rdata section of this binary was a good test case for all sorts of potential pitfalls, so let's just make
         // sure we can enumerate all the symbols in .rdata - especially ensuring that the sanity check in EnumerateSymbolsInRVARangeSessionTask passes here.
@@ -455,8 +454,7 @@ public sealed class PGOTests
         Assert.IsTrue(rdataSymbols.Count > 0);
     }
 
-    [TestMethod]
-    public async Task ImportSymbolsCanBeEnumerated()
+    private async Task ImportSymbolsCanBeEnumerated(Session MUXSession)
     {
         // Check a descriptor for an apiset, in case they're weird
         var sections = await MUXSession!.EnumerateBinarySectionsAndCOFFGroups(this.CancellationToken);
@@ -540,16 +538,4 @@ public sealed class PGOTests
         Assert.AreEqual("mincore", placement.Lib!.ShortName);
         Assert.IsNull(placement.SourceFile);
     }
-
-    public static IEnumerable<object[]> DynamicDataSourceForSymbolSourcesSupportedTests_Slimmed => 
-        SymbolSourcesSupportedCommonTests.DynamicDataSourceForSymbolSourcesSupportedTests_Slimmed;
-
-    [TestMethod]
-    [DynamicData(nameof(DynamicDataSourceForSymbolSourcesSupportedTests_Slimmed))]
-    public Task SymbolSourcesSupportedWorks(SymbolSourcesSupported symbolSources) =>
-        SymbolSourcesSupportedCommonTests.VerifyNoUnexpectedSymbolTypesCanBeMaterialized(
-            Path.Combine(this.TestContext!.DeploymentDirectory!, "Microsoft.UI.Xaml.dll"),
-            Path.Combine(this.TestContext!.DeploymentDirectory!, "Microsoft.UI.Xaml.pdb"),
-            symbolSources,
-            this.TestContext.CancellationTokenSource.Token);
 }

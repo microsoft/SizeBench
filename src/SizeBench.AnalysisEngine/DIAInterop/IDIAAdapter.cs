@@ -12,6 +12,7 @@ internal interface IDIAAdapter
     IEnumerable<SourceFile> FindSourceFiles(ILogger logger, CancellationToken token);
     IEnumerable<RVARange> FindRVARangesForSourceFileAndCompiland(SourceFile sourceFile, Compiland compiland, CancellationToken token);
     IEnumerable<MemberDataSymbol> FindAllMemberDataSymbolsWithinUDT(UserDefinedTypeSymbol udt, CancellationToken cancellationToken);
+    IEnumerable<(uint typeId, uint offset)> FindAllBaseTypeIDsForUDT(UserDefinedTypeSymbol udt);
     IEnumerable<StaticDataSymbol> FindAllStaticDataSymbolsWithinCompiland(Compiland compiland, CancellationToken cancellation);
     IEnumerable<IFunctionCodeSymbol> FindAllFunctionsWithinUDT(uint symIndexId, CancellationToken cancellationToken);
     IEnumerable<IFunctionCodeSymbol> FindAllTemplatedFunctions(CancellationToken cancellationToken);
@@ -28,8 +29,6 @@ internal interface IDIAAdapter
     List<InlineSiteSymbol> FindAllInlineSites(CancellationToken cancellationToken);
 
     IEnumerable<(ISymbol symbol, uint amountOfRVARangeExplored)> FindSymbolsInRVARange(RVARange range, CancellationToken cancellationToken);
-
-    SortedList<uint, NameCanonicalization> FindCanonicalNamesForFoldableRVAs(ILogger logger, CancellationToken cancellationToken);
 
     CommandLine FindCommandLineForCompilandByID(uint compilandSymIndexId);
 

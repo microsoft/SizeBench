@@ -11,7 +11,7 @@ public sealed class COFFGroup
     {
         get
         {
-            if (this._fullyConstructed)
+            if (this.IsFullyConstructed)
             {
                 return $"COFF Group: {this.Name}, Section={this.Section?.Name ?? "<none set>"} Size={this.Size:N0}, VirtualSize={this.VirtualSize:N0}, RVA=0x{this.RVA:X}";
             }
@@ -22,7 +22,7 @@ public sealed class COFFGroup
         }
     }
 
-    private bool _fullyConstructed;
+    internal bool IsFullyConstructed { get; private set; }
 
     public string Name { get; }
 
@@ -42,7 +42,7 @@ public sealed class COFFGroup
             // You should not use RawSize past initial construction time - it's a parking
             // ground for the size until we can determine if it's real or virtual.
             // Post-construction-time you should always use Size or VirtualSize.
-            if (this._fullyConstructed)
+            if (this.IsFullyConstructed)
             {
                 throw new ObjectFullyConstructedAlreadyException();
             }
@@ -66,7 +66,7 @@ public sealed class COFFGroup
     {
         get
         {
-            if (!this._fullyConstructed || !this._tailSlopSizeAlignment.HasValue)
+            if (!this.IsFullyConstructed || !this._tailSlopSizeAlignment.HasValue)
             {
                 throw new ObjectNotYetFullyConstructedException();
             }
@@ -90,7 +90,7 @@ public sealed class COFFGroup
     {
         get
         {
-            if (!this._fullyConstructed)
+            if (!this.IsFullyConstructed)
             {
                 throw new ObjectNotYetFullyConstructedException();
             }
@@ -116,7 +116,7 @@ public sealed class COFFGroup
     {
         get
         {
-            if (!this._fullyConstructed)
+            if (!this.IsFullyConstructed)
             {
                 throw new ObjectNotYetFullyConstructedException();
             }
@@ -132,7 +132,7 @@ public sealed class COFFGroup
     {
         get
         {
-            if (!this._fullyConstructed)
+            if (!this.IsFullyConstructed)
             {
                 throw new ObjectNotYetFullyConstructedException();
             }
@@ -146,7 +146,7 @@ public sealed class COFFGroup
     {
         get
         {
-            if (!this._fullyConstructed)
+            if (!this.IsFullyConstructed)
             {
                 throw new ObjectNotYetFullyConstructedException();
             }
@@ -164,7 +164,7 @@ public sealed class COFFGroup
     {
         get
         {
-            if (!this._fullyConstructed)
+            if (!this.IsFullyConstructed)
             {
                 throw new ObjectNotYetFullyConstructedException();
             }
@@ -173,7 +173,7 @@ public sealed class COFFGroup
         }
         internal set
         {
-            if (this._fullyConstructed)
+            if (this.IsFullyConstructed)
             {
                 throw new ObjectFullyConstructedAlreadyException();
             }
@@ -223,6 +223,6 @@ public sealed class COFFGroup
             this._size = this.RawSize;
         }
 
-        this._fullyConstructed = true;
+        this.IsFullyConstructed = true;
     }
 }

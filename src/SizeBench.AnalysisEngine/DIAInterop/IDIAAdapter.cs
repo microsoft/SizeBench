@@ -37,4 +37,5 @@ internal interface IDIAAdapter
     CompilandLanguage LanguageOfSymbolAtRva(uint rva);
 
     uint? LoadPublicSymbolTargetRVAIfPossible(uint rva);
+    List<IMAGE_SECTION_HEADER> FindAllImageSectionHeadersFromPDB(CancellationToken token);
 }

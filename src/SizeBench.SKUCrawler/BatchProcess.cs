@@ -264,6 +264,7 @@ internal sealed class BatchProcess
 
         var symbolsInSourceFilesWatch = Stopwatch.StartNew();
         results.codeSymbolsInAllSourceFiles = new Dictionary<(Compiland compiland, SourceFile sourceFile), List<SKUCrawlerSymbol>>();
+        var primaryBlocksToIgnore = new HashSet<CodeBlockSymbol>();
 
         foreach (var lib in results.libs)
         {
@@ -289,6 +290,7 @@ internal sealed class BatchProcess
                     // mean thousands upon thousands of EnumerateRVARangeSessionTasks objects get spun up and do their work.  That's very slow.
                     // Instead, we enumerate by compiland (only a few hundred of those contain any code), and then here we can fairly quickly group it into source files.
 
+                    primaryBlocksToIgnore.Clear();
                     var sourceFilesThatThisCompilandContributesTo = results.sourceFiles.Where(sf => sf.Size > 0 && sf.CompilandContributions.ContainsKey(compiland));
                     foreach (var sourceFile in sourceFilesThatThisCompilandContributesTo)
                     {
@@ -299,6 +301,14 @@ internal sealed class BatchProcess
                             var symbolsWithBlocksRolledUp = new Dictionary<ISymbol, SKUCrawlerSymbol>();
                             foreach (var symbol in codeSymbolsInThisSourceFileAndCompiland)
                             {
+                                if (symbol is CodeBlockSymbol codeBlock &&
+                                    primaryBlocksToIgnore.Contains(codeBlock))
+                                {
+                                    // We saw the separated block before the primary block, but we already added this so
+                                    // we skip processing when we later see the primary block.
+                                    continue;
+                                }
+
                                 if (symbol is SeparatedCodeBlockSymbol separatedBlock)
                                 {
                                     var parentFunction = separatedBlock.ParentFunction;
@@ -321,7 +331,7 @@ internal sealed class BatchProcess
                                             Size = primaryBlock.Size + separatedBlock.Size
                                         };
                                         symbolsWithBlocksRolledUp.Add(primaryBlock, skuSymbol);
-                                        codeSymbolsInThisSourceFileAndCompiland.Remove(primaryBlock);
+                                        primaryBlocksToIgnore.Add(primaryBlock);
                                     }
                                 }
                                 else if (symbol is PrimaryCodeBlockSymbol primaryBlock)
@@ -830,13 +840,14 @@ internal sealed class BatchProcess
         command.Transaction = transaction;
         command.CommandText =
                             $"INSERT INTO {_ErrorsTableName} " +
-                            $"(BinaryID, ExceptionType, ExceptionMessage) " +
+                            $"(BinaryID, ExceptionType, ExceptionMessage, ExceptionDetails) " +
                             $"VALUES " +
-                            $"(@BinaryID, @ExceptionType, @ExceptionMessage)";
+                            $"(@BinaryID, @ExceptionType, @ExceptionMessage, @ExceptionDetails)";
 
         command.Parameters.AddWithValue("@BinaryID", binaryID);
         command.Parameters.AddWithValue("@ExceptionType", error.GetType().Name);
         command.Parameters.AddWithValue("@ExceptionMessage", error.Message);
+        command.Parameters.AddWithValue("@ExceptionDetails", error.GetFormattedTextForLogging(String.Empty, Environment.NewLine));
         command.ExecuteNonQuery();
     }
 
@@ -1091,6 +1102,7 @@ internal sealed class BatchProcess
                                 "BinaryID INT NOT NULL, " +
                                 "ExceptionType TEXT, " +
                                 "ExceptionMessage TEXT, " +
+                                "ExceptionDetails TEXT, " +
                                 "CONSTRAINT fk_binaries " +
                                 "  FOREIGN KEY (BinaryID) " +
                                $"  REFERENCES {_BinariesTable}(BinaryID) " +

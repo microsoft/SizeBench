@@ -502,6 +502,53 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         return this.DataCache.AllBinarySections;
     }
 
+    public List<IMAGE_SECTION_HEADER> FindAllImageSectionHeadersFromPDB(CancellationToken token)
+    {
+        var sectionHeadersData = this.DiaSession.EnumerateDebugStreamData(token).FirstOrDefault(static data => data.name == "SECTIONHEADERS");
+
+        if (sectionHeadersData is not null)
+        {
+            return WalkSectionHeadersFromPDB(sectionHeadersData, token);
+        }
+        else
+        {
+            return new List<IMAGE_SECTION_HEADER>();
+        }
+    }
+
+    private static List<IMAGE_SECTION_HEADER> WalkSectionHeadersFromPDB(IDiaEnumDebugStreamData enumDebugStreamData,
+                                                                        CancellationToken token)
+    {
+        var handCoded = (IDiaEnumDebugStreamDataHandCoded)enumDebugStreamData;
+
+        var headers = new List<IMAGE_SECTION_HEADER>();
+        var sizeOfOneHeader = Marshal.SizeOf<IMAGE_SECTION_HEADER>();
+        var output = new byte[sizeOfOneHeader];
+
+        var celtSectionHeader = handCoded.Next(1, sizeOfOneHeader, out var bytesRead, output);
+        while (celtSectionHeader == 1 && bytesRead == sizeOfOneHeader)
+        {
+            token.ThrowIfCancellationRequested();
+
+            headers.Add(MarshalSectionHeader(output));
+
+            celtSectionHeader = handCoded.Next(1, sizeOfOneHeader, out bytesRead, output);
+        }
+
+        return headers;
+    }
+
+    private static IMAGE_SECTION_HEADER MarshalSectionHeader(byte[] bytes)
+    {
+        unsafe
+        {
+            fixed (byte* bp = bytes)
+            {
+                return Marshal.PtrToStructure<IMAGE_SECTION_HEADER>((IntPtr)bp);
+            }
+        }
+    }
+
     #endregion
 
     #region Finding COFF Groups

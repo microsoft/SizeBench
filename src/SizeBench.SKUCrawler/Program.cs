@@ -527,6 +527,7 @@ internal static class Program
                                 "BinaryID INT NOT NULL, " +
                                 "ExceptionType TEXT, " +
                                 "ExceptionMessage TEXT, " +
+                                "ExceptionDetails TEXT, " +
                                 "CONSTRAINT fk_binaries " +
                                 "  FOREIGN KEY (BinaryID) " +
                                $"  REFERENCES {_BinariesTable}(BinaryID) " +
@@ -1131,20 +1132,22 @@ internal static class Program
         var reader = queryPerfStats.ExecuteReader();
 
         mergedCommand.CommandText = $"INSERT INTO {_ErrorsTableName} " +
-                                     "(BinaryID, ExceptionType, ExceptionMessage) " +
+                                     "(BinaryID, ExceptionType, ExceptionMessage, ExceptionDetails) " +
                                      "VALUES " +
-                                     "(@BinaryID, @ExceptionType, @ExceptionMessage)";
+                                     "(@BinaryID, @ExceptionType, @ExceptionMessage, @ExceptionDetails)";
 
         mergedCommand.Parameters.Clear();
         mergedCommand.Parameters.AddWithValue("@BinaryID", 0);
         mergedCommand.Parameters.AddWithValue("@ExceptionType", String.Empty);
         mergedCommand.Parameters.AddWithValue("@ExceptionMessage", String.Empty);
+        mergedCommand.Parameters.AddWithValue("@ExceptionDetails", String.Empty);
 
         while (reader.Read())
         {
             mergedCommand.Parameters["@BinaryID"].Value = binaryIDMappings[Convert.ToInt32(reader["BinaryID"], CultureInfo.InvariantCulture)];
             mergedCommand.Parameters["@ExceptionType"].Value = reader["ExceptionType"];
             mergedCommand.Parameters["@ExceptionMessage"].Value = reader["ExceptionMessage"];
+            mergedCommand.Parameters["@ExceptionDetails"].Value = reader["ExceptionDetails"];
             mergedCommand.ExecuteNonQuery();
         }
     }

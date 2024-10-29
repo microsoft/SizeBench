@@ -79,17 +79,28 @@ internal sealed partial class PEFile : IPEFile
         using (var stream = File.OpenRead(originalBinaryPathMayBeRemote))
         {
             stream.Read(bytes);
-        }
 
-        fixed (byte* pBytes = bytes)
-        {
-            var headerPtr = new IntPtr(pBytes);
-            var dosHeader = Marshal.PtrToStructure<IMAGE_DOS_HEADER>(headerPtr);
-            Debug.Assert(dosHeader.isValid);
+            IMAGE_DOS_HEADER dosHeader;
+            fixed (byte* pBytes = bytes)
+            {
+                var headerPtr = new IntPtr(pBytes);
+                dosHeader = Marshal.PtrToStructure<IMAGE_DOS_HEADER>(headerPtr);
+                Debug.Assert(dosHeader.isValid);
+            }
 
-            var ntHeaderPtr = new IntPtr(pBytes + dosHeader.e_lfanew);
-            var headers32 = Marshal.PtrToStructure<IMAGE_NT_HEADERS32>(ntHeaderPtr);
-            this._hasForceIntegrityBitSet = headers32.OptionalHeader.DllCharacteristics.HasFlag(DllCharacteristicsType.IMAGE_DLLCHARACTERISTICS_FORCE_INTEGRITY);
+            // The DOS header must be in the first 4k bytes easily, but the e_lfanew could point to a location
+            // arbitrarily within the binary, such as a binary that has a custom DOS stub (with /stub on the MSVC link line).
+            // So, we need to read the bytes again starting from there, in case it may be located way in the binary.
+            bytes.Clear();
+            stream.Seek(dosHeader.e_lfanew, SeekOrigin.Begin);
+            stream.Read(bytes);
+
+            fixed (byte* pBytes = bytes)
+            {
+                var ntHeaderPtr = new IntPtr(pBytes);
+                var headers32 = Marshal.PtrToStructure<IMAGE_NT_HEADERS32>(ntHeaderPtr);
+                this._hasForceIntegrityBitSet = headers32.OptionalHeader.DllCharacteristics.HasFlag(DllCharacteristicsType.IMAGE_DLLCHARACTERISTICS_FORCE_INTEGRITY);
+            }
         }
 
         this.GuaranteedLocalCopyOfBinary = new GuaranteedLocalFile(originalBinaryPathMayBeRemote, taskLog, forceLocalCopy: this._hasForceIntegrityBitSet, openDeleteOnCloseStreamImmediately: false);

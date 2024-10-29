@@ -308,4 +308,7 @@ internal class TestDIAAdapter : IDIAAdapter
 
     public uint? LoadPublicSymbolTargetRVAIfPossible(uint rva)
         => throw new NotImplementedException();
+
+    public List<IMAGE_SECTION_HEADER> FindAllImageSectionHeadersFromPDB(CancellationToken token) 
+        => throw new NotImplementedException();
 }

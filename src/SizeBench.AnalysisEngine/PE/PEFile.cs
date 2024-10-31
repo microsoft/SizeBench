@@ -14,6 +14,13 @@ namespace SizeBench.AnalysisEngine.PE;
 
 internal sealed partial class PEFile : IPEFile
 {
+    private const ushort MAGIC_DOS = 0x5A4D; // "MZ"
+    private const ushort MAGIC_OS2 = 0x454E; // "NE"
+    private const ushort MAGIC_OS2_LE_OR_VXD = 0x454C; // "LE" for "linear executable".  This is also re-used for VXD.
+    private const ushort MAGIC_PE = 0x4550; // "PE"
+    private const ushort MAGIC_TE = 0x5A56; // "VZ" for "terse executable"
+    private const ushort MAGIC_LX = 0x584C; // "LX" for IBM OS/2 2.0 "linear executable"
+
     private readonly IntPtr _library = IntPtr.Zero;
     private readonly unsafe byte* _libraryBaseAddress = null;
     private readonly ulong _libraryPreferredLoadAddress;
@@ -21,8 +28,10 @@ internal sealed partial class PEFile : IPEFile
     private RVARangeSet? _delayLoadImportStringsRVARangeSet;
     private RVARangeSet? _delayLoadModuleHandlesRVARangeSet;
 
-    // The TempFile will only exist if _hasForceIntegrityBitSet == true
+    // The TempFile will only exist if _hasForceIntegrityBitSet == true, or we're
+    // trying to analyze a binary with a subsystem that can't be LoadLibrary'd
     private readonly bool _hasForceIntegrityBitSet;
+    private readonly SubSystemType _imageSubsystem;
     internal GuaranteedLocalFile GuaranteedLocalCopyOfBinary { get; }
 
 
@@ -97,18 +106,32 @@ internal sealed partial class PEFile : IPEFile
 
             fixed (byte* pBytes = bytes)
             {
+                // Read the "magic" bytes to determine if this is a PE file or something ancient like a New Executable (NE).
+                var magic = *(ushort*)pBytes;
+                ThrowIfUnsupportedMagic(magic, logger);
+
                 var ntHeaderPtr = new IntPtr(pBytes);
                 var headers32 = Marshal.PtrToStructure<IMAGE_NT_HEADERS32>(ntHeaderPtr);
                 this._hasForceIntegrityBitSet = headers32.OptionalHeader.DllCharacteristics.HasFlag(DllCharacteristicsType.IMAGE_DLLCHARACTERISTICS_FORCE_INTEGRITY);
+                this._imageSubsystem = headers32.OptionalHeader.Subsystem;
             }
         }
 
-        this.GuaranteedLocalCopyOfBinary = new GuaranteedLocalFile(originalBinaryPathMayBeRemote, taskLog, forceLocalCopy: this._hasForceIntegrityBitSet, openDeleteOnCloseStreamImmediately: false);
+        var shouldForceLocalCopy = this._hasForceIntegrityBitSet ||
+                                   HasSubsystemThatCannotLoadLibrary(this._imageSubsystem);
+
+        this.GuaranteedLocalCopyOfBinary = new GuaranteedLocalFile(originalBinaryPathMayBeRemote, taskLog, shouldForceLocalCopy, openDeleteOnCloseStreamImmediately: false);
 
         if (this._hasForceIntegrityBitSet)
         {
             taskLog.Log("IMAGE_DLLCHARACTERISTICS_FORCE_INTEGRITY is set, unsetting this bit to allow us to load it.");
             StripForceIntegrityBit(taskLog);
+        }
+
+        if (HasSubsystemThatCannotLoadLibrary(this._imageSubsystem))
+        {
+            taskLog.Log($"This binary has a Subsystem that cannot successfully be used with LoadLibraryExW (It has {this._imageSubsystem}).  Rewriting this to another subsystem just for analysis purposes.");
+            RewriteSubsystem(taskLog);
         }
 
         this.GuaranteedLocalCopyOfBinary.OpenDeleteOnCloseStreamIfCopiedLocally();
@@ -253,6 +276,32 @@ internal sealed partial class PEFile : IPEFile
 
         this.OtherPESymbolsRVARanges = RVARangeSet.FromListOfRVARanges(otherPESymbolRanges, maxPaddingToMerge: 16);
     }
+
+    private static void ThrowIfUnsupportedMagic(ushort magic, ILogger logger)
+    {
+        switch (magic)
+        {
+            case MAGIC_DOS:
+                throw new BinaryNotAnalyzableException("This is a DOS executable.  SizeBench doesn't support analyzing this kind of binary.");
+            case MAGIC_OS2:
+                throw new BinaryNotAnalyzableException("This is an OS/2 executable.  SizeBench doesn't support analyzing this kind of binary.");
+            case MAGIC_OS2_LE_OR_VXD:
+                throw new BinaryNotAnalyzableException("This is an OS/2 linear executable (LE) or VXD executable.  SizeBench doesn't support analyzing this kind of binary.");
+            case MAGIC_TE:
+                throw new BinaryNotAnalyzableException("This is a terse executable (TE).  SizeBench doesn't support analyzing this kind of binary.");
+            case MAGIC_LX:
+                throw new BinaryNotAnalyzableException("This is an OS/2 2.0 linear executable (LX).  SizeBench doesn't support analyzing this kind of binary.");
+            case MAGIC_PE:
+                // This is what we want, so do nothing.
+                return;
+            default:
+                logger.Log($"A new kind of binary 'magic' has been found in the new header.  This may not go well, but we'll let it try to load.  Magic: 0x{magic:X}");
+                break;
+        }
+    }
+
+    private static bool HasSubsystemThatCannotLoadLibrary(SubSystemType subsystem)
+        => subsystem == SubSystemType.IMAGE_SUBSYSTEM_WINDOWS_BOOT_APPLICATION;
 
     private void AddDirectorySymbolIfPresent(DirectoryEntry dataDirectory, string name)
     {
@@ -724,18 +773,11 @@ internal sealed partial class PEFile : IPEFile
             }
         }
 
-        // Calculate the new checksum since we changed the header
-        var result = PInvokes.MapFileAndCheckSumW(this.GuaranteedLocalCopyOfBinary.GuaranteedLocalPath, out var _ /* originalChecksum - unused */, out var newChecksum);
+        UpdateChecksumAfterMutatingBinary(taskLog);
+    }
 
-        if (result != PInvokes.MapFileAndCheckSumWResult.CHECKSUM_SUCCESS)
-        {
-            // Sometimes even if we fail to change the checksum we can still load things, so we'll log this as a warning and just continue trying to
-            // load stuff into memory.  Maybe it'll work.
-            taskLog.Log($"Unable to change the checksum after writing out the change to IMAGE_DLLCHARACTERISTICS_FORCE_INTEGRITY.  Error was: {result}", LogLevel.Warning);
-            return;
-        }
-
-        // Write the new checksum into the file
+    private void RewriteSubsystem(ILogger taskLog)
+    {
         using (var memoryMappedFile = MemoryMappedFile.CreateFromFile(this.GuaranteedLocalCopyOfBinary.GuaranteedLocalPath, FileMode.Open, null, 0, MemoryMappedFileAccess.ReadWrite))
         {
             IMAGE_DOS_HEADER dosHeader;
@@ -748,7 +790,7 @@ internal sealed partial class PEFile : IPEFile
                 Debug.Assert(dosHeader.isValid);
             }
 
-            // Conveniently, the CheckSum field that we're interested in unsetting is in a part of the optional header that's at the same
+            // Conveniently, the fields that we're interested in changing are part of the optional header that's at the same
             // offset for 32-bit and 64-bit binaries so we'll just use the 32-bit header structure and it'll be ok.
             IMAGE_NT_HEADERS32 headers32;
             using (var ntHeadersStream = memoryMappedFile.CreateViewStream(offset: dosHeader.e_lfanew, size: Marshal.SizeOf<IMAGE_NT_HEADERS32>()))
@@ -759,15 +801,85 @@ internal sealed partial class PEFile : IPEFile
                 var handle = GCHandle.Alloc(headers32Bytes, GCHandleType.Pinned);
                 headers32 = Marshal.PtrToStructure<IMAGE_NT_HEADERS32>(handle.AddrOfPinnedObject());
 
-                // By the time we get here, this bit should be unset!
-                Debug.Assert(false == headers32.OptionalHeader.DllCharacteristics.HasFlag(DllCharacteristicsType.IMAGE_DLLCHARACTERISTICS_FORCE_INTEGRITY));
+                // We should have only ever gotten into this function if the subsystem is one we don't expect to successfully LoadLibrary.
+                Debug.Assert(HasSubsystemThatCannotLoadLibrary(headers32.OptionalHeader.Subsystem));
 
                 // Seek to the beginning of the OptionalHeader first
                 ntHeadersWriter.Seek(Marshal.OffsetOf<IMAGE_NT_HEADERS32>(nameof(IMAGE_NT_HEADERS32.OptionalHeader)).ToInt32(), SeekOrigin.Begin);
-                // Then seek into the CheckSum field
-                ntHeadersWriter.Seek(Marshal.OffsetOf<IMAGE_OPTIONAL_HEADER32>(nameof(IMAGE_OPTIONAL_HEADER32.CheckSum)).ToInt32(), SeekOrigin.Current);
-                ntHeadersWriter.Write(newChecksum);
+                // Then seek into the Subsystem field
+                ntHeadersWriter.Seek(Marshal.OffsetOf<IMAGE_OPTIONAL_HEADER32>(nameof(IMAGE_OPTIONAL_HEADER32.Subsystem)).ToInt32(), SeekOrigin.Current);
+                ntHeadersWriter.Write((ushort)SubSystemType.IMAGE_SUBSYSTEM_WINDOWS_CUI);
+
+                // We also need to rewrite the OS version and image version since they can be 0 which still triggers ERROR_BAD_EXE_FORMAT in LoadLibrary
+                ntHeadersWriter.Seek(Marshal.OffsetOf<IMAGE_NT_HEADERS32>(nameof(IMAGE_NT_HEADERS32.OptionalHeader)).ToInt32(), SeekOrigin.Begin);
+                ntHeadersWriter.Seek(Marshal.OffsetOf<IMAGE_OPTIONAL_HEADER32>(nameof(IMAGE_OPTIONAL_HEADER32.MajorOperatingSystemVersion)).ToInt32(), SeekOrigin.Current);
+                // The 4 bytes here are major version (2 bytes) and minor version (2 bytes).
+                // We'll just pick 10.00 somewhat arbitrarily (this matches what Windows OS binaries set for Win10+)
+                ntHeadersWriter.Write((ushort)10);
+                ntHeadersWriter.Write((ushort)0);
+
+                ntHeadersWriter.Seek(Marshal.OffsetOf<IMAGE_NT_HEADERS32>(nameof(IMAGE_NT_HEADERS32.OptionalHeader)).ToInt32(), SeekOrigin.Begin);
+                ntHeadersWriter.Seek(Marshal.OffsetOf<IMAGE_OPTIONAL_HEADER32>(nameof(IMAGE_OPTIONAL_HEADER32.MajorImageVersion)).ToInt32(), SeekOrigin.Current);
+                // Similarly these 4 bytes are major/minor image version.  We'll just pick 10.00 again.
+                ntHeadersWriter.Write((ushort)10);
+                ntHeadersWriter.Write((ushort)0);
+
+                // We also rewrite the characteristics to allow it to load - perhaps we should only do this if characteristics is 0?
+                ntHeadersWriter.Seek(Marshal.OffsetOf<IMAGE_NT_HEADERS32>(nameof(IMAGE_NT_HEADERS32.OptionalHeader)).ToInt32(), SeekOrigin.Begin);
+                ntHeadersWriter.Seek(Marshal.OffsetOf<IMAGE_OPTIONAL_HEADER32>(nameof(IMAGE_OPTIONAL_HEADER32.DllCharacteristics)).ToInt32(), SeekOrigin.Current);
+                ntHeadersWriter.Write((ushort)DllCharacteristicsType.IMAGE_DLLCHARACTERISTICS_HIGH_ENTROPY_VA |
+                                      (ushort)DllCharacteristicsType.IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE |
+                                      (ushort)DllCharacteristicsType.IMAGE_DLLCHARACTERISTICS_NX_COMPAT);
             }
+        }
+
+        UpdateChecksumAfterMutatingBinary(taskLog);
+    }
+
+    private void UpdateChecksumAfterMutatingBinary(ILogger taskLog)
+    {
+        // Calculate the new checksum since we changed the header
+        var result = PInvokes.MapFileAndCheckSumW(this.GuaranteedLocalCopyOfBinary.GuaranteedLocalPath, out var _ /* originalChecksum - unused */, out var newChecksum);
+
+        if (result != PInvokes.MapFileAndCheckSumWResult.CHECKSUM_SUCCESS)
+        {
+            // Sometimes even if we fail to change the checksum we can still load things, so we'll log this as a warning and just continue trying to
+            // load stuff into memory.  Maybe it'll work.
+            taskLog.Log($"Unable to change the checksum after writing out the change to IMAGE_DLLCHARACTERISTICS_FORCE_INTEGRITY.  Error was: {result}", LogLevel.Warning);
+            return;
+        }
+
+        // Write the new checksum into the file
+        using var memoryMappedFile = MemoryMappedFile.CreateFromFile(this.GuaranteedLocalCopyOfBinary.GuaranteedLocalPath, FileMode.Open, null, 0, MemoryMappedFileAccess.ReadWrite);
+        IMAGE_DOS_HEADER dosHeader;
+        using (var dosHeaderStream = memoryMappedFile.CreateViewStream(offset: 0, size: Marshal.SizeOf<IMAGE_DOS_HEADER>()))
+        using (var dosHeaderReader = new BinaryReader(dosHeaderStream))
+        {
+            var dosHeaderBytes = dosHeaderReader.ReadBytes(Marshal.SizeOf<IMAGE_DOS_HEADER>());
+            var handle = GCHandle.Alloc(dosHeaderBytes, GCHandleType.Pinned);
+            dosHeader = Marshal.PtrToStructure<IMAGE_DOS_HEADER>(handle.AddrOfPinnedObject());
+            Debug.Assert(dosHeader.isValid);
+        }
+
+        // Conveniently, the CheckSum field that we're interested in unsetting is in a part of the optional header that's at the same
+        // offset for 32-bit and 64-bit binaries so we'll just use the 32-bit header structure and it'll be ok.
+        IMAGE_NT_HEADERS32 headers32;
+        using (var ntHeadersStream = memoryMappedFile.CreateViewStream(offset: dosHeader.e_lfanew, size: Marshal.SizeOf<IMAGE_NT_HEADERS32>()))
+        using (var ntHeadersReader = new BinaryReader(ntHeadersStream))
+        using (var ntHeadersWriter = new BinaryWriter(ntHeadersStream))
+        {
+            var headers32Bytes = ntHeadersReader.ReadBytes(Marshal.SizeOf<IMAGE_NT_HEADERS32>());
+            var handle = GCHandle.Alloc(headers32Bytes, GCHandleType.Pinned);
+            headers32 = Marshal.PtrToStructure<IMAGE_NT_HEADERS32>(handle.AddrOfPinnedObject());
+
+            // By the time we get here, this bit should be unset!
+            Debug.Assert(false == headers32.OptionalHeader.DllCharacteristics.HasFlag(DllCharacteristicsType.IMAGE_DLLCHARACTERISTICS_FORCE_INTEGRITY));
+
+            // Seek to the beginning of the OptionalHeader first
+            ntHeadersWriter.Seek(Marshal.OffsetOf<IMAGE_NT_HEADERS32>(nameof(IMAGE_NT_HEADERS32.OptionalHeader)).ToInt32(), SeekOrigin.Begin);
+            // Then seek into the CheckSum field
+            ntHeadersWriter.Seek(Marshal.OffsetOf<IMAGE_OPTIONAL_HEADER32>(nameof(IMAGE_OPTIONAL_HEADER32.CheckSum)).ToInt32(), SeekOrigin.Current);
+            ntHeadersWriter.Write(newChecksum);
         }
     }
 
@@ -1244,8 +1356,14 @@ internal sealed partial class PEFile : IPEFile
     {
         if (!this._isDisposed)
         {
-            this.PEReader.Dispose();
-            PInvokes.FreeLibrary(this._library);
+            // PEReader can be null if we fail to begin loading the binary (such as for a New Executable)
+            this.PEReader?.Dispose();
+
+            // Only free the library if we ever got it loaded
+            if (this._library != IntPtr.Zero)
+            {
+                PInvokes.FreeLibrary(this._library);
+            }
 
             this.GuaranteedLocalCopyOfBinary?.Dispose();
 

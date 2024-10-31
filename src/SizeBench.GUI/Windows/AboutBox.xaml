@@ -4,6 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:controls="clr-namespace:SizeBench.GUI.Controls"
         xmlns:navigationControls="clr-namespace:SizeBench.GUI.Controls.Navigation"
         xmlns:navigation="clr-namespace:SizeBench.GUI.Navigation"
         xmlns:local="clr-namespace:SizeBench.GUI.Windows"
@@ -43,8 +44,7 @@
             <Label Content="{x:Static local:AboutBox.Product}" />
             <StackPanel Orientation="Horizontal">
                 <Label Content="Version - " />
-                <Label Content="{x:Static local:AboutBox.Version}" />
-                <Label Content="{x:Static local:AboutBox.InformationalVersion}" />
+                <controls:SelectableTextBlock Text="{x:Static local:AboutBox.VersionAndInformationalVersion}"/>
             </StackPanel>
             <Label Content="{x:Static local:AboutBox.Copyright}"  />
             <Label Content="{x:Static local:AboutBox.Company}" />

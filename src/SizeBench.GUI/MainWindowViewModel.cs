@@ -317,7 +317,7 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
         var container = new WindsorContainer();
         var newTab = new BinaryDiffTab(diffSession, container);
 
-        container.Install(FromAssembly.InDirectory(new AssemblyFilter(".", "SizeBench.*")));
+        container.Install(FromAssembly.InDirectory(new AssemblyFilter(".", "SizeBench.*dll")));
         container.Register(CastleReg.Component.For<IDiffSession, ISessionWithProgress>()
                                               .Instance(diffSession)
                                               .LifestyleSingleton());

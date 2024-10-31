@@ -91,10 +91,13 @@ public partial class AboutBox : Window
             }
             else
             {
-                return $" (git commit: {informationalVersion[1]})";
+                return $"(git commit: {informationalVersion[1]})";
             }
         }
     }
+
+    public static string VersionAndInformationalVersion
+        => $"{Version} {InformationalVersion}";
 
     /// <summary>
     /// Gets the description about the application.

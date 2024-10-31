@@ -105,7 +105,7 @@ internal static class Program
         if (crawlArgs.IsBatch)
         {
             _logFilenameBase = Path.Combine(crawlArgs.OutputFolder, $"SizeBench.SKUCrawler-{crawlArgs.TimestampOfMaster}-batch{crawlArgs.BatchNumber}");
-            await Console.Out.WriteLineAsync($"Batch process started!  Batch number={crawlArgs.BatchNumber}, outputting to {_logFilenameBase}");
+            await Console.Out.WriteLineAsync($"Batch process started!  Batch number={crawlArgs.BatchNumber}, PID={Environment.ProcessId}, outputting to {_logFilenameBase}");
         }
         else if (crawlArgs.IsMasterController)
         {

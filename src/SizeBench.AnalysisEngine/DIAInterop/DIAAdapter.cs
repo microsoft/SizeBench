@@ -1119,15 +1119,16 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             parentSymbol = parentSymbol.lexicalParent;
         }
 
+        IFunctionCodeSymbol function;
         if (parentSymbol != null && (SymTagEnum)parentSymbol.symTag == SymTagEnum.SymTagFunction)
         {
             // This will in turn parse all the blocks for the function
             // This may be a Complex function with primary and separated blocks (if MSVC arrived here),
             // or this may be a Simple function when clang generates code as it can generate a lone
             // SymTagBlock under a function.
-            var function = GetOrCreateFunctionSymbol(parentSymbol, cancellationToken);
+            function = GetOrCreateFunctionSymbol(parentSymbol, cancellationToken);
 
-            // If we found a simple function, we'll return it right away.  We only go further for MSVC
+            // If we found a simple function, we'll return it right away.  We only go further
             // when we need to find the block within the complex function.
             if (function is SimpleFunctionCodeSymbol simpleFn)
             {
@@ -1139,9 +1140,49 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             throw new InvalidOperationException("We've found a separated block that does not have a function as its parent - how is this possible?  This is a bug in SizeBench's implementation, not your use of it.");
         }
 
-        var block = (CodeBlockSymbol)this.DataCache.AllSymbolsBySymIndexId[diaSymbol.symIndexId];
-        Debug.Assert(!String.IsNullOrEmpty(block.Name));
-        return block;
+        CodeBlockSymbol? parsedBlock = null;
+        if (this.DataCache.AllSymbolsBySymIndexId.TryGetValue(diaSymbol.symIndexId, out var existingBlock))
+        {
+            parsedBlock = (CodeBlockSymbol)existingBlock;
+        }
+        else
+        {
+            // In some cases, LLD has been seen to emit PDBs where functions can look like this:
+            // Primary Block: 0x25E94A-0x25EC39, with SymIndexId = X
+            //  findChildren for SymTagBlock on that SymTagFunction:
+            //    Separated Block: 0x25EBC9-0x25EC39 (fully overlaps with primary), with SymIndexId = Y
+            //    Separated Block: 0xE0741C0-0xE0741D1, with SymIndexId = Z
+            // Then we end up in this path and find a different block like this:
+            //    Block: 0x25EBDE-0x25EC39 (again fully overlaps with primary), with SymIndexId = A
+            //
+            // So, the problem is - we asked the function for all its child block symbols and we somehow didn't
+            // find this one, but it does in fact overlap with another block we *did* find.  This is *probably*
+            // a bug in LLD's PDB generation, but we'll try to compensate here by looking through all the blocks
+            // in the parent function we found, and if any of them fully contains this symbol, we'll just return
+            // that block.
+            var blockRangeToFind = RVARange.FromRVAAndSize(diaSymbol.relativeVirtualAddress, (uint)diaSymbol.length);
+            foreach (var block in function.Blocks)
+            {
+                var blockRange = new RVARange(block.RVA, block.RVAEnd);
+                if (blockRange.Contains(blockRangeToFind))
+                {
+                    // We'll just return this block instead of creating a new one that overlaps it.
+                    parsedBlock = block;
+                    // But we'll also cache this SymIndexId to point to this block so if anyone else looks it up
+                    // by SymIndexId they'll find the right thing.
+                    this.DataCache.AllSymbolsBySymIndexId[diaSymbol.symIndexId] = parsedBlock;
+                    break;
+                }
+            }
+        }
+
+        if (parsedBlock is null)
+        {
+            throw new InvalidOperationException($"Failed to parse block symbol for block with RVA=0x{diaSymbol.relativeVirtualAddress:X}, SymIndexID={diaSymbol.symIndexId}.");
+        }
+
+        Debug.Assert(!String.IsNullOrEmpty(parsedBlock.Name));
+        return parsedBlock;
     }
 
     private InlineSiteSymbol GetOrCreateInlineSiteSymbol(IDiaSymbol diaSymbol, CancellationToken cancellationToken)
@@ -1816,7 +1857,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
     {
         ThrowIfOnWrongThread();
 
-        ISymbol? previousNonFoldedSymbolYielded = null;
+        Symbol? previousNonFoldedSymbolYielded = null;
 
         if (this.DataCache.TryFindSymIndicesInRVARange(range, out var symIndicesByRVA, out var minIdx, out var maxIdx))
         {

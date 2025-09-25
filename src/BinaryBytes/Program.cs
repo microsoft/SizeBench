@@ -248,7 +248,7 @@ public static class Program
     /// Given a COFF group and a list of symbols in that group, this routine identifies all the Padding bytes and
     /// the actual symbols bytes in the COFF group and marks them appropriately.
     /// </summary>
-    private static void IdentifyPaddingAroundSymbols(IReadOnlyList<ISymbol> symbols, COFFGroup coffgroup, Dictionary<uint, SymbolContributor> rvaToContributorMap, List<BytesItem> bytesItems)
+    private static void IdentifyPaddingAroundSymbols(List<ISymbol> symbols, COFFGroup coffgroup, Dictionary<uint, SymbolContributor> rvaToContributorMap, List<BytesItem> bytesItems)
     {
         // Is there gap at the start of this COFF group?
         var startingByteOfCoffgroup = coffgroup.RVA;
@@ -279,7 +279,7 @@ public static class Program
 
         // Is there gap at the end of this COFF group?
         ulong endingByteOfCoffgroup = coffgroup.RVA + coffgroup.VirtualSize;
-        var endingByteOfLastSymbol = symbols[symbols.Count - 1].RVA + symbols[symbols.Count - 1].VirtualSize;
+        var endingByteOfLastSymbol = symbols[^1].RVA + symbols[^1].VirtualSize;
         if (endingByteOfCoffgroup != endingByteOfLastSymbol && endingByteOfCoffgroup > endingByteOfLastSymbol)
         {
             bytesItems.Add(Utilities.CreatePaddingBytesItem(Constants.CoffgroupEndPadding, coffgroup.Name,

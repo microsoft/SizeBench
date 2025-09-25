@@ -111,7 +111,7 @@ internal sealed class EnumerateSourceFilesSessionTask : SessionTask<List<SourceF
     }
 
     private void ParseSourceFile(SourceFile sourceFile,
-                                 IReadOnlyList<COFFGroup> coffGroups)
+                                 List<COFFGroup> coffGroups)
     {
         foreach (var compilandUsingThisSourceFile in sourceFile._compilands)
         {

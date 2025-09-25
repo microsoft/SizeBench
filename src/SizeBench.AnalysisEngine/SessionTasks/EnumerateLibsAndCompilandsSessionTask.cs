@@ -92,7 +92,7 @@ internal sealed class EnumerateLibsAndCompilandsSessionTask : SessionTask<HashSe
     private void ParseSectionContrib(RawSectionContribution sectionContrib,
                                      Dictionary<string, Library> libs,
                                      HashSet<Compiland> compilands,
-                                     IReadOnlyList<COFFGroup> coffGroups)
+                                     List<COFFGroup> coffGroups)
     {
 
         // If this RVA range is inside the PDATA region, it is not going to be correct anyway.  There was a bug

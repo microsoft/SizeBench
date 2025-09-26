@@ -49,7 +49,7 @@ tools, at a minimum. You'll also need to install these additional _Individual co
  - Windows 10 SDK (10.0.15063.0) for Desktop C++ [x86 and x64]. This can be downloaded from 
    [here](https://developer.microsoft.com/en-us/windows/downloads/sdk-archive/) if it does not 
    show up in your version of the Visual Studio Installer.
- - Windows 10 SDK (10.0.20348.0). This contains the support for building the MSIX packaging project.
+ - Windows 10 SDK (10.0.26100.0). This contains the support for building the MSIX packaging project.
 
 Once you open the SizeBench.sln Solution, you should build it once to be sure everything seems to be set
 up right.  If you hit issues, file an issue and we'll help you out. Then, do the following:

@@ -85,6 +85,7 @@ internal sealed class EnumerateLibsAndCompilandDiffsSessionTask : DiffSessionTas
             // First try matching on the name exactly
             var matchingAfterLib = afterLibsToProcess.FirstOrDefault(afterLib => String.Equals(beforeLib.Name, afterLib.Name, StringComparison.OrdinalIgnoreCase));
 
+#pragma warning disable IDE0270 // Use coalesce expression - this doesn't work because of the #if DEBUG part, so it hits in Release but is a mess to format for both flavors
             if (matchingAfterLib is null)
             {
                 // If that failed, try matching on IsVeryLikelyTheSameAs, which is more generous.  This two-phase attempt is unfortunately
@@ -113,6 +114,7 @@ internal sealed class EnumerateLibsAndCompilandDiffsSessionTask : DiffSessionTas
                 }
 #endif
             }
+#pragma warning restore IDE0270 // Use coalesce expression
 
             libDiffs.Add(new LibDiff(beforeLib, matchingAfterLib, this.DataCache.AllBinarySectionDiffs!, this.DataCache));
 

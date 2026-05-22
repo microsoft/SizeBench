@@ -52,6 +52,14 @@ public class WindsorInstaller : IWindsorInstaller
                                     .Instance(new SessionFactory())
                                     .LifestyleSingleton());
 
+        container.Register(Component.For<IRecentSessionStore>()
+                                    .ImplementedBy<RecentSessionStore>()
+                                    .LifestyleSingleton());
+
+        container.Register(Component.For<IRecentSessionLauncher>()
+                                    .ImplementedBy<RecentSessionLauncher>()
+                                    .LifestyleSingleton());
+
         container.Register(Classes.FromAssembly(typeof(MainWindow).Assembly)
                                   .IncludeNonPublicTypes()
                                   .Where(c => c.Name.EndsWith("ViewModel", StringComparison.Ordinal) &&

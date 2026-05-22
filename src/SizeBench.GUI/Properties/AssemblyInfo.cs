@@ -26,3 +26,4 @@ using System.Windows;
 
 [assembly: InternalsVisibleTo("SizeBench.GUI.Tests")]
 [assembly: InternalsVisibleTo("SizeBench.GUI.RealPETests")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]

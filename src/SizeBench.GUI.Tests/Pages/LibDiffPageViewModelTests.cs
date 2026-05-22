@@ -47,20 +47,24 @@ public sealed class LibDiffPageViewModelTests : IDisposable
             });
         var initTask = viewmodel.InitializeAsync();
 
-        var propertyNameResult = String.Empty;
+        var sawSymbolDiffsPropertyChange = false;
 
         viewmodel.PropertyChanged += (s, e) =>
         {
-            propertyNameResult = e.PropertyName;
-            tcsTestResultsComplete.SetResult(new object());
+            if (e.PropertyName == nameof(LibDiffPageViewModel.SymbolDiffs))
+            {
+                sawSymbolDiffsPropertyChange = true;
+                tcsTestResultsComplete.TrySetResult(new object());
+            }
         };
 
         tcsSymbolsReady.SetResult(allSymbolDiffsInLibDiff);
         await tcsTestResultsComplete.Task;
         await initTask;
 
-        Assert.AreEqual(nameof(LibDiffPageViewModel.SymbolDiffs), propertyNameResult);
+        Assert.IsTrue(sawSymbolDiffsPropertyChange);
         CollectionAssert.AreEqual(allSymbolDiffsInLibDiff, viewmodel.SymbolDiffs!.ToList());
+        Assert.AreEqual(allSymbolDiffsInLibDiff.Count, viewmodel.FilteredSymbolDiffs!.Cast<SymbolDiff>().Count());
     }
 
     [Timeout(1000 * 5)] // 5s
@@ -90,7 +94,10 @@ public sealed class LibDiffPageViewModelTests : IDisposable
 
         viewmodel.ExportSymbolsToExcelCommand.Execute();
 
-        this.MockUITaskScheduler.Verify(uits => uits.StartExcelExport(this.MockExcelExporter.Object, allSymbolsInLibDiff), Times.Exactly(1));
+        this.MockUITaskScheduler.Verify(uits => uits.StartExcelExport(this.MockExcelExporter.Object,
+                                                                      It.Is<IReadOnlyList<SymbolDiff>>(symbols => symbols.Count == allSymbolsInLibDiff.Count &&
+                                                                                                                  !symbols.Except(allSymbolsInLibDiff).Any())),
+                                        Times.Exactly(1));
     }
 
     public void Dispose() => this.TestDataGenerator.Dispose();

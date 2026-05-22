@@ -239,6 +239,7 @@ public sealed class BinarySectionDiffPageViewModelTests : IDisposable
         await tcsTestResultsComplete.Task;
 
         CollectionAssert.AreEquivalent(allSymbolDiffsInBinarySection, viewmodel.Symbols);
+        Assert.AreEqual(allSymbolDiffsInBinarySection.Count, viewmodel.FilteredSymbolDiffs!.Cast<SymbolDiff>().Count());
 
         // We should have started 2 long-running tasks, one for the binary section load and one for the symbols
         this.MockUITaskScheduler.Verify(uits => uits.StartLongRunningUITask(It.IsAny<string>(), It.IsAny<Func<CancellationToken, Task>>()), Times.Exactly(2));
@@ -338,7 +339,10 @@ public sealed class BinarySectionDiffPageViewModelTests : IDisposable
         viewmodel.SelectedTab = (int)BinarySectionPageViewModel.BinarySectionPageTabIndex.SymbolsTab;
         Assert.IsTrue(viewmodel.ExportSymbolsToExcelCommand.CanExecute());
         viewmodel.ExportSymbolsToExcelCommand.Execute();
-        this.MockUITaskScheduler.Verify(uits => uits.StartExcelExport(this.MockExcelExporter.Object, allSymbolDiffsInBinarySection), Times.Exactly(1));
+        this.MockUITaskScheduler.Verify(uits => uits.StartExcelExport(this.MockExcelExporter.Object,
+                                                                      It.Is<IReadOnlyList<SymbolDiff>>(symbols => symbols.Count == allSymbolDiffsInBinarySection.Count &&
+                                                                                                                  !symbols.Except(allSymbolDiffsInBinarySection).Any())),
+                                        Times.Exactly(1));
     }
 
     public void Dispose() => this.TestDataGenerator.Dispose();

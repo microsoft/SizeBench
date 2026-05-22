@@ -49,20 +49,24 @@ public sealed class CompilandDiffPageViewModelTests : IDisposable
             });
         var initTask = viewmodel.InitializeAsync();
 
-        var propertyNameResult = String.Empty;
+        var sawSymbolDiffsPropertyChange = false;
 
         viewmodel.PropertyChanged += (s, e) =>
         {
-            propertyNameResult = e.PropertyName;
-            tcsTestResultsComplete.SetResult(new object());
+            if (e.PropertyName == nameof(CompilandDiffPageViewModel.SymbolDiffs))
+            {
+                sawSymbolDiffsPropertyChange = true;
+                tcsTestResultsComplete.TrySetResult(new object());
+            }
         };
 
         tcsSymbolsReady.SetResult(allSymbolsInCompilandDiff);
         await tcsTestResultsComplete.Task;
         await initTask;
 
-        Assert.AreEqual(nameof(CompilandDiffPageViewModel.SymbolDiffs), propertyNameResult);
+        Assert.IsTrue(sawSymbolDiffsPropertyChange);
         CollectionAssert.AreEqual(allSymbolsInCompilandDiff, viewmodel.SymbolDiffs!.ToList());
+        Assert.AreEqual(allSymbolsInCompilandDiff.Count, viewmodel.FilteredSymbolDiffs!.Cast<SymbolDiff>().Count());
     }
 
     [Timeout(1000 * 5)] // 5s
@@ -93,7 +97,10 @@ public sealed class CompilandDiffPageViewModelTests : IDisposable
 
         viewmodel.ExportSymbolsToExcelCommand.Execute();
 
-        this.MockUITaskScheduler.Verify(uits => uits.StartExcelExport(this.MockExcelExporter.Object, allSymbolsInCompilandDiff), Times.Exactly(1));
+        this.MockUITaskScheduler.Verify(uits => uits.StartExcelExport(this.MockExcelExporter.Object,
+                                                                      It.Is<IReadOnlyList<SymbolDiff>>(symbols => symbols.Count == allSymbolsInCompilandDiff.Count &&
+                                                                                                                  !symbols.Except(allSymbolsInCompilandDiff).Any())),
+                                        Times.Exactly(1));
     }
 
     public void Dispose() => this.TestDataGenerator.Dispose();

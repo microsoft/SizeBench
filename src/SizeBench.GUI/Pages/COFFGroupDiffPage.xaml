@@ -11,15 +11,10 @@
                           xmlns:core="clr-namespace:SizeBench.GUI.Core"
                           xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
                           mc:Ignorable="d" 
+      NavigationCacheMode="Enabled"
       d:DesignHeight="300" d:DesignWidth="600"
       Title="{Binding COFFGroupDiff.Name, StringFormat='COFF Group Diff: {0}'}">
     <navigation:SizeBenchPage.Resources>
-        <CollectionViewSource x:Key="symbolsCVS" Source="{Binding SymbolDiffs}">
-            <CollectionViewSource.SortDescriptions>
-                <componentModel:SortDescription PropertyName="SizeDiff" Direction="Descending"/>
-                <componentModel:SortDescription PropertyName="VirtualSizeDiff" Direction="Descending"/>
-            </CollectionViewSource.SortDescriptions>
-        </CollectionViewSource>
         <core:BindingProxy x:Key="proxy" Data="{Binding}" />
     </navigation:SizeBenchPage.Resources>
     <Grid>
@@ -131,8 +126,12 @@
         <StackPanel Orientation="Horizontal" Grid.Row="5" Grid.ColumnSpan="2">
             <TextBlock Text="All symbols in this COFF Group:"/>
             <Button Style="{StaticResource ExportToExcelButtonStyle}" Command="{Binding ExportSymbolsToExcelCommand}"/>
+            <CheckBox Margin="12,0,0,0" IsChecked="{Binding IncludeSymbolsOnlyInBaseline}" Content="Only in baseline"/>
+            <CheckBox Margin="8,0,0,0" IsChecked="{Binding IncludeModifiedSymbols}" Content="Modified"/>
+            <CheckBox Margin="8,0,0,0" IsChecked="{Binding IncludeIdenticalSymbols}" Content="Identical"/>
+            <CheckBox Margin="8,0,0,0" IsChecked="{Binding IncludeSymbolsOnlyInUpdate}" Content="Only in update"/>
         </StackPanel>
-        <DataGrid Grid.Row="6" Grid.ColumnSpan="2" ItemsSource="{Binding Source={StaticResource symbolsCVS}}">
+        <DataGrid Grid.Row="6" Grid.ColumnSpan="2" ItemsSource="{Binding FilteredSymbolDiffs}">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Size on Disk Diff"
                                     Binding="{Binding SizeDiff, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"

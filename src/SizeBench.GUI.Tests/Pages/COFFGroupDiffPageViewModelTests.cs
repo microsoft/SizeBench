@@ -96,7 +96,7 @@ public sealed class COFFGroupDiffPageViewModelTests : IDisposable
                 sawCompilandsPropertyChange &&
                 sawLibsPropertyChange)
             {
-                tcsTestResultsComplete.SetResult(new object());
+                tcsTestResultsComplete.TrySetResult(new object());
             }
         };
 
@@ -153,6 +153,7 @@ public sealed class COFFGroupDiffPageViewModelTests : IDisposable
         Assert.AreEqual("COFFGroupContributionDiffsByName[.text$mn].SizeDiff", viewmodel.ContributionSizeSortMemberPath);
         Assert.AreEqual("COFFGroupContributionDiffsByName[.text$mn].VirtualSizeDiff", viewmodel.ContributionVirtualSizeSortMemberPath);
         Assert.IsTrue(ReferenceEquals(symbolList, viewmodel.SymbolDiffs));
+        Assert.AreEqual(symbolList.Count, viewmodel.FilteredSymbolDiffs!.Cast<SymbolDiff>().Count());
 
         // Verify libs are filtered to the CG
         Assert.AreEqual(4, this.TestDataGenerator.LibDiffs.Count);
@@ -164,6 +165,66 @@ public sealed class COFFGroupDiffPageViewModelTests : IDisposable
         Assert.IsTrue(viewmodel.CompilandDiffs.Contains(this.TestDataGenerator.A1CompilandDiff));
         Assert.IsTrue(viewmodel.CompilandDiffs.Contains(this.TestDataGenerator.A2CompilandDiff));
         Assert.IsTrue(viewmodel.CompilandDiffs.Contains(this.TestDataGenerator.B1CompilandDiff));
+    }
+
+    [Timeout(5 * 1000)]
+    [TestMethod]
+    public async Task SymbolFiltersCanShowBaselineOnlyUpdateOnlyAndModified()
+    {
+        var textMnCGDiff = this.TestDataGenerator.TextMnCGDiff;
+        var viewmodel = CreateViewmodelForTesting(textMnCGDiff,
+                                                                          out var tcsTestResultsComplete,
+                                                                          out var symbolList,
+                                                                          out var tcsCOFFGroupReady,
+                                                                          out var tcsSymbolsReady,
+                                                                          out var tcsLibsReady,
+                                                                          out var tcsCompilandsReady);
+
+        viewmodel.SetQueryString(new Dictionary<string, string>()
+            {
+                { "COFFGroup", ".text$mn" }
+            });
+
+        var initTask = viewmodel.InitializeAsync();
+
+        await AssertInitialStateThenFillInAsyncLoads(viewmodel,
+                                                     tcsTestResultsComplete,
+                                                     symbolList,
+                                                     tcsCOFFGroupReady,
+                                                     tcsSymbolsReady,
+                                                     tcsLibsReady,
+                                                     tcsCompilandsReady);
+
+        await initTask;
+
+        var baselineOnlyCount = symbolList.Count(sd => sd.BeforeSymbol != null && sd.AfterSymbol is null);
+        var updateOnlyCount = symbolList.Count(sd => sd.BeforeSymbol is null && sd.AfterSymbol != null);
+        var modifiedCount = symbolList.Count(sd => sd.BeforeSymbol != null && sd.AfterSymbol != null && (sd.SizeDiff != 0 || sd.VirtualSizeDiff != 0));
+        var identicalCount = symbolList.Count(sd => sd.BeforeSymbol != null && sd.AfterSymbol != null && sd.SizeDiff == 0 && sd.VirtualSizeDiff == 0);
+
+        viewmodel.IncludeModifiedSymbols = false;
+        viewmodel.IncludeSymbolsOnlyInUpdate = false;
+        CollectionAssert.AreEquivalent(symbolList.Where(sd => sd.BeforeSymbol != null && sd.AfterSymbol is null).ToList(),
+                                       viewmodel.FilteredSymbolDiffs!.Cast<SymbolDiff>().ToList());
+        Assert.AreEqual(baselineOnlyCount, viewmodel.FilteredSymbolDiffs!.Cast<SymbolDiff>().Count());
+
+        viewmodel.IncludeSymbolsOnlyInBaseline = false;
+        viewmodel.IncludeModifiedSymbols = true;
+        CollectionAssert.AreEquivalent(symbolList.Where(sd => sd.BeforeSymbol != null && sd.AfterSymbol != null).ToList(),
+                                       viewmodel.FilteredSymbolDiffs.Cast<SymbolDiff>().ToList());
+        Assert.AreEqual(modifiedCount, viewmodel.FilteredSymbolDiffs!.Cast<SymbolDiff>().Count());
+
+        viewmodel.IncludeModifiedSymbols = false;
+        viewmodel.IncludeIdenticalSymbols = true;
+        CollectionAssert.AreEquivalent(symbolList.Where(sd => sd.BeforeSymbol != null && sd.AfterSymbol != null && sd.SizeDiff == 0 && sd.VirtualSizeDiff == 0).ToList(),
+                                       viewmodel.FilteredSymbolDiffs.Cast<SymbolDiff>().ToList());
+        Assert.AreEqual(identicalCount, viewmodel.FilteredSymbolDiffs.Cast<SymbolDiff>().Count());
+
+        viewmodel.IncludeIdenticalSymbols = false;
+        viewmodel.IncludeSymbolsOnlyInUpdate = true;
+        CollectionAssert.AreEquivalent(symbolList.Where(sd => sd.BeforeSymbol is null && sd.AfterSymbol != null).ToList(),
+                                       viewmodel.FilteredSymbolDiffs.Cast<SymbolDiff>().ToList());
+        Assert.AreEqual(updateOnlyCount, viewmodel.FilteredSymbolDiffs.Cast<SymbolDiff>().Count());
     }
 
     [Timeout(5 * 1000)]

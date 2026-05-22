@@ -60,6 +60,10 @@ public class WindsorInstaller : IWindsorInstaller
                                     .ImplementedBy<RecentSessionLauncher>()
                                     .LifestyleSingleton());
 
+        container.Register(Component.For<IDisassemblySettings>()
+                                    .ImplementedBy<DisassemblySettingsStore>()
+                                    .LifestyleSingleton());
+
         container.Register(Classes.FromAssembly(typeof(MainWindow).Assembly)
                                   .IncludeNonPublicTypes()
                                   .Where(c => c.Name.EndsWith("ViewModel", StringComparison.Ordinal) &&

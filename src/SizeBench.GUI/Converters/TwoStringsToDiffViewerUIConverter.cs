@@ -64,7 +64,7 @@ public sealed class TwoStringsToDiffViewerUIConverter : IMultiValueConverter
             FontFamily = new FontFamily("Consolas"),
             FontSize = 16.0 * zoomPercent / 100.0
         };
-        diffViewer.ShowInline();
+        diffViewer.ShowSideBySide();
 
         return diffViewer;
     }

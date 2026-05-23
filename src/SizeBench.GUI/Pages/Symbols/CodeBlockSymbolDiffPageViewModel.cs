@@ -2,6 +2,7 @@
 using System.Text;
 using SizeBench.AnalysisEngine;
 using SizeBench.AnalysisEngine.Symbols;
+using SizeBench.GUI.Commands;
 using SizeBench.GUI.Core;
 
 namespace SizeBench.GUI.Pages.Symbols;
@@ -9,6 +10,7 @@ namespace SizeBench.GUI.Pages.Symbols;
 internal sealed class CodeBlockSymbolDiffPageViewModel : BinaryDiffViewModelBase
 {
     private readonly IUITaskScheduler _uiTaskScheduler;
+    private readonly IDisassemblySettings _disassemblySettings;
 
     private bool _doesBeforeSymbolExist;
     public bool DoesBeforeSymbolExist
@@ -104,10 +106,49 @@ internal sealed class CodeBlockSymbolDiffPageViewModel : BinaryDiffViewModelBase
         private set { this._pageTitle = value; RaisePropertyChanged(); }
     }
 
+    private string? _disassembly1;
+    public string? Disassembly1
+    {
+        get => this._disassembly1;
+        private set { this._disassembly1 = value; RaisePropertyChanged(); }
+    }
+
+    private string? _disassembly2;
+    public string? Disassembly2
+    {
+        get => this._disassembly2;
+        private set { this._disassembly2 = value; RaisePropertyChanged(); }
+    }
+
+    public IReadOnlyList<int> DisassemblyZoomPercentOptions { get; } = Enumerable.Range(0, 11).Select(i => i * 20).ToList();
+
+    private int _disassemblyZoomPercent;
+    public int DisassemblyZoomPercent
+    {
+        get => this._disassemblyZoomPercent;
+        set
+        {
+            if (this._disassemblyZoomPercent != value)
+            {
+                this._disassemblyZoomPercent = value;
+                this._disassemblySettings.TemplateFoldabilityDisassemblyZoomPercent = value;
+                RaisePropertyChanged();
+            }
+        }
+    }
+
+    public DelegateCommand IncreaseDisassemblyZoomCommand { get; }
+    public DelegateCommand DecreaseDisassemblyZoomCommand { get; }
+
     public CodeBlockSymbolDiffPageViewModel(IUITaskScheduler uiTaskScheduler,
-                                            IDiffSession diffSession) : base(diffSession)
+                                            IDiffSession diffSession,
+                                            IDisassemblySettings disassemblySettings) : base(diffSession)
     {
         this._uiTaskScheduler = uiTaskScheduler;
+        this._disassemblySettings = disassemblySettings;
+        this._disassemblyZoomPercent = this._disassemblySettings.TemplateFoldabilityDisassemblyZoomPercent;
+        this.IncreaseDisassemblyZoomCommand = new DelegateCommand(IncreaseDisassemblyZoom);
+        this.DecreaseDisassemblyZoomCommand = new DelegateCommand(DecreaseDisassemblyZoom);
     }
 
     protected internal override async Task InitializeAsync()
@@ -174,6 +215,8 @@ internal sealed class CodeBlockSymbolDiffPageViewModel : BinaryDiffViewModelBase
             await Task.WhenAll(placementLookups);
         });
 
+        await LoadDisassembly();
+
         await this._uiTaskScheduler.StartLongRunningUITask("Looking up any blocks that may have folded with this one", async (token) =>
         {
             var foldingLookups = new List<Task>(capacity: 2);
@@ -204,6 +247,36 @@ internal sealed class CodeBlockSymbolDiffPageViewModel : BinaryDiffViewModelBase
 
             await Task.WhenAll(foldingLookups);
         });
+    }
+
+    private Task LoadDisassembly()
+    {
+        if (this.ParentFunctionSymbolDiff?.BeforeSymbol is null)
+        {
+            this.Disassembly1 = null;
+        }
+
+        if (this.ParentFunctionSymbolDiff?.AfterSymbol is null)
+        {
+            this.Disassembly2 = null;
+        }
+
+        if (this.ParentFunctionSymbolDiff?.BeforeSymbol is null || this.ParentFunctionSymbolDiff.AfterSymbol is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        return this._uiTaskScheduler.StartLongRunningUITask("Loading Disassembly",
+            async (token) =>
+            {
+                var options = new DisassembleFunctionOptions()
+                {
+                    StripAbsoluteAddressForFunctionLocalReferences = true
+                };
+
+                this.Disassembly1 = await this.DiffSession.BeforeSession.DisassembleFunction(this.ParentFunctionSymbolDiff.BeforeSymbol, options, token);
+                this.Disassembly2 = await this.DiffSession.AfterSession.DisassembleFunction(this.ParentFunctionSymbolDiff.AfterSymbol, options, token);
+            });
     }
 
     private void CreateBlocksOfDifferentTypeWarningText(ISymbol before, ISymbol after)
@@ -246,5 +319,23 @@ internal sealed class CodeBlockSymbolDiffPageViewModel : BinaryDiffViewModelBase
         sb.Append("  If you meant to compare the entire function across all blocks, then ");
 
         this.BlocksOfDifferentTypeWarningText = sb.ToString();
+    }
+
+    internal void IncreaseDisassemblyZoom()
+    {
+        var currentIndex = this.DisassemblyZoomPercentOptions.ToList().IndexOf(this.DisassemblyZoomPercent);
+        if (currentIndex < this.DisassemblyZoomPercentOptions.Count - 1)
+        {
+            this.DisassemblyZoomPercent = this.DisassemblyZoomPercentOptions[currentIndex + 1];
+        }
+    }
+
+    internal void DecreaseDisassemblyZoom()
+    {
+        var currentIndex = this.DisassemblyZoomPercentOptions.ToList().IndexOf(this.DisassemblyZoomPercent);
+        if (currentIndex > 0)
+        {
+            this.DisassemblyZoomPercent = this.DisassemblyZoomPercentOptions[currentIndex - 1];
+        }
     }
 }

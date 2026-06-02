@@ -1,5 +1,5 @@
-﻿using SizeBench.AnalysisEngine;
-using SizeBench.AnalysisEngine.PE;
+﻿using System.Reflection.PortableExecutable;
+using SizeBench.AnalysisEngine;
 using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.ExcelExporter;
 using SizeBench.GUI.Core;
@@ -24,8 +24,8 @@ public class COFFGroupPageViewModelTests
         this.MockUITaskScheduler.SetupForSynchronousCompletionOfLongRunningUITasks();
 
         using var cache = new SessionDataCache();
-        var textSection = new BinarySection(cache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
-        this.textMnCG = new COFFGroup(cache, ".text$mn", size: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute)
+        var textSection = new BinarySection(cache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
+        this.textMnCG = new COFFGroup(cache, ".text$mn", size: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute)
         {
             Section = textSection
         };
@@ -37,8 +37,8 @@ public class COFFGroupPageViewModelTests
         this.MockSession.Setup(s => s.EnumerateBinarySectionsAndCOFFGroups(It.IsAny<CancellationToken>())).Returns(Task.FromResult(sections as IReadOnlyList<BinarySection>));
         using var cts = new CancellationTokenSource();
         cts.Cancel();
-        this.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromCanceled<IReadOnlyList<Library>>(cts.Token));
-        this.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromCanceled<IReadOnlyList<Compiland>>(cts.Token));
+        this.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromCanceled<IReadOnlyCollection<Library>>(cts.Token));
+        this.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromCanceled<IReadOnlyCollection<Compiland>>(cts.Token));
     }
 
     [Timeout(5 * 1000)]

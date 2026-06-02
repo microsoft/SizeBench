@@ -1,4 +1,4 @@
-﻿using SizeBench.AnalysisEngine.PE;
+﻿using System.Reflection.PortableExecutable;
 using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.Logging;
 using SizeBench.TestDataCommon;
@@ -31,14 +31,10 @@ public sealed class EnumerateSymbolsInCompilandSessionTaskTests : IDisposable
         this.TestLib = new Library(@"c:\test\blah.lib");
         this.TestCompiland = new Compiland(this.DataCache, @"c:\foo\a1.obj", this.TestLib, CommonCommandLines.NullCommandLine, compilandSymIndex: 0);
 
-        this.DataCache.PDataRVARange = new RVARange(0, 0);
-        this.DataCache.PDataSymbolsByRVA = new SortedList<uint, PDataSymbol>();
-        this.DataCache.XDataRVARanges = new RVARangeSet();
-        this.DataCache.XDataSymbolsByRVA = new SortedList<uint, XDataSymbol>();
-        this.DataCache.RsrcRVARange = new RVARange(0, 0);
-        this.DataCache.RsrcSymbolsByRVA = new SortedList<uint, RsrcSymbolBase>();
-        this.DataCache.OtherPESymbolsRVARanges = new RVARangeSet();
-        this.DataCache.OtherPESymbolsByRVA = new SortedList<uint, ISymbol>();
+        this.DataCache.PDataHasBeenInitialized = true;
+        this.DataCache.XDataHasBeenInitialized = true;
+        this.DataCache.RsrcHasBeenInitialized = true;
+        this.DataCache.OtherPESymbolsHaveBeenInitialized = true;
     }
 
     [TestMethod]
@@ -134,8 +130,8 @@ public sealed class EnumerateSymbolsInCompilandSessionTaskTests : IDisposable
 
     private BinarySection GenerateMockTextSection()
     {
-        var textSection = new BinarySection(this.SessionTaskParameters!.DataCache, ".text", size: 0x1000u, virtualSize: 0, rva: 0x4000u, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
-        var textMnCG = new COFFGroup(this.SessionTaskParameters.DataCache, ".text$mn", size: 0x1000u, rva: 0x4000u, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
+        var textSection = new BinarySection(this.SessionTaskParameters!.DataCache, ".text", size: 0x1000u, virtualSize: 0, rva: 0x4000u, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
+        var textMnCG = new COFFGroup(this.SessionTaskParameters.DataCache, ".text$mn", size: 0x1000u, rva: 0x4000u, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
 
         var textRVARanges = new List<RVARange>();
         for (uint i = 0; i < 60; i++)
@@ -157,8 +153,8 @@ public sealed class EnumerateSymbolsInCompilandSessionTaskTests : IDisposable
 
     private BinarySection GenerateMockRDataSection()
     {
-        var rdataSection = new BinarySection(this.SessionTaskParameters!.DataCache, ".rdata", size: 0x1000u, virtualSize: 0, rva: 0x1000u, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryRead);
-        var rdataZzCG = new COFFGroup(this.SessionTaskParameters.DataCache, ".rdata$zz", size: 0x1000u, rva: 0x1000u, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryRead);
+        var rdataSection = new BinarySection(this.SessionTaskParameters!.DataCache, ".rdata", size: 0x1000u, virtualSize: 0, rva: 0x1000u, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemRead);
+        var rdataZzCG = new COFFGroup(this.SessionTaskParameters.DataCache, ".rdata$zz", size: 0x1000u, rva: 0x1000u, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemRead);
 
         var rdataRVARanges = new List<RVARange>();
         for (uint i = 0; i < 60; i++)

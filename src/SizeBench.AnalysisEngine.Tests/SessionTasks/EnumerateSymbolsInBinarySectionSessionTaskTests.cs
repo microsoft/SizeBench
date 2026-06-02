@@ -1,4 +1,4 @@
-﻿using SizeBench.AnalysisEngine.PE;
+﻿using System.Reflection.PortableExecutable;
 using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.Logging;
 using SizeBench.TestDataCommon;
@@ -26,20 +26,16 @@ public sealed class EnumerateSymbolsInBinarySectionSessionTaskTests : IDisposabl
             this.TestDIAAdapter,
             this.DataCache);
 
-        this.SessionTaskParameters.DataCache.PDataRVARange = new RVARange(0, 0);
-        this.SessionTaskParameters.DataCache.PDataSymbolsByRVA = new SortedList<uint, PDataSymbol>();
-        this.SessionTaskParameters.DataCache.XDataRVARanges = new RVARangeSet();
-        this.SessionTaskParameters.DataCache.XDataSymbolsByRVA = new SortedList<uint, XDataSymbol>();
-        this.SessionTaskParameters.DataCache.RsrcRVARange = new RVARange(0, 0);
-        this.SessionTaskParameters.DataCache.RsrcSymbolsByRVA = new SortedList<uint, RsrcSymbolBase>();
-        this.SessionTaskParameters.DataCache.OtherPESymbolsRVARanges = new RVARangeSet();
-        this.SessionTaskParameters.DataCache.OtherPESymbolsByRVA = new SortedList<uint, ISymbol>();
+        this.SessionTaskParameters.DataCache.PDataHasBeenInitialized = true;
+        this.SessionTaskParameters.DataCache.XDataHasBeenInitialized = true;
+        this.SessionTaskParameters.DataCache.RsrcHasBeenInitialized = true;
+        this.SessionTaskParameters.DataCache.OtherPESymbolsHaveBeenInitialized = true;
     }
 
     [TestMethod]
     public void CanExecuteWithoutProgressReporting()
     {
-        var section = new BinarySection(this.SessionTaskParameters!.DataCache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
+        var section = new BinarySection(this.SessionTaskParameters!.DataCache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
         section.MarkFullyConstructed();
         var task = new EnumerateSymbolsInBinarySectionSessionTask(this.SessionTaskParameters,
                                                                   CancellationToken.None,
@@ -56,7 +52,7 @@ public sealed class EnumerateSymbolsInBinarySectionSessionTaskTests : IDisposabl
     [TestMethod]
     public void CanCancelInTheMiddleOfEnumerationWhenRVAsAreMonotonicallyIncreasing()
     {
-        var section = new BinarySection(this.SessionTaskParameters!.DataCache, ".text", size: 0x1000, virtualSize: 0, rva: 0x500, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
+        var section = new BinarySection(this.SessionTaskParameters!.DataCache, ".text", size: 0x1000, virtualSize: 0, rva: 0x500, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
         section.MarkFullyConstructed();
         var cancellationTokenSource = new CancellationTokenSource();
 
@@ -94,7 +90,7 @@ public sealed class EnumerateSymbolsInBinarySectionSessionTaskTests : IDisposabl
     public void FiresProgressNotificationsWithoutSpamming()
     {
         const int expectedSymbolCount = 250;
-        var section = new BinarySection(this.SessionTaskParameters!.DataCache, ".text", size: 0x200, virtualSize: expectedSymbolCount, rva: 0x500, fileAlignment: 0x200, sectionAlignment: 0x1000, characteristics: DataSectionFlags.MemoryExecute);
+        var section = new BinarySection(this.SessionTaskParameters!.DataCache, ".text", size: 0x200, virtualSize: expectedSymbolCount, rva: 0x500, fileAlignment: 0x200, sectionAlignment: 0x1000, characteristics: SectionCharacteristics.MemExecute);
         section.MarkFullyConstructed();
         var mockProgress = new Mock<IProgress<SessionTaskProgress>>();
         mockProgress.Setup(p => p.Report(It.IsAny<SessionTaskProgress>())).Verifiable();

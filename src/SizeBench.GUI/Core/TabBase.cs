@@ -75,6 +75,7 @@ internal abstract class TabBase : INotifyPropertyChanged, IUITaskScheduler, IAsy
     {
         try
         {
+            // TODO: refactor this out so we can re-use it to have a "copy version number" button in the about box
             // It seems tempting to use Clipboard.SetText, but that API is prone to throwing exceptions if
             // the clipboard is in use in another process - a more robust alternative seems to be using
             // Clipboard.SetDataObject, I think it might do some retry logic internally?

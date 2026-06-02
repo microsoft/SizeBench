@@ -53,7 +53,7 @@ internal sealed class EnumerateWastefulVirtualDiffsSessionTask : DiffSessionTask
 
                 if (beforeWVIsParsed >= nextLoggerOutput)
                 {
-                    ReportProgress($"Parsed {beforeWVIsParsed}/{beforeWVIsCount} 'before' wasteful virtual items and {afterWVIsParsed}/{afterWVIsCount} 'after' wasteful virtual items into diffs.", beforeWVIsParsed + afterWVIsParsed, totalWVIsToDiff);
+                    ReportProgress($"Parsed {beforeWVIsParsed:N0}/{beforeWVIsCount:N0} 'before' wasteful virtual items and {afterWVIsParsed:N0}/{afterWVIsCount:N0} 'after' wasteful virtual items into diffs.", beforeWVIsParsed + afterWVIsParsed, totalWVIsToDiff);
                     nextLoggerOutput += loggerOutputVelocity;
                 }
 
@@ -92,7 +92,7 @@ internal sealed class EnumerateWastefulVirtualDiffsSessionTask : DiffSessionTask
 
                 if (afterWVIsParsed >= nextLoggerOutput)
                 {
-                    ReportProgress($"Parsed {afterWVIsParsed}/{afterWVIsCount} 'after' wasteful virtual items into diffs.", afterWVIsParsed + beforeWVIsCount, totalWVIsToDiff);
+                    ReportProgress($"Parsed {afterWVIsParsed:N0}/{afterWVIsCount:N0} 'after' wasteful virtual items into diffs.", afterWVIsParsed + beforeWVIsCount, totalWVIsToDiff);
                     nextLoggerOutput += loggerOutputVelocity;
                 }
 
@@ -104,9 +104,9 @@ internal sealed class EnumerateWastefulVirtualDiffsSessionTask : DiffSessionTask
         }
 
         // One final progress report so the log shows a nice summary at the end
-        ReportProgress($"Parsed {beforeWVIsCount} 'before' wasteful virtual items and {afterWVIsCount} 'after' wasteful virtual items, generating  {WVIDiffs.Count} diffs.", totalWVIsToDiff, totalWVIsToDiff);
+        ReportProgress($"Parsed {beforeWVIsCount:N0} 'before' wasteful virtual items and {afterWVIsCount:N0} 'after' wasteful virtual items, generating  {WVIDiffs.Count:N0} diffs.", totalWVIsToDiff, totalWVIsToDiff);
 
-        logger.Log($"Finished enumerating {WVIDiffs.Count} wasteful virtual item diffs.");
+        logger.Log($"Finished enumerating {WVIDiffs.Count:N0} wasteful virtual item diffs.");
 
         return WVIDiffs;
     }

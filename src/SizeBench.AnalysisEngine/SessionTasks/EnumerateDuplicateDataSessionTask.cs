@@ -24,7 +24,7 @@ internal sealed class EnumerateDuplicateDataSessionTask : SessionTask<List<Dupli
             return this.DataCache.AllDuplicateDataItems;
         }
 
-        if (this.DataCache.XDataRVARanges is null || this.DataCache.XDataSymbolsByRVA is null)
+        if (this.DataCache.XDataHasBeenInitialized == false)
         {
             throw new InvalidOperationException("It is not valid to attempt to enumerate duplicate data before XDATA has been parsed, as that data is necessary to properly find all duplicated data.  This is a bug in SizeBench's implementation, not your usage of it.");
         }
@@ -63,7 +63,7 @@ internal sealed class EnumerateDuplicateDataSessionTask : SessionTask<List<Dupli
                 symbolsEnumerated++;
                 if (symbolsEnumerated >= nextLoggerOutput)
                 {
-                    ReportProgress($"Enumerated {symbolsEnumerated}/{sortedAndFilteredDataSymbols.Count} data symbols, found {duplicates.Count + duplicatesInThisNameAndSizeGroup.Count} items with duplicates so far.", nextLoggerOutput, (uint)sortedAndFilteredDataSymbols.Count);
+                    ReportProgress($"Enumerated {symbolsEnumerated:N0}/{sortedAndFilteredDataSymbols.Count:N0} data symbols, found {duplicates.Count + duplicatesInThisNameAndSizeGroup.Count:N0} items with duplicates so far.", nextLoggerOutput, (uint)sortedAndFilteredDataSymbols.Count);
                     nextLoggerOutput += loggerOutputVelocity;
                 }
 
@@ -137,14 +137,14 @@ internal sealed class EnumerateDuplicateDataSessionTask : SessionTask<List<Dupli
             dupe.SortReferencedIn();
         }
 
-        ReportProgress($"Enumerated {symbolsEnumerated}/{sortedAndFilteredDataSymbols.Count} data symbols, found {duplicates.Count} items with duplicates so far.", nextLoggerOutput, (uint)sortedAndFilteredDataSymbols.Count);
-        logger.Log($"Finished enumerating {duplicates.Count} duplicate data items");
+        ReportProgress($"Enumerated {symbolsEnumerated:N0}/{sortedAndFilteredDataSymbols.Count:N0} data symbols, found {duplicates.Count:N0} items with duplicates so far.", nextLoggerOutput, (uint)sortedAndFilteredDataSymbols.Count);
+        logger.Log($"Finished enumerating {duplicates.Count:N0} duplicate data items");
         this.DataCache.AllDuplicateDataItems = duplicates;
 
         return this.DataCache.AllDuplicateDataItems;
     }
 
-    private List<StaticDataSymbol> FindDataSymbolsInCompilands(List<Compiland> compilands)
+    private List<StaticDataSymbol> FindDataSymbolsInCompilands(HashSet<Compiland> compilands)
     {
         const int loggerOutputVelocity = 10;
         uint nextLoggerOutput = loggerOutputVelocity;
@@ -164,7 +164,7 @@ internal sealed class EnumerateDuplicateDataSessionTask : SessionTask<List<Dupli
             compilandsEnumerated++;
             if (compilandsEnumerated >= nextLoggerOutput)
             {
-                ReportProgress($"Enumerated all data symbols in {compilandsEnumerated}/{compilands.Count} compilands.", nextLoggerOutput, (uint)compilands.Count);
+                ReportProgress($"Enumerated all data symbols in {compilandsEnumerated:N0}/{compilands.Count:N0} compilands.", nextLoggerOutput, (uint)compilands.Count);
                 nextLoggerOutput += loggerOutputVelocity;
             }
         }

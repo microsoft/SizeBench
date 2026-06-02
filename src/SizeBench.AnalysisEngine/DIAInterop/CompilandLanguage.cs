@@ -23,6 +23,7 @@ internal enum CompilandLanguage
     CV_CFL_OBJCXX = 0x12,  // Objective-C++
     CV_CFL_SWIFT = 0x13,  // Swift
     CV_CFL_ALIASOBJ = 0x14,
-    CV_CFL_RUST = 0x15,  // Rust
+    CV_CFL_RUST = 0x15,  // Rust,
+    SizeBench_Zig = Int32.MaxValue - 1, // Zig, which does not yet have a CV_CFL_LANG value so SizeBench detects it using tool name
     Unknown = Int32.MaxValue
 }

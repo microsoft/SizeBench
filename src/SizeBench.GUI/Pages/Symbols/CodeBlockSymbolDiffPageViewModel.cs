@@ -51,9 +51,9 @@ internal sealed class CodeBlockSymbolDiffPageViewModel : BinaryDiffViewModelBase
         }
     }
 
-    public bool IsBeforeParentFunctionComplex => this.ParentFunctionSymbolDiff?.BeforeSymbol?.Blocks.Count > 1;
+    public bool IsBeforeParentFunctionComplex => this.ParentFunctionSymbolDiff?.BeforeSymbol?.BlockCount > 1;
 
-    public bool IsAfterParentFunctionComplex => this.ParentFunctionSymbolDiff?.AfterSymbol?.Blocks.Count > 1;
+    public bool IsAfterParentFunctionComplex => this.ParentFunctionSymbolDiff?.AfterSymbol?.BlockCount > 1;
 
     private SymbolPlacement? _beforePlacement;
     public SymbolPlacement? BeforePlacement
@@ -114,14 +114,14 @@ internal sealed class CodeBlockSymbolDiffPageViewModel : BinaryDiffViewModelBase
     {
         uint? beforeSymbolRVA = null;
         uint? afterSymbolRVA = null;
-        if (this.QueryString.ContainsKey("BeforeRVA"))
+        if (this.QueryString.TryGetValue("BeforeRVA", out var value))
         {
-            beforeSymbolRVA = Convert.ToUInt32(this.QueryString["BeforeRVA"], CultureInfo.InvariantCulture);
+            beforeSymbolRVA = Convert.ToUInt32(value, CultureInfo.InvariantCulture);
         }
 
-        if (this.QueryString.ContainsKey("AfterRVA"))
+        if (this.QueryString.TryGetValue("AfterRVA", out value))
         {
-            afterSymbolRVA = Convert.ToUInt32(this.QueryString["AfterRVA"], CultureInfo.InvariantCulture);
+            afterSymbolRVA = Convert.ToUInt32(value, CultureInfo.InvariantCulture);
         }
 
         this.DoesBeforeSymbolExist = beforeSymbolRVA != null;
@@ -242,6 +242,7 @@ internal sealed class CodeBlockSymbolDiffPageViewModel : BinaryDiffViewModelBase
             throw new NotImplementedException("Something has gone wrong in constructing this page.  This is a bug in SizeBench.");
         }
 
+        // It's intentional that the string ends with ", then " and seems to be hanging.  It's because the XAML has the hyperlink after that.
         sb.Append("  If you meant to compare the entire function across all blocks, then ");
 
         this.BlocksOfDifferentTypeWarningText = sb.ToString();

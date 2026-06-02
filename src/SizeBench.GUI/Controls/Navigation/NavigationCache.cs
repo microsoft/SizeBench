@@ -28,9 +28,9 @@ internal sealed class NavigationCache : DependencyObject
     {
         get
         {
-            if (this._cachePages.ContainsKey(uri))
+            if (this._cachePages.TryGetValue(uri, out var value))
             {
-                return this._cachePages[uri];
+                return value;
             }
 
             return null;
@@ -91,6 +91,7 @@ internal sealed class NavigationCache : DependencyObject
 
     internal void AddToCache(string uri, SizeBenchPage page)
     {
+#pragma warning disable CA1864 // Prefer the 'IDictionary.TryAdd(TKey, TValue)' method - this reads much clearer to me, and the perf hit here should be minimal as this isn't in a hot path
         if (this._cachePages.ContainsKey(uri))
         {
             // If it's already in the cache, bump it to the top,
@@ -114,6 +115,7 @@ internal sealed class NavigationCache : DependencyObject
             this._cachePagesMRU.Insert(0, uri);
             this._cachePages.Add(uri, page);
         }
+#pragma warning restore CA1864 // Prefer the 'IDictionary.TryAdd(TKey, TValue)' method
     }
 
     internal void RemoveFromCache(string uri)

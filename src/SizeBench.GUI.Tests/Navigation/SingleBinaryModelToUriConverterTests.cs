@@ -1,6 +1,6 @@
-﻿using Dia2Lib;
+﻿using System.Reflection.PortableExecutable;
+using Dia2Lib;
 using SizeBench.AnalysisEngine;
-using SizeBench.AnalysisEngine.PE;
 using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.TestDataCommon;
 
@@ -24,8 +24,8 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     [TestMethod]
     public void CanNavigateToBinarySection()
     {
-        var firstSection = new BinarySection(this.SessionDataCache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
-        var secondSection = new BinarySection(this.SessionDataCache, ".rdata", size: 0, virtualSize: 200, rva: 200, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryRead);
+        var firstSection = new BinarySection(this.SessionDataCache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
+        var secondSection = new BinarySection(this.SessionDataCache, ".rdata", size: 0, virtualSize: 200, rva: 200, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemRead);
 
         Assert.AreEqual(new Uri(@"BinarySection/.text", UriKind.Relative), SingleBinaryModelToUriConverter.ModelToUri(firstSection));
         Assert.AreEqual(new Uri(@"BinarySection/.rdata", UriKind.Relative), SingleBinaryModelToUriConverter.ModelToUri(secondSection));
@@ -34,7 +34,7 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     [TestMethod]
     public void CanNavigateToCOFFGroup()
     {
-        var coffGroup = new COFFGroup(this.SessionDataCache, ".text$zz", size: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
+        var coffGroup = new COFFGroup(this.SessionDataCache, ".text$zz", size: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
 
         Assert.AreEqual(new Uri($@"COFFGroup/.text$zz", UriKind.Relative), SingleBinaryModelToUriConverter.ModelToUri(coffGroup));
     }
@@ -94,7 +94,7 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     {
         var intType = new BasicTypeSymbol(this.SessionDataCache, "int", 4, symIndexId: 0);
         var function = new SimpleFunctionCodeSymbol(this.SessionDataCache, "SomeNamespace::MyType::DeadFunction<AComplex::Type<float>,bool>", rva: 0, size: 100, symIndexId: 1,
-                                                functionType: new FunctionTypeSymbol(this.SessionDataCache, "()(int)", 0, symIndexId: 2, isConst: true, isVolatile: false, argumentTypes: new TypeSymbol[] { intType }, returnValueType: intType));
+                                                    functionType: new FunctionTypeSymbol(this.SessionDataCache, "()(int)", 0, symIndexId: 2, isConst: true, isVolatile: false, argumentTypes: [intType], returnValueType: intType));
 
         Assert.AreEqual(new Uri($@"Symbols/FunctionSymbol?FunctionRVA={function.RVA}&Name=int%20SomeNamespace%3A%3AMyType%3A%3ADeadFunction%3CAComplex%3A%3AType%3Cfloat%3E%2Cbool%3E%28int%29%20const", UriKind.Relative), SingleBinaryModelToUriConverter.ModelToUri(function));
     }
@@ -133,7 +133,7 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     {
         var lib = new Library("test lib name");
         var compiland = new Compiland(this.SessionDataCache, "1.obj", lib, CommonCommandLines.NullCommandLine, compilandSymIndex: 0);
-        var textSection = new BinarySection(this.SessionDataCache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
+        var textSection = new BinarySection(this.SessionDataCache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
         var contribution = compiland.GetOrCreateSectionContribution(textSection);
         compiland.MarkFullyConstructed();
 
@@ -145,7 +145,7 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     {
         var lib = new Library("test lib name");
         var compiland = new Compiland(this.SessionDataCache, "1.obj", lib, CommonCommandLines.NullCommandLine, compilandSymIndex: 0);
-        var textMnCG = new COFFGroup(this.SessionDataCache, ".text$mn", size: 0, rva: 100, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
+        var textMnCG = new COFFGroup(this.SessionDataCache, ".text$mn", size: 0, rva: 100, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
         var contribution = compiland.GetOrCreateCOFFGroupContribution(textMnCG);
         compiland.MarkFullyConstructed();
 
@@ -156,7 +156,7 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     public void CanNavigateToLibSectionContribution()
     {
         var lib = new Library(@"c:\data\foo.lib");
-        var textSection = new BinarySection(this.SessionDataCache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
+        var textSection = new BinarySection(this.SessionDataCache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
         var contribution = lib.GetOrCreateSectionContribution(textSection);
 
         Assert.AreEqual(new Uri($@"Contribution?BinarySection=.text&Lib={Uri.EscapeDataString(lib.Name)}", UriKind.Relative), SingleBinaryModelToUriConverter.ModelToUri(contribution));
@@ -166,7 +166,7 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     public void CanNavigateToLibCOFFGroupContribution()
     {
         var lib = new Library(@"c:\data\foo.lib");
-        var textMnCG = new COFFGroup(this.SessionDataCache, ".text$mn", size: 0, rva: 100, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
+        var textMnCG = new COFFGroup(this.SessionDataCache, ".text$mn", size: 0, rva: 100, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
         var contribution = lib.GetOrCreateCOFFGroupContribution(textMnCG);
 
         Assert.AreEqual(new Uri($@"Contribution?COFFGroup=.text$mn&Lib={Uri.EscapeDataString(lib.Name)}", UriKind.Relative), SingleBinaryModelToUriConverter.ModelToUri(contribution));
@@ -176,7 +176,7 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     public void CanNavigateToSourceFileSectionContribution()
     {
         var sourceFile = new SourceFile(this.SessionDataCache, @"c:\foo\bar\baz.h", fileId: 1, compilands: new List<Compiland>());
-        var textSection = new BinarySection(this.SessionDataCache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
+        var textSection = new BinarySection(this.SessionDataCache, ".text", size: 0, virtualSize: 0, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
         var contribution = sourceFile.GetOrCreateSectionContribution(textSection);
         sourceFile.MarkFullyConstructed();
 
@@ -187,7 +187,7 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     public void CanNavigateToSourceFileCOFFGroupContribution()
     {
         var sourceFile = new SourceFile(this.SessionDataCache, @"c:\foo\bar\baz.h", fileId: 1, compilands: new List<Compiland>());
-        var textMnCG = new COFFGroup(this.SessionDataCache, ".text$mn", size: 0, rva: 100, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute);
+        var textMnCG = new COFFGroup(this.SessionDataCache, ".text$mn", size: 0, rva: 100, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute);
         var contribution = sourceFile.GetOrCreateCOFFGroupContribution(textMnCG);
         sourceFile.MarkFullyConstructed();
 
@@ -239,7 +239,7 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     [TestMethod]
     public void CanNavigateToWastefulVirtualItem()
     {
-        var udt = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter: new TestDIAAdapter(), session: new Mock<ISession>().Object, name: "MyNS::MyUDT", instanceSize: 24, symIndexId: 3, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: new Dictionary<uint, uint>());
+        var udt = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter: new TestDIAAdapter(), session: new Mock<ISession>().Object, name: "MyNS::MyUDT", instanceSize: 24, symIndexId: 3, udtKind: UserDefinedTypeKind.UdtClass);
 
         Assert.AreEqual(new Uri($@"WastefulVirtual?TypeName=MyNS%3A%3AMyUDT", UriKind.Relative), SingleBinaryModelToUriConverter.ModelToUri(new WastefulVirtualItem(udt, isCOMType: false, bytesPerWord: 8)));
     }
@@ -255,7 +255,7 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     [TestMethod]
     public void CanNavigateToUDT()
     {
-        var udt = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter: new TestDIAAdapter(), session: new Mock<ISession>().Object, name: "MyNS::MyUDT", instanceSize: 24, symIndexId: 3, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: new Dictionary<uint, uint>());
+        var udt = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter: new TestDIAAdapter(), session: new Mock<ISession>().Object, name: "MyNS::MyUDT", instanceSize: 24, symIndexId: 3, udtKind: UserDefinedTypeKind.UdtClass);
 
         Assert.AreEqual(new Uri($@"Symbols/UserDefinedTypeSymbol?Name=MyNS%3A%3AMyUDT", UriKind.Relative), SingleBinaryModelToUriConverter.ModelToUri(udt));
     }
@@ -263,8 +263,8 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     [TestMethod]
     public void CanNavigateToTemplatedUDT()
     {
-        var udt1 = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter: new TestDIAAdapter(), session: new Mock<ISession>().Object, name: "MyNS::MyUDT<float>", instanceSize: 24, symIndexId: 3, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: new Dictionary<uint, uint>());
-        var udt2 = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter: new TestDIAAdapter(), session: new Mock<ISession>().Object, name: "MyNS::MyUDT<int>", instanceSize: 24, symIndexId: 4, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: new Dictionary<uint, uint>());
+        var udt1 = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter: new TestDIAAdapter(), session: new Mock<ISession>().Object, name: "MyNS::MyUDT<float>", instanceSize: 24, symIndexId: 3, udtKind: UserDefinedTypeKind.UdtClass);
+        var udt2 = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter: new TestDIAAdapter(), session: new Mock<ISession>().Object, name: "MyNS::MyUDT<int>", instanceSize: 24, symIndexId: 4, udtKind: UserDefinedTypeKind.UdtClass);
         var templatedUDT = new TemplatedUserDefinedTypeSymbol("MyNS::MyUDT<T1>", new List<UserDefinedTypeSymbol>() { udt1, udt2 });
 
         Assert.AreEqual(new Uri($@"Symbols/TemplatedUserDefinedTypeSymbol?TemplateName=MyNS%3A%3AMyUDT%3CT1%3E", UriKind.Relative), SingleBinaryModelToUriConverter.ModelToUri(templatedUDT));
@@ -274,8 +274,8 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     public void CanNavigateToCOMDATFoldedSymbol()
     {
         var nameCanonicalization = new NameCanonicalization();
-        nameCanonicalization.AddName(symIndexId: 0, "test symbol", SymTagEnum.SymTagData);
-        nameCanonicalization.AddName(symIndexId: 1, "canonicalName", SymTagEnum.SymTagData);
+        nameCanonicalization.AddName(symIndexId: 0, SymTagEnum.SymTagData, name: "test symbol");
+        nameCanonicalization.AddName(symIndexId: 1, SymTagEnum.SymTagData, name: "canonicalName");
         nameCanonicalization.Canonicalize();
         this.SessionDataCache.AllCanonicalNames!.Add(9216, nameCanonicalization);
 
@@ -292,8 +292,8 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
     public void CanNavigateToCOMDATFoldedFunction()
     {
         var nameCanonicalization = new NameCanonicalization();
-        nameCanonicalization.AddName(symIndexId: 0, "test function", SymTagEnum.SymTagFunction);
-        nameCanonicalization.AddName(symIndexId: 1, "canonicalFunc", SymTagEnum.SymTagFunction);
+        nameCanonicalization.AddName(symIndexId: 0, SymTagEnum.SymTagFunction, name: "test function");
+        nameCanonicalization.AddName(symIndexId: 1, SymTagEnum.SymTagFunction, name: "canonicalFunc");
         nameCanonicalization.Canonicalize();
         this.SessionDataCache.AllCanonicalNames!.Add(9216, nameCanonicalization);
 

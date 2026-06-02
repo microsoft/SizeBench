@@ -32,7 +32,7 @@ public static class Program
                                                     GenericUriParserOptions.DontCompressPath), "sizebench", -1);
         }
 
-        _windsorContainer.Install(FromAssembly.InDirectory(new AssemblyFilter(".", "SizeBench.*")));
+        _windsorContainer.Install(FromAssembly.InDirectory(new AssemblyFilter(".", "SizeBench.*dll")));
         _logger = _windsorContainer.Resolve<IApplicationLogger>();
 
         using (var startupInfoLogs = _logger.StartTaskLog("Launch info"))
@@ -125,8 +125,8 @@ public static class Program
             path = "BinaryDiffOverview";
             queryBuilder.Add("BeforeBinaryPath", args[0]);
             queryBuilder.Add("BeforePDBPath", args[1]);
-            queryBuilder.Add("BinaryPath", args[2]);
-            queryBuilder.Add("PDBPath", args[3]);
+            queryBuilder.Add("AfterBinaryPath", args[2]);
+            queryBuilder.Add("AfterPDBPath", args[3]);
         }
         else if (args.Length == 2)
         {
@@ -154,8 +154,8 @@ public static class Program
                 }
 
                 path = "BinaryDiffOverview";
-                queryBuilder.Add("BinaryPath", arg1);
-                queryBuilder.Add("PDBPath", pdbPath);
+                queryBuilder.Add("AfterBinaryPath", arg1);
+                queryBuilder.Add("AfterPDBPath", pdbPath);
                 queryBuilder.Add("BeforeBinaryPath", arg2);
                 queryBuilder.Add("BeforePDBPath", beforePdbPath);
             }

@@ -64,8 +64,8 @@ public class TypeSymbolToDisplayTypeNameConverterTests
     {
         using var cache = new SessionDataCache();
         uint nextSymIndexId = 0;
-        var udt = new UserDefinedTypeSymbol(cache, new Mock<IDIAAdapter>().Object, new Mock<ISession>().Object, "MyNamespace::MyTemplate<int, const std::string&>", 4, nextSymIndexId++, UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
-        var udt2 = new UserDefinedTypeSymbol(cache, new Mock<IDIAAdapter>().Object, new Mock<ISession>().Object, "AnotherTemplatedType<int, std::string>", 4, nextSymIndexId++, UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var udt = new UserDefinedTypeSymbol(cache, new Mock<IDIAAdapter>().Object, new Mock<ISession>().Object, "MyNamespace::MyTemplate<int, const std::string&>", 4, nextSymIndexId++, UserDefinedTypeKind.UdtClass);
+        var udt2 = new UserDefinedTypeSymbol(cache, new Mock<IDIAAdapter>().Object, new Mock<ISession>().Object, "AnotherTemplatedType<int, std::string>", 4, nextSymIndexId++, UserDefinedTypeKind.UdtClass);
 
         Assert.AreEqual("MyTemplate<int, const std::string&>", TypeSymbolToDisplayTypeNameConverter.Instance.Convert(udt, typeof(string), null, null));
         Assert.AreEqual("AnotherTemplatedType<int, std::string>", TypeSymbolToDisplayTypeNameConverter.Instance.Convert(udt2, typeof(string), null, null));
@@ -76,8 +76,8 @@ public class TypeSymbolToDisplayTypeNameConverterTests
     {
         using var cache = new SessionDataCache();
         uint nextSymIndexId = 0;
-        var udt = new UserDefinedTypeSymbol(cache, new Mock<IDIAAdapter>().Object, new Mock<ISession>().Object, "MyNamespace::IsDeep::LikeReallyDeep::MyTemplate<int, const std::string&>", 4, nextSymIndexId++, UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
-        var nonTemplatedUDT = new UserDefinedTypeSymbol(cache, new Mock<IDIAAdapter>().Object, new Mock<ISession>().Object, "MyNamespace::IsDeep::LikeReallyDeep::MyNonTemplatedType", 4, nextSymIndexId++, UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var udt = new UserDefinedTypeSymbol(cache, new Mock<IDIAAdapter>().Object, new Mock<ISession>().Object, "MyNamespace::IsDeep::LikeReallyDeep::MyTemplate<int, const std::string&>", 4, nextSymIndexId++, UserDefinedTypeKind.UdtClass);
+        var nonTemplatedUDT = new UserDefinedTypeSymbol(cache, new Mock<IDIAAdapter>().Object, new Mock<ISession>().Object, "MyNamespace::IsDeep::LikeReallyDeep::MyNonTemplatedType", 4, nextSymIndexId++, UserDefinedTypeKind.UdtClass);
 
         Assert.AreEqual("MyTemplate<int, const std::string&>", TypeSymbolToDisplayTypeNameConverter.Instance.Convert(udt, typeof(string), null, null));
         Assert.AreEqual("MyNonTemplatedType", TypeSymbolToDisplayTypeNameConverter.Instance.Convert(nonTemplatedUDT, typeof(string), null, null));
@@ -88,8 +88,8 @@ public class TypeSymbolToDisplayTypeNameConverterTests
     {
         using var cache = new SessionDataCache();
         uint nextSymIndexId = 0;
-        var template = new UserDefinedTypeSymbol(cache, new Mock<IDIAAdapter>().Object, new Mock<ISession>().Object, "MyNamespace::MyTemplate<const unsigned int, const std::string&>", 4, nextSymIndexId++, UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
-        var nonTemplate = new UserDefinedTypeSymbol(cache, new Mock<IDIAAdapter>().Object, new Mock<ISession>().Object, "AReallyReallyRidiculouslyLongTypeName_WhyWouldAnyoneHaveATypeNameThisLong", 4, nextSymIndexId++, UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var template = new UserDefinedTypeSymbol(cache, new Mock<IDIAAdapter>().Object, new Mock<ISession>().Object, "MyNamespace::MyTemplate<const unsigned int, const std::string&>", 4, nextSymIndexId++, UserDefinedTypeKind.UdtClass);
+        var nonTemplate = new UserDefinedTypeSymbol(cache, new Mock<IDIAAdapter>().Object, new Mock<ISession>().Object, "AReallyReallyRidiculouslyLongTypeName_WhyWouldAnyoneHaveATypeNameThisLong", 4, nextSymIndexId++, UserDefinedTypeKind.UdtClass);
 
         Assert.AreEqual("MyTemplate<const unsigned int, const std::...", TypeSymbolToDisplayTypeNameConverter.Instance.Convert(template, typeof(string), null, null));
         Assert.AreEqual("AReallyReallyRidiculouslyLongTypeName_WhyW...", TypeSymbolToDisplayTypeNameConverter.Instance.Convert(nonTemplate, typeof(string), null, null));

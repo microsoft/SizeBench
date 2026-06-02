@@ -18,7 +18,7 @@ using SizeBench.GUI.Commands;
 using SizeBench.GUI.Controls.Errors;
 using SizeBench.GUI.Core;
 using SizeBench.GUI.Windows;
-using reg = Castle.MicroKernel.Registration;
+using CastleReg = Castle.MicroKernel.Registration;
 
 namespace SizeBench.GUI.ViewModels;
 
@@ -149,7 +149,7 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
         using var deeplinkLog = this._applicationLogger.StartTaskLog("Trying to resolve deeplink");
         deeplinkLog.Log($"deeplink = {deeplink}");
 
-        if (deeplink.Scheme.ToUpperInvariant() != "SIZEBENCH")
+        if (!deeplink.Scheme.Equals("SIZEBENCH", StringComparison.OrdinalIgnoreCase))
         {
             return;
         }
@@ -201,8 +201,9 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
         {
             return;
         }
-
-        var session = await OpenSessionFromBinaryPathAndPDBPath(deeplinkLog, binaryPath, pdbPath);
+        
+        // TODO: how should deep links include session options like SymbolSourcesSupported?  Or do we always deep-link in with everything turned on which could be quite slow?
+        var session = await OpenSessionFromBinaryPathAndPDBPath(deeplinkLog, binaryPath, pdbPath, new SessionOptions());
 
         // session can be null if the deeplink fails to open the binary/pdb (like, say, it's not present at the location anymore).
         if (session is null)
@@ -292,13 +293,13 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
         var container = new WindsorContainer();
         var newTab = new SingleBinaryTab(session, container);
 
-        container.Install(FromAssembly.InDirectory(new AssemblyFilter(".", "SizeBench.*")));
-        container.Register(reg.Component.For<ISession, ISessionWithProgress>()
-                                        .Instance(session)
-                                        .LifestyleSingleton());
-        container.Register(reg.Component.For<SingleBinaryTab, TabBase, IUITaskScheduler>()
-                                        .Instance(newTab)
-                                        .LifestyleSingleton());
+        container.Install(FromAssembly.InDirectory(new AssemblyFilter(".", "SizeBench.*dll")));
+        container.Register(CastleReg.Component.For<ISession, ISessionWithProgress>()
+                                              .Instance(session)
+                                              .LifestyleSingleton());
+        container.Register(CastleReg.Component.For<SingleBinaryTab, TabBase, IUITaskScheduler>()
+                                              .Instance(newTab)
+                                              .LifestyleSingleton());
 
         this.OpenTabs.Add(newTab);
 
@@ -316,13 +317,13 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
         var container = new WindsorContainer();
         var newTab = new BinaryDiffTab(diffSession, container);
 
-        container.Install(FromAssembly.InDirectory(new AssemblyFilter(".", "SizeBench.*")));
-        container.Register(reg.Component.For<IDiffSession, ISessionWithProgress>()
-                                        .Instance(diffSession)
-                                        .LifestyleSingleton());
-        container.Register(reg.Component.For<BinaryDiffTab, TabBase, IUITaskScheduler>()
-                                        .Instance(newTab)
-                                        .LifestyleSingleton());
+        container.Install(FromAssembly.InDirectory(new AssemblyFilter(".", "SizeBench.*dll")));
+        container.Register(CastleReg.Component.For<IDiffSession, ISessionWithProgress>()
+                                              .Instance(diffSession)
+                                              .LifestyleSingleton());
+        container.Register(CastleReg.Component.For<BinaryDiffTab, TabBase, IUITaskScheduler>()
+                                              .Instance(newTab)
+                                              .LifestyleSingleton());
 
         this.OpenTabs.Add(newTab);
 
@@ -347,7 +348,7 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
 
         if (window.ShowDialog() == true)
         {
-            var session = await OpenSessionFromBinaryPathAndPDBPath(taskLog, window.BinaryPath, window.PDBPath);
+            var session = await OpenSessionFromBinaryPathAndPDBPath(taskLog, window.BinaryPath, window.PDBPath, window.SessionOptions);
 
             if (session != null) // We can get null if the session fails to open, say due to a DIA error, corrupt PDB, etc.
             {
@@ -362,9 +363,9 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
         taskLog.Log("OpenSingleBinary command execution ended.");
     }
 
-    private async Task<ISession?> OpenSessionFromBinaryPathAndPDBPath(ILogger taskLog, string binaryPath, string pdbPath)
+    private async Task<ISession?> OpenSessionFromBinaryPathAndPDBPath(ILogger taskLog, string binaryPath, string pdbPath, SessionOptions sessionOptions)
     {
-        taskLog.Log($"Creating Session for {binaryPath}, {pdbPath}");
+        taskLog.Log($"Creating Session for {binaryPath}, {pdbPath} (symbol sources supported: {sessionOptions.SymbolSourcesSupported})");
 
         ISession? session = null;
         try
@@ -375,7 +376,7 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
                                   Environment.NewLine +
                                   "This operation can take a little bit if the PDB or binary are large and over a network connection.",
                                   isCancelable: false,
-                                  task: async (token) => session = await this._sessionFactory.CreateSession(binaryPath, pdbPath, this._applicationLogger.CreateSessionLog(binaryPath)));
+                                  task: async (token) => session = await this._sessionFactory.CreateSession(binaryPath, pdbPath, sessionOptions, this._applicationLogger.CreateSessionLog(binaryPath)));
         }
 #pragma warning disable CA1031 // Do not catch general exception types - it's better to show an error to a user than crash the whole app if anything throws when opening a session
         catch (Exception ex)

@@ -17,14 +17,10 @@ public sealed class EnumerateSymbolsInSourceFileSessionTaskTests : IDisposable
     {
         this.Generator = new SingleBinaryDataGenerator();
         this.Generator.MockSession.SetupGet(s => s.BytesPerWord).Returns(8);
-        this.Generator.DataCache.PDataRVARange = new RVARange(0, 0);
-        this.Generator.DataCache.PDataSymbolsByRVA = new SortedList<uint, PDataSymbol>();
-        this.Generator.DataCache.XDataRVARanges = new RVARangeSet();
-        this.Generator.DataCache.XDataSymbolsByRVA = new SortedList<uint, XDataSymbol>();
-        this.Generator.DataCache.RsrcRVARange = new RVARange(0, 0);
-        this.Generator.DataCache.RsrcSymbolsByRVA = new SortedList<uint, RsrcSymbolBase>();
-        this.Generator.DataCache.OtherPESymbolsRVARanges = new RVARangeSet();
-        this.Generator.DataCache.OtherPESymbolsByRVA = new SortedList<uint, ISymbol>();
+        this.Generator.DataCache.PDataHasBeenInitialized = true;
+        this.Generator.DataCache.XDataHasBeenInitialized = true;
+        this.Generator.DataCache.RsrcHasBeenInitialized = true;
+        this.Generator.DataCache.OtherPESymbolsHaveBeenInitialized = true;
     }
 
     [TestMethod]

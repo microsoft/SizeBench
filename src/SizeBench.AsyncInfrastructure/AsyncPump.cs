@@ -23,12 +23,7 @@ public static class AsyncPump
             SynchronizationContext.SetSynchronizationContext(syncCtx);
 
             // Invoke the function and alert the context to when it completes
-            var t = func();
-            if (t is null)
-            {
-                throw new InvalidOperationException("No task provided.");
-            }
-
+            var t = func() ?? throw new InvalidOperationException("No task provided.");
             t.ContinueWith(delegate { syncCtx.Complete(); }, TaskScheduler.Default);
 
             // Pump continuations and propagate any exceptions

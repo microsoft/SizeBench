@@ -15,13 +15,10 @@ internal sealed class RsrcDirectorySymbol : RsrcSymbolBase
     private readonly Win32ResourceType? _win32ResourceType;
     private readonly string _directoryName;
 
-    internal RsrcDirectorySymbol(uint rva, uint size, uint depth, Win32ResourceType rsrcType, string rsrcTypeName, string? directoryName)
-        : base(rva, size, ConjureName(depth, rsrcTypeName, directoryName))
+    internal RsrcDirectorySymbol(uint rva, uint size, uint depth, Win32ResourceType rsrcType, string rsrcTypeName, string? directoryName, SymbolSourcesSupported symbolSourcesSupported)
+        : base(rva, size, ConjureName(depth, rsrcTypeName, directoryName), symbolSourcesSupported)
     {
-        if (depth > 2)
-        {
-            throw new ArgumentOutOfRangeException(nameof(depth));
-        }
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(depth, 2u);
 
         this._depth = depth;
         this._win32ResourceType = rsrcType;

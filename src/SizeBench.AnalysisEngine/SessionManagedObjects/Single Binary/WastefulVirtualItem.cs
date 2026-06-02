@@ -13,7 +13,7 @@ public sealed class WastefulVirtualItem
     {
         get
         {
-            var numClassesWastedOn = this.UserDefinedType.DerivedTypesBySymIndexId is null ? 0 : this.UserDefinedType.DerivedTypesBySymIndexId.Count + 1; // +1 to include self
+            var numClassesWastedOn = this.UserDefinedType.DerivedTypeCount == 0 ? 0 : this.UserDefinedType.DerivedTypeCount + 1; // +1 to include self
             return numClassesWastedOn * this.BytesPerWord;
         }
     }

@@ -21,14 +21,19 @@ public sealed class Session : ISession
     public string PdbPath => this._guaranteedLocalPDBFile?.OriginalPath ?? "No pdb opened yet";
 
     private readonly string _originalBinaryPathMayBeRemote;
-    public string BinaryPath => this.PEFile?.GuaranteedLocalCopyOfBinary.OriginalPath ?? "No binary opened yet";
+    public string BinaryPath => this._peFile?.GuaranteedLocalCopyOfBinary.OriginalPath ?? "No binary opened yet";
 
-    public byte BytesPerWord => this.PEFile!.BytesPerWord;
+    public byte BytesPerWord => this._peFile?.BytesPerWord ?? 0;
 
     private readonly ILogger _logger;
-    internal SessionDataCache DataCache { get; } = new SessionDataCache();
 
-    internal PEFile? PEFile { get; private set; }
+    public SessionOptions SessionOptions { get; }
+
+    internal SessionDataCache DataCache { get; }
+
+    public IPEFile PEFile => this._peFile!;
+
+    private PEFile? _peFile;
 
     #region Progress Reporting
 
@@ -63,10 +68,11 @@ public sealed class Session : ISession
 
     #region Debugger Interop
 
-    private IDebuggerAdapter? _debuggerAdapter;
+    private DebuggerAdapter? _debuggerAdapter;
 
     private async Task EnsureDebuggerAdapter(CancellationToken token)
     {
+        ThrowIfDisposingOrDisposed();
         if (this._debuggerAdapter != null)
         {
             return;
@@ -97,9 +103,14 @@ public sealed class Session : ISession
 
     #region Create and Open Session
 
-    public static async Task<Session> Create(string binaryPath, string pdbPath, ILogger sessionLogger)
+    public static Task<Session> Create(string binaryPath, string pdbPath, ILogger sessionLogger)
+        => Create(binaryPath, pdbPath, new SessionOptions(), sessionLogger);
+
+    public static async Task<Session> Create(string binaryPath, string pdbPath, SessionOptions options, ILogger sessionLogger)
     {
-        var s = new Session(binaryPath, pdbPath, sessionLogger);
+        ArgumentNullException.ThrowIfNull(options);
+
+        var s = new Session(binaryPath, pdbPath, options, sessionLogger);
 
         try
         {
@@ -122,9 +133,11 @@ public sealed class Session : ISession
         return this._taskFactory.StartNew(InitializeDIAThread);
     }
 
-    internal Session(string binaryPath, string pdbPath, ILogger sessionLogger)
+    internal Session(string binaryPath, string pdbPath, SessionOptions options, ILogger sessionLogger)
     {
         this._logger = sessionLogger;
+        this.SessionOptions = options;
+        this.DataCache = new SessionDataCache(options.SymbolSourcesSupported);
 
         Debug.Assert(File.Exists(pdbPath));
         this._originalPDBPathMayBeRemote = pdbPath;
@@ -142,7 +155,7 @@ public sealed class Session : ISession
         //      startup.
         //      We should also use that opportunity to plumb through a CancellationToken so we can cancel opening a binary?
 
-        using var initializeDiaThreadLog = this._logger.StartTaskLog("Setting up initial data needed to open the session");
+        using var initializeDiaThreadLog = this._logger.StartTaskLog($"Setting up initial data needed to open the session (symbol sources: {this.SessionOptions.SymbolSourcesSupported})");
         this._diaManagedThreadId = Environment.CurrentManagedThreadId;
 
         this.ProgressReporter?.Report(new SessionTaskProgress("Copying PDB file locally if necessary.", 0, null));
@@ -151,23 +164,23 @@ public sealed class Session : ISession
         this._diaAdapter = new DIAAdapter(this, this._guaranteedLocalPDBFile.GuaranteedLocalPath);
         this._taskParameters = new SessionTaskParameters(this, this._diaAdapter, this.DataCache);
 
-        this.PEFile = new PEFile(this._originalBinaryPathMayBeRemote, initializeDiaThreadLog);
-        this.DataCache.BytesPerWord = this.PEFile.BytesPerWord;
-        this.DataCache.RsrcRVARange = this.PEFile.RsrcRange;
+        this._peFile = new PEFile(this._originalBinaryPathMayBeRemote, this.SessionOptions.SymbolSourcesSupported, initializeDiaThreadLog);
+        this.DataCache.BytesPerWord = this._peFile.BytesPerWord;
+        this.DataCache.RsrcRVARange = this._peFile.RsrcRange;
 
-        this._diaAdapter.Initialize(this.PEFile, initializeDiaThreadLog);
+        this._diaAdapter.Initialize(this._peFile, initializeDiaThreadLog);
     }
 
     #endregion
 
     public async Task<ISymbol?> LoadSymbolForVTableSlotAsync(uint vtableRVA, uint slotIndex)
     {
-        var vtableTargetRva = EHSymbolTable.GetAdjustedRva(this.PEFile!.LoadUInt32ByRVAThatIsPreferredBaseRelative(vtableRVA + (this.BytesPerWord * slotIndex)), this.PEFile.MachineType);
+        var vtableTargetRva = EHSymbolTable.GetAdjustedRva(this._peFile!.LoadUInt32ByRVAThatIsPreferredBaseRelative(vtableRVA + (this.BytesPerWord * slotIndex)), this.PEFile.MachineType);
         return await LoadSymbolByRVA(vtableTargetRva).ConfigureAwait(true);
     }
 
     public bool CompareData(long RVA1, long RVA2, uint length)
-        => this.PEFile!.CompareData(RVA1, RVA2, length);
+        => this._peFile!.CompareData(RVA1, RVA2, length);
 
     public float CompareSimilarityOfCodeBytesInBinary(IFunctionCodeSymbol firstSymbol, IFunctionCodeSymbol secondSymbol)
     {
@@ -192,7 +205,7 @@ public sealed class Session : ISession
             return 0.0f;
         }
 
-        return this.PEFile!.CompareSimilarityOfBytesInBinary(firstRanges, secondRanges);
+        return this._peFile!.CompareSimilarityOfBytesInBinary(firstRanges, secondRanges);
     }
 
     #region Debug Helpers
@@ -212,13 +225,7 @@ public sealed class Session : ISession
 
     #region IAsyncDisposable Support
 
-    private void ThrowIfDisposingOrDisposed()
-    {
-        if (this.IsDisposing || this.IsDisposed)
-        {
-            throw new ObjectDisposedException(GetType().Name);
-        }
-    }
+    private void ThrowIfDisposingOrDisposed() => ObjectDisposedException.ThrowIf(this.IsDisposing || this.IsDisposed, GetType().Name);
 
     // IsDisposing is set to true when we begin disposal, but once we begin we have to wait for the background
     // DIA thread to finish whatever it's doing before we can finish disposing, so IsDisposed is the way we
@@ -235,10 +242,10 @@ public sealed class Session : ISession
 
         this.IsDisposing = true;
 
-        this._taskScheduler?.Dispose();
+        this._taskScheduler.Dispose();
 
-        this.PEFile?.Dispose();
-        this.PEFile = null;
+        this._peFile?.Dispose();
+        this._peFile = null;
 
         this.DataCache.Dispose();
 
@@ -388,10 +395,10 @@ public sealed class Session : ISession
 
     #region Enumerate Libs
 
-    public Task<IReadOnlyList<Library>> EnumerateLibs(CancellationToken token)
+    public Task<IReadOnlyCollection<Library>> EnumerateLibs(CancellationToken token)
         => EnumerateLibs(token, null);
 
-    public async Task<IReadOnlyList<Library>> EnumerateLibs(CancellationToken token, ILogger? parentLogger)
+    public async Task<IReadOnlyCollection<Library>> EnumerateLibs(CancellationToken token, ILogger? parentLogger)
     {
         if (this.DataCache.AllLibs is null)
         {
@@ -408,7 +415,7 @@ public sealed class Session : ISession
 
     #region Enumerate Compilands
 
-    public async Task<IReadOnlyList<Compiland>> EnumerateCompilands(CancellationToken token)
+    public async Task<IReadOnlyCollection<Compiland>> EnumerateCompilands(CancellationToken token)
     {
         if (this.DataCache.AllCompilands is null)
         {
@@ -468,11 +475,28 @@ public sealed class Session : ISession
     #region Lookup a symbol's placement in the binary
 
     public Task<SymbolPlacement> LookupSymbolPlacementInBinary(ISymbol symbol,
+                                                               LookupSymbolPlacementOptions options,
+                                                               CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(symbol);
+        ArgumentNullException.ThrowIfNull(options);
+
+        var task = new LookupSymbolPlacementInBinarySessionTask(symbol,
+                                                                options,
+                                                                this._taskParameters!,
+                                                                token,
+                                                                this.ProgressReporter);
+
+        return PerformSessionTaskOnDIAThread(task, token);
+    }
+
+    public Task<SymbolPlacement> LookupSymbolPlacementInBinary(ISymbol symbol,
                                                                CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(symbol);
 
         var task = new LookupSymbolPlacementInBinarySessionTask(symbol,
+                                                                options: null,
                                                                 this._taskParameters!,
                                                                 token,
                                                                 this.ProgressReporter);
@@ -504,6 +528,31 @@ public sealed class Session : ISession
                                                                  rva,
                                                                  this.ProgressReporter,
                                                                  token);
+
+        return await PerformSessionTaskOnDIAThread(task, token, null).ConfigureAwait(true);
+    }
+
+    #endregion
+
+    #region Enumerate all the inline sites within a function
+
+    public async Task<IReadOnlyList<InlineSiteSymbol>> EnumerateAllInlineSitesInFunction(IFunctionCodeSymbol functionSymbol, CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(functionSymbol);
+
+        var task = new EnumerateInlineSitesInFunctionSessionTask(this._taskParameters!,
+                                                                 functionSymbol,
+                                                                 this.ProgressReporter,
+                                                                 token);
+
+        return await PerformSessionTaskOnDIAThread(task, token, null).ConfigureAwait(true);
+    }
+
+    public async Task<IReadOnlyList<InlineSiteSymbol>> EnumerateAllInlineSites(CancellationToken token)
+    {
+        var task = new EnumerateAllInlineSitesSessionTask(this._taskParameters!,
+                                                          this.ProgressReporter,
+                                                          token);
 
         return await PerformSessionTaskOnDIAThread(task, token, null).ConfigureAwait(true);
     }
@@ -642,7 +691,7 @@ public sealed class Session : ISession
         // be properly coded and tested if it's important.
         if (member.Offset != Convert.ToUInt32(member.Offset))
         {
-            throw new ArgumentOutOfRangeException(nameof(member), "member.Offset is not able to be represented as a uint - this is unexpected.  How did this happen?");
+            throw new ArgumentOutOfRangeException(nameof(member), "offset of member is not able to be represented as a uint - this is unexpected.  How did this happen?");
         }
 
         // When loading the layout of a member, if it's a pointer or an array, we'll "chase through" to find the UDT but we don't
@@ -712,6 +761,7 @@ public sealed class Session : ISession
     public async Task<string> DisassembleFunction(IFunctionCodeSymbol functionSymbol, DisassembleFunctionOptions options, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(functionSymbol);
+        ArgumentNullException.ThrowIfNull(options);
 
         try
         {

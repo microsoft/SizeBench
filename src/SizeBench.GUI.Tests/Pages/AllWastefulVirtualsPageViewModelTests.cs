@@ -38,13 +38,15 @@ public sealed class AllWastefulVirtualsPageViewModelTests : IDisposable
     [TestMethod]
     public async Task ExcelExportIsFormattedUsefully()
     {
-        var UDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "CBase", instanceSize: 100, symIndexId: 1, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
-        var baseclasses = new Dictionary<uint, uint>(capacity: 1)
+        var UDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "CBase", instanceSize: 100, symIndexId: 1, udtKind: UserDefinedTypeKind.UdtClass);
+        var baseclasses = new List<(uint, uint)>(capacity: 1)
             {
-                { UDT.SymIndexId, 0 }
+                (UDT.SymIndexId, 0)
             };
-        var DerivedUDT1 = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "CDerived1", instanceSize: 120, symIndexId: 2, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: baseclasses);
-        var DerivedUDT2 = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "CDerived2", instanceSize: 110, symIndexId: 3, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: baseclasses);
+        var DerivedUDT1 = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "CDerived1", instanceSize: 120, symIndexId: 2, udtKind: UserDefinedTypeKind.UdtClass);
+        this.TestDIAAdapter.BaseTypeIDsToFindByUDT.Add(DerivedUDT1, baseclasses);
+        var DerivedUDT2 = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "CDerived2", instanceSize: 110, symIndexId: 3, udtKind: UserDefinedTypeKind.UdtClass);
+        this.TestDIAAdapter.BaseTypeIDsToFindByUDT.Add(DerivedUDT2, baseclasses);
 
         var WastedFunction1 = new SimpleFunctionCodeSymbol(this.DataCache, "WastedFunction1", rva: 100, size: 50, symIndexId: 4);
         var WastedFunction2 = new SimpleFunctionCodeSymbol(this.DataCache, "WastedFunction2", rva: 150, size: 100, symIndexId: 5);
@@ -98,13 +100,15 @@ public sealed class AllWastefulVirtualsPageViewModelTests : IDisposable
     public async Task TogglingExcludeCOMTypesRefreshesView()
     {
         uint nextSymIndexId = 1;
-        var UDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "CBase", instanceSize: 100, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
-        var baseclasses = new Dictionary<uint, uint>(capacity: 1)
+        var UDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "CBase", instanceSize: 100, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
+        var baseclasses = new List<(uint, uint)>(capacity: 1)
             {
-                { UDT.SymIndexId, 0 }
+                (UDT.SymIndexId, 0)
             };
-        var DerivedUDT1 = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "CDerived1", instanceSize: 120, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: baseclasses);
-        var DerivedUDT2 = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "CDerived2", instanceSize: 110, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: baseclasses);
+        var DerivedUDT1 = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "CDerived1", instanceSize: 120, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
+        this.TestDIAAdapter.BaseTypeIDsToFindByUDT.Add(DerivedUDT1, baseclasses);
+        var DerivedUDT2 = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "CDerived2", instanceSize: 110, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
+        this.TestDIAAdapter.BaseTypeIDsToFindByUDT.Add(DerivedUDT2, baseclasses);
 
         var WastedFunction1 = new SimpleFunctionCodeSymbol(this.DataCache, "WastedFunction1", rva: 100, size: 50, symIndexId: nextSymIndexId++);
         var WastedFunction2 = new SimpleFunctionCodeSymbol(this.DataCache, "WastedFunction2", rva: 150, size: 100, symIndexId: nextSymIndexId++);
@@ -118,17 +122,19 @@ public sealed class AllWastefulVirtualsPageViewModelTests : IDisposable
         nonCOMType1.AddWastedOverrideThatIsNotPureWithNoOverrides(WastedFunction2);
 
         // A COM type
-        var iUnk = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "IUnknown", instanceSize: 8, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtStruct, baseTypeIDs: null);
-        var baseIUnk = new Dictionary<uint, uint>(capacity: 1)
+        var iUnk = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "IUnknown", instanceSize: 8, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtStruct);
+        var baseIUnk = new List<(uint, uint)>(capacity: 1)
             {
-                { iUnk.SymIndexId, 0 }
+                (iUnk.SymIndexId, 0)
             };
-        var UDT2 = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "MyCOMType", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: baseIUnk);
+        var UDT2 = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "MyCOMType", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
+        this.TestDIAAdapter.BaseTypeIDsToFindByUDT.Add(UDT2, baseIUnk);
         UDT2.MarkDerivedTypesLoaded();
         var COMType1 = new WastefulVirtualItem(UDT2, isCOMType: true, bytesPerWord: 8);
         COMType1.AddWastedOverrideThatIsNotPureWithNoOverrides(WastedFunction1);
 
-        var UDT3 = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "MyCOMType2", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: baseIUnk);
+        var UDT3 = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, name: "MyCOMType2", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
+        this.TestDIAAdapter.BaseTypeIDsToFindByUDT.Add(UDT3, baseIUnk);
         UDT3.MarkDerivedTypesLoaded();
         var COMType2 = new WastefulVirtualItem(UDT3, isCOMType: true, bytesPerWord: 8);
         COMType2.AddWastedOverrideThatIsNotPureWithNoOverrides(WastedFunction1);

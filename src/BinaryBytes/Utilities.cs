@@ -28,9 +28,9 @@ internal static class Utilities
 
     private static string? InferBinaryPathFromPDBPathIfPossible(string pdbPath, string? customBinaryDirectory)
     {
-        // TODO: this should use the IBinaryLocator interface and find all the locators that way instead of hardcoding the local build and windows build...
+        // TODO: this should use the IBinaryLocator interface and find all the locators that way instead of hardcoding the local build...
 
-        string[] extensionsSupported = { "dll", "exe", "efi", "sys", "pyd" };
+        string[] extensionsSupported = ["dll", "exe", "efi", "sys", "pyd"];
 
         string? binaryPath = null;
         string? possibleBinaryPath;
@@ -57,61 +57,59 @@ internal static class Utilities
         return binaryPath;
     }
 
-    internal static BytesItem CreatePaddingBytesItem(string name, string coffgroup, uint rva, ulong size)
+    internal static BytesItem CreatePaddingBytesItem(string name, string coffgroup, uint rva, ulong virtualSize)
     {
         return new BytesItem()
         {
             IsPadding = true,
             Name = name,
-            CoffgroupName = coffgroup,
+            CoffGroupName = coffgroup,
             RVA = rva,
-            Size = size,
+            VirtualSize = virtualSize,
             LibraryFilename = String.Empty,
             CompilandName = String.Empty,
-            IsPGO = false,
-            IsOptimizedForSpeed = false
         };
     }
 
-    internal static BytesItem CreateSpecialBytesItem(string name, string coffgroup, uint rva, ulong size, SymbolContributor contributor)
+    internal static BytesItem CreateSpecialBytesItem(string name, string coffgroup, uint rva, ulong virtualSize, SymbolContributor contributor)
     {
         return new BytesItem()
         {
             IsPadding = false,
             Name = name,
-            CoffgroupName = coffgroup,
+            CoffGroupName = coffgroup,
             RVA = rva,
-            Size = size,
+            VirtualSize = virtualSize,
             LibraryFilename = contributor.LibraryName,
             CompilandName = contributor.CompilandName,
-            IsPGO = false,
-            IsOptimizedForSpeed = false
         };
     }
 
     internal static BytesItem CreateSymbolsBytesItem(ISymbol symbol, string coffgroup, SymbolContributor contributor)
     {
-        var functionSymbol = symbol as IFunctionCodeSymbol;
-        if (symbol is CodeBlockSymbol block)
+        var functionSymbol = symbol switch
         {
-            functionSymbol = block.ParentFunction;
-        }
+            IFunctionCodeSymbol f => f,
+            CodeBlockSymbol b => b.ParentFunction,
+            _ => null
+        };
 
         return new BytesItem()
         {
             IsPadding = false,
             Name = symbol.Name,
-            CoffgroupName = coffgroup,
+            CoffGroupName = coffgroup,
             RVA = symbol.RVA,
-            Size = symbol.Size,
+            VirtualSize = symbol.VirtualSize,
             LibraryFilename = contributor.LibraryName,
             CompilandName = contributor.CompilandName,
             IsPGO = functionSymbol?.IsPGO ?? false,
-            IsOptimizedForSpeed = functionSymbol?.IsOptimizedForSpeed ?? false
+            IsOptimizedForSpeed = functionSymbol?.IsOptimizedForSpeed ?? false,
+            DynamicInstructionCount = functionSymbol?.DynamicInstructionCount ?? 0,
         };
     }
 
-    internal static Dictionary<uint, SymbolContributor> CreateRvaToContributorMap(IReadOnlyList<Compiland> compilands)
+    internal static Dictionary<uint, SymbolContributor> CreateRvaToContributorMap(IReadOnlyCollection<Compiland> compilands)
     {
         var rvaToContributorMap = new Dictionary<uint, SymbolContributor>();
 
@@ -119,8 +117,8 @@ internal static class Utilities
         {
             foreach (var coffgroupContribution in compiland.COFFGroupContributions)
             {
-                var compilandName = coffgroupContribution.Value.Compiland.Name.Split('\\').Last();
-                var libName = coffgroupContribution.Value.Compiland.Lib.Name.Split('\\').Last();
+                var compilandName = coffgroupContribution.Value.Compiland.ShortName;
+                var libName = coffgroupContribution.Value.Compiland.Lib.ShortName;
                 foreach (var rvaRange in coffgroupContribution.Value.RVARanges)
                 {
                     var rva = rvaRange.RVAStart;
@@ -134,14 +132,11 @@ internal static class Utilities
 
     internal static SymbolContributor GetContributorForRva(uint rva, Dictionary<uint, SymbolContributor> rvaToContributorMap)
     {
-        var rvaContributor = new SymbolContributor(String.Empty, String.Empty);
-        if (rvaToContributorMap.ContainsKey(rva))
+        if (rvaToContributorMap.TryGetValue(rva, out var value))
         {
-            var libname = rvaToContributorMap[rva]?.LibraryName ?? String.Empty;
-            var compilandName = rvaToContributorMap[rva]?.CompilandName ?? String.Empty;
-            rvaContributor = new SymbolContributor(libname, compilandName);
+            return value;
         }
 
-        return rvaContributor;
+        return SymbolContributor.Default;
     }
 }

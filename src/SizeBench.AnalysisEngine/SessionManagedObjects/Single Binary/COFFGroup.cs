@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
-using SizeBench.AnalysisEngine.PE;
+using System.Reflection.PortableExecutable;
 
 namespace SizeBench.AnalysisEngine;
 
@@ -11,18 +11,18 @@ public sealed class COFFGroup
     {
         get
         {
-            if (this._fullyConstructed)
+            if (this.IsFullyConstructed)
             {
-                return $"COFF Group: {this.Name}, Section={this.Section?.Name ?? "<none set>"} Size={this.Size}, VirtualSize={this.VirtualSize}, RVA={this.RVA}";
+                return $"COFF Group: {this.Name}, Section={this.Section?.Name ?? "<none set>"} Size={this.Size:N0}, VirtualSize={this.VirtualSize:N0}, RVA=0x{this.RVA:X}";
             }
             else
             {
-                return $"[Not Yet Fully Constructed] COFF Group: {this.Name}, _rawSize={this._rawSize}, RVA={this.RVA}";
+                return $"[Not Yet Fully Constructed] COFF Group: {this.Name}, _rawSize={this._rawSize:N0}, RVA=0x{this.RVA:X}";
             }
         }
     }
 
-    private bool _fullyConstructed;
+    internal bool IsFullyConstructed { get; private set; }
 
     public string Name { get; }
 
@@ -30,7 +30,7 @@ public sealed class COFFGroup
     public uint RVA { get; }
 
     [Display(AutoGenerateField = false)]
-    public DataSectionFlags Characteristics { get; }
+    public SectionCharacteristics Characteristics { get; }
 
     // When parsing a COFF Group it is not possible to tell if the size found is real
     // or virtual, so we must look it up based on properties of its containing section.
@@ -42,7 +42,7 @@ public sealed class COFFGroup
             // You should not use RawSize past initial construction time - it's a parking
             // ground for the size until we can determine if it's real or virtual.
             // Post-construction-time you should always use Size or VirtualSize.
-            if (this._fullyConstructed)
+            if (this.IsFullyConstructed)
             {
                 throw new ObjectFullyConstructedAlreadyException();
             }
@@ -66,7 +66,7 @@ public sealed class COFFGroup
     {
         get
         {
-            if (!this._fullyConstructed || !this._tailSlopSizeAlignment.HasValue)
+            if (!this.IsFullyConstructed || !this._tailSlopSizeAlignment.HasValue)
             {
                 throw new ObjectNotYetFullyConstructedException();
             }
@@ -90,7 +90,7 @@ public sealed class COFFGroup
     {
         get
         {
-            if (!this._fullyConstructed)
+            if (!this.IsFullyConstructed)
             {
                 throw new ObjectNotYetFullyConstructedException();
             }
@@ -116,7 +116,7 @@ public sealed class COFFGroup
     {
         get
         {
-            if (!this._fullyConstructed)
+            if (!this.IsFullyConstructed)
             {
                 throw new ObjectNotYetFullyConstructedException();
             }
@@ -132,7 +132,7 @@ public sealed class COFFGroup
     {
         get
         {
-            if (!this._fullyConstructed)
+            if (!this.IsFullyConstructed)
             {
                 throw new ObjectNotYetFullyConstructedException();
             }
@@ -146,7 +146,7 @@ public sealed class COFFGroup
     {
         get
         {
-            if (!this._fullyConstructed)
+            if (!this.IsFullyConstructed)
             {
                 throw new ObjectNotYetFullyConstructedException();
             }
@@ -164,7 +164,7 @@ public sealed class COFFGroup
     {
         get
         {
-            if (!this._fullyConstructed)
+            if (!this.IsFullyConstructed)
             {
                 throw new ObjectNotYetFullyConstructedException();
             }
@@ -173,7 +173,7 @@ public sealed class COFFGroup
         }
         internal set
         {
-            if (this._fullyConstructed)
+            if (this.IsFullyConstructed)
             {
                 throw new ObjectFullyConstructedAlreadyException();
             }
@@ -184,7 +184,7 @@ public sealed class COFFGroup
 
     //TODO: remove FileAlignment and SectionAlignment parameters here, they don't do much...but need to check how the size vs. virtualsize is calculated in
     //      MarkFullyConstructed.  It seems like I could base this off VA vs. RVA or something instead?
-    internal COFFGroup(SessionDataCache cache, string name, uint size, uint rva, uint fileAlignment, uint sectionAlignment, DataSectionFlags characteristics)
+    internal COFFGroup(SessionDataCache cache, string name, uint size, uint rva, uint fileAlignment, uint sectionAlignment, SectionCharacteristics characteristics)
     {
 #if DEBUG
         var conflict = cache.COFFGroupsConstrutedEver.Where(cg => cg.RVA == rva || cg.Name == name).FirstOrDefault();
@@ -211,8 +211,8 @@ public sealed class COFFGroup
         // If, however, the file alignment is >= 4K (the default), then we can use the characteristics to
         // determine if this is representing 'real' size (on-disk size) or 'virtual' size (size in memory, but not on-disk).
         if (this.SectionAlignment >= 0x1000 &&
-             this.Characteristics.HasFlag(DataSectionFlags.ContentUninitializedData) &&
-            !this.Characteristics.HasFlag(DataSectionFlags.ContentInitializedData))
+             this.Characteristics.HasFlag(SectionCharacteristics.ContainsUninitializedData) &&
+            !this.Characteristics.HasFlag(SectionCharacteristics.ContainsInitializedData))
         {
             this._virtualSize = this.RawSize;
             this._size = 0;
@@ -223,6 +223,6 @@ public sealed class COFFGroup
             this._size = this.RawSize;
         }
 
-        this._fullyConstructed = true;
+        this.IsFullyConstructed = true;
     }
 }

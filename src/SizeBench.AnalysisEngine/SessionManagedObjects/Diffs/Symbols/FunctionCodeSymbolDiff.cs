@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace SizeBench.AnalysisEngine.Symbols;
 
-[DebuggerDisplay("FunctionSymbolDiff Name={Name}, SizeDiff={SizeDiff}, VirtualSizeDiff={VirtualSizeDiff}")]
+[DebuggerDisplay("FunctionSymbolDiff Name={FullName}, SizeDiff={SizeDiff}")]
 public sealed class FunctionCodeSymbolDiff
 {
     [Display(AutoGenerateField = false)]

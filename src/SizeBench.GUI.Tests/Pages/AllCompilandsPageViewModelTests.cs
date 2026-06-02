@@ -23,7 +23,7 @@ public class AllCompilandsPageViewModelTests
     {
         using var generator = new SingleBinaryDataGenerator();
 
-        generator.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Compilands as IReadOnlyList<Compiland>));
+        generator.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Compilands as IReadOnlyCollection<Compiland>));
 
         var viewmodel = new AllCompilandsPageViewModel(this.MockUITaskScheduler.Object,
                                                        generator.MockSession.Object,
@@ -43,7 +43,7 @@ public class AllCompilandsPageViewModelTests
     {
         using var generator = new SingleBinaryDataGenerator();
 
-        generator.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Compilands as IReadOnlyList<Compiland>));
+        generator.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Compilands as IReadOnlyCollection<Compiland>));
 
         var viewmodel = new AllCompilandsPageViewModel(this.MockUITaskScheduler.Object,
                                                        generator.MockSession.Object,
@@ -65,7 +65,7 @@ public class AllCompilandsPageViewModelTests
     public async Task ExcelExportDataForSizeIsFormattedUsefully()
     {
         using var generator = new SingleBinaryDataGenerator();
-        generator.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Compilands as IReadOnlyList<Compiland>));
+        generator.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Compilands as IReadOnlyCollection<Compiland>));
 
         var viewmodel = new AllCompilandsPageViewModel(this.MockUITaskScheduler.Object,
                                                        generator.MockSession.Object,
@@ -122,7 +122,7 @@ public class AllCompilandsPageViewModelTests
     public async Task ExcelExportDataForVirtualSizeIsFormattedUsefully()
     {
         using var generator = new SingleBinaryDataGenerator();
-        generator.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Compilands as IReadOnlyList<Compiland>));
+        generator.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Compilands as IReadOnlyCollection<Compiland>));
 
         var viewmodel = new AllCompilandsPageViewModel(this.MockUITaskScheduler.Object,
                                                        generator.MockSession.Object,

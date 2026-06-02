@@ -4,7 +4,7 @@ using SizeBench.Logging;
 
 namespace SizeBench.AnalysisEngine.SessionTasks;
 
-internal sealed class EnumerateLibsAndCompilandsSessionTask : SessionTask<List<Library>>
+internal sealed class EnumerateLibsAndCompilandsSessionTask : SessionTask<HashSet<Library>>
 {
     private readonly SessionTaskParameters _sessionTaskParameters;
     private uint _totalNumberOfItemsToReportProgressOn;
@@ -18,7 +18,7 @@ internal sealed class EnumerateLibsAndCompilandsSessionTask : SessionTask<List<L
         this.TaskName = "Enumerate LIBs and Compilands";
     }
 
-    protected override List<Library> ExecuteCore(ILogger logger)
+    protected override HashSet<Library> ExecuteCore(ILogger logger)
     {
         if (this.DataCache.AllLibs != null)
         {
@@ -26,15 +26,15 @@ internal sealed class EnumerateLibsAndCompilandsSessionTask : SessionTask<List<L
             return this.DataCache.AllLibs;
         }
 
-        if (this.DataCache.PDataRVARange is null || this.DataCache.PDataSymbolsByRVA is null)
+        if (this.DataCache.PDataHasBeenInitialized == false)
         {
             throw new InvalidOperationException("It is not valid to attempt to enumerate libs and compilands before the PDATA range and symbol RVAs has been established, as that data is necessary to properly attribute PDATA contributions.  This is a bug in SizeBench's implementation, not your usage of it.");
         }
 
         var binarySections = new EnumerateBinarySectionsAndCOFFGroupsSessionTask(this._sessionTaskParameters, this.CancellationToken).Execute(logger);
 
-        var libs = new Dictionary<string, Library>();
-        var compilands = new Dictionary<uint, Compiland>();
+        var libs = new Dictionary<string, Library>(StringComparer.OrdinalIgnoreCase);
+        var compilands = new HashSet<Compiland>(capacity: 1000);
 
         uint contribsParsed = 0;
         const int loggerOutputVelocity = 100;
@@ -50,7 +50,7 @@ internal sealed class EnumerateLibsAndCompilandsSessionTask : SessionTask<List<L
             {
                 if (contribsParsed >= nextLoggerOutput)
                 {
-                    ReportProgress($"Parsed {contribsParsed}/{allSectionContributions.Count} section contributions.", contribsParsed, this._totalNumberOfItemsToReportProgressOn);
+                    ReportProgress($"Parsed {contribsParsed:N0}/{allSectionContributions.Count:N0} section contributions.", contribsParsed, this._totalNumberOfItemsToReportProgressOn);
                     nextLoggerOutput += loggerOutputVelocity;
                 }
 
@@ -59,7 +59,7 @@ internal sealed class EnumerateLibsAndCompilandsSessionTask : SessionTask<List<L
             }
 
             // One final progress report so the log shows this as "120/120" instead of "100/120" due to the throttling of progress messages in the loop
-            ReportProgress($"Parsed {contribsParsed}/{allSectionContributions.Count} section contributions.", contribsParsed, this._totalNumberOfItemsToReportProgressOn);
+            ReportProgress($"Parsed {contribsParsed:N0}/{allSectionContributions.Count:N0} section contributions.", contribsParsed, this._totalNumberOfItemsToReportProgressOn);
         }
 
         var pdataSection = binarySections.FirstOrDefault(bs => bs.Name == ".pdata");
@@ -71,7 +71,7 @@ internal sealed class EnumerateLibsAndCompilandsSessionTask : SessionTask<List<L
         }
 
         logger.Log("Marking all compilands and libs as fully constructed.");
-        foreach (var compiland in compilands.Values)
+        foreach (var compiland in compilands)
         {
             compiland.MarkFullyConstructed();
         }
@@ -81,18 +81,18 @@ internal sealed class EnumerateLibsAndCompilandsSessionTask : SessionTask<List<L
             lib.MarkFullyConstructed();
         }
 
-        this.DataCache.AllLibs = libs.Values.ToList();
-        this.DataCache.AllCompilands = compilands.Values.ToList();
+        this.DataCache.AllLibs = libs.Values.ToHashSet();
+        this.DataCache.AllCompilands = compilands;
 
-        logger.Log($"Finished parsing {libs.Count} libs and {compilands.Count} compilands");
+        logger.Log($"Finished parsing {libs.Count:N0} libs and {compilands.Count:N0} compilands");
 
         return this.DataCache.AllLibs;
     }
 
     private void ParseSectionContrib(RawSectionContribution sectionContrib,
                                      Dictionary<string, Library> libs,
-                                     Dictionary<uint, Compiland> compilands,
-                                     IReadOnlyList<COFFGroup> coffGroups)
+                                     HashSet<Compiland> compilands,
+                                     List<COFFGroup> coffGroups)
     {
 
         // If this RVA range is inside the PDATA region, it is not going to be correct anyway.  There was a bug
@@ -102,7 +102,7 @@ internal sealed class EnumerateLibsAndCompilandsSessionTask : SessionTask<List<L
         //
         // To see how PDATA symbols get correctly attributed to the right compiland/lib, see the code above in
         // ExecuteCore where we do further processing on PDATA regions.
-        if (this.DataCache.PDataRVARange!.Contains(sectionContrib.RVA, sectionContrib.Length))
+        if (this.DataCache.PDataRVARange.Contains(sectionContrib.RVA, sectionContrib.Length))
         {
             return;
         }
@@ -134,25 +134,21 @@ internal sealed class EnumerateLibsAndCompilandsSessionTask : SessionTask<List<L
         }
 
         var contributingCompiland = lib.GetOrCreateCompiland(this.DataCache, sectionContrib.CompilandName, sectionContrib.CompilandSymIndexId, this._sessionTaskParameters.DIAAdapter);
-        if (!compilands.ContainsKey(sectionContrib.CompilandSymIndexId))
-        {
-            compilands.Add(sectionContrib.CompilandSymIndexId, contributingCompiland);
-        }
-
+        compilands.Add(contributingCompiland);
         var rvaRange = RVARange.FromRVAAndSize(sectionContrib.RVA, sectionContrib.Length, isVirtualSize: coffGroup.IsVirtualSizeOnly);
 
         contributingCompiland.GetOrCreateSectionContribution(section).AddRVARange(rvaRange);
         contributingCompiland.GetOrCreateCOFFGroupContribution(coffGroup).AddRVARange(rvaRange);
     }
 
-    private void AttributePDataSymbols(Dictionary<uint, Compiland> compilands,
+    private void AttributePDataSymbols(HashSet<Compiland> compilands,
                                        Dictionary<string, Library> libs,
                                        BinarySection pdataSection,
                                        COFFGroup? pdataCOFFGroup,
                                        ILogger logger,
                                        uint contribsParsed)
     {
-        if (this.DataCache.PDataSymbolsByRVA!.Count == 0)
+        if (this.DataCache.PDataSymbolsByRVA.Count == 0)
         {
             logger.Log("No PDATA symbols to attribute");
             return;
@@ -174,9 +170,9 @@ internal sealed class EnumerateLibsAndCompilandsSessionTask : SessionTask<List<L
             ReportProgress("Attributing PDATA symbols to compilands.", contribsParsed, this._totalNumberOfItemsToReportProgressOn);
             // We'll pre-fill this with empty lists to make the logic below simpler to read.
             var compilandPDataContributions = new Dictionary<Compiland, List<RVARange>>(capacity: compilands.Count);
-            foreach (var compilandBySymIndexId in compilands)
+            foreach (var c in compilands)
             {
-                compilandPDataContributions.Add(compilandBySymIndexId.Value, new List<RVARange>());
+                compilandPDataContributions.Add(c, new List<RVARange>());
             }
 
             Compiland? compiland = null;
@@ -187,7 +183,7 @@ internal sealed class EnumerateLibsAndCompilandsSessionTask : SessionTask<List<L
             //
             // We'll restrict ourselves to only looking at compilands that contain any executable code as another way to filter how much we have
             // to look through.
-            var compilandsWithExecutableCode = compilands.Values.Where(c => c.ContainsExecutableCode).ToList();
+            var compilandsWithExecutableCode = compilands.Where(c => c.ContainsExecutableCode).ToList();
 
             uint pdataSymbolsAttributed = 0;
             const int loggerOutputVelocity = 1000;
@@ -197,7 +193,7 @@ internal sealed class EnumerateLibsAndCompilandsSessionTask : SessionTask<List<L
             {
                 if (pdataSymbolsAttributed >= nextLoggerOutput)
                 {
-                    ReportProgress($"Attributed {pdataSymbolsAttributed}/{this.DataCache.PDataSymbolsByRVA.Count} PDATA symbols to compilands.", contribsParsed + pdataSymbolsAttributed, this._totalNumberOfItemsToReportProgressOn);
+                    ReportProgress($"Attributed {pdataSymbolsAttributed:N0}/{this.DataCache.PDataSymbolsByRVA.Count:N0} PDATA symbols to compilands.", contribsParsed + pdataSymbolsAttributed, this._totalNumberOfItemsToReportProgressOn);
                     nextLoggerOutput += loggerOutputVelocity;
                     this.CancellationToken.ThrowIfCancellationRequested();
                 }
@@ -245,7 +241,7 @@ internal sealed class EnumerateLibsAndCompilandsSessionTask : SessionTask<List<L
             }
 
             // One final progress report to ensure it looks nice at 100%
-            ReportProgress($"Attributed {pdataSymbolsAttributed}/{this.DataCache.PDataSymbolsByRVA.Count} PDATA symbols to compilands.", contribsParsed + pdataSymbolsAttributed, this._totalNumberOfItemsToReportProgressOn);
+            ReportProgress($"Attributed {pdataSymbolsAttributed:N0}/{this.DataCache.PDataSymbolsByRVA.Count:N0} PDATA symbols to compilands.", contribsParsed + pdataSymbolsAttributed, this._totalNumberOfItemsToReportProgressOn);
 
             // Some compilands may not have any PDATA contributions - so we'll skip any that have an empty list.
             foreach (var compilandPDataContribution in compilandPDataContributions.Where(kvp => kvp.Value.Count > 0))

@@ -57,7 +57,7 @@ public sealed class LoadTypeLayoutSessionTaskTests : IDisposable
         // This will simulate having a "const MyCustomType*[]" - an array of pointers to const MyCustomTypes, which hits all the different kinds
         // of symbols we want to 'chase through' to find the real UDT whose type layout we should load
         uint nextSymIndexId = 0;
-        var udt = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "MyCustomType", 20, nextSymIndexId++, UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var udt = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "MyCustomType", 20, nextSymIndexId++, UserDefinedTypeKind.UdtClass);
         var constUDT = new ModifiedTypeSymbol(this.DataCache, udt, "const MyCustomType", 20, nextSymIndexId++);
         var pointerToConstUDT = new PointerTypeSymbol(this.DataCache, constUDT, "const MyCustomType*", 8, nextSymIndexId++);
         var arrayOfPointerToConstUDT = new ArrayTypeSymbol(this.DataCache, "const MyCustomType*[3]", 24, nextSymIndexId++, pointerToConstUDT, 3);
@@ -100,7 +100,7 @@ public sealed class LoadTypeLayoutSessionTaskTests : IDisposable
          * 18   <tail slop padding 6 bytes>
          */
         var voidType = new BasicTypeSymbol(this.DataCache, "void", 0, this.NextSymIndexId++);
-        var baseUdt = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "TestBase", 16, this.NextSymIndexId++, UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var baseUdt = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "TestBase", 16, this.NextSymIndexId++, UserDefinedTypeKind.UdtClass);
         var baseFunctions = new List<IFunctionCodeSymbol>()
             {
                 new SimpleFunctionCodeSymbol(this.DataCache, "VirtualFunction", 0, 10, this.NextSymIndexId++,
@@ -118,7 +118,8 @@ public sealed class LoadTypeLayoutSessionTaskTests : IDisposable
         this.TestDIAAdapter.MemberDataSymbolsToFindByUDT.Add(baseUdt, baseDataMembers);
 
 
-        var derivedUdt = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "TestType", 24, this.NextSymIndexId++, UserDefinedTypeKind.UdtClass, new Dictionary<uint, uint>() { { baseUdt.SymIndexId, 0 } });
+        var derivedUdt = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "TestType", 24, this.NextSymIndexId++, UserDefinedTypeKind.UdtClass);
+        this.TestDIAAdapter.BaseTypeIDsToFindByUDT.Add(derivedUdt, [(baseUdt.SymIndexId, 0)]);
         var derivedFunctions = new List<IFunctionCodeSymbol>()
             {
                 new SimpleFunctionCodeSymbol(this.DataCache, "AnotherVirtualFunction", 0, 30, this.NextSymIndexId++)
@@ -231,7 +232,7 @@ public sealed class LoadTypeLayoutSessionTaskTests : IDisposable
         // padding to be at the wrong offset and size.
 
         var voidType = new BasicTypeSymbol(this.DataCache, "void", 0, this.NextSymIndexId++);
-        var udt = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "TestBase", 32, this.NextSymIndexId++, UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var udt = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "TestBase", 32, this.NextSymIndexId++, UserDefinedTypeKind.UdtClass);
         var functions = new List<IFunctionCodeSymbol>()
             {
                 new SimpleFunctionCodeSymbol(this.DataCache, "VirtualFunction", 0, 10, this.NextSymIndexId++,
@@ -285,7 +286,7 @@ public sealed class LoadTypeLayoutSessionTaskTests : IDisposable
     {
         for (uint i = 0; i < count; i++)
         {
-            var udt = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, namePrefix + i, 10, symIndexId: this.NextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+            var udt = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, namePrefix + i, 10, symIndexId: this.NextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
             yield return udt;
         }
     }

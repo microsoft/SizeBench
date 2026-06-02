@@ -4,12 +4,12 @@ namespace SizeBench.AnalysisEngine.DiffSessionTasks;
 
 internal sealed class EnumerateLibsAndCompilandDiffsSessionTask : DiffSessionTask<List<LibDiff>>
 {
-    private readonly Func<ILogger, Task<IReadOnlyList<Library>>> _beforeLibTaskFactory;
-    private readonly Func<ILogger, Task<IReadOnlyList<Library>>> _afterLibTaskFactory;
+    private readonly Func<ILogger, Task<IReadOnlyCollection<Library>>> _beforeLibTaskFactory;
+    private readonly Func<ILogger, Task<IReadOnlyCollection<Library>>> _afterLibTaskFactory;
 
     public EnumerateLibsAndCompilandDiffsSessionTask(DiffSessionTaskParameters parameters,
-                                                     Func<ILogger, Task<IReadOnlyList<Library>>> beforeLibTaskFactory,
-                                                     Func<ILogger, Task<IReadOnlyList<Library>>> afterLibTaskFactory,
+                                                     Func<ILogger, Task<IReadOnlyCollection<Library>>> beforeLibTaskFactory,
+                                                     Func<ILogger, Task<IReadOnlyCollection<Library>>> afterLibTaskFactory,
                                                      CancellationToken token,
                                                      IProgress<SessionTaskProgress>? progress)
         : base(parameters, progress, token)
@@ -48,8 +48,8 @@ internal sealed class EnumerateLibsAndCompilandDiffsSessionTask : DiffSessionTas
 
         ReportProgress("Enumerating libs in 'before' and 'after'", 0, null);
 
-        IReadOnlyList<Library> beforeLibs;
-        IReadOnlyList<Library> afterLibs;
+        IReadOnlyCollection<Library> beforeLibs;
+        IReadOnlyCollection<Library> afterLibs;
 
         using (var beforeAndAfterLog = logger.StartTaskLog("Enumerating libs in 'before' and 'after'"))
         {
@@ -76,7 +76,7 @@ internal sealed class EnumerateLibsAndCompilandDiffsSessionTask : DiffSessionTas
 
             if (beforeLibsParsed >= nextLoggerOutput)
             {
-                ReportProgress($"Parsed {beforeLibsParsed}/{beforeLibs.Count} libs into diffs.", beforeLibsParsed, (uint)beforeLibs.Count);
+                ReportProgress($"Parsed {beforeLibsParsed:N0}/{beforeLibs.Count:N0} libs into diffs.", beforeLibsParsed, (uint)beforeLibs.Count);
                 nextLoggerOutput += loggerOutputVelocity;
             }
 
@@ -85,6 +85,7 @@ internal sealed class EnumerateLibsAndCompilandDiffsSessionTask : DiffSessionTas
             // First try matching on the name exactly
             var matchingAfterLib = afterLibsToProcess.FirstOrDefault(afterLib => String.Equals(beforeLib.Name, afterLib.Name, StringComparison.OrdinalIgnoreCase));
 
+#pragma warning disable IDE0270 // Use coalesce expression - this doesn't work because of the #if DEBUG part, so it hits in Release but is a mess to format for both flavors
             if (matchingAfterLib is null)
             {
                 // If that failed, try matching on IsVeryLikelyTheSameAs, which is more generous.  This two-phase attempt is unfortunately
@@ -113,6 +114,7 @@ internal sealed class EnumerateLibsAndCompilandDiffsSessionTask : DiffSessionTas
                 }
 #endif
             }
+#pragma warning restore IDE0270 // Use coalesce expression
 
             libDiffs.Add(new LibDiff(beforeLib, matchingAfterLib, this.DataCache.AllBinarySectionDiffs!, this.DataCache));
 
@@ -130,11 +132,11 @@ internal sealed class EnumerateLibsAndCompilandDiffsSessionTask : DiffSessionTas
         }
 
         // One final progress report so the log shows a nice summary at the end
-        ReportProgress($"Parsed {beforeLibs.Count} 'before' libs and {afterLibs.Count} 'after' libs, generating  {libDiffs.Count} diffs.", (uint)libDiffs.Count, (uint)libDiffs.Count);
+        ReportProgress($"Parsed {beforeLibs.Count:N0} 'before' libs and {afterLibs.Count:N0} 'after' libs, generating  {libDiffs.Count:N0} diffs.", (uint)libDiffs.Count, (uint)libDiffs.Count);
 
         this.DataCache.AllLibDiffsInList = libDiffs;
 
-        logger.Log($"Finished enumerating {libDiffs.Count} lib diffs.");
+        logger.Log($"Finished enumerating {libDiffs.Count:N0} lib diffs.");
         this.DataCache._allLibDiffsCreationInProgress = false;
 
         return libDiffs;

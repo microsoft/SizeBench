@@ -14,6 +14,7 @@ public static class WellKnownPages
     public static Uri AllCompilandsPageUri => new Uri(@"AllCompilands", UriKind.Relative);
     public static Uri AllSourceFilesPageUri => new Uri(@"AllSourceFiles", UriKind.Relative);
     public static Uri AllUserDefinedTypesPageUri => new Uri(@"AllUserDefinedTypes", UriKind.Relative);
+    public static Uri AllInlinesPageUri => new Uri(@"AllInlines", UriKind.Relative);
     public static Uri AllDuplicateDataPageUri => new Uri(@"AllDuplicateData", UriKind.Relative);
     // We default to excluding COM types since most people don't want to deal with doing something fancy like interface forwarding to save on these.
     public static Uri AllWastefulVirtualsPageUri => new Uri(@"AllWastefulVirtuals#ExcludeCOMTypes", UriKind.Relative);

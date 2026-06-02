@@ -5,7 +5,7 @@ using SizeBench.Logging;
 
 namespace SizeBench.AnalysisEngine.Helpers;
 
-internal sealed class GuaranteedLocalFile : IDisposable
+internal sealed partial class GuaranteedLocalFile : IDisposable
 {
     private readonly string _guaranteedLocalPath;
     private FileStream? _deleteOnCloseStream;
@@ -17,6 +17,7 @@ internal sealed class GuaranteedLocalFile : IDisposable
     /// <param name="originalPath">The path that the user provided - may be local or remote</param>
     /// <param name="log">The log to write to.</param>
     /// <param name="forceLocalCopy">Always copy, even if the path is already local.  If you need to modify the file, 
+    /// <param name="openDeleteOnCloseStreamImmediately">If this is true, immediately open a delete-on-close stream to the file.  If false, you can later use <see cref="OpenDeleteOnCloseStreamIfCopiedLocally"/>.</param>
     /// for example, to not change somebody's original.</param>
     public GuaranteedLocalFile(string originalPath, ILogger log, bool forceLocalCopy = false, bool openDeleteOnCloseStreamImmediately = true)
     {
@@ -106,14 +107,14 @@ internal sealed class GuaranteedLocalFile : IDisposable
     }
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [DllImport("Shlwapi.dll", EntryPoint = "PathIsNetworkPathW", SetLastError = true, CharSet = CharSet.Unicode)]
+    [LibraryImport("Shlwapi.dll", EntryPoint = "PathIsNetworkPathW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool PathIsNetworkPath([MarshalAs(UnmanagedType.LPWStr)] string pszPath);
+    private static partial bool PathIsNetworkPath([MarshalAs(UnmanagedType.LPWStr)] string pszPath);
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [DllImport("Shlwapi.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    [LibraryImport("Shlwapi.dll", EntryPoint="PathIsUNCW", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool PathIsUNC([MarshalAs(UnmanagedType.LPWStr)] string pszPath);
+    private static partial bool PathIsUNC([MarshalAs(UnmanagedType.LPWStr)] string pszPath);
 
     private bool _isDisposed;
     ~GuaranteedLocalFile() { Dispose(false); }

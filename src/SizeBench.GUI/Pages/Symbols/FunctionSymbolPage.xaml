@@ -78,12 +78,8 @@
                 <StackPanel>
                     <TextBlock TextWrapping="Wrap" Width="{Binding ViewportWidth, ElementName=scroller}"
                                HorizontalAlignment="Left">
-                        <Run>Functions can be complex and composed of multiple things - the code in them, of course, but functions also create data in many
-                        cases.  This page shows only the function's code.</Run>
-                        <LineBreak/>
-                        <Run>SizeBench currently does not attempt to account for the size of inlines - so if this function was inlined at multiple callsites,
-                        those costs are not added up here.  Thus, you can think of the total size shown above, and the list of blocks of code below, as a lower
-                        bound for the total cost of this function if you were able to delete it in its entirety.</Run>
+                        Functions can be complex and composed of multiple things - the code in them, of course, but functions also create data in many
+                        cases.  This page shows only the function's code.
                     </TextBlock>
 
                     <Expander Header="Code blocks" IsExpanded="True" Width="{Binding ViewportWidth, ElementName=scroller}"
@@ -142,6 +138,29 @@
                         </StackPanel>
                     </Expander>
 
+                    <Expander Header="Functions Inlined into this one" IsExpanded="True"
+                              HorizontalAlignment="Left"
+                              Visibility="{Binding HasInlineSites, Mode=OneWay, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}}"
+                              Width="{Binding ViewportWidth, ElementName=scroller}">
+                        <StackPanel>
+                            <TextBlock TextWrapping="Wrap" Margin="0,10,0,0">
+                                <Run>These functions are inlined into this function.  Removing them may not save their "size" because the optimizer could make different decisions based on
+                                the code that survives in the function.  Likewise, making them explicitly no-inline will not save all the size as some will remain for a call instruction and 
+                                parameter passing.</Run>
+                            </TextBlock>
+
+                            <DataGrid ItemsSource="{Binding InlineSites, Mode=OneWay}"
+                                      AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False"
+                                      IsReadOnly="True" HeadersVisibility="Column" IsSynchronizedWithCurrentItem="True"
+                                      SelectionMode="Single">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Function Name" Binding="{Binding Name, Mode=OneWay}"/>
+                                    <DataGridTextColumn Header="Size" Binding="{Binding Size, Mode=OneWay}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Expander>
+                    
                     <Expander Header="Disassembly" IsExpanded="True" HorizontalAlignment="Left">
                         <controls:SelectableTextBlock Text="{Binding Disassembly, Mode=OneWay}"
                                                       FontSize="16" FontFamily="Consolas"/>

@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using SizeBench.AnalysisEngine;
 using SizeBench.AnalysisEngine.DIAInterop;
+using SizeBench.AnalysisEngine.PE;
 using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.Logging;
 
@@ -11,7 +12,7 @@ internal class TestDIAAdapter : IDIAAdapter
 {
     public IEnumerable<BinarySection>? BinarySectionsToFind;
 
-    public IEnumerable<BinarySection> FindBinarySections(ILogger logger, CancellationToken token)
+    public IEnumerable<BinarySection> FindBinarySections(IPEFile peFile, ILogger logger, CancellationToken token)
     {
         if (this.BinarySectionsToFind is null)
         {
@@ -23,7 +24,7 @@ internal class TestDIAAdapter : IDIAAdapter
 
     public IEnumerable<COFFGroup>? COFFGroupsToFind;
 
-    public IEnumerable<COFFGroup> FindCOFFGroups(ILogger logger, CancellationToken token)
+    public IEnumerable<COFFGroup> FindCOFFGroups(IPEFile peFile, ILogger logger, CancellationToken token)
     {
         if (this.COFFGroupsToFind is null)
         {
@@ -67,6 +68,20 @@ internal class TestDIAAdapter : IDIAAdapter
         else
         {
             return new List<MemberDataSymbol>();
+        }
+    }
+
+    public Dictionary<UserDefinedTypeSymbol, IEnumerable<(uint typeId, uint offset)>> BaseTypeIDsToFindByUDT = new Dictionary<UserDefinedTypeSymbol, IEnumerable<(uint typeId, uint offset)>>();
+
+    public IEnumerable<(uint typeId, uint offset)> FindAllBaseTypeIDsForUDT(UserDefinedTypeSymbol udt)
+    {
+        if (this.BaseTypeIDsToFindByUDT.TryGetValue(udt, out var baseTypeIds))
+        {
+            return baseTypeIds;
+        }
+        else
+        {
+            return new List<(uint typeId, uint offset)>();
         }
     }
 
@@ -125,6 +140,10 @@ internal class TestDIAAdapter : IDIAAdapter
             throw new InvalidOperationException("Tests should never reach this");
         }
     }
+
+    public List<InlineSiteSymbol>? FindAllInlineSitesForBlock(CodeBlockSymbol codeBlock, CancellationToken cancellationToken) => throw new NotImplementedException();
+
+    public List<InlineSiteSymbol> FindAllInlineSites(CancellationToken cancellationToken) => throw new NotImplementedException();
 
     public IEnumerable<IFunctionCodeSymbol> TemplatedFunctionsToFind = new List<IFunctionCodeSymbol>();
 
@@ -235,10 +254,6 @@ internal class TestDIAAdapter : IDIAAdapter
         }
     }
 
-    public SortedList<uint, NameCanonicalization> CanonicalNamesToFind = new SortedList<uint, NameCanonicalization>();
-    public SortedList<uint, NameCanonicalization> FindCanonicalNamesForFoldableRVAs(ILogger logger, CancellationToken token) =>
-        this.CanonicalNamesToFind;
-
     public Dictionary<uint, CommandLine> CompilandCommandLinesToFind = new Dictionary<uint, CommandLine>();
     public CommandLine FindCommandLineForCompilandByID(uint compilandSymIndexId)
     {
@@ -292,5 +307,8 @@ internal class TestDIAAdapter : IDIAAdapter
     }
 
     public uint? LoadPublicSymbolTargetRVAIfPossible(uint rva)
+        => throw new NotImplementedException();
+
+    public List<IMAGE_SECTION_HEADER> FindAllImageSectionHeadersFromPDB(CancellationToken token) 
         => throw new NotImplementedException();
 }

@@ -35,7 +35,7 @@ internal class EnumerateSymbolsInSourceFileSessionTask : SessionTask<List<ISymbo
                 this.CancellationToken.ThrowIfCancellationRequested();
                 if (numRangesEnumerated > nextLoggerOutput)
                 {
-                    ReportProgress($"Parsed {numRangesEnumerated}/{totalRVARanges} RVA Ranges.  So far, {symbolsEnumerated.Count} symbols have been found.", numRangesEnumerated, (uint)totalRVARanges);
+                    ReportProgress($"Parsed {numRangesEnumerated:N0}/{totalRVARanges:N0} RVA Ranges.  So far, {symbolsEnumerated.Count:N0} symbols have been found.", numRangesEnumerated, (uint)totalRVARanges);
                     nextLoggerOutput += loggerOutputVelocity;
                 }
 

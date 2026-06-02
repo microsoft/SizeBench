@@ -17,13 +17,11 @@ internal sealed class RsrcDataEntrySymbol : RsrcSymbolBase
     private readonly Win32ResourceType? _win32ResourceType;
     private readonly string _directoryName;
 
-    internal RsrcDataEntrySymbol(uint rva, uint size, uint depth, string language, Win32ResourceType rsrcType, string rsrcTypeName, string? directoryName, uint entryIndex)
-        : base(rva, size, ConjureName(depth, language, rsrcTypeName, directoryName))
+    internal RsrcDataEntrySymbol(uint rva, uint size, uint depth, string language, Win32ResourceType rsrcType, string rsrcTypeName,
+                                 string? directoryName, uint entryIndex, SymbolSourcesSupported symbolSourcesSupported)
+        : base(rva, size, ConjureName(depth, language, rsrcTypeName, directoryName), symbolSourcesSupported)
     {
-        if (depth > 2)
-        {
-            throw new ArgumentOutOfRangeException(nameof(depth));
-        }
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(depth, 2u);
 
         this._depth = depth;
         this._language = language;

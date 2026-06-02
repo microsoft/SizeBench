@@ -67,9 +67,9 @@ public sealed class StaticStaticDataSymbolTests : IDisposable
         var diaAdapter = new TestDIAAdapter();
         var mockSession = new Mock<ISession>();
         uint nextSymIndexId = 0;
-        var udt1 = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter, mockSession.Object, "UDT1::Stuff", 20, nextSymIndexId++, UserDefinedTypeKind.UdtClass, null);
+        var udt1 = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter, mockSession.Object, "UDT1::Stuff", 20, nextSymIndexId++, UserDefinedTypeKind.UdtClass);
         var data1 = BuildSimpleStaticDataSymbol(ref nextSymIndexId, "s_foo", type: udt1);
-        var udt2 = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter, mockSession.Object, "UDT2::Stuff", 20, nextSymIndexId++, UserDefinedTypeKind.UdtClass, null);
+        var udt2 = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter, mockSession.Object, "UDT2::Stuff", 20, nextSymIndexId++, UserDefinedTypeKind.UdtClass);
         var data2 = BuildSimpleStaticDataSymbol(ref nextSymIndexId, "s_foo", type: udt2);
 
         Assert.IsFalse(data1.IsVeryLikelyTheSameAs(data2));
@@ -82,9 +82,9 @@ public sealed class StaticStaticDataSymbolTests : IDisposable
         var diaAdapter = new TestDIAAdapter();
         var mockSession = new Mock<ISession>();
         uint nextSymIndexId = 0;
-        var udt1 = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter, mockSession.Object, "TraceForFailFast::__l7::<unnamed-type-_TlgEvent>", 20, nextSymIndexId++, UserDefinedTypeKind.UdtClass, null);
+        var udt1 = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter, mockSession.Object, "TraceForFailFast::__l7::<unnamed-type-_TlgEvent>", 20, nextSymIndexId++, UserDefinedTypeKind.UdtClass);
         var data1 = BuildSimpleStaticDataSymbol(ref nextSymIndexId, "s_foo", type: udt1);
-        var udt2 = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter, mockSession.Object, "TraceForFailFast::__l8::<unnamed-type-_TlgEvent>", 20, nextSymIndexId++, UserDefinedTypeKind.UdtClass, null);
+        var udt2 = new UserDefinedTypeSymbol(this.SessionDataCache, diaAdapter, mockSession.Object, "TraceForFailFast::__l8::<unnamed-type-_TlgEvent>", 20, nextSymIndexId++, UserDefinedTypeKind.UdtClass);
         var data2 = BuildSimpleStaticDataSymbol(ref nextSymIndexId, "s_foo", type: udt2);
 
         Assert.IsTrue(data1.IsVeryLikelyTheSameAs(data2));

@@ -164,12 +164,12 @@
         <h3><a id="notable-limitations">Notable Limitations</a></h3>
         <h4>Only able to analyze code linked with Microsoft's native linker (link.exe)</h4>
         <p>
-            SizeBench has been built to analyze native C++ code.  Some early experiments suggest that it may also work alright for Rust code as that uses Microsoft's linker and has
-            sufficient similarities.<br />
+            SizeBench has been built to analyze native C and C++ code, and has relatively recent support for Rust and Zig.  Your mileage may vary with other languages.<br />
             <br />
-            Managed code (C#/Visual Basic .NET/F#/etc.) cannot be analyzed at this time due to substantial differences in how the code is structured and the way the PDBs produce metadata.<br />
+            Managed code (C#/Visual Basic .NET/F#/etc.) cannot be analyzed at this time due to substantial differences in how the code is structured and the way the PDBs produce metadata. 
+            For managed code you may find the <a href="https://github.com/MichalStrehovsky/sizoscope">Sizoscope tool</a> useful.<br />
             <br />
-            Similarly, SizeBench cannot analyze Java bytecode, interpreted code like JavaScript or Lua, and so on.  It's really designed for just things linked with link.exe today.
+            Similarly, SizeBench cannot analyze Java bytecode, interpreted code like JavaScript or Lua, and so on.
         </p>
 
         <h4>Unable to analyze code linked with lld-link</h4>

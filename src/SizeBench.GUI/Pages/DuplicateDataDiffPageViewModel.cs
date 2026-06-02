@@ -24,14 +24,14 @@ internal sealed class DuplicateDataDiffPageViewModel : BinaryDiffViewModelBase
     {
         uint? beforeDuplicateRVA = null;
         uint? afterDuplicateRVA = null;
-        if (this.QueryString.ContainsKey("BeforeDuplicateRVA"))
+        if (this.QueryString.TryGetValue("BeforeDuplicateRVA", out var value))
         {
-            beforeDuplicateRVA = Convert.ToUInt32(this.QueryString["BeforeDuplicateRVA"], CultureInfo.InvariantCulture);
+            beforeDuplicateRVA = Convert.ToUInt32(value, CultureInfo.InvariantCulture);
         }
 
-        if (this.QueryString.ContainsKey("AfterDuplicateRVA"))
+        if (this.QueryString.TryGetValue("AfterDuplicateRVA", out value))
         {
-            afterDuplicateRVA = Convert.ToUInt32(this.QueryString["AfterDuplicateRVA"], CultureInfo.InvariantCulture);
+            afterDuplicateRVA = Convert.ToUInt32(value, CultureInfo.InvariantCulture);
         }
 
         await this._uiTaskScheduler.StartLongRunningUITask($"Finding Duplicate Data Item Diff",

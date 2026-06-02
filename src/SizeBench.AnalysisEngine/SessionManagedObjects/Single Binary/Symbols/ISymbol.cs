@@ -2,6 +2,10 @@
 
 namespace SizeBench.AnalysisEngine.Symbols;
 
+// TODO: in the future, split ISymbol into IContiguousSymbol and IDiscontiguousSymbol (or something like that), where
+// contiguous symbols occupy a single RVA range, and discontiguous symbols occupy multiple RVA ranges.  This will allow
+// more code to be generalized.  Examples of discontiguous symbols today are "complex" functions (functions with separated blocks)
+// and InlineSites, but there are likely going to be more as SizeBench's scenarios grow.
 public interface ISymbol
 {
     string Name { get; }

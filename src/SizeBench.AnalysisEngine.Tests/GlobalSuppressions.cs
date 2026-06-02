@@ -14,3 +14,5 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "Class naming for tests isn't terribly important.")]
 
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Not important for test code")]
+
+[assembly: SuppressMessage("Performance", "CA1861:Avoid constant arrays as arguments", Justification = "Performance of the tests isn't *that* important.")]

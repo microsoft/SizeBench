@@ -161,7 +161,7 @@ public sealed class FunctionCodeFormattedNameTests
         uint nextSymIndexId = 1;
         var voidType = new BasicTypeSymbol(dataCache, "void", 0, nextSymIndexId++);
         var intType = new BasicTypeSymbol(dataCache, "int", 4, nextSymIndexId++);
-        var udt = new UserDefinedTypeSymbol(dataCache, diaAdapter, mockSession.Object, "ANamespace::SomeUDT", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var udt = new UserDefinedTypeSymbol(dataCache, diaAdapter, mockSession.Object, "ANamespace::SomeUDT", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
         var constUDT = new ModifiedTypeSymbol(dataCache, udt, $"const {udt.Name}", size: 10, nextSymIndexId++);
         var constUDTRef = new PointerTypeSymbol(dataCache, constUDT, $"{constUDT.Name}&", instanceSize: 10, nextSymIndexId++);
         var functionType = new FunctionTypeSymbol(dataCache, "", 0, nextSymIndexId++, isConst: false, isVolatile: false, argumentTypes: new TypeSymbol[] { intType }, returnValueType: constUDTRef);
@@ -203,7 +203,7 @@ public sealed class FunctionCodeFormattedNameTests
         uint nextSymIndexId = 1;
         var intType = new BasicTypeSymbol(dataCache, "int", 4, nextSymIndexId++);
         var intPtrType = new PointerTypeSymbol(dataCache, intType, "int*", 4, nextSymIndexId++);
-        var udt = new UserDefinedTypeSymbol(dataCache, diaAdapter, mockSession.Object, "ANamespace::SomeUDT", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var udt = new UserDefinedTypeSymbol(dataCache, diaAdapter, mockSession.Object, "ANamespace::SomeUDT", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
         var constUDT = new ModifiedTypeSymbol(dataCache, udt, $"const {udt.Name}", size: 10, nextSymIndexId++);
         var constUDTRef = new PointerTypeSymbol(dataCache, constUDT, $"{constUDT.Name}&", instanceSize: 10, nextSymIndexId++);
         var functionType = new FunctionTypeSymbol(dataCache, "", 0, nextSymIndexId++, isConst: false, isVolatile: false, argumentTypes: new TypeSymbol[] { intType, constUDTRef, intPtrType }, returnValueType: intType);
@@ -245,7 +245,7 @@ public sealed class FunctionCodeFormattedNameTests
         uint nextSymIndexId = 1;
         var intType = new BasicTypeSymbol(dataCache, "int", 4, nextSymIndexId++);
         var intPtrType = new PointerTypeSymbol(dataCache, intType, "int*", 4, nextSymIndexId++);
-        var udt = new UserDefinedTypeSymbol(dataCache, diaAdapter, mockSession.Object, "ANamespace::SomeUDT", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var udt = new UserDefinedTypeSymbol(dataCache, diaAdapter, mockSession.Object, "ANamespace::SomeUDT", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
         var constUDT = new ModifiedTypeSymbol(dataCache, udt, $"const {udt.Name}", size: 10, nextSymIndexId++);
         var constUDTRef = new PointerTypeSymbol(dataCache, constUDT, $"{constUDT.Name}&", instanceSize: 10, nextSymIndexId++);
         var functionType = new FunctionTypeSymbol(dataCache, "", 0, nextSymIndexId++, isConst: false, isVolatile: false, argumentTypes: new TypeSymbol[] { intType, constUDTRef, intPtrType }, returnValueType: intType);
@@ -293,7 +293,7 @@ public sealed class FunctionCodeFormattedNameTests
         uint nextSymIndexId = 1;
         var voidType = new BasicTypeSymbol(dataCache, "void", 0, nextSymIndexId++);
         var intType = new BasicTypeSymbol(dataCache, "int", 4, nextSymIndexId++);
-        var udt = new UserDefinedTypeSymbol(dataCache, diaAdapter, mockSession.Object, "ANamespace::SomeUDT", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var udt = new UserDefinedTypeSymbol(dataCache, diaAdapter, mockSession.Object, "ANamespace::SomeUDT", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
         var constUDT = new ModifiedTypeSymbol(dataCache, udt, $"const {udt.Name}", size: 10, nextSymIndexId++);
         var constUDTRef = new PointerTypeSymbol(dataCache, constUDT, $"{constUDT.Name}&", instanceSize: 10, nextSymIndexId++);
         var functionType = new FunctionTypeSymbol(dataCache, "", 0, nextSymIndexId++, isConst: true, isVolatile: false, argumentTypes: new TypeSymbol[] { intType }, returnValueType: constUDTRef);
@@ -335,7 +335,7 @@ public sealed class FunctionCodeFormattedNameTests
         uint nextSymIndexId = 1;
         var voidType = new BasicTypeSymbol(dataCache, "void", 0, nextSymIndexId++);
         var intType = new BasicTypeSymbol(dataCache, "int", 4, nextSymIndexId++);
-        var udt = new UserDefinedTypeSymbol(dataCache, diaAdapter, mockSession.Object, "ANamespace::SomeUDT", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var udt = new UserDefinedTypeSymbol(dataCache, diaAdapter, mockSession.Object, "ANamespace::SomeUDT", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
         var constUDT = new ModifiedTypeSymbol(dataCache, udt, $"const {udt.Name}", size: 10, nextSymIndexId++);
         var constUDTRef = new PointerTypeSymbol(dataCache, constUDT, $"{constUDT.Name}&", instanceSize: 10, nextSymIndexId++);
         var functionType = new FunctionTypeSymbol(dataCache, "", 0, nextSymIndexId++, isConst: false, isVolatile: true, argumentTypes: new TypeSymbol[] { intType }, returnValueType: constUDTRef);
@@ -377,7 +377,7 @@ public sealed class FunctionCodeFormattedNameTests
         uint nextSymIndexId = 1;
         var voidType = new BasicTypeSymbol(dataCache, "void", 0, nextSymIndexId++);
         var intType = new BasicTypeSymbol(dataCache, "int", 4, nextSymIndexId++);
-        var udt = new UserDefinedTypeSymbol(dataCache, diaAdapter, mockSession.Object, "ANamespace::SomeUDT", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var udt = new UserDefinedTypeSymbol(dataCache, diaAdapter, mockSession.Object, "ANamespace::SomeUDT", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
         var constUDT = new ModifiedTypeSymbol(dataCache, udt, $"const {udt.Name}", size: 10, nextSymIndexId++);
         var constUDTRef = new PointerTypeSymbol(dataCache, constUDT, $"{constUDT.Name}&", instanceSize: 10, nextSymIndexId++);
         var functionType = new FunctionTypeSymbol(dataCache, "", 0, nextSymIndexId++, isConst: true, isVolatile: true, argumentTypes: new TypeSymbol[] { intType }, returnValueType: constUDTRef);

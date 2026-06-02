@@ -61,14 +61,14 @@ internal sealed class SymbolDiffPageViewModel : BinaryDiffViewModelBase
     {
         uint? beforeSymbolRVA = null;
         uint? afterSymbolRVA = null;
-        if (this.QueryString.ContainsKey("BeforeRVA"))
+        if (this.QueryString.TryGetValue("BeforeRVA", out var value))
         {
-            beforeSymbolRVA = Convert.ToUInt32(this.QueryString["BeforeRVA"], CultureInfo.InvariantCulture);
+            beforeSymbolRVA = Convert.ToUInt32(value, CultureInfo.InvariantCulture);
         }
 
-        if (this.QueryString.ContainsKey("AfterRVA"))
+        if (this.QueryString.TryGetValue("AfterRVA", out value))
         {
-            afterSymbolRVA = Convert.ToUInt32(this.QueryString["AfterRVA"], CultureInfo.InvariantCulture);
+            afterSymbolRVA = Convert.ToUInt32(value, CultureInfo.InvariantCulture);
         }
 
         this.DoesBeforeSymbolExist = beforeSymbolRVA != null;

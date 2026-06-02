@@ -1,5 +1,5 @@
-﻿using SizeBench.AnalysisEngine;
-using SizeBench.AnalysisEngine.PE;
+﻿using System.Reflection.PortableExecutable;
+using SizeBench.AnalysisEngine;
 using SizeBench.AnalysisEngine.SessionTasks;
 using SizeBench.AnalysisEngine.Symbols;
 
@@ -139,21 +139,21 @@ public sealed class SingleBinaryDataGenerator : IDisposable
     public SingleBinaryDataGenerator()
     {
         this.TextSection = new BinarySection(this.DataCache, ".text", size: 5000, virtualSize: 5000, rva: 0,
-                                             fileAlignment: 200, sectionAlignment: 5000, characteristics: DataSectionFlags.MemoryExecute);
+                                             fileAlignment: 200, sectionAlignment: 5000, characteristics: SectionCharacteristics.MemExecute);
         this.DataSection = new BinarySection(this.DataCache, ".data", size: 1000, virtualSize: 1450, rva: 5000,
-                                             fileAlignment: 200, sectionAlignment: 5000, characteristics: DataSectionFlags.MemoryWrite | DataSectionFlags.MemoryRead);
+                                             fileAlignment: 200, sectionAlignment: 5000, characteristics: SectionCharacteristics.MemWrite | SectionCharacteristics.MemRead);
         this.RDataSection = new BinarySection(this.DataCache, ".rdata", size: 1800, virtualSize: 1700, rva: 10000,
-                                              fileAlignment: 200, sectionAlignment: 5000, characteristics: DataSectionFlags.MemoryRead);
+                                              fileAlignment: 200, sectionAlignment: 5000, characteristics: SectionCharacteristics.MemRead);
 
         this.TextMnCG = new COFFGroup(this.DataCache, ".text$mn", size: 3000, rva: 0,
                                       fileAlignment: 200, sectionAlignment: 5000,
-                                      characteristics: DataSectionFlags.MemoryExecute)
+                                      characteristics: SectionCharacteristics.MemExecute)
         {
             Section = this.TextSection
         };
         this.TextZzCG = new COFFGroup(this.DataCache, ".text$zz", size: 2000, rva: 3000,
                                       fileAlignment: 200, sectionAlignment: 5000,
-                                      characteristics: DataSectionFlags.MemoryExecute)
+                                      characteristics: SectionCharacteristics.MemExecute)
         {
             Section = this.TextSection
         };
@@ -161,37 +161,37 @@ public sealed class SingleBinaryDataGenerator : IDisposable
 
         this.DataXxCG = new COFFGroup(this.DataCache, ".data$xx", size: 500, rva: 5000,
                                       fileAlignment: 200, sectionAlignment: 5000,
-                                      characteristics: DataSectionFlags.ContentInitializedData |
-                                                       DataSectionFlags.MemoryRead |
-                                                       DataSectionFlags.MemoryWrite)
+                                      characteristics: SectionCharacteristics.ContainsInitializedData |
+                                                       SectionCharacteristics.MemRead |
+                                                       SectionCharacteristics.MemWrite)
         {
             Section = this.DataSection
         };
         this.DataZzCG = new COFFGroup(this.DataCache, ".data$zz", size: 450, rva: 5500,
                                       fileAlignment: 200, sectionAlignment: 5000,
-                                      characteristics: DataSectionFlags.ContentInitializedData |
-                                                       DataSectionFlags.MemoryRead |
-                                                       DataSectionFlags.MemoryWrite)
+                                      characteristics: SectionCharacteristics.ContainsInitializedData |
+                                                       SectionCharacteristics.MemRead |
+                                                       SectionCharacteristics.MemWrite)
         {
             Section = this.DataSection
         };
 
         this.BssCG = new COFFGroup(this.DataCache, ".bss", size: 500, rva: 5950,
                                    fileAlignment: 200, sectionAlignment: 5000,
-                                   characteristics: DataSectionFlags.ContentUninitializedData)
+                                   characteristics: SectionCharacteristics.ContainsUninitializedData)
         {
             Section = this.DataSection
         };
 
         this.RDataXxCG = new COFFGroup(this.DataCache, ".rdata$xx", size: 500, rva: 10000,
                                        fileAlignment: 200, sectionAlignment: 5000,
-                                       characteristics: DataSectionFlags.MemoryRead)
+                                       characteristics: SectionCharacteristics.MemRead)
         {
             Section = this.RDataSection
         };
         this.RDataZzCG = new COFFGroup(this.DataCache, ".rdata$zz", size: 1200, rva: 10500,
                                        fileAlignment: 200, sectionAlignment: 5000,
-                                       characteristics: DataSectionFlags.MemoryRead)
+                                       characteristics: SectionCharacteristics.MemRead)
         {
             Section = this.RDataSection
         };

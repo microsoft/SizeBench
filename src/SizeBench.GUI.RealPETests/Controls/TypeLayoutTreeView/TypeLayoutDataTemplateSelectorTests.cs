@@ -3,7 +3,6 @@ using System.Windows;
 using System.Windows.Controls;
 using SizeBench.AnalysisEngine;
 using SizeBench.Logging;
-using SizeBench.TestInfrastructure;
 
 namespace SizeBench.GUI.Controls.TypeLayoutTreeView.Tests;
 

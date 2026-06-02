@@ -45,7 +45,7 @@ public class BinarySectionPageViewModelTests
             tcsTestResultsComplete.SetResult(new object());
         };
 
-        generator.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Libs as IReadOnlyList<Library>));
+        generator.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Libs as IReadOnlyCollection<Library>));
 
         Assert.IsNull(viewmodel.Libs);
         viewmodel.SelectedTab = (int)BinarySectionPageViewModel.BinarySectionPageTabIndex.LibsTab;
@@ -83,7 +83,7 @@ public class BinarySectionPageViewModelTests
             tcsTestResultsComplete.SetResult(new object());
         };
 
-        generator.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Libs as IReadOnlyList<Library>));
+        generator.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Libs as IReadOnlyCollection<Library>));
 
         Assert.IsNull(viewmodel.Libs);
         viewmodel.SelectedTab = (int)BinarySectionPageViewModel.BinarySectionPageTabIndex.LibsTab;
@@ -128,8 +128,8 @@ public class BinarySectionPageViewModelTests
             }
         };
 
-        generator.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Libs as IReadOnlyList<Library>));
-        generator.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Compilands as IReadOnlyList<Compiland>));
+        generator.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Libs as IReadOnlyCollection<Library>));
+        generator.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Compilands as IReadOnlyCollection<Compiland>));
 
         Assert.IsNull(viewmodel.Compilands);
         viewmodel.SelectedTab = (int)BinarySectionPageViewModel.BinarySectionPageTabIndex.CompilandsTab;
@@ -170,8 +170,8 @@ public class BinarySectionPageViewModelTests
             }
         };
 
-        generator.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Libs as IReadOnlyList<Library>));
-        generator.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Compilands as IReadOnlyList<Compiland>));
+        generator.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Libs as IReadOnlyCollection<Library>));
+        generator.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Compilands as IReadOnlyCollection<Compiland>));
 
         Assert.IsNull(viewmodel.Compilands);
         viewmodel.SelectedTab = (int)BinarySectionPageViewModel.BinarySectionPageTabIndex.CompilandsTab;
@@ -305,8 +305,8 @@ public class BinarySectionPageViewModelTests
     {
         using var generator = new SingleBinaryDataGenerator();
         generator.MockSession.Setup(s => s.LoadBinarySectionByName(generator.TextSection.Name, It.IsAny<CancellationToken>())).Returns(Task.FromResult<BinarySection?>(generator.TextSection));
-        generator.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Libs as IReadOnlyList<Library>));
-        generator.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Compilands as IReadOnlyList<Compiland>));
+        generator.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Libs as IReadOnlyCollection<Library>));
+        generator.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Compilands as IReadOnlyCollection<Compiland>));
 
         var typeSymbol = new BasicTypeSymbol(generator.DataCache, "int", size: 4, symIndexId: generator._nextSymIndexId++);
 

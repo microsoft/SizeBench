@@ -24,6 +24,7 @@ public sealed class StringSymbol : PublicSymbol
                           uint symIndexId,
                           uint targetRva) : base(cache, GetFriendlyName(name, isUnicodeString, stringData), rva, size, isVirtualSize, symIndexId, targetRva)
     {
+        Debug.Assert(cache.SymbolSourcesSupported.HasFlag(SymbolSourcesSupported.DataSymbols));
         this.StringType = isUnicodeString ? StringSymbolType.Unicode : StringSymbolType.ANSI;
         this.StringData = stringData;
     }

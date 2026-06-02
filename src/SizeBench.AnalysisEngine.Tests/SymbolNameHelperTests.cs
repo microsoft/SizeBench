@@ -32,7 +32,7 @@ public sealed class SymbolNameHelperTests : IDisposable
         var intType = new BasicTypeSymbol(this.DataCache, "int", size: 1, symIndexId: nextSymIndexId++);
         var intPointerType = new PointerTypeSymbol(this.DataCache, intType, "int*", instanceSize: 8, symIndexId: nextSymIndexId++);
         var constBoolPointerType = new PointerTypeSymbol(this.DataCache, constBoolType, "const bool*", instanceSize: 8, symIndexId: nextSymIndexId++);
-        var aComplexTypeOfSomeUDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "AComplex::Type<SomeUDT>", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var aComplexTypeOfSomeUDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "AComplex::Type<SomeUDT>", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
 
         Assert.AreEqual("MyType::MyFunction<T1>(bool, T1)",
             SymbolNameHelper.FunctionToGenericTemplatedName(
@@ -74,11 +74,11 @@ public sealed class SymbolNameHelperTests : IDisposable
     public void UDTNamesCanBeGenericized()
     {
         uint nextSymIndexId = 0;
-        var simpleType = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "SomeNamespace::ASimpleTypeName", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
-        var aComplexTypeOfInt = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "AComplex::Type<int>", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
-        var aComplexTypeOfFloat = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "AComplex::Type<float>", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
-        var aComplexTypeOfSomeUDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "AComplex::Type<SomeUDT>", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
-        var aComplexTypeInANamespace = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "ANamespace::AComplex::Type<int>", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var simpleType = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "SomeNamespace::ASimpleTypeName", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
+        var aComplexTypeOfInt = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "AComplex::Type<int>", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
+        var aComplexTypeOfFloat = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "AComplex::Type<float>", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
+        var aComplexTypeOfSomeUDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "AComplex::Type<SomeUDT>", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
+        var aComplexTypeInANamespace = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "ANamespace::AComplex::Type<int>", instanceSize: 10, symIndexId: nextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
 
         Assert.AreEqual("SomeNamespace::ASimpleTypeName", SymbolNameHelper.UserDefinedTypeToGenericTemplatedName(simpleType));
         Assert.AreEqual("AComplex::Type<T1>", SymbolNameHelper.UserDefinedTypeToGenericTemplatedName(aComplexTypeOfInt));

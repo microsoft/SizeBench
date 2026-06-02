@@ -49,7 +49,9 @@ internal readonly struct IMAGE_FILE_HEADER
     public readonly ushort Characteristics;
 }
 
-internal enum MachineType : ushort
+#pragma warning disable CA1028 // Enum Storage should be Int32 - this is a 16 bit value for P/Invoke marshaling, per PE file format
+public enum MachineType : ushort
+#pragma warning restore CA1028 // Enum Storage should be Int32
 {
     Unknown = 0,
     I386 = 0x014c,
@@ -58,6 +60,7 @@ internal enum MachineType : ushort
     ARM = 0x01c4,
     ARM64 = 0xAA64
 }
+
 internal enum MagicType : ushort
 {
     IMAGE_NT_OPTIONAL_HDR32_MAGIC = 0x10b,
@@ -69,14 +72,16 @@ internal enum SubSystemType : ushort
     IMAGE_SUBSYSTEM_NATIVE = 1,
     IMAGE_SUBSYSTEM_WINDOWS_GUI = 2,
     IMAGE_SUBSYSTEM_WINDOWS_CUI = 3,
+    IMAGE_SUBSYSTEM_OS2_CUI = 5,
     IMAGE_SUBSYSTEM_POSIX_CUI = 7,
+    IMAGE_SUBSYSTEM_NATIVE_WINDOWS = 8,
     IMAGE_SUBSYSTEM_WINDOWS_CE_GUI = 9,
     IMAGE_SUBSYSTEM_EFI_APPLICATION = 10,
     IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER = 11,
     IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER = 12,
     IMAGE_SUBSYSTEM_EFI_ROM = 13,
-    IMAGE_SUBSYSTEM_XBOX = 14
-
+    IMAGE_SUBSYSTEM_XBOX = 14,
+    IMAGE_SUBSYSTEM_WINDOWS_BOOT_APPLICATION = 16
 }
 
 [Flags]
@@ -332,144 +337,6 @@ internal readonly struct IMAGE_OPTIONAL_HEADER32
     [FieldOffset(216)]
     public readonly IMAGE_DATA_DIRECTORY Reserved;
 }
-[StructLayout(LayoutKind.Explicit)]
-internal readonly struct IMAGE_OPTIONAL_HEADER64
-{
-    [FieldOffset(0)]
-    public readonly MagicType Magic;
-
-    [FieldOffset(2)]
-    public readonly byte MajorLinkerVersion;
-
-    [FieldOffset(3)]
-    public readonly byte MinorLinkerVersion;
-
-    [FieldOffset(4)]
-    public readonly uint SizeOfCode;
-
-    [FieldOffset(8)]
-    public readonly uint SizeOfInitializedData;
-
-    [FieldOffset(12)]
-    public readonly uint SizeOfUninitializedData;
-
-    [FieldOffset(16)]
-    public readonly uint AddressOfEntryPoint;
-
-    [FieldOffset(20)]
-    public readonly uint BaseOfCode;
-
-    [FieldOffset(24)]
-    public readonly ulong ImageBase;
-
-    [FieldOffset(32)]
-    public readonly uint SectionAlignment;
-
-    [FieldOffset(36)]
-    public readonly uint FileAlignment;
-
-    [FieldOffset(40)]
-    public readonly ushort MajorOperatingSystemVersion;
-
-    [FieldOffset(42)]
-    public readonly ushort MinorOperatingSystemVersion;
-
-    [FieldOffset(44)]
-    public readonly ushort MajorImageVersion;
-
-    [FieldOffset(46)]
-    public readonly ushort MinorImageVersion;
-
-    [FieldOffset(48)]
-    public readonly ushort MajorSubsystemVersion;
-
-    [FieldOffset(50)]
-    public readonly ushort MinorSubsystemVersion;
-
-    [FieldOffset(52)]
-    public readonly uint Win32VersionValue;
-
-    [FieldOffset(56)]
-    public readonly uint SizeOfImage;
-
-    [FieldOffset(60)]
-    public readonly uint SizeOfHeaders;
-
-    [FieldOffset(64)]
-    public readonly uint CheckSum;
-
-    [FieldOffset(68)]
-    public readonly SubSystemType Subsystem;
-
-    [FieldOffset(70)]
-    public readonly DllCharacteristicsType DllCharacteristics;
-
-    [FieldOffset(72)]
-    public readonly ulong SizeOfStackReserve;
-
-    [FieldOffset(80)]
-    public readonly ulong SizeOfStackCommit;
-
-    [FieldOffset(88)]
-    public readonly ulong SizeOfHeapReserve;
-
-    [FieldOffset(96)]
-    public readonly ulong SizeOfHeapCommit;
-
-    [FieldOffset(104)]
-    public readonly uint LoaderFlags;
-
-    [FieldOffset(108)]
-    public readonly uint NumberOfRvaAndSizes;
-
-    [FieldOffset(112)]
-    public readonly IMAGE_DATA_DIRECTORY ExportTable;
-
-    [FieldOffset(120)]
-    public readonly IMAGE_DATA_DIRECTORY ImportTable;
-
-    [FieldOffset(128)]
-    public readonly IMAGE_DATA_DIRECTORY ResourceTable;
-
-    [FieldOffset(136)]
-    public readonly IMAGE_DATA_DIRECTORY ExceptionTable;
-
-    [FieldOffset(144)]
-    public readonly IMAGE_DATA_DIRECTORY CertificateTable;
-
-    [FieldOffset(152)]
-    public readonly IMAGE_DATA_DIRECTORY BaseRelocationTable;
-
-    [FieldOffset(160)]
-    public readonly IMAGE_DATA_DIRECTORY Debug;
-
-    [FieldOffset(168)]
-    public readonly IMAGE_DATA_DIRECTORY Architecture;
-
-    [FieldOffset(176)]
-    public readonly IMAGE_DATA_DIRECTORY GlobalPtr;
-
-    [FieldOffset(184)]
-    public readonly IMAGE_DATA_DIRECTORY TLSTable;
-
-    [FieldOffset(192)]
-    public readonly IMAGE_DATA_DIRECTORY LoadConfigTable;
-
-    [FieldOffset(200)]
-    public readonly IMAGE_DATA_DIRECTORY BoundImport;
-
-    [FieldOffset(208)]
-    public readonly IMAGE_DATA_DIRECTORY IAT;
-
-    [FieldOffset(216)]
-    public readonly IMAGE_DATA_DIRECTORY DelayImportDescriptor;
-
-    [FieldOffset(224)]
-    public readonly IMAGE_DATA_DIRECTORY CLRRuntimeHeader;
-
-    [FieldOffset(232)]
-    public readonly IMAGE_DATA_DIRECTORY Reserved;
-}
 
 [ExcludeFromCodeCoverage]
 [StructLayout(LayoutKind.Explicit)]
@@ -483,24 +350,6 @@ internal readonly struct IMAGE_NT_HEADERS32
 
     [FieldOffset(24)]
     public readonly IMAGE_OPTIONAL_HEADER32 OptionalHeader;
-
-    private bool _SignatureIsValid => this.Signature == 0x00004550; /* this is "PE\0\0" as a UInt32 */
-
-    public bool isValid => this._SignatureIsValid && (this.OptionalHeader.Magic == MagicType.IMAGE_NT_OPTIONAL_HDR32_MAGIC || this.OptionalHeader.Magic == MagicType.IMAGE_NT_OPTIONAL_HDR64_MAGIC);
-}
-
-[ExcludeFromCodeCoverage]
-[StructLayout(LayoutKind.Explicit)]
-internal readonly struct IMAGE_NT_HEADERS64
-{
-    [FieldOffset(0)]
-    public readonly uint Signature;
-
-    [FieldOffset(4)]
-    public readonly IMAGE_FILE_HEADER FileHeader;
-
-    [FieldOffset(24)]
-    public readonly IMAGE_OPTIONAL_HEADER64 OptionalHeader;
 
     private bool _SignatureIsValid => this.Signature == 0x00004550; /* this is "PE\0\0" as a UInt32 */
 
@@ -526,6 +375,10 @@ internal enum IMAGE_DEBUG_TYPE
     ILTCG = 14,
     MPX = 15,
     Repro = 16,
+    EmbeddedPortablePDB = 17,
+    SPGO = 18,
+    PDBChecksum = 19,
+    ExtendedDllCharacteristics = 20,
 }
 
 [StructLayout(LayoutKind.Explicit)]
@@ -565,15 +418,14 @@ internal enum IMAGE_DEBUG_DIRECTORY_POGO_MAGIC
 
 internal enum IMAGE_DEBUG_TYPE_MAGIC : int
 {
+    // Fun trivia: "RSDS" is for "Richard S, Dan S", presumably those two folks worked on defining this debugging information back in the day.
     RSDS_SIGNATURE = 0x53445352
 }
 
 [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Ansi)]
 
 internal readonly struct RSDS_DEBUG_FORMAT
-
 {
-
     public readonly uint Signature; // RSDS
 
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
@@ -581,7 +433,6 @@ internal readonly struct RSDS_DEBUG_FORMAT
     public readonly byte[] Guid;
 
     public readonly uint Age;
-
 }
 
 [StructLayout(LayoutKind.Explicit)]
@@ -604,6 +455,36 @@ internal readonly struct IMAGE_IMPORT_DESCRIPTOR
 
     [FieldOffset(16)]
     public readonly uint FirstThunk;
+}
+
+[StructLayout(LayoutKind.Explicit)]
+internal readonly struct IMAGE_DELAYLOAD_DESCRIPTOR
+{
+    [FieldOffset(0)]
+    public readonly uint Attributes;
+
+    public bool RvaBased => (this.Attributes & 0x1) == 0x1;
+
+    [FieldOffset(4)]
+    public readonly uint DllNameRVA;
+
+    [FieldOffset(8)]
+    public readonly uint ModuleHandleRVA;
+
+    [FieldOffset(12)]
+    public readonly uint ImportAddressTableRVA;
+
+    [FieldOffset(16)]
+    public readonly uint ImportNameTableRVA;
+
+    [FieldOffset(20)]
+    public readonly uint BoundImportAddressTableRVA;
+
+    [FieldOffset(24)]
+    public readonly uint UnloadInformationTableRVA;
+
+    [FieldOffset(28)]
+    public readonly uint TimeDateStamp;
 }
 
 [StructLayout(LayoutKind.Explicit)]
@@ -679,7 +560,7 @@ internal readonly struct IMAGE_SECTION_HEADER
         get
         {
             var nameString = new string(this.Name);
-            if (nameString.IndexOf('\0', StringComparison.Ordinal) != -1)
+            if (nameString.Contains('\0', StringComparison.Ordinal))
             {
                 nameString = nameString[..nameString.IndexOf('\0', StringComparison.Ordinal)];
             }
@@ -702,6 +583,7 @@ internal readonly struct IMAGE_SECTION_HEADER
         this.Characteristics = original.Characteristics;
     }
 }
+
 [Flags]
 #pragma warning disable CA1028 // Enum Storage should be Int32 - this is for interop purposes with DIA, and in DIA it is an unsigned int
 #pragma warning disable CA1711 // Identifiers should not have incorrect suffix - "DataSectionFlags" is the name in the PE spec, so ignoring this rule
@@ -883,27 +765,1064 @@ public enum DataSectionFlags : uint
     MemoryWrite = 0x80000000
 }
 
-// From https://msdn.microsoft.com/en-us/library/windows/desktop/ms680149(v=vs.85).aspx
-internal enum IMAGE_DIRECTORY_ENTRY : ushort
+internal static class CFGConstants
 {
-    Architecture = 7,
-    BaseReloc = 5,
-    BoundImport = 11,
-    COMDescriptor = 14,
-    Debug = 6,
-    DelayImport = 13,
-    Exception = 3,
-    Export = 0,
-    GlobalPtr = 8,
-    IAT = 12,
-    Import = 1,
-    LoadConfig = 10,
-    Resource = 2,
-    Security = 4,
-    TLS = 9
+    internal const uint IMAGE_GUARD_CF_FUNCTION_TABLE_SIZE_MASK = 0xF0000000;
+    internal const uint IMAGE_GUARD_CF_FUNCTION_TABLE_SIZE_SHIFT = 28;
 }
 
-internal static class PInvokes
+[StructLayout(LayoutKind.Sequential)]
+internal readonly struct IMAGE_LOAD_CONFIG_CODE_INTEGRITY
+{
+    public readonly ushort Flags;
+    public readonly ushort Catalog;
+    public readonly uint CatalogOffset;
+    public readonly uint Reserved;
+}
+
+[StructLayout(LayoutKind.Explicit, Pack = 1)]
+internal readonly struct IMAGE_LOAD_CONFIG_DIRECTORY64_V1
+{
+    [FieldOffset(0)]
+    public readonly uint Size;
+
+    [FieldOffset(4)]
+    public readonly uint TimeDateStamp;
+
+    [FieldOffset(8)]
+    public readonly ushort MajorVersion;
+
+    [FieldOffset(10)]
+    public readonly ushort MinorVersion;
+
+    [FieldOffset(12)]
+    public readonly uint GlobalFlagsClear;
+
+    [FieldOffset(16)]
+    public readonly uint GlobalFlagsSet;
+
+    [FieldOffset(20)]
+    public readonly uint CriticalSectionDefaultTimeout;
+
+    [FieldOffset(24)]
+    public readonly ulong DeCommitFreeBlockThreshold;
+
+    [FieldOffset(32)]
+    public readonly ulong DeCommitTotalFreeThreshold;
+
+    [FieldOffset(40)]
+    public readonly ulong LockPrefixTable;
+
+    [FieldOffset(48)]
+    public readonly ulong MaximumAllocationSize;
+
+    [FieldOffset(56)]
+    public readonly ulong VirtualMemoryThershold;
+
+    [FieldOffset(64)]
+    public readonly ulong ProcessAffinityMask;
+
+    [FieldOffset(72)]
+    public readonly uint ProcessHeapFlags;
+
+    [FieldOffset(76)]
+    public readonly ushort CSDVersion;
+
+    [FieldOffset(78)]
+    public readonly ushort DependentLoadFlags;
+
+    [FieldOffset(80)]
+    public readonly ulong EditList;
+
+    [FieldOffset(88)]
+    public readonly ulong SecurityCookie;
+
+    [FieldOffset(96)]
+    public readonly ulong SEHandlerTable;
+
+    [FieldOffset(104)]
+    public readonly ulong SEHandlerCount;
+}
+
+[StructLayout(LayoutKind.Explicit, Pack = 1)]
+internal readonly struct IMAGE_LOAD_CONFIG_DIRECTORY32_V1
+{
+    [FieldOffset(0)]
+    public readonly uint Size;
+
+    [FieldOffset(4)]
+    public readonly uint TimeDateStamp;
+
+    [FieldOffset(8)]
+    public readonly ushort MajorVersion;
+
+    [FieldOffset(10)]
+    public readonly ushort MinorVersion;
+
+    [FieldOffset(12)]
+    public readonly uint GlobalFlagsClear;
+
+    [FieldOffset(16)]
+    public readonly uint GlobalFlagsSet;
+
+    [FieldOffset(20)]
+    public readonly uint CriticalSectionDefaultTimeout;
+
+    [FieldOffset(24)]
+    public readonly uint DeCommitFreeBlockThreshold;
+
+    [FieldOffset(28)]
+    public readonly uint DeCommitTotalFreeThreshold;
+
+    [FieldOffset(32)]
+    public readonly uint LockPrefixTable;
+
+    [FieldOffset(36)]
+    public readonly uint MaximumAllocationSize;
+
+    [FieldOffset(40)]
+    public readonly uint VirtualMemoryThershold;
+
+    [FieldOffset(44)]
+    public readonly uint ProcessAffinityMask;
+
+    [FieldOffset(48)]
+    public readonly uint ProcessHeapFlags;
+
+    [FieldOffset(52)]
+    public readonly ushort CSDVersion;
+
+    [FieldOffset(54)]
+    public readonly ushort DependentLoadFlags;
+
+    [FieldOffset(56)]
+    public readonly uint EditList;
+
+    [FieldOffset(60)]
+    public readonly uint SecurityCookie;
+
+    [FieldOffset(64)]
+    public readonly uint SEHandlerTable;
+
+    [FieldOffset(68)]
+    public readonly uint SEHandlerCount;
+}
+
+[StructLayout(LayoutKind.Explicit, Pack = 1)]
+internal readonly struct IMAGE_LOAD_CONFIG_DIRECTORY64_V2
+{
+    [FieldOffset(0)]
+    public readonly uint Size;
+
+    [FieldOffset(4)]
+    public readonly uint TimeDateStamp;
+
+    [FieldOffset(8)]
+    public readonly ushort MajorVersion;
+
+    [FieldOffset(10)]
+    public readonly ushort MinorVersion;
+
+    [FieldOffset(12)]
+    public readonly uint GlobalFlagsClear;
+
+    [FieldOffset(16)]
+    public readonly uint GlobalFlagsSet;
+
+    [FieldOffset(20)]
+    public readonly uint CriticalSectionDefaultTimeout;
+
+    [FieldOffset(24)]
+    public readonly ulong DeCommitFreeBlockThreshold;
+
+    [FieldOffset(32)]
+    public readonly ulong DeCommitTotalFreeThreshold;
+
+    [FieldOffset(40)]
+    public readonly ulong LockPrefixTable;
+
+    [FieldOffset(48)]
+    public readonly ulong MaximumAllocationSize;
+
+    [FieldOffset(56)]
+    public readonly ulong VirtualMemoryThershold;
+
+    [FieldOffset(64)]
+    public readonly ulong ProcessAffinityMask;
+
+    [FieldOffset(72)]
+    public readonly uint ProcessHeapFlags;
+
+    [FieldOffset(76)]
+    public readonly ushort CSDVersion;
+
+    [FieldOffset(78)]
+    public readonly ushort DependentLoadFlags;
+
+    [FieldOffset(80)]
+    public readonly ulong EditList;
+
+    [FieldOffset(88)]
+    public readonly ulong SecurityCookie;
+
+    [FieldOffset(96)]
+    public readonly ulong SEHandlerTable;
+
+    [FieldOffset(104)]
+    public readonly ulong SEHandlerCount;
+
+    [FieldOffset(112)]
+    public readonly ulong GuardCFCheckFunctionPointer;
+
+    [FieldOffset(120)]
+    public readonly ulong GuardCFDispatchFunctionPointer;
+
+    [FieldOffset(128)]
+    public readonly ulong GuardCFFunctionTable;
+
+    [FieldOffset(136)]
+    public readonly ulong GuardCFFunctionCount;
+
+    [FieldOffset(144)]
+    public readonly uint GuardFlags;
+}
+
+[StructLayout(LayoutKind.Explicit, Pack = 1)]
+internal readonly struct IMAGE_LOAD_CONFIG_DIRECTORY32_V2
+{
+    [FieldOffset(0)]
+    public readonly uint Size;
+
+    [FieldOffset(4)]
+    public readonly uint TimeDateStamp;
+
+    [FieldOffset(8)]
+    public readonly ushort MajorVersion;
+
+    [FieldOffset(10)]
+    public readonly ushort MinorVersion;
+
+    [FieldOffset(12)]
+    public readonly uint GlobalFlagsClear;
+
+    [FieldOffset(16)]
+    public readonly uint GlobalFlagsSet;
+
+    [FieldOffset(20)]
+    public readonly uint CriticalSectionDefaultTimeout;
+
+    [FieldOffset(24)]
+    public readonly uint DeCommitFreeBlockThreshold;
+
+    [FieldOffset(28)]
+    public readonly uint DeCommitTotalFreeThreshold;
+
+    [FieldOffset(32)]
+    public readonly uint LockPrefixTable;
+
+    [FieldOffset(36)]
+    public readonly uint MaximumAllocationSize;
+
+    [FieldOffset(40)]
+    public readonly uint VirtualMemoryThershold;
+
+    [FieldOffset(44)]
+    public readonly uint ProcessAffinityMask;
+
+    [FieldOffset(48)]
+    public readonly uint ProcessHeapFlags;
+
+    [FieldOffset(52)]
+    public readonly ushort CSDVersion;
+
+    [FieldOffset(54)]
+    public readonly ushort DependentLoadFlags;
+
+    [FieldOffset(56)]
+    public readonly uint EditList;
+
+    [FieldOffset(60)]
+    public readonly uint SecurityCookie;
+
+    [FieldOffset(64)]
+    public readonly uint SEHandlerTable;
+
+    [FieldOffset(68)]
+    public readonly uint SEHandlerCount;
+
+    [FieldOffset(72)]
+    public readonly uint GuardCFCheckFunctionPointer;
+
+    [FieldOffset(76)]
+    public readonly uint GuardCFDispatchFunctionPointer;
+
+    [FieldOffset(80)]
+    public readonly uint GuardCFFunctionTable;
+
+    [FieldOffset(84)]
+    public readonly uint GuardCFFunctionCount;
+
+    [FieldOffset(88)]
+    public readonly uint GuardFlags;
+}
+
+[StructLayout(LayoutKind.Explicit, Pack = 1)]
+internal readonly struct IMAGE_LOAD_CONFIG_DIRECTORY64_V3
+{
+    [FieldOffset(0)]
+    public readonly uint Size;
+
+    [FieldOffset(4)]
+    public readonly uint TimeDateStamp;
+
+    [FieldOffset(8)]
+    public readonly ushort MajorVersion;
+
+    [FieldOffset(10)]
+    public readonly ushort MinorVersion;
+
+    [FieldOffset(12)]
+    public readonly uint GlobalFlagsClear;
+
+    [FieldOffset(16)]
+    public readonly uint GlobalFlagsSet;
+
+    [FieldOffset(20)]
+    public readonly uint CriticalSectionDefaultTimeout;
+
+    [FieldOffset(24)]
+    public readonly ulong DeCommitFreeBlockThreshold;
+
+    [FieldOffset(32)]
+    public readonly ulong DeCommitTotalFreeThreshold;
+
+    [FieldOffset(40)]
+    public readonly ulong LockPrefixTable;
+
+    [FieldOffset(48)]
+    public readonly ulong MaximumAllocationSize;
+
+    [FieldOffset(56)]
+    public readonly ulong VirtualMemoryThershold;
+
+    [FieldOffset(64)]
+    public readonly ulong ProcessAffinityMask;
+
+    [FieldOffset(72)]
+    public readonly uint ProcessHeapFlags;
+
+    [FieldOffset(76)]
+    public readonly ushort CSDVersion;
+
+    [FieldOffset(78)]
+    public readonly ushort DependentLoadFlags;
+
+    [FieldOffset(80)]
+    public readonly ulong EditList;
+
+    [FieldOffset(88)]
+    public readonly ulong SecurityCookie;
+
+    [FieldOffset(96)]
+    public readonly ulong SEHandlerTable;
+
+    [FieldOffset(104)]
+    public readonly ulong SEHandlerCount;
+
+    [FieldOffset(112)]
+    public readonly ulong GuardCFCheckFunctionPointer;
+
+    [FieldOffset(120)]
+    public readonly ulong GuardCFDispatchFunctionPointer;
+
+    [FieldOffset(128)]
+    public readonly ulong GuardCFFunctionTable;
+
+    [FieldOffset(136)]
+    public readonly ulong GuardCFFunctionCount;
+
+    [FieldOffset(144)]
+    public readonly uint GuardFlags;
+
+    [FieldOffset(148)]
+    public readonly IMAGE_LOAD_CONFIG_CODE_INTEGRITY CodeIntegrity;
+
+    [FieldOffset(160)]
+    public readonly ulong GuardAddressTakenIatEntryTable;
+
+    [FieldOffset(168)]
+    public readonly ulong GuardAddressTakenIatEntryCount;
+
+    [FieldOffset(176)]
+    public readonly ulong GuardLongJumpTargetTable;
+
+    [FieldOffset(184)]
+    public readonly ulong GuardLongJumpTargetCount;
+}
+
+[StructLayout(LayoutKind.Explicit, Pack = 1)]
+internal readonly struct IMAGE_LOAD_CONFIG_DIRECTORY32_V3
+{
+    [FieldOffset(0)]
+    public readonly uint Size;
+
+    [FieldOffset(4)]
+    public readonly uint TimeDateStamp;
+
+    [FieldOffset(8)]
+    public readonly ushort MajorVersion;
+
+    [FieldOffset(10)]
+    public readonly ushort MinorVersion;
+
+    [FieldOffset(12)]
+    public readonly uint GlobalFlagsClear;
+
+    [FieldOffset(16)]
+    public readonly uint GlobalFlagsSet;
+
+    [FieldOffset(20)]
+    public readonly uint CriticalSectionDefaultTimeout;
+
+    [FieldOffset(24)]
+    public readonly uint DeCommitFreeBlockThreshold;
+
+    [FieldOffset(28)]
+    public readonly uint DeCommitTotalFreeThreshold;
+
+    [FieldOffset(32)]
+    public readonly uint LockPrefixTable;
+
+    [FieldOffset(36)]
+    public readonly uint MaximumAllocationSize;
+
+    [FieldOffset(40)]
+    public readonly uint VirtualMemoryThershold;
+
+    [FieldOffset(44)]
+    public readonly uint ProcessAffinityMask;
+
+    [FieldOffset(48)]
+    public readonly uint ProcessHeapFlags;
+
+    [FieldOffset(52)]
+    public readonly ushort CSDVersion;
+
+    [FieldOffset(54)]
+    public readonly ushort DependentLoadFlags;
+
+    [FieldOffset(56)]
+    public readonly uint EditList;
+
+    [FieldOffset(60)]
+    public readonly uint SecurityCookie;
+
+    [FieldOffset(64)]
+    public readonly uint SEHandlerTable;
+
+    [FieldOffset(68)]
+    public readonly uint SEHandlerCount;
+
+    [FieldOffset(72)]
+    public readonly uint GuardCFCheckFunctionPointer;
+
+    [FieldOffset(76)]
+    public readonly uint GuardCFDispatchFunctionPointer;
+
+    [FieldOffset(80)]
+    public readonly uint GuardCFFunctionTable;
+
+    [FieldOffset(84)]
+    public readonly uint GuardCFFunctionCount;
+
+    [FieldOffset(88)]
+    public readonly uint GuardFlags;
+
+    [FieldOffset(92)]
+    public readonly IMAGE_LOAD_CONFIG_CODE_INTEGRITY CodeIntegrity;
+
+    [FieldOffset(104)]
+    public readonly uint GuardAddressTakenIatEntryTable;
+
+    [FieldOffset(108)]
+    public readonly uint GuardAddressTakenIatEntryCount;
+
+    [FieldOffset(112)]
+    public readonly uint GuardLongJumpTargetTable;
+
+    [FieldOffset(116)]
+    public readonly uint GuardLongJumpTargetCount;
+}
+
+[StructLayout(LayoutKind.Explicit, Pack = 1)]
+internal readonly struct IMAGE_LOAD_CONFIG_DIRECTORY64_V4
+{
+    [FieldOffset(0)]
+    public readonly uint Size;
+
+    [FieldOffset(4)]
+    public readonly uint TimeDateStamp;
+
+    [FieldOffset(8)]
+    public readonly ushort MajorVersion;
+
+    [FieldOffset(10)]
+    public readonly ushort MinorVersion;
+
+    [FieldOffset(12)]
+    public readonly uint GlobalFlagsClear;
+
+    [FieldOffset(16)]
+    public readonly uint GlobalFlagsSet;
+
+    [FieldOffset(20)]
+    public readonly uint CriticalSectionDefaultTimeout;
+
+    [FieldOffset(24)]
+    public readonly ulong DeCommitFreeBlockThreshold;
+
+    [FieldOffset(32)]
+    public readonly ulong DeCommitTotalFreeThreshold;
+
+    [FieldOffset(40)]
+    public readonly ulong LockPrefixTable;
+
+    [FieldOffset(48)]
+    public readonly ulong MaximumAllocationSize;
+
+    [FieldOffset(56)]
+    public readonly ulong VirtualMemoryThershold;
+
+    [FieldOffset(64)]
+    public readonly ulong ProcessAffinityMask;
+
+    [FieldOffset(72)]
+    public readonly uint ProcessHeapFlags;
+
+    [FieldOffset(76)]
+    public readonly ushort CSDVersion;
+
+    [FieldOffset(78)]
+    public readonly ushort DependentLoadFlags;
+
+    [FieldOffset(80)]
+    public readonly ulong EditList;
+
+    [FieldOffset(88)]
+    public readonly ulong SecurityCookie;
+
+    [FieldOffset(96)]
+    public readonly ulong SEHandlerTable;
+
+    [FieldOffset(104)]
+    public readonly ulong SEHandlerCount;
+
+    [FieldOffset(112)]
+    public readonly ulong GuardCFCheckFunctionPointer;
+
+    [FieldOffset(120)]
+    public readonly ulong GuardCFDispatchFunctionPointer;
+
+    [FieldOffset(128)]
+    public readonly ulong GuardCFFunctionTable;
+
+    [FieldOffset(136)]
+    public readonly ulong GuardCFFunctionCount;
+
+    [FieldOffset(144)]
+    public readonly uint GuardFlags;
+
+    [FieldOffset(148)]
+    public readonly IMAGE_LOAD_CONFIG_CODE_INTEGRITY CodeIntegrity;
+
+    [FieldOffset(160)]
+    public readonly ulong GuardAddressTakenIatEntryTable;
+
+    [FieldOffset(168)]
+    public readonly ulong GuardAddressTakenIatEntryCount;
+
+    [FieldOffset(176)]
+    public readonly ulong GuardLongJumpTargetTable;
+
+    [FieldOffset(184)]
+    public readonly ulong GuardLongJumpTargetCount;
+
+    [FieldOffset(192)]
+    public readonly ulong DynamicValueRelocTable;
+
+    [FieldOffset(200)]
+    public readonly ulong CHPEMetadataPointer;
+
+    [FieldOffset(208)]
+    public readonly ulong GuardRFFailureRoutine;
+
+    [FieldOffset(216)]
+    public readonly ulong GuardRFFailureRoutineFunctionPointer;
+
+    [FieldOffset(224)]
+    public readonly uint DynamicValueRelocTableOffset;
+
+    [FieldOffset(228)]
+    public readonly ushort DynamicValueRelocTableSection;
+
+    [FieldOffset(230)]
+    public readonly ushort Reserved2;
+
+    [FieldOffset(232)]
+    public readonly ulong GuardRFVerifyStackPointerFunctionPointer;
+
+    [FieldOffset(240)]
+    public readonly uint HotPatchTableOffset;
+
+    [FieldOffset(244)]
+    public readonly uint Reserved3;
+
+    [FieldOffset(248)]
+    public readonly ulong EnclaveConfigurationPointer;
+
+    [FieldOffset(256)]
+    public readonly ulong VolatileMetadataPointer;
+
+    [FieldOffset(264)]
+    public readonly ulong GuardEHContinuationTable;
+
+    [FieldOffset(272)]
+    public readonly ulong GuardEHContinuationCount;
+}
+
+[StructLayout(LayoutKind.Explicit, Pack = 1)]
+internal readonly struct IMAGE_LOAD_CONFIG_DIRECTORY32_V4
+{
+    [FieldOffset(0)]
+    public readonly uint Size;
+
+    [FieldOffset(4)]
+    public readonly uint TimeDateStamp;
+
+    [FieldOffset(8)]
+    public readonly ushort MajorVersion;
+
+    [FieldOffset(10)]
+    public readonly ushort MinorVersion;
+
+    [FieldOffset(12)]
+    public readonly uint GlobalFlagsClear;
+
+    [FieldOffset(16)]
+    public readonly uint GlobalFlagsSet;
+
+    [FieldOffset(20)]
+    public readonly uint CriticalSectionDefaultTimeout;
+
+    [FieldOffset(24)]
+    public readonly uint DeCommitFreeBlockThreshold;
+
+    [FieldOffset(28)]
+    public readonly uint DeCommitTotalFreeThreshold;
+
+    [FieldOffset(32)]
+    public readonly uint LockPrefixTable;
+
+    [FieldOffset(36)]
+    public readonly uint MaximumAllocationSize;
+
+    [FieldOffset(40)]
+    public readonly uint VirtualMemoryThershold;
+
+    [FieldOffset(44)]
+    public readonly uint ProcessAffinityMask;
+
+    [FieldOffset(48)]
+    public readonly uint ProcessHeapFlags;
+
+    [FieldOffset(52)]
+    public readonly ushort CSDVersion;
+
+    [FieldOffset(54)]
+    public readonly ushort DependentLoadFlags;
+
+    [FieldOffset(56)]
+    public readonly uint EditList;
+
+    [FieldOffset(60)]
+    public readonly uint SecurityCookie;
+
+    [FieldOffset(64)]
+    public readonly uint SEHandlerTable;
+
+    [FieldOffset(68)]
+    public readonly uint SEHandlerCount;
+
+    [FieldOffset(72)]
+    public readonly uint GuardCFCheckFunctionPointer;
+
+    [FieldOffset(76)]
+    public readonly uint GuardCFDispatchFunctionPointer;
+
+    [FieldOffset(80)]
+    public readonly uint GuardCFFunctionTable;
+
+    [FieldOffset(84)]
+    public readonly uint GuardCFFunctionCount;
+
+    [FieldOffset(88)]
+    public readonly uint GuardFlags;
+
+    [FieldOffset(92)]
+    public readonly IMAGE_LOAD_CONFIG_CODE_INTEGRITY CodeIntegrity;
+
+    [FieldOffset(104)]
+    public readonly uint GuardAddressTakenIatEntryTable;
+
+    [FieldOffset(108)]
+    public readonly uint GuardAddressTakenIatEntryCount;
+
+    [FieldOffset(112)]
+    public readonly uint GuardLongJumpTargetTable;
+
+    [FieldOffset(116)]
+    public readonly uint GuardLongJumpTargetCount;
+
+    [FieldOffset(120)]
+    public readonly uint DynamicValueRelocTable;
+
+    [FieldOffset(124)]
+    public readonly uint CHPEMetadataPointer;
+
+    [FieldOffset(128)]
+    public readonly uint GuardRFFailureRoutine;
+
+    [FieldOffset(132)]
+    public readonly uint GuardRFFailureRoutineFunctionPointer;
+
+    [FieldOffset(136)]
+    public readonly uint DynamicValueRelocTableOffset;
+
+    [FieldOffset(140)]
+    public readonly ushort DynamicValueRelocTableSection;
+
+    [FieldOffset(142)]
+    public readonly ushort Reserved2;
+
+    [FieldOffset(144)]
+    public readonly uint GuardRFVerifyStackPointerFunctionPointer;
+
+    [FieldOffset(148)]
+    public readonly uint HotPatchTableOffset;
+
+    [FieldOffset(152)]
+    public readonly uint Reserved3;
+
+    [FieldOffset(156)]
+    public readonly uint EnclaveConfigurationPointer;
+
+    [FieldOffset(160)]
+    public readonly uint VolatileMetadataPointer;
+
+    [FieldOffset(164)]
+    public readonly uint GuardEHContinuationTable;
+
+    [FieldOffset(168)]
+    public readonly uint GuardEHContinuationCount;
+}
+
+[StructLayout(LayoutKind.Explicit, Pack = 1)]
+internal readonly struct IMAGE_LOAD_CONFIG_DIRECTORY64_V5
+{
+    [FieldOffset(0)]
+    public readonly uint Size;
+
+    [FieldOffset(4)]
+    public readonly uint TimeDateStamp;
+
+    [FieldOffset(8)]
+    public readonly ushort MajorVersion;
+
+    [FieldOffset(10)]
+    public readonly ushort MinorVersion;
+
+    [FieldOffset(12)]
+    public readonly uint GlobalFlagsClear;
+
+    [FieldOffset(16)]
+    public readonly uint GlobalFlagsSet;
+
+    [FieldOffset(20)]
+    public readonly uint CriticalSectionDefaultTimeout;
+
+    [FieldOffset(24)]
+    public readonly ulong DeCommitFreeBlockThreshold;
+
+    [FieldOffset(32)]
+    public readonly ulong DeCommitTotalFreeThreshold;
+
+    [FieldOffset(40)]
+    public readonly ulong LockPrefixTable;
+
+    [FieldOffset(48)]
+    public readonly ulong MaximumAllocationSize;
+
+    [FieldOffset(56)]
+    public readonly ulong VirtualMemoryThershold;
+
+    [FieldOffset(64)]
+    public readonly ulong ProcessAffinityMask;
+
+    [FieldOffset(72)]
+    public readonly uint ProcessHeapFlags;
+
+    [FieldOffset(76)]
+    public readonly ushort CSDVersion;
+
+    [FieldOffset(78)]
+    public readonly ushort DependentLoadFlags;
+
+    [FieldOffset(80)]
+    public readonly ulong EditList;
+
+    [FieldOffset(88)]
+    public readonly ulong SecurityCookie;
+
+    [FieldOffset(96)]
+    public readonly ulong SEHandlerTable;
+
+    [FieldOffset(104)]
+    public readonly ulong SEHandlerCount;
+
+    [FieldOffset(112)]
+    public readonly ulong GuardCFCheckFunctionPointer;
+
+    [FieldOffset(120)]
+    public readonly ulong GuardCFDispatchFunctionPointer;
+
+    [FieldOffset(128)]
+    public readonly ulong GuardCFFunctionTable;
+
+    [FieldOffset(136)]
+    public readonly ulong GuardCFFunctionCount;
+
+    [FieldOffset(144)]
+    public readonly uint GuardFlags;
+
+    [FieldOffset(148)]
+    public readonly IMAGE_LOAD_CONFIG_CODE_INTEGRITY CodeIntegrity;
+
+    [FieldOffset(160)]
+    public readonly ulong GuardAddressTakenIatEntryTable;
+
+    [FieldOffset(168)]
+    public readonly ulong GuardAddressTakenIatEntryCount;
+
+    [FieldOffset(176)]
+    public readonly ulong GuardLongJumpTargetTable;
+
+    [FieldOffset(184)]
+    public readonly ulong GuardLongJumpTargetCount;
+
+    [FieldOffset(192)]
+    public readonly ulong DynamicValueRelocTable;
+
+    [FieldOffset(200)]
+    public readonly ulong CHPEMetadataPointer;
+
+    [FieldOffset(208)]
+    public readonly ulong GuardRFFailureRoutine;
+
+    [FieldOffset(216)]
+    public readonly ulong GuardRFFailureRoutineFunctionPointer;
+
+    [FieldOffset(224)]
+    public readonly uint DynamicValueRelocTableOffset;
+
+    [FieldOffset(228)]
+    public readonly ushort DynamicValueRelocTableSection;
+
+    [FieldOffset(230)]
+    public readonly ushort Reserved2;
+
+    [FieldOffset(232)]
+    public readonly ulong GuardRFVerifyStackPointerFunctionPointer;
+
+    [FieldOffset(240)]
+    public readonly uint HotPatchTableOffset;
+
+    [FieldOffset(244)]
+    public readonly uint Reserved3;
+
+    [FieldOffset(248)]
+    public readonly ulong EnclaveConfigurationPointer;
+
+    [FieldOffset(256)]
+    public readonly ulong VolatileMetadataPointer;
+
+    [FieldOffset(264)]
+    public readonly ulong GuardEHContinuationTable;
+
+    [FieldOffset(272)]
+    public readonly ulong GuardEHContinuationCount;
+
+    [FieldOffset(280)]
+    public readonly ulong GuardXFGCheckFunctionPointer;
+
+    [FieldOffset(288)]
+    public readonly ulong GuardXFGDispatchFunctionPointer;
+
+    [FieldOffset(296)]
+    public readonly ulong GuardXFGTableDispatchFunctionPointer;
+
+    [FieldOffset(304)]
+    public readonly ulong CastGuardOsDeterminedFailureMode;
+}
+
+[StructLayout(LayoutKind.Explicit, Pack = 1)]
+internal readonly struct IMAGE_LOAD_CONFIG_DIRECTORY32_V5
+{
+    [FieldOffset(0)]
+    public readonly uint Size;
+
+    [FieldOffset(4)]
+    public readonly uint TimeDateStamp;
+
+    [FieldOffset(8)]
+    public readonly ushort MajorVersion;
+
+    [FieldOffset(10)]
+    public readonly ushort MinorVersion;
+
+    [FieldOffset(12)]
+    public readonly uint GlobalFlagsClear;
+
+    [FieldOffset(16)]
+    public readonly uint GlobalFlagsSet;
+
+    [FieldOffset(20)]
+    public readonly uint CriticalSectionDefaultTimeout;
+
+    [FieldOffset(24)]
+    public readonly uint DeCommitFreeBlockThreshold;
+
+    [FieldOffset(28)]
+    public readonly uint DeCommitTotalFreeThreshold;
+
+    [FieldOffset(32)]
+    public readonly uint LockPrefixTable;
+
+    [FieldOffset(36)]
+    public readonly uint MaximumAllocationSize;
+
+    [FieldOffset(40)]
+    public readonly uint VirtualMemoryThershold;
+
+    [FieldOffset(44)]
+    public readonly uint ProcessAffinityMask;
+
+    [FieldOffset(48)]
+    public readonly uint ProcessHeapFlags;
+
+    [FieldOffset(52)]
+    public readonly ushort CSDVersion;
+
+    [FieldOffset(54)]
+    public readonly ushort DependentLoadFlags;
+
+    [FieldOffset(56)]
+    public readonly uint EditList;
+
+    [FieldOffset(60)]
+    public readonly uint SecurityCookie;
+
+    [FieldOffset(64)]
+    public readonly uint SEHandlerTable;
+
+    [FieldOffset(68)]
+    public readonly uint SEHandlerCount;
+
+    [FieldOffset(72)]
+    public readonly uint GuardCFCheckFunctionPointer;
+
+    [FieldOffset(76)]
+    public readonly uint GuardCFDispatchFunctionPointer;
+
+    [FieldOffset(80)]
+    public readonly uint GuardCFFunctionTable;
+
+    [FieldOffset(84)]
+    public readonly uint GuardCFFunctionCount;
+
+    [FieldOffset(88)]
+    public readonly uint GuardFlags;
+
+    [FieldOffset(92)]
+    public readonly IMAGE_LOAD_CONFIG_CODE_INTEGRITY CodeIntegrity;
+
+    [FieldOffset(104)]
+    public readonly uint GuardAddressTakenIatEntryTable;
+
+    [FieldOffset(108)]
+    public readonly uint GuardAddressTakenIatEntryCount;
+
+    [FieldOffset(112)]
+    public readonly uint GuardLongJumpTargetTable;
+
+    [FieldOffset(116)]
+    public readonly uint GuardLongJumpTargetCount;
+
+    [FieldOffset(120)]
+    public readonly uint DynamicValueRelocTable;
+
+    [FieldOffset(124)]
+    public readonly uint CHPEMetadataPointer;
+
+    [FieldOffset(128)]
+    public readonly uint GuardRFFailureRoutine;
+
+    [FieldOffset(132)]
+    public readonly uint GuardRFFailureRoutineFunctionPointer;
+
+    [FieldOffset(136)]
+    public readonly uint DynamicValueRelocTableOffset;
+
+    [FieldOffset(140)]
+    public readonly ushort DynamicValueRelocTableSection;
+
+    [FieldOffset(142)]
+    public readonly ushort Reserved2;
+
+    [FieldOffset(144)]
+    public readonly uint GuardRFVerifyStackPointerFunctionPointer;
+
+    [FieldOffset(148)]
+    public readonly uint HotPatchTableOffset;
+
+    [FieldOffset(152)]
+    public readonly uint Reserved3;
+
+    [FieldOffset(156)]
+    public readonly uint EnclaveConfigurationPointer;
+
+    [FieldOffset(160)]
+    public readonly uint VolatileMetadataPointer;
+
+    [FieldOffset(164)]
+    public readonly uint GuardEHContinuationTable;
+
+    [FieldOffset(168)]
+    public readonly uint GuardEHContinuationCount;
+
+    [FieldOffset(172)]
+    public readonly uint GuardXFGCheckFunctionPointer;
+
+    [FieldOffset(176)]
+    public readonly uint GuardXFGDispatchFunctionPointer;
+
+    [FieldOffset(180)]
+    public readonly uint GuardXFGTableDispatchFunctionPointer;
+
+    [FieldOffset(184)]
+    public readonly uint CastGuardOsDeterminedFailureMode;
+}
+
+internal static partial class PInvokes
 {
     #region LoadLibraryEx / FreeLibrary
 
@@ -922,43 +1841,32 @@ internal static class PInvokes
     }
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static extern bool SetDllDirectory(string lpPathName);
+    [LibraryImport("Kernelbase.dll", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+    public static partial IntPtr LoadLibraryExW([MarshalAs(UnmanagedType.LPWStr)] string lpFileName, IntPtr reserved, LoadLibraryFlags flags);
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [DllImport("Kernelbase.dll", CallingConvention = CallingConvention.Winapi, PreserveSig = true, SetLastError = true, CharSet = CharSet.Unicode)]
-    public static extern IntPtr LoadLibraryExW([In, MarshalAs(UnmanagedType.LPWStr)] string lpFileName, IntPtr reserved, [In] LoadLibraryFlags flags);
-
-    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [DllImport("kernel32.dll", SetLastError = true)]
+    [LibraryImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    internal static extern unsafe bool FreeLibrary(IntPtr hModule);
+    internal static unsafe partial bool FreeLibrary(IntPtr hModule);
 
     #endregion
 
     #region DbgHelp - note we use the copy in SizeBench from DbgX, NOT the OS version
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [DllImport(@"amd64\dbghelp.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "ImageNtHeader")]
+    [LibraryImport(@"amd64\dbghelp.dll", EntryPoint = "ImageNtHeader")]
     [SuppressUnmanagedCodeSecurity]
-    internal static extern unsafe void* ImageNtHeader(void* Base);
-
-    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [DllImport(@"amd64\dbghelp.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "ImageDirectoryEntryToDataEx")]
-    internal static extern unsafe void* ImageDirectoryEntryToDataEx(void* Base,
-                                                                   [MarshalAs(UnmanagedType.Bool)] bool MappedAsImage,
-                                                                   [MarshalAs(UnmanagedType.U2)] IMAGE_DIRECTORY_ENTRY DirectoryEntry,
-                                                                   [MarshalAs(UnmanagedType.U2)] out ushort Size,
-                                                                   out IntPtr FoundHeader);
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvStdcall)])]
+    internal static unsafe partial void* ImageNtHeader(void* Base);
 
     #endregion
 
     #region MSVCRT
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [DllImport("msvcrt.dll", EntryPoint = "memcpy", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
-    public static extern IntPtr memcpy(IntPtr dest, IntPtr src, UIntPtr count);
+    [LibraryImport("msvcrt.dll", EntryPoint = "memcpy", SetLastError = false)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    public static partial IntPtr memcpy(IntPtr dest, IntPtr src, UIntPtr count);
 
     #endregion
 
@@ -974,8 +1882,9 @@ internal static class PInvokes
     }
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    [DllImport("imagehlp.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "MapFileAndCheckSumW")]
-    internal static extern MapFileAndCheckSumWResult MapFileAndCheckSumW([MarshalAs(UnmanagedType.LPWStr)] string filename,
+    [LibraryImport("imagehlp.dll", EntryPoint = "MapFileAndCheckSumW")]
+    [UnmanagedCallConv(CallConvs = new Type[] { typeof(System.Runtime.CompilerServices.CallConvStdcall) })]
+    internal static partial MapFileAndCheckSumWResult MapFileAndCheckSumW([MarshalAs(UnmanagedType.LPWStr)] string filename,
                                                                          [MarshalAs(UnmanagedType.U4)] out uint originalHeaderChecksum,
                                                                          [MarshalAs(UnmanagedType.U4)] out uint newChecksum);
 

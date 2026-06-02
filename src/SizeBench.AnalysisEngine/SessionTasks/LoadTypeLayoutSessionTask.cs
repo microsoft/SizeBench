@@ -131,7 +131,7 @@ internal class LoadTypeLayoutSessionTask : SessionTask<List<TypeLayoutItem>>
             symbolsEnumerated++;
             if (symbolsEnumerated >= nextLoggerOutput)
             {
-                ReportProgress($"Enumerated type layouts for {symbolsEnumerated}/{udts.Count} user-defined types.", nextLoggerOutput, (uint)udts.Count);
+                ReportProgress($"Enumerated type layouts for {symbolsEnumerated:N0}/{udts.Count:N0} user-defined types.", nextLoggerOutput, (uint)udts.Count);
                 nextLoggerOutput += loggerOutputVelocity;
             }
 
@@ -140,7 +140,7 @@ internal class LoadTypeLayoutSessionTask : SessionTask<List<TypeLayoutItem>>
             TypeLayouts.Add(LoadSingleTypeLayout(udt, baseOffset: this.taskWideBaseOffset, logger: logger));
         }
 
-        ReportProgress($"Enumerated type layouts for {symbolsEnumerated}/{udts.Count} user-defined types.", nextLoggerOutput, (uint)udts.Count);
+        ReportProgress($"Enumerated type layouts for {symbolsEnumerated:N0}/{udts.Count:N0} user-defined types.", nextLoggerOutput, (uint)udts.Count);
 
         TypeLayouts.Sort((tl1, tl2) => String.CompareOrdinal(tl1.UserDefinedType.Name, tl2.UserDefinedType.Name));
 
@@ -381,7 +381,7 @@ internal class LoadTypeLayoutSessionTask : SessionTask<List<TypeLayoutItem>>
             return null;
         }
 
-        var baseTypeLayouts = new TypeLayoutItem[udt.BaseTypes.Count];
+        var baseTypeLayouts = new TypeLayoutItem[udt.BaseTypes.Length];
 
         uint baseTypeIndex = 0;
         foreach (var baseTypeAndOffset in udt.BaseTypes)

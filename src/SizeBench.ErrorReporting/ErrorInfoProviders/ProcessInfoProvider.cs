@@ -37,13 +37,13 @@ public sealed class ProcessInfoProvider : KeyValueInfoProvider
             processName = currentProcess.ProcessName;
         }
 
-        var entries = new Dictionary<string, string>() {
+        var entries = new Dictionary<string, string>(StringComparer.Ordinal) {
                 { "Process Name", processName },
                 { "Application Version", appVersion },
                 { "Application Hash", appHash },
-                {"Working Set", Environment.WorkingSet.ToString("##,#", CultureInfo.InvariantCulture.NumberFormat) },
-                {"Command Line", Environment.CommandLine },
-                {"64-bit Process", Environment.Is64BitProcess.ToString(CultureInfo.InvariantCulture) },
+                { "Working Set", Environment.WorkingSet.ToString("##,#", CultureInfo.InvariantCulture.NumberFormat) },
+                { "Command Line", Environment.CommandLine },
+                { "64-bit Process", Environment.Is64BitProcess.ToString(CultureInfo.InvariantCulture) },
             };
 
         return entries;

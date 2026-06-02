@@ -7,11 +7,11 @@ namespace SizeBench.AnalysisEngine.COMInterop;
 
 [ExcludeFromCodeCoverage]
 [DebuggerDisplay("LibraryModule for {FilePath}")]
-internal class LibraryModule : IDisposable
+internal partial class LibraryModule : IDisposable
 {
     private IntPtr _handle;
 
-    private static class Win32
+    private static partial class Win32
     {
 #pragma warning disable CA2101 // Specify marshaling for P/Invoke string arguments - cannot use this here as it's got a false positive going on, as tracked in this GitHub issue: https://github.com/dotnet/roslyn-analyzers/issues/5479
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
@@ -19,8 +19,9 @@ internal class LibraryModule : IDisposable
         public static extern IntPtr GetProcAddress(IntPtr hModule, string lpProcName);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        [DllImport("kernel32.dll")]
-        public static extern bool FreeLibrary(IntPtr hModule);
+        [LibraryImport("kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static partial bool FreeLibrary(IntPtr hModule);
 
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         [DllImport("kernel32.dll", CharSet = CharSet.Ansi, SetLastError = true, BestFitMapping = false, ThrowOnUnmappableChar = true)]

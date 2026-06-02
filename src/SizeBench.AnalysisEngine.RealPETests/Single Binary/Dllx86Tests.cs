@@ -465,29 +465,53 @@ public class Dllx86Tests
         using var logger = new NoOpLogger();
         await using var session = await Session.Create(this.BinaryPath, this.PDBPath, logger);
 
-        // Test an IMAGE_IMPORT_DESCRIPTOR
-        var VCRuntime140DImportDescriptor = (ImportDescriptorSymbol)(await session.LoadSymbolByRVA(0x34A4))!;
-        Assert.AreEqual(SymbolComparisonClass.ImportDescriptor, VCRuntime140DImportDescriptor.SymbolComparisonClass);
-        Assert.AreEqual(20u, VCRuntime140DImportDescriptor.Size);
-        Assert.AreEqual(20u, VCRuntime140DImportDescriptor.VirtualSize);
-        Assert.IsFalse(VCRuntime140DImportDescriptor.IsCOMDATFolded);
-        Assert.AreEqual("[import descriptor] VCRUNTIME140D.dll", VCRuntime140DImportDescriptor.Name);
+        // Test an IMAGE_DELAYLOAD_DESCRIPTOR
+        var VCRuntime140DDelayloadImportDescriptor = (ImportDescriptorSymbol)(await session.LoadSymbolByRVA(0x3634))!;
+        Assert.AreEqual(SymbolComparisonClass.ImportDescriptor, VCRuntime140DDelayloadImportDescriptor.SymbolComparisonClass);
+        Assert.AreEqual(20u, VCRuntime140DDelayloadImportDescriptor.Size);
+        Assert.AreEqual(20u, VCRuntime140DDelayloadImportDescriptor.VirtualSize);
+        Assert.IsFalse(VCRuntime140DDelayloadImportDescriptor.IsCOMDATFolded);
+        Assert.AreEqual("[import descriptor] VCRUNTIME140D.dll", VCRuntime140DDelayloadImportDescriptor.Name);
 
-        var placement = await session.LookupSymbolPlacementInBinary(VCRuntime140DImportDescriptor, this.CancellationToken);
+        // Test an IMAGE_IMPORT_DESCRIPTOR
+        var ucrtbasedImportDescriptor = (ImportDescriptorSymbol)(await session.LoadSymbolByRVA(0x36D8))!;
+        Assert.AreEqual(SymbolComparisonClass.ImportDescriptor, ucrtbasedImportDescriptor.SymbolComparisonClass);
+        Assert.AreEqual(20u, ucrtbasedImportDescriptor.Size);
+        Assert.AreEqual(20u, ucrtbasedImportDescriptor.VirtualSize);
+        Assert.IsFalse(ucrtbasedImportDescriptor.IsCOMDATFolded);
+        Assert.AreEqual("[import descriptor] ucrtbased.dll", ucrtbasedImportDescriptor.Name);
+
+        var placement = await session.LookupSymbolPlacementInBinary(VCRuntime140DDelayloadImportDescriptor, this.CancellationToken);
 
         Assert.AreEqual(".rdata", placement.BinarySection!.Name);
-        Assert.AreEqual(".idata$2", placement.COFFGroup!.Name);
-        Assert.AreEqual("VCRUNTIME140D.dll", placement.Compiland!.ShortName);
+        Assert.AreEqual(".didat$2", placement.COFFGroup!.Name);
+        Assert.AreEqual("Import:VCRUNTIME140D.dll", placement.Compiland!.ShortName);
         Assert.AreEqual("vcruntimed", placement.Lib!.ShortName);
         Assert.IsNull(placement.SourceFile);
 
+        placement = await session.LookupSymbolPlacementInBinary(ucrtbasedImportDescriptor, this.CancellationToken);
+
+        Assert.AreEqual(".rdata", placement.BinarySection!.Name);
+        Assert.AreEqual(".idata$2", placement.COFFGroup!.Name);
+        Assert.AreEqual("ucrtbased.dll", placement.Compiland!.ShortName);
+        Assert.AreEqual("ucrtd", placement.Lib!.ShortName);
+        Assert.IsNull(placement.SourceFile);
+
+        // Test a delayload import thunk by name - ideally we'd test an ordinal-only import too, but don't have a convenient test...
+        var memsetDelayloadImportThunk = (ImportThunkSymbol)(await session.LoadSymbolByRVA(0x3678))!;
+        Assert.AreEqual(SymbolComparisonClass.ImportThunk, memsetDelayloadImportThunk.SymbolComparisonClass);
+        Assert.AreEqual(4u, memsetDelayloadImportThunk.Size);
+        Assert.AreEqual(4u, memsetDelayloadImportThunk.VirtualSize);
+        Assert.IsFalse(memsetDelayloadImportThunk.IsCOMDATFolded);
+        Assert.AreEqual("[import thunk] VCRUNTIME140D.dll memset, ordinal 72", memsetDelayloadImportThunk.Name);
+
         // Test an import thunk by name - ideally we'd test an ordinal-only import too, but don't have a convenient test...
-        var IsProcessorFeaturePresentImportThunk = (ImportThunkSymbol)(await session.LoadSymbolByRVA(0x3518))!;
+        var IsProcessorFeaturePresentImportThunk = (ImportThunkSymbol)(await session.LoadSymbolByRVA(0x3714))!;
         Assert.AreEqual(SymbolComparisonClass.ImportThunk, IsProcessorFeaturePresentImportThunk.SymbolComparisonClass);
         Assert.AreEqual(4u, IsProcessorFeaturePresentImportThunk.Size);
         Assert.AreEqual(4u, IsProcessorFeaturePresentImportThunk.VirtualSize);
         Assert.IsFalse(IsProcessorFeaturePresentImportThunk.IsCOMDATFolded);
-        Assert.AreEqual("[import thunk] KERNEL32.dll IsProcessorFeaturePresent, ordinal 893", IsProcessorFeaturePresentImportThunk.Name);
+        Assert.AreEqual("[import thunk] KERNEL32.dll IsProcessorFeaturePresent, ordinal 905", IsProcessorFeaturePresentImportThunk.Name);
 
         placement = await session.LookupSymbolPlacementInBinary(IsProcessorFeaturePresentImportThunk, this.CancellationToken);
 
@@ -497,14 +521,24 @@ public class Dllx86Tests
         Assert.AreEqual("kernel32", placement.Lib!.ShortName);
         Assert.IsNull(placement.SourceFile);
 
-        // Test an IMAGE_IMPORT_BY_NAME
-        var IsDebuggerPresentImportByName = (ImportByNameSymbol)(await session.LoadSymbolByRVA(0x3788))!;
+        // Test an IMAGE_IMPORT_BY_NAME, for a delayload import
+        var _except_handler4_commonImportByName = (ImportByNameSymbol)(await session.LoadSymbolByRVA(0x36AE))!;
+        Assert.AreEqual(SymbolComparisonClass.ImportByName, _except_handler4_commonImportByName.SymbolComparisonClass);
+        Assert.AreEqual((uint)"_except_handler4_common".Length + 3, _except_handler4_commonImportByName.Size); // +1 byte for the string null terminator and +2 bytes for the ordinal as a ushort
+        Assert.AreEqual((uint)"_except_handler4_common".Length + 3, _except_handler4_commonImportByName.VirtualSize);
+        Assert.IsFalse(_except_handler4_commonImportByName.IsCOMDATFolded);
+        Assert.AreEqual("VCRUNTIME140D.dll", _except_handler4_commonImportByName.ImportDescriptorName);
+        Assert.AreEqual(0x35, _except_handler4_commonImportByName.Ordinal);
+        Assert.AreEqual("`string': \"_except_handler4_common\"", _except_handler4_commonImportByName.Name);
+
+        // Test an IMAGE_IMPORT_BY_NAME, for a regular import
+        var IsDebuggerPresentImportByName = (ImportByNameSymbol)(await session.LoadSymbolByRVA(0x3934))!;
         Assert.AreEqual(SymbolComparisonClass.ImportByName, IsDebuggerPresentImportByName.SymbolComparisonClass);
         Assert.AreEqual((uint)"IsDebuggerPresent".Length + 3, IsDebuggerPresentImportByName.Size); // +1 byte for the string null terminator and +2 bytes for the ordinal as a ushort
         Assert.AreEqual((uint)"IsDebuggerPresent".Length + 3, IsDebuggerPresentImportByName.VirtualSize);
         Assert.IsFalse(IsDebuggerPresentImportByName.IsCOMDATFolded);
         Assert.AreEqual("KERNEL32.dll", IsDebuggerPresentImportByName.ImportDescriptorName);
-        Assert.AreEqual(0x376, IsDebuggerPresentImportByName.Ordinal);
+        Assert.AreEqual(0x382, IsDebuggerPresentImportByName.Ordinal);
         Assert.AreEqual("`string': \"IsDebuggerPresent\"", IsDebuggerPresentImportByName.Name);
 
         placement = await session.LookupSymbolPlacementInBinary(IsDebuggerPresentImportByName, this.CancellationToken);

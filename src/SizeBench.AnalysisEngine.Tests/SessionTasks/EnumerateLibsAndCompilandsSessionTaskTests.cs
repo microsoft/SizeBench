@@ -1,6 +1,5 @@
-﻿using SizeBench.AnalysisEngine.DIAInterop;
-using SizeBench.AnalysisEngine.PE;
-using SizeBench.AnalysisEngine.Symbols;
+﻿using System.Reflection.PortableExecutable;
+using SizeBench.AnalysisEngine.DIAInterop;
 using SizeBench.Logging;
 using SizeBench.TestDataCommon;
 
@@ -30,21 +29,21 @@ public sealed class EnumerateLibsAndCompilandsSessionTaskTests : IDisposable
         this.TestDIAAdapter.BinarySectionsToFind = new List<BinarySection>()
             {
                 // .text  = 0x0000-0x1999
-                new BinarySection(this.DataCache, ".text", size: 0x2000, virtualSize: 0x2000, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute),
+                new BinarySection(this.DataCache, ".text", size: 0x2000, virtualSize: 0x2000, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute),
                 // .rdata = 0x2000-0x2999
-                new BinarySection(this.DataCache, ".rdata", size: 0x1000, virtualSize: 0x1000, rva: 0x2000, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryRead),
+                new BinarySection(this.DataCache, ".rdata", size: 0x1000, virtualSize: 0x1000, rva: 0x2000, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemRead),
                 // .data  = 0x3000-0x3499
-                new BinarySection(this.DataCache, ".data", size: 0x500, virtualSize: 0x500, rva: 0x3000, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryWrite | DataSectionFlags.MemoryRead)
+                new BinarySection(this.DataCache, ".data", size: 0x500, virtualSize: 0x500, rva: 0x3000, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemWrite | SectionCharacteristics.MemRead)
             };
 
         this.TestDIAAdapter.COFFGroupsToFind = new List<COFFGroup>()
             {
                 // .text$mn = 0x0000-0x1499
-                new COFFGroup(this.DataCache, ".text$mn", size: 0x1500, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: PE.DataSectionFlags.MemoryExecute),
+                new COFFGroup(this.DataCache, ".text$mn", size: 0x1500, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute),
                 // .CRT$XCA = 0x2100-0x2199
-                new COFFGroup(this.DataCache, ".CRT$XCA", size: 0x100, rva: 0x2100, fileAlignment: 0, sectionAlignment: 0, characteristics: PE.DataSectionFlags.MemoryRead),
+                new COFFGroup(this.DataCache, ".CRT$XCA", size: 0x100, rva: 0x2100, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemRead),
                 // .text$zz = 0x1500-0x2099
-                new COFFGroup(this.DataCache, ".text$zz", size: 0x600, rva: 0x1500, fileAlignment: 0, sectionAlignment: 0, characteristics: PE.DataSectionFlags.MemoryExecute),
+                new COFFGroup(this.DataCache, ".text$zz", size: 0x600, rva: 0x1500, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute),
             };
 
         uint nextCompilandSymIndexId = 0;
@@ -63,12 +62,10 @@ public sealed class EnumerateLibsAndCompilandsSessionTaskTests : IDisposable
                 new RawSectionContribution(libName: @"c:\dummy\c.lib", compilandName: @"c:\dummy\c.obj" , compilandSymIndexId: nextCompilandSymIndexId++, rva: 0x1500, length: 0x200),
             };
 
-        this.DataCache.PDataRVARange = new RVARange(0, 0);
-        this.DataCache.PDataSymbolsByRVA = new SortedList<uint, PDataSymbol>();
-        this.DataCache.XDataRVARanges = new RVARangeSet();
-        this.DataCache.XDataSymbolsByRVA = new SortedList<uint, XDataSymbol>();
-        this.DataCache.RsrcRVARange = new RVARange(0, 0);
-        this.DataCache.RsrcSymbolsByRVA = new SortedList<uint, RsrcSymbolBase>();
+        this.DataCache.PDataHasBeenInitialized = true;
+        this.DataCache.XDataHasBeenInitialized = true;
+        this.DataCache.RsrcHasBeenInitialized = true;
+        this.DataCache.OtherPESymbolsHaveBeenInitialized = true;
     }
 
     [TestMethod]
@@ -84,7 +81,7 @@ public sealed class EnumerateLibsAndCompilandsSessionTaskTests : IDisposable
 
         Assert.IsFalse(String.IsNullOrEmpty(task.TaskName));
         OperationCanceledException? capturedException = null;
-        IList<Library>? asyncResult = null;
+        HashSet<Library>? asyncResult = null;
         try
         {
             using var logger = new NoOpLogger();
@@ -103,14 +100,14 @@ public sealed class EnumerateLibsAndCompilandsSessionTaskTests : IDisposable
     public void CanEnumerateMultipleLibsWithCompilandsThatHaveTheSameNameIfItsAnImport()
     {
         TestNameCollisions("Import:ntdll.dll",
-                           new string[] { @"c:\dev\a.lib", @"c:\dev\a.lib" });
+                           [@"c:\dev\a.lib", @"c:\dev\a.lib"]);
     }
 
     [TestMethod]
     public void CanEnumerateMultipleLibsWithCompilandsThatHaveTheSameNameIfLibNamesDiffer()
     {
         TestNameCollisions(@"c:\dummy\a1.obj",
-                           new string[] { @"c:\dev\a.lib", @"c:\dev\b.lib" });
+                           [@"c:\dev\a.lib", @"c:\dev\b.lib"]);
     }
 
     private void TestNameCollisions(string nameToCollide, string[] libNames)

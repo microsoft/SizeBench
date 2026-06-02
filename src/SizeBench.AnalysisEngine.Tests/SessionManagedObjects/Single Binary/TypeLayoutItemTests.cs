@@ -17,12 +17,13 @@ public sealed class TypeLayoutItemTests : IDisposable
         this.DataCache = new SessionDataCache();
         this.MockSession = new Mock<ISession>();
         var diaAdapter = new TestDIAAdapter();
-        this.UDT = new UserDefinedTypeSymbol(this.DataCache, diaAdapter, this.MockSession.Object, name: "CBase", instanceSize: 100, symIndexId: 1, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
-        var baseclasses = new Dictionary<uint, uint>(capacity: 1)
+        this.UDT = new UserDefinedTypeSymbol(this.DataCache, diaAdapter, this.MockSession.Object, name: "CBase", instanceSize: 100, symIndexId: 1, udtKind: UserDefinedTypeKind.UdtClass);
+        var baseclasses = new List<(uint, uint)>(capacity: 1)
             {
-                { this.UDT.SymIndexId, 0 }
+                (this.UDT.SymIndexId, 0)
             };
-        this.DerivedUDT1 = new UserDefinedTypeSymbol(this.DataCache, diaAdapter, this.MockSession.Object, name: "CDerived1", instanceSize: 120, symIndexId: 2, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: baseclasses);
+        this.DerivedUDT1 = new UserDefinedTypeSymbol(this.DataCache, diaAdapter, this.MockSession.Object, name: "CDerived1", instanceSize: 120, symIndexId: 2, udtKind: UserDefinedTypeKind.UdtClass);
+        diaAdapter.BaseTypeIDsToFindByUDT.Add(this.DerivedUDT1, baseclasses);
     }
 
     [TestMethod]

@@ -96,13 +96,18 @@ internal static class PathHeuristicComparer
         // Levenshtein Distance.  There are tests that'll end up checking both of these so feel free to fiddle with this heuristic further, it's
         // not perfect now.
 
-        var firstFilename = Path.GetFileName(firstName);
-        var secondFilename = Path.GetFileName(secondName);
+        var firstFilename = Path.GetFileName(firstName.AsSpan());
+        var secondFilename = Path.GetFileName(secondName.AsSpan());
 
-        if (!String.Equals(firstFilename, secondFilename, StringComparison.OrdinalIgnoreCase))
+        if (!firstFilename.Equals(secondFilename, StringComparison.OrdinalIgnoreCase))
         {
             return false;
         }
+
+#pragma warning disable CA1308 // Normalize strings to uppercase - these are file paths, lower invariant is ok
+        firstName = firstName.ToLowerInvariant();
+        secondName = secondName.ToLowerInvariant();
+#pragma warning restore CA1308 // Normalize strings to uppercase
 
         int charactersSame = firstFilename.Length, charactersDifferent = 0;
         var secondLength = secondName.Length - 1 - charactersSame;

@@ -36,7 +36,8 @@ internal sealed unsafe class ARM_EHParser : EHSymbolParser
 
     public ARM_EHParser(IDIAAdapter diaAdapter,
                         byte* libraryBaseAddress,
-                        MachineType machineType) : base(diaAdapter, libraryBaseAddress, machineType)
+                        PEFile peFile,
+                        SymbolSourcesSupported symbolSourcesSupported) : base(diaAdapter, libraryBaseAddress, peFile, symbolSourcesSupported)
     {
         this.__GSHandlerCheck_EHRva = diaAdapter.SymbolRvaFromName("__GSHandlerCheck_EH", true);
         this.__GSHandlerCheck_EH4Rva = diaAdapter.SymbolRvaFromName("__GSHandlerCheck_EH4", true);
@@ -49,9 +50,9 @@ internal sealed unsafe class ARM_EHParser : EHSymbolParser
         this.__GSHandlerCheckRva = diaAdapter.SymbolRvaFromName("__GSHandlerCheck", true);
     }
 
-    protected override SortedList<uint, PDataSymbol> ParsePDataForArchitecture(uint sectionAlignment, SessionDataCache cache)
+    protected override SortedList<uint, PDataSymbol> ParsePDataForArchitecture(SessionDataCache cache)
     {
-        var pdataFunctions = ParsePDATA<ARM_RUNTIME_FUNCTION>(this.LibraryBaseAddress, sectionAlignment, cache);
+        var pdataFunctions = ParsePDATA<ARM_RUNTIME_FUNCTION>(this.LibraryBaseAddress, cache);
 
         // There's no pdata, so we're done
         if (pdataFunctions is null)
@@ -80,31 +81,31 @@ internal sealed unsafe class ARM_EHParser : EHSymbolParser
                 continue;
             }
 
-            var pdataEntryRva = cache.PDataRVARange!.RVAStart + (uint)(i * sizeOfRUNTIMEFUNCTION);
+            var pdataEntryRva = cache.PDataRVARange.RVAStart + (uint)(i * sizeOfRUNTIMEFUNCTION);
 
             var flags = (PDataFlags)(pdataEntry.EHMetadata & 0x3);
             var adjustedFunctionStartRva = GetAdjustedRva(pdataEntry.FunctionStartRva);
 
             if (flags == PDataFlags.EXCEPTION_INFO) // The remaining bits of EHMetadata in this pdata record point to an xdata record  
             {
-                pdataSymbols.Add(pdataEntryRva, new PDataSymbol(adjustedFunctionStartRva, pdataEntry.EHMetadata, pdataEntryRva, (uint)Marshal.SizeOf<ARM_RUNTIME_FUNCTION>()));
+                pdataSymbols.Add(pdataEntryRva, new PDataSymbol(adjustedFunctionStartRva, pdataEntry.EHMetadata, pdataEntryRva, (uint)Marshal.SizeOf<ARM_RUNTIME_FUNCTION>(), this.SymbolSourcesSupported));
             }
             else if (flags == PDataFlags.FORWARDER)
             {
-                pdataSymbols.Add(pdataEntryRva, new ForwarderPDataSymbol(adjustedFunctionStartRva, pdataEntryRva, (uint)Marshal.SizeOf<ARM_RUNTIME_FUNCTION>()));
+                pdataSymbols.Add(pdataEntryRva, new ForwarderPDataSymbol(adjustedFunctionStartRva, pdataEntryRva, (uint)Marshal.SizeOf<ARM_RUNTIME_FUNCTION>(), this.SymbolSourcesSupported));
             }
             else
             {
-                pdataSymbols.Add(pdataEntryRva, new PackedUnwindDataPDataSymbol(adjustedFunctionStartRva, pdataEntryRva, (uint)Marshal.SizeOf<ARM_RUNTIME_FUNCTION>()));
+                pdataSymbols.Add(pdataEntryRva, new PackedUnwindDataPDataSymbol(adjustedFunctionStartRva, pdataEntryRva, (uint)Marshal.SizeOf<ARM_RUNTIME_FUNCTION>(), this.SymbolSourcesSupported));
             }
         }
 
         return pdataSymbols;
     }
 
-    protected override void ParseXDataForArchitecture(uint sectionAlignment, RVARange? XDataRVARange, SessionDataCache cache)
+    protected override void ParseXDataForArchitecture(RVARange? XDataRVARange, SessionDataCache cache)
     {
-        foreach (var pds in cache.PDataSymbolsByRVA!.Values)
+        foreach (var pds in cache.PDataSymbolsByRVA.Values)
         {
             var adjustedFunctionStartRva = GetAdjustedRva(pds.TargetStartRVA);
             var targetSymbol = GetTargetSymbolForRVA(adjustedFunctionStartRva);
@@ -180,7 +181,7 @@ internal sealed unsafe class ARM_EHParser : EHSymbolParser
         else
         {
             // Just a simple [unwind]
-            AddXData(new UnwindInfoSymbol(targetSymbol, GetAdjustedRva(functionStartRva), ehMetadata, GetXdataRecordSize(unwindInfoStart)));
+            AddXData(new UnwindInfoSymbol(targetSymbol, GetAdjustedRva(functionStartRva), ehMetadata, GetXdataRecordSize(unwindInfoStart), this.SymbolSourcesSupported));
         }
     }
 

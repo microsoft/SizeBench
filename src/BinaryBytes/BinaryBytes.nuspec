@@ -11,7 +11,7 @@
     <copyright>Microsoft Corp</copyright>
   </metadata>
   <files>
-    <file src="bin\Release\net6.0-windows10.0.17763\win-x64\**" target="tools\BinaryBytes"/>
+    <file src="bin\Release\net8.0-windows10.0.17763\win-x64\**" target="tools\BinaryBytes"/>
     <file src="BinaryBytes.props" target="build"/>
   </files>
 </package>

@@ -8,8 +8,8 @@ internal sealed class ImportByNameSymbol : ImportSymbolBase
     internal string ImportDescriptorName { get; }
     internal ushort Ordinal { get; }
 
-    internal ImportByNameSymbol(uint rva, uint size, ushort ordinal, string importDescriptorName, string thunkName)
-        : base(rva, size, $"`string': \"{thunkName}\"")
+    internal ImportByNameSymbol(uint rva, uint size, ushort ordinal, string importDescriptorName, string thunkName, SymbolSourcesSupported symbolSourcesSupported)
+        : base(rva, size, $"`string': \"{thunkName}\"", symbolSourcesSupported)
     {
         this.Ordinal = ordinal;
         this.ImportDescriptorName = importDescriptorName;

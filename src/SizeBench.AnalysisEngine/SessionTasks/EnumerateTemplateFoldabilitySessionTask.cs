@@ -48,7 +48,7 @@ internal sealed class EnumerateTemplateFoldabilitySessionTask : SessionTask<List
             symbolsEnumerated += (uint)groupOfTemplatedFunctions.Count();
             if (symbolsEnumerated >= nextLoggerOutput)
             {
-                ReportProgress($"Enumerated {symbolsEnumerated}/{allTemplatedFunctionSymbols.Count} functions, found {foldables.Count} items with interesting foldability so far.", symbolsEnumerated, (uint)allTemplatedFunctionSymbols.Count);
+                ReportProgress($"Enumerated {symbolsEnumerated:N0}/{allTemplatedFunctionSymbols.Count:N0} functions, found {foldables.Count:N0} items with interesting foldability so far.", symbolsEnumerated, (uint)allTemplatedFunctionSymbols.Count);
                 nextLoggerOutput += loggerOutputVelocity;
             }
 
@@ -98,8 +98,8 @@ internal sealed class EnumerateTemplateFoldabilitySessionTask : SessionTask<List
                                                       CalculatePercentageSimilarity(groupOfTemplatedFunctions)));
         }
 
-        ReportProgress($"Enumerated {symbolsEnumerated}/{allTemplatedFunctionSymbols.Count} functions, found {foldables.Count} items so far.", nextLoggerOutput, (uint)allTemplatedFunctionSymbols.Count);
-        logger.Log($"Finished enumerating {foldables.Count} template foldability items");
+        ReportProgress($"Enumerated {symbolsEnumerated:N0}/{allTemplatedFunctionSymbols.Count:N0} functions, found {foldables.Count:N0} items so far.", nextLoggerOutput, (uint)allTemplatedFunctionSymbols.Count);
+        logger.Log($"Finished enumerating {foldables.Count:N0} template foldability items");
         this.DataCache.AllTemplateFoldabilityItems = foldables;
 
         return this.DataCache.AllTemplateFoldabilityItems;
@@ -116,16 +116,19 @@ internal sealed class EnumerateTemplateFoldabilitySessionTask : SessionTask<List
         // we'll end up with two "groups" to compare - which is all that's interesting, as moving a function from one of
         // these groups to the other wouldn't affect size - only structural changes that eliminate a group (or shrink all
         // groups) really save space.
-        var functionsGroupedByRVA = allFunctionsToCompare.GroupBy(func => (func.PrimaryBlock.RVA, BlockCount: func.Blocks.Count));
+        var functionsGroupedByRVA = allFunctionsToCompare.GroupBy(static func => (func.PrimaryBlock.RVA, func.BlockCount));
 
         // If there's only one function group (after COMDAT-folding), then it's of course 100% the same as itself, so
         // filter out the degenerate case
+#pragma warning disable CA1851 // Possible multiple enumerations of 'IEnumerable' collection - this path turns out to be pretty fast for most binaries, and the fast-path by enumerating Count() here is worth a double-enumerate possibility later.
         if (functionsGroupedByRVA.Count() < 2)
         {
             return 1.0f;
         }
+#pragma warning restore CA1851 // Possible multiple enumerations of 'IEnumerable' collection
 
         IFunctionCodeSymbol? previousFunction = null;
+#pragma warning disable CA1851 // Possible multiple enumerations of 'IEnumerable' collection - see earlier in this function for reasoning
         foreach (var functionGroup in functionsGroupedByRVA.OrderBy(group => group.Key.BlockCount))
         {
             var thisFunction = functionGroup.First();
@@ -138,6 +141,7 @@ internal sealed class EnumerateTemplateFoldabilitySessionTask : SessionTask<List
             allPercentageSimilarities.Add(this.Session.CompareSimilarityOfCodeBytesInBinary(previousFunction, thisFunction));
             previousFunction = thisFunction;
         }
+#pragma warning restore CA1851 // Possible multiple enumerations of 'IEnumerable' collection
 
         return allPercentageSimilarities.Average();
     }

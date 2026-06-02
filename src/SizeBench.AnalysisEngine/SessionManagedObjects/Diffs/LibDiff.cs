@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+#if DEBUG
 using System.Diagnostics.CodeAnalysis;
+#endif
 using System.IO;
 
 namespace SizeBench.AnalysisEngine;
@@ -43,10 +45,7 @@ public sealed class LibDiff
 
                 // If we can't find one that way, we'll use IsVeryLikelyTheSameAs - it's heuristic and can sometimes be wrong, but it's really hard to be right
                 // all the time since people compile with different "enlistment roots" so exact matches fail too often.
-                if (matchingAfterCompiland is null)
-                {
-                    matchingAfterCompiland = afterCompilandsToProcess.FirstOrDefault(beforeCompiland.IsVeryLikelyTheSameAs);
-                }
+                matchingAfterCompiland ??= afterCompilandsToProcess.FirstOrDefault(beforeCompiland.IsVeryLikelyTheSameAs);
 
                 var newCompilandDiff = new CompilandDiff(beforeCompiland, matchingAfterCompiland, this, sectionDiffs, cache);
                 this._compilandDiffs.Add(beforeCompiland.Name, newCompilandDiff);
@@ -227,7 +226,7 @@ public sealed class LibDiff
     }
 
     #region Compilands
-    private readonly Dictionary<string, CompilandDiff> _compilandDiffs = new Dictionary<string, CompilandDiff>();
+    private readonly Dictionary<string, CompilandDiff> _compilandDiffs = new Dictionary<string, CompilandDiff>(StringComparer.OrdinalIgnoreCase);
     public IReadOnlyDictionary<string, CompilandDiff> CompilandDiffs => this._compilandDiffs;
 
     #endregion

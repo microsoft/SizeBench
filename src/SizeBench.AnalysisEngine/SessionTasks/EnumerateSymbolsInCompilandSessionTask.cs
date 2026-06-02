@@ -1,4 +1,5 @@
-﻿using SizeBench.AnalysisEngine.Symbols;
+﻿using System.Reflection.PortableExecutable;
+using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.Logging;
 
 namespace SizeBench.AnalysisEngine.SessionTasks;
@@ -34,7 +35,7 @@ internal class EnumerateSymbolsInCompilandSessionTask : SessionTask<List<ISymbol
         foreach (var sectionContribution in this._compiland.SectionContributions.Values)
         {
             // If we're only enumerating code symbols, and this section does not contain code, move along
-            if (this._options.OnlyCodeSymbols && (sectionContribution.BinarySection.Characteristics & PE.DataSectionFlags.MemoryExecute) != PE.DataSectionFlags.MemoryExecute)
+            if (this._options.OnlyCodeSymbols && (sectionContribution.BinarySection.Characteristics & SectionCharacteristics.MemExecute) != SectionCharacteristics.MemExecute)
             {
                 continue;
             }
@@ -43,7 +44,7 @@ internal class EnumerateSymbolsInCompilandSessionTask : SessionTask<List<ISymbol
             {
                 if (numRangesEnumerated > nextLoggerOutput)
                 {
-                    ReportProgress($"Parsed {numRangesEnumerated}/{totalRVARanges} RVA Ranges.  So far, {symbolsEnumerated.Count} symbols have been found.", numRangesEnumerated, (uint)totalRVARanges);
+                    ReportProgress($"Parsed {numRangesEnumerated:N0}/{totalRVARanges:N0} RVA Ranges.  So far, {symbolsEnumerated.Count:N0} symbols have been found.", numRangesEnumerated, (uint)totalRVARanges);
                     nextLoggerOutput += loggerOutputVelocity;
                 }
 

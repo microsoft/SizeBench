@@ -11,12 +11,12 @@ internal sealed class AllCompilandsPageViewModel : SingleBinaryViewModelBase
 {
     private readonly IUITaskScheduler _uiTaskScheduler;
     private readonly IExcelExporter _excelExporter;
-    private IReadOnlyList<Compiland>? _compilandList;
+    private IReadOnlyCollection<Compiland>? _compilandCollection;
 
-    public IReadOnlyList<Compiland>? Compilands
+    public IReadOnlyCollection<Compiland>? Compilands
     {
-        get => this._compilandList;
-        private set { this._compilandList = value; RaisePropertyChanged(); }
+        get => this._compilandCollection;
+        private set { this._compilandCollection = value; RaisePropertyChanged(); }
     }
 
     public List<string> DisplayModes { get; } = new List<string>() { "Size on disk", "Size in memory" };
@@ -78,7 +78,7 @@ internal sealed class AllCompilandsPageViewModel : SingleBinaryViewModelBase
             {
                 this.DataGridSizeColumnDescriptions.Add(new DataGridColumnDescription(
                     header: $"Section: {section.Name}",
-                    propertyPath: $"SectionContributionsByName[{section.Name}].Size",
+                    propertyPath: $"SectionContributionsByName[{PageViewModelUtilities.EscapeXAMLIndexer(section.Name)}].Size",
                     valueConverter: SizeToFriendlySizeConverter.Instance,
                     isRightAligned: true));
             }
@@ -86,7 +86,7 @@ internal sealed class AllCompilandsPageViewModel : SingleBinaryViewModelBase
             {
                 this.DataGridVirtualSizeColumnDescriptions.Add(new DataGridColumnDescription(
                     header: $"Section: {section.Name}",
-                    propertyPath: $"SectionContributionsByName[{section.Name}].VirtualSize",
+                    propertyPath: $"SectionContributionsByName[{PageViewModelUtilities.EscapeXAMLIndexer(section.Name)}].VirtualSize",
                     valueConverter: SizeToFriendlySizeConverter.Instance,
                     isRightAligned: true));
             }
@@ -98,7 +98,7 @@ internal sealed class AllCompilandsPageViewModel : SingleBinaryViewModelBase
             {
                 this.DataGridSizeColumnDescriptions.Add(new DataGridColumnDescription(
                     header: $"COFF Group: {coffGroup.Name}",
-                    propertyPath: $"COFFGroupContributionsByName[{coffGroup.Name}].Size",
+                    propertyPath: $"COFFGroupContributionsByName[{PageViewModelUtilities.EscapeXAMLIndexer(coffGroup.Name)}].Size",
                     valueConverter: SizeToFriendlySizeConverter.Instance,
                     isRightAligned: true));
             }
@@ -106,7 +106,7 @@ internal sealed class AllCompilandsPageViewModel : SingleBinaryViewModelBase
             {
                 this.DataGridVirtualSizeColumnDescriptions.Add(new DataGridColumnDescription(
                     header: $"COFF Group: {coffGroup.Name}",
-                    propertyPath: $"COFFGroupContributionsByName[{coffGroup.Name}].VirtualSize",
+                    propertyPath: $"COFFGroupContributionsByName[{PageViewModelUtilities.EscapeXAMLIndexer(coffGroup.Name)}].VirtualSize",
                     valueConverter: SizeToFriendlySizeConverter.Instance,
                     isRightAligned: true));
             }

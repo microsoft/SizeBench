@@ -59,9 +59,9 @@ internal sealed class FunctionCodeSymbolDiffPageViewModel : BinaryDiffViewModelB
         private set { this._afterAttributes = value; RaisePropertyChanged(); }
     }
 
-    public bool BeforeFunctionContainsMultipleCodeBlocks => this.FunctionDiff?.BeforeSymbol?.Blocks.Count > 1;
+    public bool BeforeFunctionContainsMultipleCodeBlocks => this.FunctionDiff?.BeforeSymbol?.BlockCount > 1;
 
-    public bool AfterFunctionContainsMultipleCodeBlocks => this.FunctionDiff?.AfterSymbol?.Blocks.Count > 1;
+    public bool AfterFunctionContainsMultipleCodeBlocks => this.FunctionDiff?.AfterSymbol?.BlockCount > 1;
 
     public ObservableCollection<KeyValuePair<CodeBlockSymbol, SymbolPlacement>> BeforeBlockPlacements { get; } = new ObservableCollection<KeyValuePair<CodeBlockSymbol, SymbolPlacement>>();
     public ObservableCollection<KeyValuePair<CodeBlockSymbol, SymbolPlacement>> AfterBlockPlacements { get; } = new ObservableCollection<KeyValuePair<CodeBlockSymbol, SymbolPlacement>>();
@@ -110,14 +110,14 @@ internal sealed class FunctionCodeSymbolDiffPageViewModel : BinaryDiffViewModelB
     {
         uint? beforeSymbolRVA = null;
         uint? afterSymbolRVA = null;
-        if (this.QueryString.ContainsKey("BeforeRVA"))
+        if (this.QueryString.TryGetValue("BeforeRVA", out var value))
         {
-            beforeSymbolRVA = Convert.ToUInt32(this.QueryString["BeforeRVA"], CultureInfo.InvariantCulture);
+            beforeSymbolRVA = Convert.ToUInt32(value, CultureInfo.InvariantCulture);
         }
 
-        if (this.QueryString.ContainsKey("AfterRVA"))
+        if (this.QueryString.TryGetValue("AfterRVA", out value))
         {
-            afterSymbolRVA = Convert.ToUInt32(this.QueryString["AfterRVA"], CultureInfo.InvariantCulture);
+            afterSymbolRVA = Convert.ToUInt32(value, CultureInfo.InvariantCulture);
         }
 
         this.DoesBeforeSymbolExist = beforeSymbolRVA != null;
@@ -178,8 +178,8 @@ internal sealed class FunctionCodeSymbolDiffPageViewModel : BinaryDiffViewModelB
     {
         return this._uiTaskScheduler.StartLongRunningUITask($"Looking up the location of blocks in {functionDiff.FullName}", async (token) =>
         {
-            var countOfBeforeBlocks = functionDiff.BeforeSymbol?.Blocks.Count ?? 0;
-            var countOfAfterBlocks = functionDiff.AfterSymbol?.Blocks.Count ?? 0;
+            var countOfBeforeBlocks = functionDiff.BeforeSymbol?.BlockCount ?? 0;
+            var countOfAfterBlocks = functionDiff.AfterSymbol?.BlockCount ?? 0;
             var beforePlacements = new Dictionary<CodeBlockSymbol, Task<SymbolPlacement>>(capacity: countOfBeforeBlocks);
             var afterPlacements = new Dictionary<CodeBlockSymbol, Task<SymbolPlacement>>(capacity: countOfAfterBlocks);
 
@@ -330,6 +330,11 @@ internal sealed class FunctionCodeSymbolDiffPageViewModel : BinaryDiffViewModelB
         if (function.IsPGO)
         {
             attributes.Add("has been PGO'd");
+
+            if (function.DynamicInstructionCount > 0)
+            {
+                attributes.Add($"has PGO dynamic instruction count of {function.DynamicInstructionCount:N0}");
+            }
         }
 
         if (function.IsOptimizedForSpeed)

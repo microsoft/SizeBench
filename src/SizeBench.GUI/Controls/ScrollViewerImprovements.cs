@@ -41,9 +41,10 @@ public static class ScrollViewerImprovements
     }
 
     [ThreadStatic]
-    private static readonly List<MouseWheelEventArgs> _reentrantList = new List<MouseWheelEventArgs>();
+    private static List<MouseWheelEventArgs>? _reentrantList;
     private static void HandlePreviewMouseWheel(object sender, MouseWheelEventArgs e)
     {
+        _reentrantList ??= new List<MouseWheelEventArgs>();
         if (!e.Handled && sender is ScrollViewer scrollControl && !_reentrantList.Contains(e))
         {
             var previewEventArg = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta)

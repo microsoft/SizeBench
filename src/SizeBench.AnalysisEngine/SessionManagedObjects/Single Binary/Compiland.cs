@@ -1,17 +1,21 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection.PortableExecutable;
 using SizeBench.AnalysisEngine.DIAInterop;
 using SizeBench.AnalysisEngine.Helpers;
 
 namespace SizeBench.AnalysisEngine;
 
 [DebuggerDisplay("Compiland Name={Name}, Size={Size}")]
-public sealed class Compiland
+public sealed class Compiland : IEquatable<Compiland>
 {
+    [Display(AutoGenerateField = false)]
+    public static string UnknownName => "...no name found...";
+
     private bool _fullyConstructed;
 
-    internal readonly uint SymIndexId;
+    internal readonly HashSet<uint> SymIndexIds = new HashSet<uint>();
 
     public string Name { get; }
 
@@ -170,14 +174,17 @@ public sealed class Compiland
 
     internal Compiland(SessionDataCache cache, string name, Library lib, CommandLine commandLine, uint compilandSymIndex)
     {
+        name = String.IsNullOrEmpty(name) ? UnknownName : name;
+
 #if DEBUG
         // Compilands that start with "Import:" are sort of special, since they can exist multiple times in a binary
         // and that's fine.
         // Technically, what maks a Compiland unique is the compilandId, but for most users this is difficult to visually
         // parse so we hope that most binaries only have compilands that are unique by name (including the name of the lib
         // they're part of) - note that name is a fully-qualified path, so that's not too crazy to assume.
-        if (cache.CompilandsConstructedEver.Any(c => c.SymIndexId == compilandSymIndex) ||
-            cache.CompilandsConstructedEver.Any(c => c.Name == name && c.Lib.Name == lib.Name))
+        if (cache.CompilandsConstructedEver.Any(c => c.SymIndexIds.Contains(compilandSymIndex)) ||
+            cache.CompilandsConstructedEver.Any(c => c.Name.Equals(name, StringComparison.OrdinalIgnoreCase) &&
+                                                     c.Lib.Name.Equals(lib.Name, StringComparison.OrdinalIgnoreCase)))
         {
             throw new ObjectAlreadyExistsException();
         }
@@ -185,10 +192,20 @@ public sealed class Compiland
 
         this.Name = name;
         this._commandLine = commandLine;
-        this.SymIndexId = compilandSymIndex;
+        this.SymIndexIds.Add(compilandSymIndex);
         this.Lib = lib;
 
-        cache.RecordCompilandConstructed(this);
+        cache.RecordCompilandConstructed(this, compilandSymIndex);
+    }
+
+    internal void AddSymIndexId(uint compilandSymIndex)
+    {
+        if (this._fullyConstructed)
+        {
+            throw new ObjectFullyConstructedAlreadyException();
+        }
+
+        this.SymIndexIds.Add(compilandSymIndex);
     }
 
     internal CompilandSectionContribution GetOrCreateSectionContribution(BinarySection section)
@@ -261,7 +278,7 @@ public sealed class Compiland
             this._containsExecutableCode = false;
             foreach (var section in this._sectionContributions.Keys)
             {
-                if ((section.Characteristics & PE.DataSectionFlags.MemoryExecute) == PE.DataSectionFlags.MemoryExecute)
+                if ((section.Characteristics & SectionCharacteristics.MemExecute) == SectionCharacteristics.MemExecute)
                 {
                     this._containsExecutableCode = true;
                     break;
@@ -276,7 +293,7 @@ public sealed class Compiland
         for (var i = 0; i < this._sectionContributionsAsList.Count; i++)
         {
             var kvp = this._sectionContributionsAsList[i];
-            if ((kvp.Key.Characteristics & PE.DataSectionFlags.MemoryExecute) == PE.DataSectionFlags.MemoryExecute)
+            if ((kvp.Key.Characteristics & SectionCharacteristics.MemExecute) == SectionCharacteristics.MemExecute)
             {
                 if (kvp.Value.Contains(rva))
                 {
@@ -326,4 +343,18 @@ public sealed class Compiland
 
     internal bool IsVeryLikelyTheSameAs(Compiland otherCompiland)
         => PathHeuristicComparer.PathNamesAreVerySimilar(this.Name, otherCompiland.Name);
+
+    public override bool Equals(object? obj) => base.Equals(obj as Compiland);
+
+    public bool Equals(Compiland? other)
+    {
+        if (other is null) { return false; }
+
+        if (ReferenceEquals(this, other)) { return true; }
+
+        return this.Name.Equals(other.Name, StringComparison.OrdinalIgnoreCase) &&
+               this.Lib.Equals(other.Lib);
+    }
+
+    public override int GetHashCode() => HashCode.Combine(this.Name.GetHashCode(StringComparison.OrdinalIgnoreCase), this.Lib);
 }

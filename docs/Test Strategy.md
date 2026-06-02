@@ -1,10 +1,11 @@
 # Test Strategy
-Each Project in SizeBench has a corresponding "\<projectname\>.Tests" test
+Each Project in SizeBench has a corresponding `<projectname>.Tests` test
 assembly, which should thoroughly test that component in isolation in a unit
 test style fashion.
 
 Then there are integration tests which inspect a real binary to ensure end-to-end
-analysis can handle the complexities of the stuff the real toolchain spits out.
+analysis can handle the complexities of the stuff real toolchains spit out.
+
 
 ## Unit Tests
 The unit tests are filled with mocks, stubs, fakes...whatever is needed to be
@@ -14,7 +15,7 @@ to run after each build in Visual Studio.
 
 
 ## Integration Tests
-These tests are in the *.RealPETests projects, and they depend on "Test PEs" 
+These tests are in the `*.RealPETests` projects, and they depend on "Test PEs" 
 that come in two flavors:
 
 * Binaries built in SizeBench's solution, so we can see the end-to-end flow of
@@ -28,6 +29,22 @@ favor the test PEs we can build ourselves, so we can understand the source code
 that generates a given binary, and because the checked-in binaries and PDBs are
 not great for git (large binary files) where at least the TestPEs built in the
 repo tend to be on the smaller side.
+
+
+## What Tests To Run And When
+Most of the tests are quite fast - on a moderate machine in 2024, over 1000 tests can execute
+even in Debug configuration in under a minute.
+
+But some tests are quite slow, like for PGO'd binaries or disassembly of complex functions with
+DbgX.  All the really slow tests are annotated this way:
+
+`[TestCategory(CommonTestCategories.SlowTests)]`
+
+If you use the [ExcludeSlowTests.playlist](/src/ExcludeSlowTests.playlist) playlist in the Visual
+Studio Test Explorer you can have a better experience of using "run all tests" and running the vast
+majority of tests for an inner loop.  You can run the slow tests from the default Test Explorer
+if you really want to but they can take 10 minutes or so, so be prepared to chill.  All tests
+run in the PR and CI pipelines so you can also just let those be your safety check later.
 
 
 #### Updating Test PEs
@@ -46,7 +63,7 @@ corresponding test changes, if necessary.
 
 #### How To Add A New Test PE
 The test PEs all share a lot of properties, so a common set of MSBuild properties
-has been added to the solution - see TestPEDll.props.  When adding a new test
+has been added to the solution - see `TestPEDll.props`.  When adding a new test
 project (which should be under the [TestPEProjects folder](/src/TestPEProjects), 
 look at how the other projects look and mimic them as much as possible.
 This will require hand-editing the .vcxproj file when you add a new Test PE.

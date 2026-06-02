@@ -4,6 +4,9 @@ internal readonly struct RawSectionContribution
 {
     public RawSectionContribution(string libName, string compilandName, uint compilandSymIndexId, uint rva, uint length)
     {
+        ArgumentNullException.ThrowIfNull(libName);
+        ArgumentNullException.ThrowIfNull(compilandName);
+
         this.LibName = libName;
         this.CompilandName = compilandName;
         this.CompilandSymIndexId = compilandSymIndexId;

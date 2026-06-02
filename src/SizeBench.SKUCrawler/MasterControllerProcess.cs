@@ -6,7 +6,7 @@ using SizeBench.Threading.Tasks.Schedulers;
 
 namespace SizeBench.SKUCrawler;
 
-internal class MasterControllerProcess : IDisposable
+internal sealed class MasterControllerProcess : IDisposable
 {
     private readonly ConcurrentBag<Process> BatchProcesses = new ConcurrentBag<Process>();
     //TODO: SKUCrawler: check if Parallel.ForEachAsync might be a simpler way of writing this code, once moved to .NET 6
@@ -101,9 +101,17 @@ internal class MasterControllerProcess : IDisposable
     {
         using (var colorScope = new ConsoleColorScope(ConsoleColor.Red))
         {
-            foreach (var batchPID in this._errorsFromBatchesByPID.Keys)
+            foreach ((var batchPID, var errors) in this._errorsFromBatchesByPID)
             {
-                foreach (var errorLineFromBatch in this._errorsFromBatchesByPID[batchPID])
+                if (errors.IsEmpty)
+                {
+                    continue;
+                }
+
+                WriteToLogAndStdErr(log, String.Empty);
+                WriteToLogAndStdErr(log, $"Errors from batch with PID={batchPID}:");
+
+                foreach (var errorLineFromBatch in errors)
                 {
                     // We get the errors one line at a time, so we try to guess at where the interesting 'first line' of an exception is, by looking for
                     // "Exception:" - that way "System.InvalidOperationException: some message" gets this extra data before we then let it spew out the callstack.
@@ -147,7 +155,7 @@ internal class MasterControllerProcess : IDisposable
     #region IDisposable Support
     private bool disposedValue; // To detect redundant calls
 
-    protected virtual void Dispose(bool disposing)
+    private void Dispose(bool disposing)
     {
         if (!this.disposedValue)
         {

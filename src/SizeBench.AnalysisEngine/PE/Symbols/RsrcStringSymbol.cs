@@ -13,8 +13,8 @@ internal sealed class RsrcStringSymbol : RsrcSymbolBase
 
     public string String { get; }
 
-    internal RsrcStringSymbol(uint rva, uint size, string str)
-        : base(rva, size, $"[rsrc string] \"{str}\"")
+    internal RsrcStringSymbol(uint rva, uint size, string str, SymbolSourcesSupported symbolSourcesSupported)
+        : base(rva, size, $"[rsrc string] \"{str}\"", symbolSourcesSupported)
     {
         this.String = str;
     }

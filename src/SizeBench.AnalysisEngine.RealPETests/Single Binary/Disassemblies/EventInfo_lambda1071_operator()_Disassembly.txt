@@ -1,5 +1,4 @@
-﻿
-EventInfo::<lambda_1071>::operator() [C:\Users\asklar\source\repos\react-native-xaml\package\windows\ReactNativeXaml\Codegen\TypeEvents.g.h @ 201]:
+﻿EventInfo::<lambda_1071>::operator() [C:\Users\asklar\source\repos\react-native-xaml\package\windows\ReactNativeXaml\Codegen\TypeEvents.g.h @ 201]:
 mov         qword ptr [rsp+8],rbx
 mov         qword ptr [rsp+18h],rsi
 mov         qword ptr [rsp+20h],rdi
@@ -22,7 +21,7 @@ test        c (rbx),c (rbx)
 je          ReactNativeXaml!EventInfo::<lambda_1071>::operator()+0x13f (18002d43f)
 
 EventInfo::<lambda_1071>::operator()+0x46 [C:\Users\asklar\source\repos\react-native-xaml\package\windows\ReactNativeXaml\Codegen\TypeEvents.g.h @ 197]:
-mov         rcx,qword ptr [(*reactContext){} (rsi)]
+mov         rcx,qword ptr [reactContext{->m_ptr} (rsi)]
 mov         qword ptr [rbp-38h],rcx
 test        rcx,rcx
 je          ReactNativeXaml!EventInfo::<lambda_1071>::operator()+0x58 (18002d358)
@@ -32,7 +31,7 @@ mov         rax,qword ptr [rcx]
 call        qword ptr [rax+8]
 
 EventInfo::<lambda_1071>::operator()+0x58 [C:\Users\asklar\source\repos\react-native-xaml\package\windows\ReactNativeXaml\Codegen\TypeEvents.g.h @ 197]:
-mov         rcx,qword ptr [(*ii){} (rdi)]
+mov         rcx,qword ptr [ii{->m_ptr} (rdi)]
 mov         qword ptr [rbp-30h],rcx
 test        rcx,rcx
 je          ReactNativeXaml!EventInfo::<lambda_1071>::operator()+0x6a (18002d36a)
@@ -103,7 +102,7 @@ je          ReactNativeXaml!EventInfo::<lambda_1071>::operator()+0x116 (18002d41
 
 EventInfo::<lambda_1071>::operator()+0xFB [C:\Users\asklar\source\repos\react-native-xaml\package\windows\ReactNativeXaml\Codegen\TypeEvents.g.h @ 197]:
 mov         qword ptr [rbp-18h],rcx
-mov         rax,qword ptr [c{} (rbx)]
+mov         rax,qword ptr [c{.m_ptr} (rbx)]
 lea         r8,[rbp-18h]
 lea         rdx,[ReactNativeXaml!winrt::impl::guid_v<winrt::Windows::UI::Xaml::IUIElement3>{.Data1} (1800d0028)]
 mov         rcx,c (rbx)

@@ -70,7 +70,7 @@ internal class EnumerateSymbolDiffsBetweenTwoSymbolListsSessionTask : DiffSessio
 
                     if (beforeSymbolsParsed >= nextLoggerOutput)
                     {
-                        ReportProgress($"Parsed {beforeSymbolsParsed}/{beforeSymbolsCount} 'before' symbols and {afterSymbolsParsed}/{afterSymbolsCount} 'after' symbols into diffs.", beforeSymbolsParsed + afterSymbolsParsed, totalSymbolsToDiff);
+                        ReportProgress($"Parsed {beforeSymbolsParsed:N0}/{beforeSymbolsCount:N0} 'before' symbols and {afterSymbolsParsed:N0}/{afterSymbolsCount:N0} 'after' symbols into diffs.", beforeSymbolsParsed + afterSymbolsParsed, totalSymbolsToDiff);
                         nextLoggerOutput += loggerOutputVelocity;
                     }
 
@@ -106,7 +106,7 @@ internal class EnumerateSymbolDiffsBetweenTwoSymbolListsSessionTask : DiffSessio
 
                 if (afterSymbolsParsed >= nextLoggerOutput)
                 {
-                    ReportProgress($"Parsed {afterSymbolsParsed}/{afterSymbolsCount} 'after' symbols into diffs.", afterSymbolsParsed + beforeSymbolsCount, totalSymbolsToDiff);
+                    ReportProgress($"Parsed {afterSymbolsParsed:N0}/{afterSymbolsCount:N0} 'after' symbols into diffs.", afterSymbolsParsed + beforeSymbolsCount, totalSymbolsToDiff);
                     nextLoggerOutput += loggerOutputVelocity;
                 }
 
@@ -118,9 +118,9 @@ internal class EnumerateSymbolDiffsBetweenTwoSymbolListsSessionTask : DiffSessio
         }
 
         // One final progress report so the log shows a nice summary at the end
-        ReportProgress($"Parsed {beforeSymbolsCount} 'before' symbols and {afterSymbolsCount} 'after' symbols, generating  {symbolDiffs.Count} diffs.", totalSymbolsToDiff, totalSymbolsToDiff);
+        ReportProgress($"Parsed {beforeSymbolsCount:N0} 'before' symbols and {afterSymbolsCount:N0} 'after' symbols, generating  {symbolDiffs.Count:N0} diffs.", totalSymbolsToDiff, totalSymbolsToDiff);
 
-        logger.Log($"Finished enumerating {symbolDiffs.Count} symbol diffs.");
+        logger.Log($"Finished enumerating {symbolDiffs.Count:N0} symbol diffs.");
 
         return symbolDiffs;
     }

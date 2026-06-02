@@ -62,10 +62,17 @@ public sealed class EnumerateWastefulVirtualsSessionTaskTests : IDisposable
 
         var voidType = new BasicTypeSymbol(this.DataCache, "void", 0, symIndexId: 5000);
 
-        this.Base1UDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "Base1", instanceSize: 100, symIndexId: 0, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
-        this.Base1_Derived1UDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "Base1_Derived1", instanceSize: 150, symIndexId: 2, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: new Dictionary<uint, uint>() { { this.Base1UDT.SymIndexId, 0 } });
-        this.Base1_Derived2UDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "Base1_Derived2", instanceSize: 120, symIndexId: 3, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: new Dictionary<uint, uint>() { { this.Base1UDT.SymIndexId, 0 } });
-        this.Base1_Derived1_Derived1UDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "Base1_Derived1_Derived1", instanceSize: 120, symIndexId: 4, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: new Dictionary<uint, uint>() { { this.Base1_Derived1UDT.SymIndexId, 0 } });
+        this.Base1UDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "Base1", instanceSize: 100, symIndexId: 0, udtKind: UserDefinedTypeKind.UdtClass);
+        this.TestDIAAdapter.TypeSymbolsToFindBySymIndexId.Add(this.Base1UDT.SymIndexId, this.Base1UDT);
+        this.Base1_Derived1UDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "Base1_Derived1", instanceSize: 150, symIndexId: 2, udtKind: UserDefinedTypeKind.UdtClass);
+        this.TestDIAAdapter.TypeSymbolsToFindBySymIndexId.Add(this.Base1_Derived1UDT.SymIndexId, this.Base1_Derived1UDT);
+        this.TestDIAAdapter.BaseTypeIDsToFindByUDT.Add(this.Base1_Derived1UDT, [(this.Base1UDT.SymIndexId, 0)]);
+        this.Base1_Derived2UDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "Base1_Derived2", instanceSize: 120, symIndexId: 3, udtKind: UserDefinedTypeKind.UdtClass);
+        this.TestDIAAdapter.TypeSymbolsToFindBySymIndexId.Add(this.Base1_Derived2UDT.SymIndexId, this.Base1_Derived2UDT);
+        this.TestDIAAdapter.BaseTypeIDsToFindByUDT.Add(this.Base1_Derived2UDT, [(this.Base1UDT.SymIndexId, 0)]);
+        this.Base1_Derived1_Derived1UDT = new UserDefinedTypeSymbol(this.DataCache, this.TestDIAAdapter, this.MockSession.Object, "Base1_Derived1_Derived1", instanceSize: 120, symIndexId: 4, udtKind: UserDefinedTypeKind.UdtClass);
+        this.TestDIAAdapter.TypeSymbolsToFindBySymIndexId.Add(this.Base1_Derived1_Derived1UDT.SymIndexId, this.Base1_Derived1_Derived1UDT);
+        this.TestDIAAdapter.BaseTypeIDsToFindByUDT.Add(this.Base1_Derived1_Derived1UDT, [(this.Base1_Derived1UDT.SymIndexId, 0)]);
 
         var base1_nonVirtual = new SimpleFunctionCodeSymbol(this.DataCache, "NonVirtual", rva: 1000, size: 100, symIndexId: 5, parentType: this.Base1UDT);
         var base1_virtualFunctionWithOverrides = new SimpleFunctionCodeSymbol(this.DataCache, "VirtualFunctionWithOverrides", rva: 1100, size: 100, symIndexId: 6, isVirtual: true, isIntroVirtual: true, parentType: this.Base1UDT);

@@ -12,8 +12,9 @@ internal sealed class RsrcIconDataSymbol : RsrcDataSymbol
     public ushort Width { get; }
     public ushort Height { get; }
     public ushort BitsPerPixel { get; }
-    internal RsrcIconDataSymbol(uint rva, uint size, string language, Win32ResourceType rsrcType, string? rsrcTypeName, string dataName, ushort width, ushort height, ushort bpp)
-        : base(rva, size, language, rsrcType, rsrcTypeName, dataName, nameSuffix: $" {width}x{height} {bpp}bpp")
+    internal RsrcIconDataSymbol(uint rva, uint size, string language, Win32ResourceType rsrcType, string? rsrcTypeName, string dataName, 
+                                ushort width, ushort height, ushort bpp, SymbolSourcesSupported symbolSourcesSupported)
+        : base(rva, size, language, rsrcType, rsrcTypeName, dataName, nameSuffix: $" {width}x{height} {bpp}bpp", symbolSourcesSupported)
     {
         this.Width = width;
         this.Height = height;

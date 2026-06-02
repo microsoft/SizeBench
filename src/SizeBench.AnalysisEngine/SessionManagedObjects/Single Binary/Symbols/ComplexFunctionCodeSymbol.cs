@@ -16,6 +16,7 @@ public sealed class ComplexFunctionCodeSymbol : IFunctionCodeSymbol
     public bool IsSealed { get; }
     public bool IsPGO { get; }
     public bool IsOptimizedForSpeed { get; }
+    public ulong DynamicInstructionCount { get; }
 
     [Display(Name = "Function Type")]
     public FunctionTypeSymbol? FunctionType { get; }
@@ -26,12 +27,22 @@ public sealed class ComplexFunctionCodeSymbol : IFunctionCodeSymbol
     public TypeSymbol? ParentType { get; }
     public bool IsMemberFunction => this.ParentType != null;
 
+    public int BlockCount => this._separatedBlocks.Count + 1; /* +1 for the primary block */
     public CodeBlockSymbol PrimaryBlock { get; }
     private readonly List<SeparatedCodeBlockSymbol> _separatedBlocks;
     public IReadOnlyList<SeparatedCodeBlockSymbol> SeparatedBlocks => this._separatedBlocks;
 
-    private readonly List<CodeBlockSymbol> _blocks;
-    public IReadOnlyList<CodeBlockSymbol> Blocks => this._blocks;
+    public IEnumerable<CodeBlockSymbol> Blocks
+    {
+        get
+        {
+            yield return this.PrimaryBlock;
+            foreach (var separatedBlock in this._separatedBlocks)
+            {
+                yield return separatedBlock;
+            }
+        }
+    }
 
     public FunctionCodeFormattedName FormattedName { get; }
 
@@ -52,20 +63,18 @@ public sealed class ComplexFunctionCodeSymbol : IFunctionCodeSymbol
                                        bool isVirtual = false,
                                        bool isSealed = false,
                                        bool isPGO = false,
-                                       bool isOptimizedForSpeed = false)
+                                       bool isOptimizedForSpeed = false,
+                                       ulong dynamicInstructionCount = 0)
     {
 #if DEBUG
+        Debug.Assert(cache.SymbolSourcesSupported.HasFlag(SymbolSourcesSupported.Code));
+
         if (cache.AllFunctionSymbolsBySymIndexIdOfPrimaryBlock.ContainsKey(primaryBlock.SymIndexId))
         {
             throw new ObjectAlreadyExistsException();
         }
 #endif
 
-        this._blocks = new List<CodeBlockSymbol>(capacity: separatedBlocks.Count + 1)
-            {
-                primaryBlock
-            };
-        this._blocks.AddRange(separatedBlocks);
         this.FunctionName = name;
         this.AccessModifier = accessModifier;
         this.IsIntroVirtual = isIntroVirtual;
@@ -75,6 +84,7 @@ public sealed class ComplexFunctionCodeSymbol : IFunctionCodeSymbol
         this.IsSealed = isSealed;
         this.IsPGO = isPGO;
         this.IsOptimizedForSpeed = isOptimizedForSpeed;
+        this.DynamicInstructionCount = dynamicInstructionCount;
         FunctionSymbolHelper.VerifyNotInInconsistentState(this);
 
         this.FunctionType = functionType;

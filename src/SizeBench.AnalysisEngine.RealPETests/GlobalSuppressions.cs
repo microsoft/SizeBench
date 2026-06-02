@@ -11,3 +11,5 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Naming", "CA1707:Identifiers should not contain underscores", Justification = "Class naming for tests isn't terribly important.")]
 
 [assembly: SuppressMessage("Maintainability", "CA1505:Avoid unmaintainable code", Justification = "Complexity of test methods doesn't seem terribly important.")]
+
+[assembly: SuppressMessage("Performance", "CA1851:Possible multiple enumerations of 'IEnumerable' collection", Justification = "Performance of tests isn't *that* important.")]

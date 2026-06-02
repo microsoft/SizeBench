@@ -5,6 +5,7 @@ namespace SizeBench.GUI;
 
 public interface ISessionFactory
 {
+    Task<ISession> CreateSession(string binaryPath, string pdbPath, SessionOptions sessionOptions, ILogger logger);
     Task<ISession> CreateSession(string binaryPath, string pdbPath, ILogger logger);
     Task<IDiffSession> CreateDiffSession(string beforeBinaryPath, string beforePdbPath,
                                          string afterBinaryPath, string afterPdbPath,
@@ -18,12 +19,14 @@ internal sealed class SessionFactory : ISessionFactory
     private readonly List<ISession> _openSessions = new List<ISession>();
     private readonly List<IDiffSession> _openDiffSessions = new List<IDiffSession>();
 
-    public async Task<ISession> CreateSession(string binaryPath, string pdbPath, ILogger logger)
+    public async Task<ISession> CreateSession(string binaryPath, string pdbPath, SessionOptions sessionOptions, ILogger logger)
     {
-        var newSession = await Session.Create(binaryPath, pdbPath, logger);
+        var newSession = await Session.Create(binaryPath, pdbPath, sessionOptions, logger);
         this._openSessions.Add(newSession);
         return newSession;
     }
+
+    public Task<ISession> CreateSession(string binaryPath, string pdbPath, ILogger logger) => CreateSession(binaryPath, pdbPath, new SessionOptions(), logger);
 
     public async Task<IDiffSession> CreateDiffSession(string beforeBinaryPath, string beforePdbPath,
                                                       string afterBinaryPath, string afterPdbPath,

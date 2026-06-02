@@ -10,8 +10,8 @@ internal sealed class RsrcGroupIconDataSymbol : RsrcDataSymbol
     private string DebuggerDisplay => $"{GetType().Name}: {this.Name} ({this.Size} bytes)";
 
     public IReadOnlyList<RsrcIconDataSymbol> Icons { get; }
-    internal RsrcGroupIconDataSymbol(uint size, string language, string dataName, List<RsrcIconDataSymbol> icons)
-        : base(icons[0].RVA, size, language, Win32ResourceType.GROUP_ICON, "GROUP_ICON", dataName)
+    internal RsrcGroupIconDataSymbol(uint size, string language, string dataName, List<RsrcIconDataSymbol> icons, SymbolSourcesSupported symbolSourcesSupported)
+        : base(icons[0].RVA, size, language, Win32ResourceType.GROUP_ICON, "GROUP_ICON", dataName, "", symbolSourcesSupported)
     {
         this.Icons = icons;
     }

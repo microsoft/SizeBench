@@ -1,0 +1,31 @@
+﻿<navigation:SizeBenchPage x:Class="SizeBench.GUI.Pages.AllInlinesPage"
+                          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                          xmlns:controls="clr-namespace:SizeBench.GUI.Controls"
+                          xmlns:converters="clr-namespace:SizeBench.GUI.Converters"
+                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                          xmlns:navigation="clr-namespace:SizeBench.GUI.Controls.Navigation"
+                          mc:Ignorable="d" 
+      d:DesignHeight="300" d:DesignWidth="600"
+      Title="All Inlines">
+    <Grid x:Name="LayoutRoot">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Button Style="{StaticResource ExportToExcelButtonStyle}" Command="{Binding ExportToExcelCommand}"/>
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding InlineSiteGroups}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Total Size" Binding="{Binding TotalSize, Converter={x:Static converters:SizeToFriendlySizeConverter.Instance}}"
+                                    ElementStyle="{StaticResource RightAlignedTextStyle}"
+                                    SortDirection="Descending"/>
+                <DataGridTextColumn Header="# Inline Sites" Binding="{Binding InlineSites.Count}"
+                                    ElementStyle="{StaticResource RightAlignedTextStyle}"/>
+                <controls:SizeBenchDataGridHyperlinkColumn Header="Name"
+                                    HyperlinkTextBinding="{Binding InlinedFunctionName}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</navigation:SizeBenchPage>

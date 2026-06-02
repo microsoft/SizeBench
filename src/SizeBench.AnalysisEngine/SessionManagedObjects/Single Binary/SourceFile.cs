@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection.PortableExecutable;
 using SizeBench.AnalysisEngine.Helpers;
 
 namespace SizeBench.AnalysisEngine;
@@ -14,7 +15,7 @@ public sealed class SourceFile
     private readonly uint _bytesPerWord;
 #endif
 
-    internal readonly uint FileId;
+    internal readonly List<uint> DiaFileIds = new List<uint>(capacity: 1);
 
     public string Name { get; }
 
@@ -86,9 +87,9 @@ public sealed class SourceFile
         }
     }
 
-    internal List<Compiland> _compilands = new List<Compiland>();
+    internal HashSet<Compiland> _compilands = new HashSet<Compiland>();
     [Display(AutoGenerateField = false)]
-    public IReadOnlyList<Compiland> Compilands
+    public IReadOnlyCollection<Compiland> Compilands
     {
         get
         {
@@ -179,7 +180,7 @@ public sealed class SourceFile
     internal SourceFile(SessionDataCache cache, string name, uint fileId, IEnumerable<Compiland> compilands)
     {
 #if DEBUG
-        if (cache.SourceFilesConstructedEver.Any(sf => sf.Name == name) == true)
+        if (cache.SourceFilesConstructedEver.Any(sf => sf.Name.Equals(name, StringComparison.OrdinalIgnoreCase)) == true)
         {
             throw new ObjectAlreadyExistsException();
         }
@@ -188,10 +189,16 @@ public sealed class SourceFile
 #endif
 
         this.Name = name;
-        this.FileId = fileId;
-        this._compilands.AddRange(compilands);
+        this.DiaFileIds.Add(fileId);
+        this._compilands.UnionWith(compilands);
 
         cache.RecordSourceFileConstructed(this);
+    }
+
+    internal void Merge(uint diaFileId, IEnumerable<Compiland> compilands)
+    {
+        this.DiaFileIds.Add(diaFileId);
+        this._compilands.UnionWith(compilands);
     }
 
     internal SourceFileSectionContribution GetOrCreateSectionContribution(BinarySection section)
@@ -302,7 +309,7 @@ public sealed class SourceFile
                 return this._containsExecutableCode.Value;
             }
 
-            this._containsExecutableCode = this._sectionContributions.Keys.Any(s => (s.Characteristics & PE.DataSectionFlags.MemoryExecute) == PE.DataSectionFlags.MemoryExecute);
+            this._containsExecutableCode = this._sectionContributions.Keys.Any(s => (s.Characteristics & SectionCharacteristics.MemExecute) == SectionCharacteristics.MemExecute);
             return this._containsExecutableCode.Value;
         }
     }
@@ -312,7 +319,7 @@ public sealed class SourceFile
         for (var i = 0; i < this._sectionContributionsAsList.Count; i++)
         {
             var kvp = this._sectionContributionsAsList[i];
-            if ((kvp.Key.Characteristics & PE.DataSectionFlags.MemoryExecute) == PE.DataSectionFlags.MemoryExecute)
+            if ((kvp.Key.Characteristics & SectionCharacteristics.MemExecute) == SectionCharacteristics.MemExecute)
             {
                 if (kvp.Value.Contains(rva))
                 {

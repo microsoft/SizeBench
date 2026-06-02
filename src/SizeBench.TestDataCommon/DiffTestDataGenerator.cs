@@ -1,8 +1,8 @@
-﻿using SizeBench.AnalysisEngine;
+﻿using System.Reflection.PortableExecutable;
+using SizeBench.AnalysisEngine;
 using SizeBench.AnalysisEngine.DiffSessionTasks;
 using SizeBench.AnalysisEngine.SessionTasks;
 using SizeBench.AnalysisEngine.Symbols;
-using PE = SizeBench.AnalysisEngine.PE;
 
 namespace SizeBench.TestDataCommon;
 
@@ -179,11 +179,11 @@ internal sealed class DiffTestDataGenerator : IDisposable
     public Compiland BeforeB1Compiland;
     public Compiland BeforeB2Compiland;
     public Compiland BeforeC1Compiland;
-    public List<Compiland> BeforeCompilands;
+    public HashSet<Compiland> BeforeCompilands;
     public Library BeforeALib;
     public Library BeforeBLib;
     public Library BeforeCLib;
-    public List<Library> BeforeLibs;
+    public HashSet<Library> BeforeLibs;
     public UserDefinedTypeSymbol BeforeIUnknownUDT;
 
     // After objects
@@ -211,11 +211,11 @@ internal sealed class DiffTestDataGenerator : IDisposable
     public Compiland AfterB1Compiland;
     public Compiland AfterB2Compiland;
     public Compiland AfterD1Compiland;
-    public List<Compiland> AfterCompilands;
+    public HashSet<Compiland> AfterCompilands;
     public Library AfterALib;
     public Library AfterBLib;
     public Library AfterDLib;
-    public List<Library> AfterLibs;
+    public HashSet<Library> AfterLibs;
     public UserDefinedTypeSymbol AfterIUnknownUDT;
 
     // Diff objects
@@ -306,23 +306,23 @@ internal sealed class DiffTestDataGenerator : IDisposable
     private void SetupBeforeSectionsAndCOFFGroups()
     {
         this.BeforeTextSection = new BinarySection(this.BeforeDataCache, ".text", size: 1500, virtualSize: 1500, rva: 0,
-                                                  fileAlignment: 0, sectionAlignment: 5000, characteristics: PE.DataSectionFlags.MemoryExecute);
+                                                  fileAlignment: 0, sectionAlignment: 5000, characteristics: SectionCharacteristics.MemExecute);
         this.BeforeDataSection = new BinarySection(this.BeforeDataCache, ".data", size: 2000, virtualSize: 2500, rva: 5000,
-                                                  fileAlignment: 0, sectionAlignment: 5000, characteristics: PE.DataSectionFlags.MemoryWrite | PE.DataSectionFlags.MemoryRead);
+                                                  fileAlignment: 0, sectionAlignment: 5000, characteristics: SectionCharacteristics.MemWrite | SectionCharacteristics.MemRead);
         this.BeforeRDataSection = new BinarySection(this.BeforeDataCache, ".rdata", size: 1800, virtualSize: 1800, rva: 10000,
-                                                   fileAlignment: 0, sectionAlignment: 5000, characteristics: PE.DataSectionFlags.MemoryRead);
+                                                   fileAlignment: 0, sectionAlignment: 5000, characteristics: SectionCharacteristics.MemRead);
         this.BeforeVirtSection = new BinarySection(this.BeforeDataCache, ".virt", size: 0, virtualSize: 300, rva: 15000,
-                                                  fileAlignment: 0, sectionAlignment: 5000, characteristics: PE.DataSectionFlags.ContentUninitializedData);
+                                                  fileAlignment: 0, sectionAlignment: 5000, characteristics: SectionCharacteristics.ContainsUninitializedData);
 
         this.BeforeTextMnCG = new COFFGroup(this.BeforeDataCache, ".text$mn", size: 900, rva: 0,
                                            fileAlignment: 0, sectionAlignment: 5000,
-                                           characteristics: PE.DataSectionFlags.MemoryExecute)
+                                           characteristics: SectionCharacteristics.MemExecute)
         {
             Section = this.BeforeTextSection
         };
         this.BeforeTextZzCG = new COFFGroup(this.BeforeDataCache, ".text$zz", size: 600, rva: 900,
                                            fileAlignment: 0, sectionAlignment: 5000,
-                                           characteristics: PE.DataSectionFlags.MemoryExecute)
+                                           characteristics: SectionCharacteristics.MemExecute)
         {
             Section = this.BeforeTextSection
         };
@@ -330,25 +330,25 @@ internal sealed class DiffTestDataGenerator : IDisposable
 
         this.BeforeDataXxCG = new COFFGroup(this.BeforeDataCache, ".data$xx", size: 500, rva: 5000,
                                            fileAlignment: 0, sectionAlignment: 5000,
-                                           characteristics: PE.DataSectionFlags.ContentInitializedData |
-                                                            PE.DataSectionFlags.MemoryRead |
-                                                            PE.DataSectionFlags.MemoryWrite)
+                                           characteristics: SectionCharacteristics.ContainsInitializedData |
+                                                            SectionCharacteristics.MemRead |
+                                                            SectionCharacteristics.MemWrite)
         {
             Section = this.BeforeDataSection
         };
         this.BeforeDataZzCG = new COFFGroup(this.BeforeDataCache, ".data$zz", size: 1500, rva: 5500,
                                            fileAlignment: 0, sectionAlignment: 5000,
-                                           characteristics: PE.DataSectionFlags.ContentInitializedData |
-                                                            PE.DataSectionFlags.MemoryRead |
-                                                            PE.DataSectionFlags.MemoryWrite)
+                                           characteristics: SectionCharacteristics.ContainsInitializedData |
+                                                            SectionCharacteristics.MemRead |
+                                                            SectionCharacteristics.MemWrite)
         {
             Section = this.BeforeDataSection
         };
         this.BeforeBssCG = new COFFGroup(this.BeforeDataCache, ".bss", size: 500, rva: 7000,
                                          fileAlignment: 0, sectionAlignment: 5000,
-                                         characteristics: PE.DataSectionFlags.ContentUninitializedData |
-                                                          PE.DataSectionFlags.MemoryRead |
-                                                          PE.DataSectionFlags.MemoryWrite)
+                                         characteristics: SectionCharacteristics.ContainsUninitializedData |
+                                                          SectionCharacteristics.MemRead |
+                                                          SectionCharacteristics.MemWrite)
         {
             Section = this.BeforeDataSection
         };
@@ -356,32 +356,32 @@ internal sealed class DiffTestDataGenerator : IDisposable
 
         this.BeforeRDataXxCG = new COFFGroup(this.BeforeDataCache, ".rdata$xx", size: 800, rva: 10000,
                                            fileAlignment: 0, sectionAlignment: 5000,
-                                           characteristics: PE.DataSectionFlags.MemoryRead)
+                                           characteristics: SectionCharacteristics.MemRead)
         {
             Section = this.BeforeRDataSection
         };
         this.BeforeRDataZzCG = new COFFGroup(this.BeforeDataCache, ".rdata$zz", size: 200, rva: 10800,
                                            fileAlignment: 0, sectionAlignment: 5000,
-                                           characteristics: PE.DataSectionFlags.MemoryRead)
+                                           characteristics: SectionCharacteristics.MemRead)
         {
             Section = this.BeforeRDataSection
         };
         this.BeforeRDataBefCG = new COFFGroup(this.BeforeDataCache, ".rdata$bef", size: 300, rva: 11000,
                                               fileAlignment: 0, sectionAlignment: 5000,
-                                              characteristics: PE.DataSectionFlags.MemoryRead)
+                                              characteristics: SectionCharacteristics.MemRead)
         {
             Section = this.BeforeRDataSection
         };
         this.BeforeRDataFooCG = new COFFGroup(this.BeforeDataCache, ".rdata$foo", size: 500, rva: 11300,
                                               fileAlignment: 0, sectionAlignment: 5000,
-                                              characteristics: PE.DataSectionFlags.MemoryRead)
+                                              characteristics: SectionCharacteristics.MemRead)
         {
             Section = this.BeforeRDataSection
         };
 
         this.BeforeVirtCG = new COFFGroup(this.BeforeDataCache, ".virt", size: 300, rva: 15000,
                                          fileAlignment: 0, sectionAlignment: 5000,
-                                         characteristics: PE.DataSectionFlags.ContentUninitializedData)
+                                         characteristics: SectionCharacteristics.ContainsUninitializedData)
         {
             Section = this.BeforeVirtSection
         };
@@ -440,79 +440,79 @@ internal sealed class DiffTestDataGenerator : IDisposable
     private void SetupAfterSectionsAndCOFFGroups()
     {
         this.AfterTextSection = new BinarySection(this.AfterDataCache, ".text", size: 2000, virtualSize: 2000, rva: 0,
-                                                  fileAlignment: 0, sectionAlignment: 5000, characteristics: PE.DataSectionFlags.MemoryExecute);
+                                                  fileAlignment: 0, sectionAlignment: 5000, characteristics: SectionCharacteristics.MemExecute);
         this.AfterDataSection = new BinarySection(this.AfterDataCache, ".data", size: 1000, virtualSize: 1700, rva: 5000,
-                                                  fileAlignment: 0, sectionAlignment: 5000, characteristics: PE.DataSectionFlags.MemoryWrite | PE.DataSectionFlags.MemoryRead);
+                                                  fileAlignment: 0, sectionAlignment: 5000, characteristics: SectionCharacteristics.MemWrite | SectionCharacteristics.MemRead);
         this.AfterRDataSection = new BinarySection(this.AfterDataCache, ".rdata", size: 1800, virtualSize: 1800, rva: 10000,
-                                                   fileAlignment: 0, sectionAlignment: 5000, characteristics: PE.DataSectionFlags.MemoryRead);
+                                                   fileAlignment: 0, sectionAlignment: 5000, characteristics: SectionCharacteristics.MemRead);
         this.AfterRsrcSection = new BinarySection(this.AfterDataCache, ".rsrc", size: 200, virtualSize: 200, rva: 15000,
-                                                  fileAlignment: 0, sectionAlignment: 5000, characteristics: PE.DataSectionFlags.MemoryRead);
+                                                  fileAlignment: 0, sectionAlignment: 5000, characteristics: SectionCharacteristics.MemRead);
 
         this.AfterTextMnCG = new COFFGroup(this.AfterDataCache, ".text$mn", size: 1000, rva: 0,
                                            fileAlignment: 0, sectionAlignment: 5000,
-                                           characteristics: PE.DataSectionFlags.MemoryExecute)
+                                           characteristics: SectionCharacteristics.MemExecute)
         {
             Section = this.AfterTextSection
         };
         this.AfterTextZzCG = new COFFGroup(this.AfterDataCache, ".text$zz", size: 1000, rva: 1000,
                                            fileAlignment: 0, sectionAlignment: 5000,
-                                           characteristics: PE.DataSectionFlags.MemoryExecute)
+                                           characteristics: SectionCharacteristics.MemExecute)
         {
             Section = this.AfterTextSection
         };
 
         this.AfterDataXxCG = new COFFGroup(this.AfterDataCache, ".data$xx", size: 500, rva: 5000,
                                            fileAlignment: 0, sectionAlignment: 5000,
-                                           characteristics: PE.DataSectionFlags.ContentInitializedData |
-                                                            PE.DataSectionFlags.MemoryRead |
-                                                            PE.DataSectionFlags.MemoryWrite)
+                                           characteristics: SectionCharacteristics.ContainsInitializedData |
+                                                            SectionCharacteristics.MemRead |
+                                                            SectionCharacteristics.MemWrite)
         {
             Section = this.AfterDataSection
         };
         this.AfterDataZzCG = new COFFGroup(this.AfterDataCache, ".data$zz", size: 500, rva: 5500,
                                            fileAlignment: 0, sectionAlignment: 5000,
-                                           characteristics: PE.DataSectionFlags.ContentInitializedData |
-                                                            PE.DataSectionFlags.MemoryRead |
-                                                            PE.DataSectionFlags.MemoryWrite)
+                                           characteristics: SectionCharacteristics.ContainsInitializedData |
+                                                            SectionCharacteristics.MemRead |
+                                                            SectionCharacteristics.MemWrite)
         {
             Section = this.AfterDataSection
         };
         this.AfterBssCG = new COFFGroup(this.AfterDataCache, ".bss", size: 700, rva: 6000,
                                         fileAlignment: 0, sectionAlignment: 5000,
-                                        characteristics: PE.DataSectionFlags.ContentUninitializedData |
-                                                         PE.DataSectionFlags.MemoryRead |
-                                                         PE.DataSectionFlags.MemoryWrite)
+                                        characteristics: SectionCharacteristics.ContainsUninitializedData |
+                                                         SectionCharacteristics.MemRead |
+                                                         SectionCharacteristics.MemWrite)
         {
             Section = this.AfterDataSection
         };
 
         this.AfterRDataXxCG = new COFFGroup(this.AfterDataCache, ".rdata$xx", size: 800, rva: 10000,
                                            fileAlignment: 0, sectionAlignment: 5000,
-                                           characteristics: PE.DataSectionFlags.MemoryRead)
+                                           characteristics: SectionCharacteristics.MemRead)
         {
             Section = this.AfterRDataSection
         };
         this.AfterRDataZzCG = new COFFGroup(this.AfterDataCache, ".rdata$zz", size: 200, rva: 10800,
                                            fileAlignment: 0, sectionAlignment: 5000,
-                                           characteristics: PE.DataSectionFlags.MemoryRead)
+                                           characteristics: SectionCharacteristics.MemRead)
         {
             Section = this.AfterRDataSection
         };
         this.AfterRDataAftCG = new COFFGroup(this.AfterDataCache, ".rdata$aft", size: 300, rva: 11000,
                                            fileAlignment: 0, sectionAlignment: 5000,
-                                           characteristics: PE.DataSectionFlags.MemoryRead)
+                                           characteristics: SectionCharacteristics.MemRead)
         {
             Section = this.AfterRDataSection
         };
         this.AfterRDataFooCG = new COFFGroup(this.AfterDataCache, ".rdata$foo", size: 500, rva: 11300,
                                            fileAlignment: 0, sectionAlignment: 5000,
-                                           characteristics: PE.DataSectionFlags.MemoryRead)
+                                           characteristics: SectionCharacteristics.MemRead)
         {
             Section = this.AfterRDataSection
         };
         this.AfterRsrcCG = new COFFGroup(this.AfterDataCache, ".rsrc", size: 200, rva: 15000,
                                          fileAlignment: 0, sectionAlignment: 5000,
-                                         characteristics: PE.DataSectionFlags.MemoryRead)
+                                         characteristics: SectionCharacteristics.MemRead)
         {
             Section = this.AfterRsrcSection
         };
@@ -763,14 +763,14 @@ internal sealed class DiffTestDataGenerator : IDisposable
         this.BeforeC1Compiland.MarkFullyConstructed();
         this.BeforeCLib.MarkFullyConstructed();
 
-        this.BeforeLibs = new List<Library>()
+        this.BeforeLibs = new HashSet<Library>()
             {
                 this.BeforeALib,
                 this.BeforeBLib,
                 this.BeforeCLib
             };
 
-        this.BeforeCompilands = new List<Compiland>()
+        this.BeforeCompilands = new HashSet<Compiland>()
             {
                 this.BeforeA1Compiland,
                 this.BeforeA2Compiland,
@@ -925,14 +925,14 @@ internal sealed class DiffTestDataGenerator : IDisposable
         this.AfterD1Compiland.MarkFullyConstructed();
         this.AfterDLib.MarkFullyConstructed();
 
-        this.AfterLibs = new List<Library>()
+        this.AfterLibs = new HashSet<Library>()
             {
                 this.AfterALib,
                 this.AfterBLib,
                 this.AfterDLib
             };
 
-        this.AfterCompilands = new List<Compiland>()
+        this.AfterCompilands = new HashSet<Compiland>()
             {
                 this.AfterA1Compiland,
                 this.AfterA2Compiland,
@@ -1158,15 +1158,15 @@ internal sealed class DiffTestDataGenerator : IDisposable
 
         if (shouldBeCOMTypes && this.BeforeIUnknownUDT is null)
         {
-            this.BeforeIUnknownUDT = new UserDefinedTypeSymbol(this.BeforeDataCache, this.BeforeDIAAdapter, this.MockBeforeSession.Object, "IUnknown", 8, this._beforeNextSymIndexId++, UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+            this.BeforeIUnknownUDT = new UserDefinedTypeSymbol(this.BeforeDataCache, this.BeforeDIAAdapter, this.MockBeforeSession.Object, "IUnknown", 8, this._beforeNextSymIndexId++, UserDefinedTypeKind.UdtClass);
             udts.Add(this.BeforeIUnknownUDT);
         }
 
-        var iunknownBaseTypeIDs = new Dictionary<uint, uint>();
+        var iunknownBaseTypeIDs = new List<(uint, uint)>();
 
         if (shouldBeCOMTypes)
         {
-            iunknownBaseTypeIDs.Add(this.BeforeIUnknownUDT.SymIndexId, 0);
+            iunknownBaseTypeIDs.Add((this.BeforeIUnknownUDT.SymIndexId, 0));
         };
 
         var endIndex = this._nextBeforeUDTIndex + 3;
@@ -1176,19 +1176,22 @@ internal sealed class DiffTestDataGenerator : IDisposable
             uint size = 10;
             var udt = new UserDefinedTypeSymbol(this.BeforeDataCache, this.BeforeDIAAdapter, this.MockBeforeSession.Object,
                                                 $"{namePrefix}UDT{(shouldBeCOMTypes ? "COMType" : "")}{this._nextBeforeUDTIndex}",
-                                                size, this._beforeNextSymIndexId++, UserDefinedTypeKind.UdtClass,
-                                                baseTypeIDs: shouldBeCOMTypes ? iunknownBaseTypeIDs : null);
+                                                size, this._beforeNextSymIndexId++, UserDefinedTypeKind.UdtClass);
+            if (shouldBeCOMTypes)
+            {
+                this.BeforeDIAAdapter.BaseTypeIDsToFindByUDT.Add(udt, iunknownBaseTypeIDs);
+            }
             udt.LoadBaseTypes(this.BeforeDataCache, this.BeforeDIAAdapter, CancellationToken.None);
 
-            var baseTypeIDs = new Dictionary<uint, uint>()
+            var baseTypeIDs = new List<(uint, uint)>()
                 {
-                    { udt.SymIndexId, 0 }
+                    (udt.SymIndexId, 0)
                 };
 
             var derivedUDT = new UserDefinedTypeSymbol(this.BeforeDataCache, this.BeforeDIAAdapter, this.MockBeforeSession.Object,
                                                        $"{namePrefix}UDT{(shouldBeCOMTypes ? "COMType" : "")}{this._nextBeforeUDTIndex}_Derived",
-                                                       size, this._beforeNextSymIndexId++, UserDefinedTypeKind.UdtClass,
-                                                       baseTypeIDs: baseTypeIDs);
+                                                       size, this._beforeNextSymIndexId++, UserDefinedTypeKind.UdtClass);
+            this.BeforeDIAAdapter.BaseTypeIDsToFindByUDT.Add(derivedUDT, baseTypeIDs);
             derivedUDT.LoadBaseTypes(this.BeforeDataCache, this.BeforeDIAAdapter, CancellationToken.None);
             udt.AddDerivedType(derivedUDT);
 
@@ -1212,15 +1215,15 @@ internal sealed class DiffTestDataGenerator : IDisposable
 
         if (shouldBeCOMTypes && this.AfterIUnknownUDT is null)
         {
-            this.AfterIUnknownUDT = new UserDefinedTypeSymbol(this.AfterDataCache, this.AfterDIAAdapter, this.MockAfterSession.Object, "IUnknown", 8, this._afterNextSymIndexId++, UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+            this.AfterIUnknownUDT = new UserDefinedTypeSymbol(this.AfterDataCache, this.AfterDIAAdapter, this.MockAfterSession.Object, "IUnknown", 8, this._afterNextSymIndexId++, UserDefinedTypeKind.UdtClass);
             udts.Add(this.AfterIUnknownUDT);
         }
 
-        var iunknownBaseTypeIDs = new Dictionary<uint, uint>();
+        var iunknownBaseTypeIDs = new List<(uint, uint)>();
 
         if (shouldBeCOMTypes)
         {
-            iunknownBaseTypeIDs.Add(this.AfterIUnknownUDT.SymIndexId, 0);
+            iunknownBaseTypeIDs.Add((this.AfterIUnknownUDT.SymIndexId, 0));
         };
 
         var endIndex = this._nextAfterUDTIndex + 3;
@@ -1230,19 +1233,22 @@ internal sealed class DiffTestDataGenerator : IDisposable
             uint size = 10;
             var udt = new UserDefinedTypeSymbol(this.AfterDataCache, this.AfterDIAAdapter, this.MockAfterSession.Object,
                                                 $"{namePrefix}UDT{(shouldBeCOMTypes ? "COMType" : "")}{this._nextAfterUDTIndex}",
-                                                size, this._afterNextSymIndexId++, UserDefinedTypeKind.UdtClass,
-                                                baseTypeIDs: shouldBeCOMTypes ? iunknownBaseTypeIDs : null);
+                                                size, this._afterNextSymIndexId++, UserDefinedTypeKind.UdtClass);
+            if (shouldBeCOMTypes)
+            {
+                this.AfterDIAAdapter.BaseTypeIDsToFindByUDT.Add(udt, iunknownBaseTypeIDs);
+            }
             udt.LoadBaseTypes(this.AfterDataCache, this.AfterDIAAdapter, CancellationToken.None);
 
-            var baseTypeIDs = new Dictionary<uint, uint>()
+            var baseTypeIDs = new List<(uint, uint)>()
                 {
-                    { udt.SymIndexId, 0 }
+                    (udt.SymIndexId, 0)
                 };
 
             var derivedUDT = new UserDefinedTypeSymbol(this.AfterDataCache, this.AfterDIAAdapter, this.MockAfterSession.Object,
                                                        $"{namePrefix}UDT{(shouldBeCOMTypes ? "COMType" : "")}{this._nextAfterUDTIndex}_Derived",
-                                                       size, this._afterNextSymIndexId++, UserDefinedTypeKind.UdtClass,
-                                                       baseTypeIDs: baseTypeIDs);
+                                                       size, this._afterNextSymIndexId++, UserDefinedTypeKind.UdtClass);
+            this.AfterDIAAdapter.BaseTypeIDsToFindByUDT.Add(derivedUDT, baseTypeIDs);
             derivedUDT.LoadBaseTypes(this.AfterDataCache, this.AfterDIAAdapter, CancellationToken.None);
             udt.AddDerivedType(derivedUDT);
 
@@ -1638,7 +1644,7 @@ internal sealed class DiffTestDataGenerator : IDisposable
         var boolType = new BasicTypeSymbol(this.BeforeDataCache, "bool", size: 1, symIndexId: this._beforeNextSymIndexId++);
         var intType = new BasicTypeSymbol(this.BeforeDataCache, "int", size: 1, symIndexId: this._beforeNextSymIndexId++);
         var voidType = new BasicTypeSymbol(this.BeforeDataCache, "void", size: 0, symIndexId: this._beforeNextSymIndexId++);
-        var aComplexType = new UserDefinedTypeSymbol(this.BeforeDataCache, this.BeforeDIAAdapter, this.MockBeforeSession.Object, "AComplex::Type", instanceSize: 10, symIndexId: this._beforeNextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var aComplexType = new UserDefinedTypeSymbol(this.BeforeDataCache, this.BeforeDIAAdapter, this.MockBeforeSession.Object, "AComplex::Type", instanceSize: 10, symIndexId: this._beforeNextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
 
         return new List<IFunctionCodeSymbol>()
             {
@@ -1673,7 +1679,7 @@ internal sealed class DiffTestDataGenerator : IDisposable
         var boolType = new BasicTypeSymbol(this.AfterDataCache, "bool", size: 1, symIndexId: this._afterNextSymIndexId++);
         var intType = new BasicTypeSymbol(this.AfterDataCache, "int", size: 1, symIndexId: this._afterNextSymIndexId++);
         var voidType = new BasicTypeSymbol(this.AfterDataCache, "void", size: 0, symIndexId: this._afterNextSymIndexId++);
-        var aComplexType = new UserDefinedTypeSymbol(this.AfterDataCache, this.AfterDIAAdapter, this.MockAfterSession.Object, "AComplex::Type", instanceSize: 10, symIndexId: this._afterNextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass, baseTypeIDs: null);
+        var aComplexType = new UserDefinedTypeSymbol(this.AfterDataCache, this.AfterDIAAdapter, this.MockAfterSession.Object, "AComplex::Type", instanceSize: 10, symIndexId: this._afterNextSymIndexId++, udtKind: UserDefinedTypeKind.UdtClass);
 
         return new List<IFunctionCodeSymbol>()
             {

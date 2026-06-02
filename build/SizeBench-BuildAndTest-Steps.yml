@@ -39,10 +39,10 @@ steps:
           Write-Host "##vso[task.setvariable variable=AppxManifestPathOverride]$outputFilename"
 
 - task: UseDotNet@2
-  displayName: 'Use .NET 6 SDK'
+  displayName: 'Use .NET 8 SDK'
   inputs:
     packageType: sdk
-    version: 6.x
+    version: 8.x
     installationPath: $(Agent.ToolsDirectory)/dotnet
 
 - task: DotNetCoreCLI@2

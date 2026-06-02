@@ -1,4 +1,5 @@
-﻿using SizeBench.AnalysisEngine.Symbols;
+﻿using SizeBench.AnalysisEngine.PE;
+using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.Logging;
 
 namespace SizeBench.AnalysisEngine;
@@ -9,6 +10,10 @@ public interface ISession : ISessionWithProgress
     string BinaryPath { get; }
 
     byte BytesPerWord { get; }
+
+    IPEFile PEFile { get; }
+
+    SessionOptions SessionOptions { get; }
 
     Task<IReadOnlyList<BinarySection>> EnumerateBinarySectionsAndCOFFGroups(CancellationToken token);
     Task<IReadOnlyList<BinarySection>> EnumerateBinarySectionsAndCOFFGroups(CancellationToken token, ILogger? parentLogger);
@@ -62,14 +67,15 @@ public interface ISession : ISessionWithProgress
 
     #endregion
 
-    Task<IReadOnlyList<Library>> EnumerateLibs(CancellationToken token);
-    Task<IReadOnlyList<Library>> EnumerateLibs(CancellationToken token, ILogger? parentLogger);
+    Task<IReadOnlyCollection<Library>> EnumerateLibs(CancellationToken token);
+    Task<IReadOnlyCollection<Library>> EnumerateLibs(CancellationToken token, ILogger? parentLogger);
 
-    Task<IReadOnlyList<Compiland>> EnumerateCompilands(CancellationToken token);
+    Task<IReadOnlyCollection<Compiland>> EnumerateCompilands(CancellationToken token);
 
     Task<IReadOnlyList<SourceFile>> EnumerateSourceFiles(CancellationToken token);
 
     Task<SymbolPlacement> LookupSymbolPlacementInBinary(ISymbol symbol, CancellationToken token);
+    Task<SymbolPlacement> LookupSymbolPlacementInBinary(ISymbol symbol, LookupSymbolPlacementOptions options, CancellationToken token);
 
     Task<ISymbol?> LoadSymbolByRVA(uint rva);
     Task<ISymbol?> LoadSymbolByRVA(uint rva, CancellationToken token, ILogger? parentLogger);
@@ -105,6 +111,10 @@ public interface ISession : ISessionWithProgress
     Task<IReadOnlyList<AnnotationSymbol>> EnumerateAnnotations(CancellationToken token);
 
     Task<IReadOnlyList<ISymbol>> EnumerateAllSymbolsFoldedAtRVA(uint rva, CancellationToken token);
+
+    Task<IReadOnlyList<InlineSiteSymbol>> EnumerateAllInlineSitesInFunction(IFunctionCodeSymbol functionSymbol, CancellationToken token);
+
+    Task<IReadOnlyList<InlineSiteSymbol>> EnumerateAllInlineSites(CancellationToken token);
 
     float CompareSimilarityOfCodeBytesInBinary(IFunctionCodeSymbol firstSymbol, IFunctionCodeSymbol secondSymbol);
 

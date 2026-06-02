@@ -33,10 +33,10 @@ internal sealed class EnumerateAllSymbolsFoldedAtRVASessionTask : SessionTask<Li
         if (this.DataCache.AllCanonicalNames!.TryGetValue(primarySymbol.RVA, out var nameCanonicalization))
         {
             var list = new List<ISymbol>();
-            foreach (var symIndexIDToLoad in nameCanonicalization.NamesBySymIndexID)
+            foreach (var canonicalNameEntry in nameCanonicalization.NamesBySymIndexID)
             {
                 this.CancellationToken.ThrowIfCancellationRequested();
-                list.Add(this.DIAAdapter.FindSymbolBySymIndexId<ISymbol>(symIndexIDToLoad.Key, this.CancellationToken));
+                list.Add(this.DIAAdapter.FindSymbolBySymIndexId<ISymbol>(canonicalNameEntry.symIndexId, this.CancellationToken));
             }
             return list;
         }

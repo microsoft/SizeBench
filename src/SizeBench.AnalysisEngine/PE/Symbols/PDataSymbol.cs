@@ -1,4 +1,6 @@
-﻿namespace SizeBench.AnalysisEngine.Symbols;
+﻿using System.Diagnostics;
+
+namespace SizeBench.AnalysisEngine.Symbols;
 
 internal class PDataSymbol : EHSymbolBase
 {
@@ -6,9 +8,10 @@ internal class PDataSymbol : EHSymbolBase
 
     internal uint UnwindInfoStartRva { get; }
 
-    internal PDataSymbol(uint targetStartRVA, uint unwindInfoStartRVA, uint rva, uint size)
+    internal PDataSymbol(uint targetStartRVA, uint unwindInfoStartRVA, uint rva, uint size, SymbolSourcesSupported symbolSourcesSupported)
         : base(targetStartRVA, rva, size)
     {
+        Debug.Assert(symbolSourcesSupported.HasFlag(SymbolSourcesSupported.PDATA));
         this.UnwindInfoStartRva = unwindInfoStartRVA;
     }
 

@@ -24,7 +24,7 @@ public class AllLibsPageViewModelTests
     {
         using var generator = new SingleBinaryDataGenerator();
 
-        generator.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Libs as IReadOnlyList<Library>));
+        generator.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Libs as IReadOnlyCollection<Library>));
 
         var viewmodel = new AllLibsPageViewModel(this.MockUITaskScheduler.Object,
                                                  generator.MockSession.Object,
@@ -43,7 +43,7 @@ public class AllLibsPageViewModelTests
     {
         using var generator = new SingleBinaryDataGenerator();
 
-        generator.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Libs as IReadOnlyList<Library>));
+        generator.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Libs as IReadOnlyCollection<Library>));
 
         var viewmodel = new AllLibsPageViewModel(this.MockUITaskScheduler.Object,
                                                  generator.MockSession.Object,
@@ -65,7 +65,7 @@ public class AllLibsPageViewModelTests
     {
         using var generator = new SingleBinaryDataGenerator();
 
-        generator.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Libs as IReadOnlyList<Library>));
+        generator.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Libs as IReadOnlyCollection<Library>));
 
         var viewmodel = new AllLibsPageViewModel(this.MockUITaskScheduler.Object,
                                                  generator.MockSession.Object,
@@ -121,7 +121,7 @@ public class AllLibsPageViewModelTests
     {
         using var generator = new SingleBinaryDataGenerator();
 
-        generator.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Libs as IReadOnlyList<Library>));
+        generator.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Libs as IReadOnlyCollection<Library>));
 
         var viewmodel = new AllLibsPageViewModel(this.MockUITaskScheduler.Object,
                                                  generator.MockSession.Object,
@@ -173,7 +173,7 @@ public class AllLibsPageViewModelTests
     {
         using var generator = new SingleBinaryDataGenerator();
 
-        generator.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Libs as IReadOnlyList<Library>));
+        generator.MockSession.Setup(s => s.EnumerateLibs(It.IsAny<CancellationToken>())).Returns(Task.FromResult(generator.Libs as IReadOnlyCollection<Library>));
 
         var viewmodel = new AllLibsPageViewModel(this.MockUITaskScheduler.Object,
                                                  generator.MockSession.Object,

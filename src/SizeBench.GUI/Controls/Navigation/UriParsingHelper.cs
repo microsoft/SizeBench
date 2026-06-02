@@ -62,10 +62,7 @@ internal static class UriParsingHelper
     {
         ArgumentNullException.ThrowIfNull(newUri);
 
-        if (baseUri is null)
-        {
-            baseUri = new Uri(String.Empty, UriKind.Relative);
-        }
+        baseUri ??= new Uri(String.Empty, UriKind.Relative);
 
         Debug.Assert(!InternalUriIsFragment(baseUri), "Cannot merge URIs when the base Uri is only a fragment");
 
@@ -200,7 +197,7 @@ internal static class UriParsingHelper
     {
         var components = UriComponents.Path;
 
-        if (uri.OriginalString.StartsWith("/", StringComparison.Ordinal))
+        if (uri.OriginalString.StartsWith('/'))
         {
             components |= UriComponents.KeepDelimiter;
         }
@@ -214,9 +211,9 @@ internal static class UriParsingHelper
     /// <param name="uri">The Uri to parse the query string from</param>
     /// <param name="decodeResults">True if the resulting dictionary should contain decoded values, false if not</param>
     /// <returns>A dictionary containing one entry for each name/value pair in the query string</returns>
-    internal static IDictionary<string, string> InternalUriParseQueryStringToDictionary(Uri? uri, bool decodeResults)
+    internal static Dictionary<string, string> InternalUriParseQueryStringToDictionary(Uri? uri, bool decodeResults)
     {
-        IDictionary<string, string> dict = new Dictionary<string, string>(StringComparer.Ordinal);
+        var dict = new Dictionary<string, string>(StringComparer.Ordinal);
 
         var kvps = InternalUriGetQueryString(uri).Split(StatePairDelimiter.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
         foreach (var kvp in kvps)

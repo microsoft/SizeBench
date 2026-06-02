@@ -11,3 +11,5 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Design", "CA1051:Do not declare visible instance fields", Justification = "This isn't important for test code.")]
 
 [assembly: SuppressMessage("Usage", "CA2201:Do not raise reserved exception types", Justification = "Not important for test code.")]
+
+[assembly: SuppressMessage("Performance", "CA1861:Avoid constant arrays as arguments", Justification = "Performance of the tests isn't *that* important.")]

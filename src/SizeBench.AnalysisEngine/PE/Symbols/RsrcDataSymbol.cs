@@ -15,8 +15,8 @@ internal class RsrcDataSymbol : RsrcSymbolBase
     public Win32ResourceType Win32ResourceType { get; }
     public string ResourceTypeName { get; }
 
-    internal RsrcDataSymbol(uint rva, uint size, string language, Win32ResourceType rsrcType, string? rsrcTypeName, string dataName, string nameSuffix = "")
-        : base(rva, size, ConjureName(language, rsrcType, rsrcTypeName, dataName, nameSuffix))
+    internal RsrcDataSymbol(uint rva, uint size, string language, Win32ResourceType rsrcType, string? rsrcTypeName, string dataName, string nameSuffix, SymbolSourcesSupported symbolSourcesSupported)
+        : base(rva, size, ConjureName(language, rsrcType, rsrcTypeName, dataName, nameSuffix), symbolSourcesSupported)
     {
         this.Language = language;
         this.Win32ResourceType = rsrcType;

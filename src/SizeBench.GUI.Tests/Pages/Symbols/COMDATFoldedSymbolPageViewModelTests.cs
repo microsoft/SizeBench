@@ -33,9 +33,9 @@ public sealed class COMDATFoldedSymbolPageViewModelTests : IDisposable
         var thirdSymIndexId = this.Generator._nextSymIndexId++;
 
         var nameCanonicalization = new NameCanonicalization();
-        nameCanonicalization.AddName(testSymIndexId, "test symbol", SymTagEnum.SymTagData);
-        nameCanonicalization.AddName(canonicalSymIndexId, "canonicalName", SymTagEnum.SymTagData);
-        nameCanonicalization.AddName(thirdSymIndexId, "thirdSymbol", SymTagEnum.SymTagData);
+        nameCanonicalization.AddName(testSymIndexId, SymTagEnum.SymTagData, name: "test symbol");
+        nameCanonicalization.AddName(canonicalSymIndexId, SymTagEnum.SymTagData, name: "canonicalName");
+        nameCanonicalization.AddName(thirdSymIndexId, SymTagEnum.SymTagData, name: "thirdSymbol");
         nameCanonicalization.Canonicalize();
         this.Generator.DataCache.AllCanonicalNames!.Add(rva, nameCanonicalization);
 

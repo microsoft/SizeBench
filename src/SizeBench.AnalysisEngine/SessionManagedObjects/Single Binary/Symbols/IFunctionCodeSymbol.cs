@@ -20,6 +20,7 @@ public interface IFunctionCodeSymbol
     bool IsSealed { get; }
     bool IsPGO { get; }
     bool IsOptimizedForSpeed { get; }
+    ulong DynamicInstructionCount { get; }
 
     FunctionTypeSymbol? FunctionType { get; }
     IReadOnlyList<ParameterDataSymbol>? ArgumentNames { get; }
@@ -30,8 +31,9 @@ public interface IFunctionCodeSymbol
     TypeSymbol? ParentType { get; }
     bool IsMemberFunction { get; }
 
+    int BlockCount { get; }
     CodeBlockSymbol PrimaryBlock { get; }
-    IReadOnlyList<CodeBlockSymbol> Blocks { get; }
+    IEnumerable<CodeBlockSymbol> Blocks { get; }
 
     bool IsVeryLikelyTheSameAs(IFunctionCodeSymbol otherSymbol);
 }

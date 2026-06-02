@@ -1,6 +1,5 @@
-﻿using SizeBench.AnalysisEngine.DIAInterop;
-using SizeBench.AnalysisEngine.PE;
-using SizeBench.AnalysisEngine.Symbols;
+﻿using System.Reflection.PortableExecutable;
+using SizeBench.AnalysisEngine.DIAInterop;
 using SizeBench.Logging;
 using SizeBench.TestDataCommon;
 
@@ -30,23 +29,23 @@ public sealed class EnumerateSourceFilesSessionTaskTests : IDisposable
         this.TestDIAAdapter.BinarySectionsToFind = new List<BinarySection>()
             {
                 // .text  = 0x0000-0x1999
-                new BinarySection(this.DataCache, ".text", size: 0x2000, virtualSize: 0x2000, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryExecute),
+                new BinarySection(this.DataCache, ".text", size: 0x2000, virtualSize: 0x2000, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute),
                 // .rdata = 0x2000-0x2999
-                new BinarySection(this.DataCache, ".rdata", size: 0x1000, virtualSize: 0x1000, rva: 0x2000, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryRead),
+                new BinarySection(this.DataCache, ".rdata", size: 0x1000, virtualSize: 0x1000, rva: 0x2000, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemRead),
                 // .data  = 0x3000-0x3499
-                new BinarySection(this.DataCache, ".pdata", size: 0x500, virtualSize: 0x500, rva: 0x3000, fileAlignment: 0, sectionAlignment: 0, characteristics: DataSectionFlags.MemoryRead)
+                new BinarySection(this.DataCache, ".pdata", size: 0x500, virtualSize: 0x500, rva: 0x3000, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemRead)
             };
 
         this.TestDIAAdapter.COFFGroupsToFind = new List<COFFGroup>()
             {
                 // .text$mn = 0x0000-0x1499
-                new COFFGroup(this.DataCache, ".text$mn", size: 0x1500, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: PE.DataSectionFlags.MemoryExecute),
+                new COFFGroup(this.DataCache, ".text$mn", size: 0x1500, rva: 0, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute),
                 // .xdata = 0x2100-0x2199
-                new COFFGroup(this.DataCache, ".xdata", size: 0x100, rva: 0x2100, fileAlignment: 0, sectionAlignment: 0, characteristics: PE.DataSectionFlags.MemoryRead),
+                new COFFGroup(this.DataCache, ".xdata", size: 0x100, rva: 0x2100, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemRead),
                 // .text$zz = 0x1500-0x1999
-                new COFFGroup(this.DataCache, ".text$zz", size: 0x500, rva: 0x1500, fileAlignment: 0, sectionAlignment: 0, characteristics: PE.DataSectionFlags.MemoryExecute),
+                new COFFGroup(this.DataCache, ".text$zz", size: 0x500, rva: 0x1500, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute),
                 // .pdata = 0x3000-0x3499
-                new COFFGroup(this.DataCache, ".pdata", size: 0x500, rva: 0x3000, fileAlignment: 0, sectionAlignment: 0, characteristics: PE.DataSectionFlags.MemoryExecute),
+                new COFFGroup(this.DataCache, ".pdata", size: 0x500, rva: 0x3000, fileAlignment: 0, sectionAlignment: 0, characteristics: SectionCharacteristics.MemExecute),
             };
 
         uint nextCompilandSymIndexId = 0;
@@ -62,12 +61,10 @@ public sealed class EnumerateSourceFilesSessionTaskTests : IDisposable
                 new RawSectionContribution(libName: @"c:\dummy\a.lib", compilandName: @"c:\dummy\a2.obj", compilandSymIndexId: nextCompilandSymIndexId++, rva: 0x0500, length: 0x1000),
             };
 
-        this.DataCache.PDataRVARange = new RVARange(0, 0);
-        this.DataCache.PDataSymbolsByRVA = new SortedList<uint, PDataSymbol>();
-        this.DataCache.XDataRVARanges = new RVARangeSet();
-        this.DataCache.XDataSymbolsByRVA = new SortedList<uint, XDataSymbol>();
-        this.DataCache.RsrcRVARange = new RVARange(0, 0);
-        this.DataCache.RsrcSymbolsByRVA = new SortedList<uint, RsrcSymbolBase>();
+        this.DataCache.PDataHasBeenInitialized = true;
+        this.DataCache.XDataHasBeenInitialized = true;
+        this.DataCache.RsrcHasBeenInitialized = true;
+        this.DataCache.OtherPESymbolsHaveBeenInitialized = true;
     }
 
     [TestMethod]
@@ -201,7 +198,7 @@ public sealed class EnumerateSourceFilesSessionTaskTests : IDisposable
         Assert.AreEqual<ulong>(0x200, cgContrib.Value.RVARanges[0].Size);
 
         Assert.AreEqual(1, a1SourceFile.Compilands.Count);
-        Assert.AreEqual(a1Compiland, a1SourceFile.Compilands[0]);
+        Assert.AreEqual(a1Compiland, a1SourceFile.Compilands.First());
 
         Assert.AreEqual(1, a1SourceFile.CompilandContributions.Count);
         var compilandContrib = a1SourceFile.CompilandContributions.First();
@@ -236,7 +233,7 @@ public sealed class EnumerateSourceFilesSessionTaskTests : IDisposable
         Assert.AreEqual<ulong>(0x50, cgContrib.Value.RVARanges[1].Size);
 
         Assert.AreEqual(1, a2SourceFile.Compilands.Count);
-        Assert.AreEqual(a2Compiland, a2SourceFile.Compilands[0]);
+        Assert.AreEqual(a2Compiland, a2SourceFile.Compilands.First());
 
         Assert.AreEqual(1, a2SourceFile.CompilandContributions.Count);
         compilandContrib = a2SourceFile.CompilandContributions.First();

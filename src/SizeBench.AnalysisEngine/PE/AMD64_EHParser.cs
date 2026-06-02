@@ -31,7 +31,8 @@ internal sealed unsafe class AMD64_EHParser : EHSymbolParser
 
     public AMD64_EHParser(IDIAAdapter diaAdapter,
                           byte* libraryBaseAddress,
-                          MachineType machineType) : base(diaAdapter, libraryBaseAddress, machineType)
+                          PEFile peFile,
+                          SymbolSourcesSupported symbolSourcesSupported) : base(diaAdapter, libraryBaseAddress, peFile, symbolSourcesSupported)
     {
         this.__GSHandlerCheck_EHRva = diaAdapter.SymbolRvaFromName("__GSHandlerCheck_EH", true);
         this.__GSHandlerCheck_EH4Rva = diaAdapter.SymbolRvaFromName("__GSHandlerCheck_EH4", true);
@@ -56,12 +57,20 @@ internal sealed unsafe class AMD64_EHParser : EHSymbolParser
         var flags = (UNWIND_INFO_Flags)(versionAndFlags >> 3); // Upper 5 bits are flags
         var version = (byte)(versionAndFlags & 0x7); // Bottom 3 bits are the version
 
+        // If the flags are 0 and version is 0, then this is some kind of stub that might be here because of incremental linking or incremental LTCG.
+        // We can ignore this one - it is only a few bytes in size so it's not material to size concerns.
+        if (flags == 0 && version == 0)
+        {
+            return;
+        }
+
         // Version 2 of UNWIND_INFO didn't change the size of anything, it introduced some new EpilogueCode
         // stuff, but via a union - so for the purposes of SizeBench this isn't interesting (same size).
         // We throw here because who knows, maybe v3 will exist someday with a different size.
+        
         if (version is < 1 or > 2)
         {
-            throw new InvalidOperationException("SizeBench only knows how to parse version 1 and 2 UNWIND_INFO structures!");
+            throw new InvalidOperationException($"SizeBench only knows how to parse version 1 and 2 UNWIND_INFO structures!  This binary has an UNWIND_INFO of version {version}.");
         }
 
         pRawXdata++; // skip VersionAndFlags byte
@@ -88,14 +97,14 @@ internal sealed unsafe class AMD64_EHParser : EHSymbolParser
 
         var pAfterUnwindCodes = pRawXdata;
 
-        if (flags == UNWIND_INFO_Flags.UNW_FLAG_CHAININFO)
+        if (flags.HasFlag(UNWIND_INFO_Flags.UNW_FLAG_CHAININFO))
         {
             ParseOneChainInfo(targetSymbol, targetStartRva, unwindInfoStartRva, pAfterUnwindCodes, unwindInfoStart);
         }
         else if (flags == 0)
         {
             // Just a simple [unwind]
-            AddXData(new UnwindInfoSymbol(targetSymbol, targetStartRva, unwindInfoStartRva, (uint)(pAfterUnwindCodes - unwindInfoStart)));
+            AddXData(new UnwindInfoSymbol(targetSymbol, targetStartRva, unwindInfoStartRva, (uint)(pAfterUnwindCodes - unwindInfoStart), this.SymbolSourcesSupported));
         }
         else
         {
@@ -109,15 +118,15 @@ internal sealed unsafe class AMD64_EHParser : EHSymbolParser
         var rfChain = Marshal.PtrToStructure<RUNTIME_FUNCTION>(new IntPtr(pAfterUnwindCodes));
         pAfterUnwindCodes += Marshal.SizeOf<RUNTIME_FUNCTION>();
 
-        AddXData(new ChainUnwindInfoSymbol(targetSymbol, targetStartRva, unwindInfoStartRva, (uint)(pAfterUnwindCodes - unwindInfoStart)));
+        AddXData(new ChainUnwindInfoSymbol(targetSymbol, targetStartRva, unwindInfoStartRva, (uint)(pAfterUnwindCodes - unwindInfoStart), this.SymbolSourcesSupported));
 
         var targetSymbolForChain = GetTargetSymbolForRVA(rfChain.FunctionStartRva);
         ParseOneXData(targetSymbolForChain, rfChain.FunctionStartRva, rfChain.UnwindInfoRva);
     }
 
-    protected override SortedList<uint, PDataSymbol> ParsePDataForArchitecture(uint sectionAlignment, SessionDataCache cache)
+    protected override SortedList<uint, PDataSymbol> ParsePDataForArchitecture(SessionDataCache cache)
     {
-        var pdataFunctions = ParsePDATA<RUNTIME_FUNCTION>(this.LibraryBaseAddress, sectionAlignment, cache);
+        var pdataFunctions = ParsePDATA<RUNTIME_FUNCTION>(this.LibraryBaseAddress, cache);
 
         // There's no pdata, so we're done
         if (pdataFunctions is null)
@@ -152,16 +161,16 @@ internal sealed unsafe class AMD64_EHParser : EHSymbolParser
                 continue;
             }
 
-            var pdataEntryRva = cache.PDataRVARange!.RVAStart + (uint)(i * sizeOfRUNTIMEFUNCTION);
-            pdataSymbols.Add(pdataEntryRva, new PDataSymbol(pdataEntry.FunctionStartRva, pdataEntry.UnwindInfoRva, pdataEntryRva, sizeOfRUNTIMEFUNCTION));
+            var pdataEntryRva = cache.PDataRVARange.RVAStart + (uint)(i * sizeOfRUNTIMEFUNCTION);
+            pdataSymbols.Add(pdataEntryRva, new PDataSymbol(pdataEntry.FunctionStartRva, pdataEntry.UnwindInfoRva, pdataEntryRva, sizeOfRUNTIMEFUNCTION, this.SymbolSourcesSupported));
         }
 
         return pdataSymbols;
     }
 
-    protected override void ParseXDataForArchitecture(uint sectionAlignment, RVARange? XDataRVARange, SessionDataCache cache)
+    protected override void ParseXDataForArchitecture(RVARange? XDataRVARange, SessionDataCache cache)
     {
-        foreach (var pds in cache.PDataSymbolsByRVA!.Values)
+        foreach (var pds in cache.PDataSymbolsByRVA.Values)
         {
             var targetSymbol = GetTargetSymbolForRVA(pds.TargetStartRVA);
             pds.UpdateTargetSymbol(targetSymbol);

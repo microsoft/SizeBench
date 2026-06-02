@@ -36,7 +36,7 @@ internal sealed class FunctionSymbolPageViewModel : SingleBinaryViewModelBase
         }
     }
 
-    public bool DoesFunctionContainMultipleCodeBlocks => this.Function?.Blocks.Count > 1;
+    public bool DoesFunctionContainMultipleCodeBlocks => this.Function?.BlockCount > 1;
 
     public bool IsFunctionCodeUsedForMultipleFunctions => this.FoldedFunctions?.Count > 1;
 
@@ -51,6 +51,20 @@ internal sealed class FunctionSymbolPageViewModel : SingleBinaryViewModelBase
             RaisePropertyChanged(nameof(this.IsFunctionCodeUsedForMultipleFunctions));
         }
     }
+
+    private IReadOnlyList<InlineSiteSymbol>? _inlineSites;
+    public IReadOnlyList<InlineSiteSymbol>? InlineSites
+    {
+        get => this._inlineSites;
+        set
+        {
+            this._inlineSites = value;
+            RaisePropertyChanged();
+            RaisePropertyChanged(nameof(this.HasInlineSites));
+        }
+    }
+
+    public bool HasInlineSites => this.InlineSites?.Count > 0;
 
     public ObservableCollection<KeyValuePair<CodeBlockSymbol, SymbolPlacement>> BlockPlacements { get; } = new ObservableCollection<KeyValuePair<CodeBlockSymbol, SymbolPlacement>>();
 
@@ -144,6 +158,11 @@ internal sealed class FunctionSymbolPageViewModel : SingleBinaryViewModelBase
         if (this.Function.IsPGO)
         {
             attributes.Add("has been PGO'd");
+
+            if (this.Function.DynamicInstructionCount > 0)
+            {
+                attributes.Add($"has PGO dynamic instruction count of {this.Function.DynamicInstructionCount:N0}");
+            }
         }
 
         if (this.Function.IsOptimizedForSpeed)
@@ -174,6 +193,9 @@ internal sealed class FunctionSymbolPageViewModel : SingleBinaryViewModelBase
                 this.FoldedFunctions = foldedFunctions.OrderBy(fn => fn.FullName).ToList();
             }
         });
+
+        await this._uiTaskScheduler.StartLongRunningUITask("Looking up all the inline sites in this function", async (token)
+            => this.InlineSites = await this.Session.EnumerateAllInlineSitesInFunction(this.Function, token));
 
         await this._uiTaskScheduler.StartLongRunningUITask($"Disassembling {this.Function.FullName}", async (token)
             => this.Disassembly = await this.Session.DisassembleFunction(this.Function, new DisassembleFunctionOptions(), token));

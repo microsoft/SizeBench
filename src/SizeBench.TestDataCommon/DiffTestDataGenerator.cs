@@ -1738,7 +1738,7 @@ internal sealed class DiffTestDataGenerator : IDisposable
         return complexFn;
     }
 
-    private bool IsCOMType(UserDefinedTypeSymbol udt)
+    private static bool IsCOMType(UserDefinedTypeSymbol udt)
     {
         if (udt.Name == "IUnknown")
         {

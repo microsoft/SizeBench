@@ -1442,7 +1442,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         }
     }
 
-    private void RecursivelyFindSymbols(IDiaSymbol parentSymbol,
+    private static void RecursivelyFindSymbols(IDiaSymbol parentSymbol,
                                         SymTagEnum[] symTagsToSearchThrough,
                                         SymTagEnum symTagToProcess,
                                         CancellationToken cancellationToken,

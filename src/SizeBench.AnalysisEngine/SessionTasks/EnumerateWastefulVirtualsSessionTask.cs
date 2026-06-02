@@ -254,7 +254,7 @@ internal sealed class EnumerateWastefulVirtualsSessionTask : SessionTask<List<Wa
     private static bool IsPureVirtualFunction(IFunctionCodeSymbol function)
         => function.IsPure && IsVirtualFunction(function);
 
-    private bool BaseTypeContainsVirtualFunction(UserDefinedTypeSymbol thisClass, string functionFormattedName)
+    private static bool BaseTypeContainsVirtualFunction(UserDefinedTypeSymbol thisClass, string functionFormattedName)
     {
         if (thisClass.Functions != null &&
             thisClass.Functions.Any(f => IsVirtualFunction(f) &&

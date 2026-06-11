@@ -179,12 +179,10 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         {
             this.LoadedPdbPath = this._globalScope.symbolsFileName;
         }
-#pragma warning disable CA1031 // Do not catch general exception types - symbolsFileName is informational only; some PDBs may not expose it.
-        catch (Exception)
+        catch (COMException)
         {
-            // Leave LoadedPdbPath null if DIA can't report it
+            // Leave LoadedPdbPath null if DIA can't report it for this PDB type
         }
-#pragma warning restore CA1031
 
         var machineType = this._globalScope.machineType;
 

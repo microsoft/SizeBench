@@ -91,4 +91,36 @@ public sealed class SelectSessionOptionsControlViewModelTests
         Assert.AreEqual(4, propertiesChanged.Count);
         CollectionAssert.AreEquivalent(new[] { "", "", "", "" }, propertiesChanged);
     }
+
+    [TestMethod]
+    public void SymbolServerToggleFlowsThroughToSessionOptions()
+    {
+        var vm = new SelectSessionOptionsControlViewModel();
+
+        // Default - no symbol server
+        Assert.IsFalse(vm.UseSymbolServer);
+        Assert.IsNull(vm.SessionOptions.SymbolServerSearchPath);
+        Assert.IsFalse(vm.HasAnySymbolServerPaths);
+
+        // Setting the text only does not enable usage; SessionOptions still has null search path
+        vm.SymbolServerPathsText = "srv*https://contoso/symbols";
+        Assert.IsTrue(vm.HasAnySymbolServerPaths);
+        Assert.IsNull(vm.SessionOptions.SymbolServerSearchPath);
+
+        // Enabling the checkbox surfaces the search path to SessionOptions
+        vm.UseSymbolServer = true;
+        Assert.AreEqual("srv*https://contoso/symbols", vm.SessionOptions.SymbolServerSearchPath);
+
+        // Multiple lines are joined with ';' for symsrv
+        vm.SymbolServerPathsText = "C:\\local\r\nsrv*C:\\cache*https://msdl";
+        Assert.AreEqual("C:\\local;srv*C:\\cache*https://msdl", vm.SessionOptions.SymbolServerSearchPath);
+
+        // Blank lines are ignored
+        vm.SymbolServerPathsText = "\r\n\r\nC:\\local\r\n\r\n";
+        Assert.AreEqual("C:\\local", vm.SessionOptions.SymbolServerSearchPath);
+
+        // Disabling the toggle removes the search path even if text remains
+        vm.UseSymbolServer = false;
+        Assert.IsNull(vm.SessionOptions.SymbolServerSearchPath);
+    }
 }

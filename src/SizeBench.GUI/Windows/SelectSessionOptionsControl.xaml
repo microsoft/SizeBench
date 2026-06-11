@@ -7,31 +7,59 @@
              d:DesignWidth="500" d:Background="White"
              MaxWidth="600">
     <Expander Header="Advanced Options" IsExpanded="False">
-        <HeaderedContentControl Header="Symbols Sourced From:">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+        <StackPanel>
+            <HeaderedContentControl Header="Symbols Sourced From:">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                <WrapPanel Margin="5">
-                    <CheckBox Width="100" Content="Code" IsChecked="{Binding CodeSymbolsSupported}" ToolTip="Ex: functions, separated code blocks, thunks" />
-                    <CheckBox Width="100" Content="Data" IsChecked="{Binding DataSymbolsSupported}" ToolTip="Ex: data symbols like constexpr arrays or strings" />
-                    <CheckBox Width="100" Content="PDATA" IsChecked="{Binding PDATASymbolsSupported}" ToolTip="Ex: procedure data (.pdata section)" />
-                    <CheckBox Width="100" Content="XDATA" IsChecked="{Binding XDATASymbolsSupported}" ToolTip="Ex: exception unwinding data (.xdata COFF Group)"/>
-                    <CheckBox Width="100" Content="RSRC" IsChecked="{Binding RSRCSymbolsSupported}" ToolTip="Ex: Win32 resources (.rsrc section)" />
-                    <CheckBox Width="200" Content="Other PE Symbols" IsChecked="{Binding OtherPESymbolsSupported}"  ToolTip="Ex: load config directory, imports, delay load imports, debug directories" />
-                </WrapPanel>
-                
-                <TextBlock Grid.Row="1" Margin="10,0,10,0" TextWrapping="Wrap">
-                    <Run>Some sources of symbols (like PDATA and XDATA) can take a long time to parse out of large binaries, so</Run>
-                    <Run>you can disable them to open a binary up much faster if you're only looking for certain things like code.</Run>
-                    <Run>Hover over any of the checkboxes to see a description of this type of symbol.</Run>
-                    <LineBreak/>
-                    <LineBreak/>
-                    <Bold><Run>Note: if some symbol sources are disabled, then SizeBench will show a subset of its normal data.</Run></Bold>
-                </TextBlock>
-            </Grid>
-        </HeaderedContentControl>
+                    <WrapPanel Margin="5">
+                        <CheckBox Width="100" Content="Code" IsChecked="{Binding CodeSymbolsSupported}" ToolTip="Ex: functions, separated code blocks, thunks" />
+                        <CheckBox Width="100" Content="Data" IsChecked="{Binding DataSymbolsSupported}" ToolTip="Ex: data symbols like constexpr arrays or strings" />
+                        <CheckBox Width="100" Content="PDATA" IsChecked="{Binding PDATASymbolsSupported}" ToolTip="Ex: procedure data (.pdata section)" />
+                        <CheckBox Width="100" Content="XDATA" IsChecked="{Binding XDATASymbolsSupported}" ToolTip="Ex: exception unwinding data (.xdata COFF Group)"/>
+                        <CheckBox Width="100" Content="RSRC" IsChecked="{Binding RSRCSymbolsSupported}" ToolTip="Ex: Win32 resources (.rsrc section)" />
+                        <CheckBox Width="200" Content="Other PE Symbols" IsChecked="{Binding OtherPESymbolsSupported}"  ToolTip="Ex: load config directory, imports, delay load imports, debug directories" />
+                    </WrapPanel>
+
+                    <TextBlock Grid.Row="1" Margin="10,0,10,0" TextWrapping="Wrap">
+                        <Run>Some sources of symbols (like PDATA and XDATA) can take a long time to parse out of large binaries, so</Run>
+                        <Run>you can disable them to open a binary up much faster if you're only looking for certain things like code.</Run>
+                        <Run>Hover over any of the checkboxes to see a description of this type of symbol.</Run>
+                        <LineBreak/>
+                        <LineBreak/>
+                        <Bold><Run>Note: if some symbol sources are disabled, then SizeBench will show a subset of its normal data.</Run></Bold>
+                    </TextBlock>
+                </Grid>
+            </HeaderedContentControl>
+
+            <HeaderedContentControl Header="Symbol Server:" Margin="0,10,0,0">
+                <StackPanel>
+                    <CheckBox Margin="5,5,5,5"
+                              Content="Use symbol server (download the PDB automatically when no local PDB is provided)"
+                              IsChecked="{Binding UseSymbolServer}"
+                              ToolTip="When enabled and no PDB path is supplied, SizeBench will use DIA to download the matching PDB from the configured symbol servers."/>
+
+                    <TextBlock Margin="10,0,10,5" TextWrapping="Wrap">
+                        <Run>One symbol server path per line. Each line is a standard symsrv-style entry, for example:</Run>
+                        <LineBreak/>
+                        <Run FontFamily="Consolas">srv*C:\Symbols*https://msdl.microsoft.com/download/symbols</Run>
+                        <LineBreak/>
+                        <Run>The list below is saved across sessions.</Run>
+                    </TextBlock>
+
+                    <TextBox Margin="10,0,10,5"
+                             MinHeight="80"
+                             MaxHeight="160"
+                             AcceptsReturn="True"
+                             VerticalScrollBarVisibility="Auto"
+                             FontFamily="Consolas"
+                             IsEnabled="{Binding UseSymbolServer}"
+                             Text="{Binding SymbolServerPathsText, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+            </HeaderedContentControl>
+        </StackPanel>
     </Expander>
 </UserControl>

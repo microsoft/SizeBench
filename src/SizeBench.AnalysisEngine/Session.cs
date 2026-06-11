@@ -18,7 +18,9 @@ public sealed class Session : ISession
 {
     private readonly string _originalPDBPathMayBeRemote;
     private GuaranteedLocalFile? _guaranteedLocalPDBFile;
-    public string PdbPath => this._guaranteedLocalPDBFile?.OriginalPath ?? "No pdb opened yet";
+    public string PdbPath => this._guaranteedLocalPDBFile?.OriginalPath
+                              ?? this._diaAdapter?.LoadedPdbPath
+                              ?? (String.IsNullOrEmpty(this._originalPDBPathMayBeRemote) ? "No pdb opened yet" : this._originalPDBPathMayBeRemote);
 
     private readonly string _originalBinaryPathMayBeRemote;
     public string BinaryPath => this._peFile?.GuaranteedLocalCopyOfBinary.OriginalPath ?? "No binary opened yet";
@@ -139,8 +141,14 @@ public sealed class Session : ISession
         this.SessionOptions = options;
         this.DataCache = new SessionDataCache(options.SymbolSourcesSupported);
 
-        Debug.Assert(File.Exists(pdbPath));
-        this._originalPDBPathMayBeRemote = pdbPath;
+        var hasExplicitPdbPath = !String.IsNullOrEmpty(pdbPath);
+        var hasSymbolServer = !String.IsNullOrWhiteSpace(options.SymbolServerSearchPath);
+        if (!hasExplicitPdbPath && !hasSymbolServer)
+        {
+            throw new ArgumentException("Either a PDB path or a SymbolServerSearchPath in SessionOptions must be supplied.", nameof(pdbPath));
+        }
+        Debug.Assert(!hasExplicitPdbPath || File.Exists(pdbPath));
+        this._originalPDBPathMayBeRemote = pdbPath ?? String.Empty;
         Debug.Assert(File.Exists(binaryPath));
         this._originalBinaryPathMayBeRemote = binaryPath;
 
@@ -158,10 +166,22 @@ public sealed class Session : ISession
         using var initializeDiaThreadLog = this._logger.StartTaskLog($"Setting up initial data needed to open the session (symbol sources: {this.SessionOptions.SymbolSourcesSupported})");
         this._diaManagedThreadId = Environment.CurrentManagedThreadId;
 
-        this.ProgressReporter?.Report(new SessionTaskProgress("Copying PDB file locally if necessary.", 0, null));
-        this._guaranteedLocalPDBFile = new GuaranteedLocalFile(this._originalPDBPathMayBeRemote, initializeDiaThreadLog);
+        var hasExplicitPdb = !String.IsNullOrEmpty(this._originalPDBPathMayBeRemote);
+        if (hasExplicitPdb)
+        {
+            this.ProgressReporter?.Report(new SessionTaskProgress("Copying PDB file locally if necessary.", 0, null));
+            this._guaranteedLocalPDBFile = new GuaranteedLocalFile(this._originalPDBPathMayBeRemote, initializeDiaThreadLog);
 
-        this._diaAdapter = new DIAAdapter(this, this._guaranteedLocalPDBFile.GuaranteedLocalPath);
+            this._diaAdapter = new DIAAdapter(this, this._guaranteedLocalPDBFile.GuaranteedLocalPath);
+        }
+        else
+        {
+            var searchPath = this.SessionOptions.SymbolServerSearchPath!;
+            initializeDiaThreadLog.Log($"No explicit PDB supplied - using symbol server search path: {searchPath}");
+            this.ProgressReporter?.Report(new SessionTaskProgress("Downloading PDB from symbol server if necessary.", 0, null));
+
+            this._diaAdapter = new DIAAdapter(this, this._originalBinaryPathMayBeRemote, searchPath);
+        }
         this._taskParameters = new SessionTaskParameters(this, this._diaAdapter, this.DataCache);
 
         this._peFile = new PEFile(this._originalBinaryPathMayBeRemote, this.SessionOptions.SymbolSourcesSupported, initializeDiaThreadLog);

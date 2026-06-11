@@ -58,10 +58,22 @@
 
   <!-- This is all the stuff necessary to use DbgX at runtime, it's needed in multiple projects, so it's centralized here -->
   <ItemGroup Condition="'$(IncludeDbgXAssets)'=='true' and '$(MicrosoftDebuggingDataModelDbgModelApiXtnPath)' != ''">
-    <Content Include="..\ExternalDependencies\DIA\msdia140.dll">
+    <Content Include="$(MicrosoftDebuggingPlatformDbgEngContent)amd64\msdia140.dll" Condition="Exists('$(MicrosoftDebuggingPlatformDbgEngContent)amd64\msdia140.dll')">
+      <Link>msdia140.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>False</Visible>
     </Content>
     <None Include="$(MicrosoftDebuggingDataModelDbgModelApiXtnPath)\**\*" CopyToOutputDirectory="PreserveNewest" Visible="False" Link="%(RecursiveDir)%(FileName)%(Extension)"/>
+  </ItemGroup>
+
+  <!-- Drop symsrv.dll next to msdia140.dll so DIA's loadDataForExe can resolve PDBs from symbol servers.
+       msdia140 looks for symsrv.dll in its own directory; without this, srv*...*https://... segments are silently ignored. -->
+  <ItemGroup Condition="'$(IncludeDbgXAssets)'=='true' and '$(MicrosoftDebuggingPlatformSymSrvContent)' != ''">
+    <Content Include="$(MicrosoftDebuggingPlatformSymSrvContent)amd64\symsrv.dll" Condition="Exists('$(MicrosoftDebuggingPlatformSymSrvContent)amd64\symsrv.dll')">
+      <Link>symsrv.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Visible>False</Visible>
+    </Content>
   </ItemGroup>
 
   <!-- Embed the git hash in the assembly informational version -->

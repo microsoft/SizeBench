@@ -12,12 +12,12 @@ internal static class EnumHelper<T>
 
         foreach (var fi in typeof(T).GetFields(BindingFlags.Static | BindingFlags.Public))
         {
-            enumValues.Add((T)Enum.Parse(typeof(T), fi.Name, false));
+            enumValues.Add(Enum.Parse<T>(fi.Name, false));
         }
         return enumValues;
     }
 
-    public static T Parse(string value) => (T)Enum.Parse(typeof(T), value, true);
+    public static T Parse(string value) => Enum.Parse<T>(value, true);
 
     public static IList<string> GetNames() => typeof(T).GetFields(BindingFlags.Static | BindingFlags.Public).Select(fi => fi.Name).ToList();
 

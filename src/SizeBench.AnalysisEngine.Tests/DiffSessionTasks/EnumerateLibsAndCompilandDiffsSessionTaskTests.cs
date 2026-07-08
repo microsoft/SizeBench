@@ -36,12 +36,12 @@ public sealed class EnumerateLibsAndCompilandDiffsSessionTaskTests : IDisposable
         using var logger = new NoOpLogger();
         var results = await task.ExecuteAsync(logger);
 
-        Assert.AreEqual(4, results.Count);
-        Assert.AreEqual(1, results.Where(libDiff => libDiff.BeforeLib is null).Count());
+        Assert.HasCount(4, results);
+        Assert.ContainsSingle(libDiff => libDiff.BeforeLib is null, results);
         Assert.AreEqual("c.lib", results.First(libDiff => libDiff.AfterLib is null).Name);
-        Assert.AreEqual(1, results.Where(libDiff => libDiff.AfterLib is null).Count());
+        Assert.ContainsSingle(libDiff => libDiff.AfterLib is null, results);
         Assert.AreEqual("d.lib", results.First(libDiff => libDiff.BeforeLib is null).Name);
-        Assert.AreEqual(0, results.Where(libDiff => libDiff.BeforeLib is null && libDiff.AfterLib is null).Count());
+        Assert.IsEmpty(results.Where(libDiff => libDiff.BeforeLib is null && libDiff.AfterLib is null));
 
         Assert.AreEqual(400, results.First(libDiff => libDiff.Name == "a.lib").SizeDiff);
         Assert.AreEqual(600, results.First(libDiff => libDiff.Name == "a.lib").VirtualSizeDiff);
@@ -69,7 +69,7 @@ public sealed class EnumerateLibsAndCompilandDiffsSessionTaskTests : IDisposable
         var output = await task.ExecuteAsync(logger);
 
         Assert.IsNotNull(this._generator.DiffDataCache.AllLibDiffsInList);
-        Assert.AreEqual(4, this._generator.DiffDataCache.AllLibDiffsInList.Count);
+        Assert.HasCount(4, this._generator.DiffDataCache.AllLibDiffsInList);
 
         var list = this._generator.DiffDataCache.AllLibDiffsInList;
 
@@ -83,7 +83,7 @@ public sealed class EnumerateLibsAndCompilandDiffsSessionTaskTests : IDisposable
         var output2 = await task.ExecuteAsync(logger);
 
         Assert.IsNotNull(this._generator.DiffDataCache.AllLibDiffsInList);
-        Assert.AreEqual(4, this._generator.DiffDataCache.AllLibDiffsInList.Count);
+        Assert.HasCount(4, this._generator.DiffDataCache.AllLibDiffsInList);
         Assert.IsTrue(ReferenceEquals(list, this._generator.DiffDataCache.AllLibDiffsInList));
     }
 

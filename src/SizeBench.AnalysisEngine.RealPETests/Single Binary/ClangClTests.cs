@@ -158,16 +158,16 @@ public sealed class ClangClTests
         Assert.IsNotNull(firstEntry);
         Assert.AreEqual(0x1510u, firstEntry.RVA);
         Assert.AreEqual(firstEntry.Name, ((Symbol)firstEntry).CanonicalName);
-        StringAssert.Contains(firstEntry.Name, "Dllx64_DerivedClass", StringComparison.Ordinal);
-        StringAssert.Contains(firstEntry.Name, "AVirtualFunction", StringComparison.Ordinal);
+        Assert.Contains("Dllx64_DerivedClass", firstEntry.Name, StringComparison.Ordinal);
+        Assert.Contains("AVirtualFunction", firstEntry.Name, StringComparison.Ordinal);
 
         // Get an entry that is from the base class (not overridden in the derived class)
         var secondEntry = await ClangClx64Session.LoadSymbolForVTableSlotAsync(derivedClassVftableRVA, slotIndex: 1);
         Assert.IsNotNull(secondEntry);
         Assert.AreEqual(0x14F0u, secondEntry.RVA);
         Assert.AreEqual(secondEntry.Name, ((Symbol)secondEntry).CanonicalName);
-        StringAssert.Contains(secondEntry.Name, "Dllx64_BaseClass", StringComparison.Ordinal);
-        StringAssert.Contains(secondEntry.Name, "ASecondVirtualFunction", StringComparison.Ordinal);
+        Assert.Contains("Dllx64_BaseClass", secondEntry.Name, StringComparison.Ordinal);
+        Assert.Contains("ASecondVirtualFunction", secondEntry.Name, StringComparison.Ordinal);
     }
 
     [TestMethod]
@@ -180,7 +180,7 @@ public sealed class ClangClTests
 
         var typeWithClangExtensionsLayouts = await ClangClx64Session!.LoadTypeLayoutsByName("TypeWithClangExtensions", CancellationToken.None);
 
-        Assert.AreEqual(1, typeWithClangExtensionsLayouts.Count);
+        Assert.HasCount(1, typeWithClangExtensionsLayouts);
 
         // We should see a "_Float16" member, then 2 bytes of padding, then a 4 byte standard float
         var typeWithClangExtensionsLayout = typeWithClangExtensionsLayouts[0];
@@ -190,7 +190,7 @@ public sealed class ClangClTests
         Assert.AreEqual(0u, typeWithClangExtensionsLayout.UsedForVFPtrsExclusive);
         Assert.IsNull(typeWithClangExtensionsLayout.BaseTypeLayouts);
         Assert.IsNotNull(typeWithClangExtensionsLayout.MemberLayouts);
-        Assert.AreEqual(3, typeWithClangExtensionsLayout.MemberLayouts.Count);
+        Assert.HasCount(3, typeWithClangExtensionsLayout.MemberLayouts);
 
         Assert.AreEqual(0u, typeWithClangExtensionsLayout.MemberLayouts[0].Offset);
         Assert.AreEqual(2u, typeWithClangExtensionsLayout.MemberLayouts[0].Size);
@@ -216,14 +216,14 @@ public sealed class ClangClTests
         // Also test that _Float16 is used in method names, like the return type and parameter types
         var functions = await ClangClx64Session.EnumerateFunctionsFromUserDefinedType(typeWithClangExtensionsLayout.UserDefinedType, CancellationToken.None);
 
-        Assert.AreEqual(3, functions.Count);
+        Assert.HasCount(3, functions);
 
         var getFloat16 = functions.Single(x => x.FunctionName == "GetFloat16");
         Assert.AreEqual("_Float16", getFloat16.FunctionType!.ReturnValueType.Name);
         Assert.AreEqual("_Float16 TypeWithClangExtensions::GetFloat16() const", getFloat16.FormattedName.All);
 
         var setFloat16 = functions.Single(x => x.FunctionName == "SetFloat16");
-        Assert.AreEqual(1, setFloat16.FunctionType!.ArgumentTypes!.Count);
+        Assert.HasCount(1, setFloat16.FunctionType!.ArgumentTypes);
         Assert.AreEqual("_Float16", setFloat16.FunctionType!.ArgumentTypes![0].Name);
         Assert.AreEqual("void TypeWithClangExtensions::SetFloat16(_Float16)", setFloat16.FormattedName.All);
     }
@@ -237,5 +237,5 @@ public sealed class ClangClTests
             Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.ClangClx64.dll"),
             Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.ClangClx64.pdb"),
             symbolSources,
-            this.TestContext!.CancellationTokenSource.Token);
+            this.TestContext!.CancellationToken);
 }

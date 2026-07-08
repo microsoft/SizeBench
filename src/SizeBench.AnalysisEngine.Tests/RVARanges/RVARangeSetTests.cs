@@ -32,32 +32,30 @@ public class RVARangeSetTests
         Assert.IsTrue(set.AtLeastPartiallyOverlapsWith(new RVARange(350, 550)));
     }
 
-    [ExpectedException(typeof(ArgumentException))]
     [TestMethod]
     public void AdjacentRVARangesBeingAddedThrows()
     {
         // The AtLeastPartiallyOverlapsWith code really needs us to not allow adjacent ranges in - the caller
         // should collapse them before putting them in the set.
-        _ = new RVARangeSet
+        Assert.ThrowsExactly<ArgumentException>(() => new RVARangeSet
             {
                 new RVARange(100, 200),
                 new RVARange(400, 500),
                 new RVARange(200, 300) // Should throw since it's adjacent to (100, 200)
-            };
+            });
     }
 
-    [ExpectedException(typeof(ArgumentException))]
     [TestMethod]
     public void OverlappingRVARangesBeingAddedThrows()
     {
         // The AtLeastPartiallyOverlapsWith code really needs us to not allow overlapping ranges in - the caller
         // should collapse them before putting them in the set.
-        _ = new RVARangeSet
+        Assert.ThrowsExactly<ArgumentException>(() => new RVARangeSet
             {
                 new RVARange(100, 200),
                 new RVARange(400, 500),
                 new RVARange(100, 150) // Should throw since it's overlapping with (100, 200)
-            };
+            });
     }
 
     [TestMethod]
@@ -90,7 +88,6 @@ public class RVARangeSetTests
         Assert.IsTrue(set.Contains(500));
     }
 
-    [ExpectedException(typeof(ArgumentException))]
     [TestMethod]
     public void AdjacentRVARangesBeingUnionedThrows()
     {
@@ -108,10 +105,10 @@ public class RVARangeSetTests
                 new RVARange(200, 300)
             };
 
-        set.UnionWith(set2); // Should throw because of the adjacent set
+        // Should throw because of the adjacent set
+        Assert.ThrowsExactly<ArgumentException>(() => set.UnionWith(set2));
     }
 
-    [ExpectedException(typeof(ArgumentException))]
     [TestMethod]
     public void OverlappingRVARangesBeingUnionedThrows()
     {
@@ -129,7 +126,7 @@ public class RVARangeSetTests
                 new RVARange(100, 150)
             };
 
-        set.UnionWith(set2); // Should throw because of the overlapping set
+        Assert.ThrowsExactly<ArgumentException>(() => set.UnionWith(set2)); // Should throw because of the overlapping set
     }
 
     [TestMethod]

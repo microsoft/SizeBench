@@ -35,7 +35,7 @@ public sealed class DiffSession_EnumerateCompilandsTests
                                       RealPETestingConstants.ObjsInMSVCRTD + RealPETestingConstants.ObjsFromLinkerBefore +
                                       RealPETestingConstants.ObjsDirectlyInDLLBefore;
 
-        Assert.AreEqual(totalExpectedCompilands, compilandDiffs.Count);
+        Assert.HasCount(totalExpectedCompilands, compilandDiffs);
 
         foreach (var compilandDiff in compilandDiffs)
         {
@@ -126,7 +126,7 @@ public sealed class DiffSession_EnumerateCompilandsTests
         var bssCGDiff = dataSectionDiff.COFFGroupDiffs.First(cgd => cgd.Name == ".bss");
 
         // Start with dllmain.obj, which is detected as a lib since it's directly in the dll
-        Assert.AreEqual(1, compilandDiffs.Where(cd => cd.ShortName == "dllmain.obj").Count());
+        Assert.ContainsSingle(cd => cd.ShortName == "dllmain.obj", compilandDiffs);
         var dllMainCompilandDiff = compilandDiffs.First(cd => cd.ShortName == "dllmain.obj");
 
         Assert.IsNotNull(dllMainCompilandDiff.BeforeCompiland);
@@ -168,7 +168,7 @@ public sealed class DiffSession_EnumerateCompilandsTests
 
 
         // Move on to SourceFile2.obj, which is only in 'before'
-        Assert.AreEqual(1, compilandDiffs.Where(cd => cd.ShortName == "SourceFile2.obj" && cd.LibDiff.ShortName == "SourceFile2").Count());
+        Assert.ContainsSingle(cd => cd.ShortName == "SourceFile2.obj" && cd.LibDiff.ShortName == "SourceFile2", compilandDiffs);
         var sourceFile2InDLLCompilandDiff = compilandDiffs.First(cd => cd.ShortName == "SourceFile2.obj" && cd.LibDiff.ShortName == "SourceFile2");
         Assert.IsNotNull(sourceFile2InDLLCompilandDiff.BeforeCompiland);
         Assert.IsNull(sourceFile2InDLLCompilandDiff.AfterCompiland);
@@ -181,7 +181,7 @@ public sealed class DiffSession_EnumerateCompilandsTests
 
 
         // And then hit SourceFile3.obj, which is only in 'after'
-        Assert.AreEqual(1, compilandDiffs.Where(cd => cd.ShortName == "SourceFile3.obj" && cd.LibDiff.ShortName == "SourceFile3").Count());
+        Assert.ContainsSingle(cd => cd.ShortName == "SourceFile3.obj" && cd.LibDiff.ShortName == "SourceFile3", compilandDiffs);
         var sourceFile3InDLLCompilandDiff = compilandDiffs.First(cd => cd.ShortName == "SourceFile3.obj" && cd.LibDiff.ShortName == "SourceFile3");
         Assert.IsNull(sourceFile3InDLLCompilandDiff.BeforeCompiland);
         Assert.IsNotNull(sourceFile3InDLLCompilandDiff.AfterCompiland);
@@ -192,17 +192,17 @@ public sealed class DiffSession_EnumerateCompilandsTests
         Assert.AreEqual(sourceFile3RDataSize, sourceFile3InDLLCompilandDiff.COFFGroupContributionDiffs[rdataCGDiff].SizeDiff);
 
         // Now look at static libs 1, 2, and 3
-        Assert.AreEqual(1, compilandDiffs.Where(cd => cd.ShortName == "SourceFile1.obj" && cd.LibDiff.ShortName == "StaticLib1").Count());
+        Assert.ContainsSingle(cd => cd.ShortName == "SourceFile1.obj" && cd.LibDiff.ShortName == "StaticLib1", compilandDiffs);
         var sourceFile1StaticLib1Diff = compilandDiffs.First(cd => cd.ShortName == "SourceFile1.obj" && cd.LibDiff.ShortName == "StaticLib1");
         Assert.IsNotNull(sourceFile1StaticLib1Diff.BeforeCompiland);
         Assert.IsNotNull(sourceFile1StaticLib1Diff.AfterCompiland);
 
-        Assert.AreEqual(1, compilandDiffs.Where(cd => cd.ShortName == "SourceFile1.obj" && cd.LibDiff.ShortName == "StaticLib2").Count());
+        Assert.ContainsSingle(cd => cd.ShortName == "SourceFile1.obj" && cd.LibDiff.ShortName == "StaticLib2", compilandDiffs);
         var sourceFile1StaticLib2Diff = compilandDiffs.First(cd => cd.ShortName == "SourceFile1.obj" && cd.LibDiff.ShortName == "StaticLib2");
         Assert.IsNotNull(sourceFile1StaticLib2Diff.BeforeCompiland);
         Assert.IsNull(sourceFile1StaticLib2Diff.AfterCompiland);
 
-        Assert.AreEqual(1, compilandDiffs.Where(cd => cd.ShortName == "SourceFile1.obj" && cd.LibDiff.ShortName == "StaticLib3").Count());
+        Assert.ContainsSingle(cd => cd.ShortName == "SourceFile1.obj" && cd.LibDiff.ShortName == "StaticLib3", compilandDiffs);
         var sourceFile1StaticLib3Diff = compilandDiffs.First(cd => cd.ShortName == "SourceFile1.obj" && cd.LibDiff.ShortName == "StaticLib3");
         Assert.IsNull(sourceFile1StaticLib3Diff.BeforeCompiland);
         Assert.IsNotNull(sourceFile1StaticLib3Diff.AfterCompiland);

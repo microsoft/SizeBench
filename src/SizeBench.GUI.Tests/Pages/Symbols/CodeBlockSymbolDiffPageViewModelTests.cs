@@ -33,7 +33,7 @@ public sealed class CodeBlockSymbolDiffPageViewModelTests : IDisposable
         this.Generator.MockDiffSession.Setup(s => s.LoadSymbolDiffByBeforeAndAfterRVA(expectedDiff.BeforeSymbol!.PrimaryBlock.RVA, expectedDiff.AfterSymbol!.PrimaryBlock.RVA, It.IsAny<CancellationToken>()))
                                       .Returns(Task.FromResult<SymbolDiff?>(blockDiff));
         var tcsPlacement = new TaskCompletionSource<SymbolPlacement>();
-        tcsPlacement.SetCanceled();
+        tcsPlacement.SetCanceled(this.TestContext.CancellationToken);
         this.Generator.MockBeforeSession.Setup(s => s.LookupSymbolPlacementInBinary(blockDiff.BeforeSymbol!, It.IsAny<CancellationToken>())).Returns(tcsPlacement.Task);
         this.Generator.MockBeforeSession.Setup(s => s.EnumerateAllSymbolsFoldedAtRVA(blockDiff.BeforeSymbol!.RVA, It.IsAny<CancellationToken>())).Returns(Task.FromResult<IReadOnlyList<ISymbol>>(new List<ISymbol>()));
         this.Generator.MockAfterSession.Setup(s => s.LookupSymbolPlacementInBinary(blockDiff.AfterSymbol!, It.IsAny<CancellationToken>())).Returns(tcsPlacement.Task);
@@ -209,11 +209,11 @@ public sealed class CodeBlockSymbolDiffPageViewModelTests : IDisposable
         Assert.IsTrue(ReferenceEquals(primaryBlockDiff, viewmodel.SymbolDiff));
         Assert.IsTrue(viewmodel.IsBeforeBlockCodeUsedForMultipleBlocks);
         Assert.IsTrue(viewmodel.IsAfterBlockCodeUsedForMultipleBlocks);
-        Assert.AreEqual(3, viewmodel.BeforeFoldedBlocks!.Count);
+        Assert.HasCount(3, viewmodel.BeforeFoldedBlocks);
         Assert.AreEqual("Block of code in ComplexBeforeComplexAfter(bool)", viewmodel.BeforeFoldedBlocks[0].Name);
         Assert.AreEqual("Block of code in FoldedBeforeComplex(bool)", viewmodel.BeforeFoldedBlocks[1].Name);
         Assert.AreEqual("FoldedBeforeSimple(bool)", viewmodel.BeforeFoldedBlocks[2].Name);
-        Assert.AreEqual(4, viewmodel.AfterFoldedBlocks!.Count);
+        Assert.HasCount(4, viewmodel.AfterFoldedBlocks);
         Assert.AreEqual("Block of code in ComplexBeforeComplexAfter(bool)", viewmodel.AfterFoldedBlocks[0].Name);
         Assert.AreEqual("Block of code in FoldedAfterComplex1(bool)", viewmodel.AfterFoldedBlocks[1].Name);
         Assert.AreEqual("Block of code in FoldedAfterComplex2(bool)", viewmodel.AfterFoldedBlocks[2].Name);
@@ -259,8 +259,8 @@ public sealed class CodeBlockSymbolDiffPageViewModelTests : IDisposable
 
         // We should have generated warning text with at least some helpful bits of information.
         Assert.IsNotNull(viewmodel.BlocksOfDifferentTypeWarningText);
-        StringAssert.Contains(viewmodel.BlocksOfDifferentTypeWarningText, "the symbol in the 'before' binary is an entire function", StringComparison.Ordinal);
-        StringAssert.Contains(viewmodel.BlocksOfDifferentTypeWarningText, "the symbol in the 'after' binary is only the primary block of a function that is separated into multiple blocks (such as by PGO)", StringComparison.Ordinal);
+        Assert.Contains("the symbol in the 'before' binary is an entire function", viewmodel.BlocksOfDifferentTypeWarningText, StringComparison.Ordinal);
+        Assert.Contains("the symbol in the 'after' binary is only the primary block of a function that is separated into multiple blocks (such as by PGO)", viewmodel.BlocksOfDifferentTypeWarningText, StringComparison.Ordinal);
 
         Assert.IsTrue(viewmodel.DoesBeforeSymbolExist);
         Assert.IsTrue(viewmodel.DoesAfterSymbolExist);
@@ -278,4 +278,6 @@ public sealed class CodeBlockSymbolDiffPageViewModelTests : IDisposable
     }
 
     public void Dispose() => this.Generator.Dispose();
+
+    public TestContext TestContext { get; set; }
 }

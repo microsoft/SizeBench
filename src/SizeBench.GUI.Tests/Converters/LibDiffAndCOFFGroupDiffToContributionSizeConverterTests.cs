@@ -11,10 +11,9 @@ public sealed class LibDiffAndCOFFGroupDiffToContributionSizeConverterTests : ID
     [TestInitialize]
     public void TestInitialize() => this._generator = new DiffTestDataGenerator();
 
-    [ExpectedException(typeof(ArgumentException), AllowDerivedTypes = false)]
     [TestMethod]
     public void ConvertOnlyTakesLibDiffAndCOFFGroupDiffValuesInThatOrder()
-        => LibDiffAndCOFFGroupDiffToContributionSizeConverter.Instance.Convert(new object[] { this._generator.DataXxCGDiff, this._generator.ALibDiff }, typeof(string), null /* ConverterParameter */, null /* CultureInfo */);
+        => Assert.ThrowsExactly<ArgumentException>(() => LibDiffAndCOFFGroupDiffToContributionSizeConverter.Instance.Convert(new object[] { this._generator.DataXxCGDiff, this._generator.ALibDiff }, typeof(string), null /* ConverterParameter */, null /* CultureInfo */));
 
     [TestMethod]
     public void ReturnsCorrectSizeWhenContributionExists()

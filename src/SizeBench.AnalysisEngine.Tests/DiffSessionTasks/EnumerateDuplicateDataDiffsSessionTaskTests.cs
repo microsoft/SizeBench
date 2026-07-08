@@ -31,11 +31,11 @@ public sealed class EnumerateDuplicateDataDiffsSessionTaskTests : IDisposable
         using var logger = new NoOpLogger();
         var results = await task.ExecuteAsync(logger);
 
-        Assert.AreEqual(15, results.Count);
-        Assert.AreEqual(5, results.Where(ddiDiff => ddiDiff.BeforeDuplicate is null).Count());
-        Assert.AreEqual(5, results.Where(ddiDiff => ddiDiff.AfterDuplicate is null).Count());
-        Assert.AreEqual(5, results.Where(ddiDiff => ddiDiff.BeforeDuplicate != null && ddiDiff.AfterDuplicate != null).Count());
-        Assert.AreEqual(0, results.Where(ddiDiff => ddiDiff.BeforeDuplicate is null && ddiDiff.AfterDuplicate is null).Count());
+        Assert.HasCount(15, results);
+        Assert.HasCount(5, results.Where(ddiDiff => ddiDiff.BeforeDuplicate is null));
+        Assert.HasCount(5, results.Where(ddiDiff => ddiDiff.AfterDuplicate is null));
+        Assert.HasCount(5, results.Where(ddiDiff => ddiDiff.BeforeDuplicate != null && ddiDiff.AfterDuplicate != null));
+        Assert.IsEmpty(results.Where(ddiDiff => ddiDiff.BeforeDuplicate is null && ddiDiff.AfterDuplicate is null));
     }
 
     public void Dispose() => this._generator.Dispose();

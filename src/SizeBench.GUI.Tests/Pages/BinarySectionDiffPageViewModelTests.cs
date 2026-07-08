@@ -23,7 +23,7 @@ public sealed class BinarySectionDiffPageViewModelTests : IDisposable
         this.MockExcelExporter = new Mock<IExcelExporter>();
     }
 
-    [Timeout(5 * 1000)] // 5s
+    [Timeout(5 * 1000, CooperativeCancellation = true)] // 5s
     [TestMethod]
     public async Task LibsInitializeWhenTabSelected()
     {
@@ -64,7 +64,7 @@ public sealed class BinarySectionDiffPageViewModelTests : IDisposable
         this.MockUITaskScheduler.Verify(uits => uits.StartLongRunningUITask(It.IsAny<string>(), It.IsAny<Func<CancellationToken, Task>>()), Times.Exactly(2));
     }
 
-    [Timeout(5 * 1000)] // 5s
+    [Timeout(5 * 1000, CooperativeCancellation = true)] // 5s
     [TestMethod]
     public async Task CompilandsInitializeWhenTabSelected()
     {
@@ -105,7 +105,7 @@ public sealed class BinarySectionDiffPageViewModelTests : IDisposable
         this.MockUITaskScheduler.Verify(uits => uits.StartLongRunningUITask(It.IsAny<string>(), It.IsAny<Func<CancellationToken, Task>>()), Times.Exactly(2));
     }
 
-    [Timeout(5 * 1000)] // 5s
+    [Timeout(5 * 1000, CooperativeCancellation = true)] // 5s
     [TestMethod]
     public async Task LibsLoadOnlyOnceEvenIfYouSwitchTabsABunch()
     {
@@ -151,7 +151,7 @@ public sealed class BinarySectionDiffPageViewModelTests : IDisposable
         this.MockUITaskScheduler.Verify(uits => uits.StartLongRunningUITask(It.IsAny<string>(), It.IsAny<Func<CancellationToken, Task>>()), Times.Exactly(2));
     }
 
-    [Timeout(5 * 1000)] // 5s
+    [Timeout(5 * 1000, CooperativeCancellation = true)] // 5s
     [TestMethod]
     public async Task CompilandsLoadOnlyOnceEvenIfYouSwitchTabsABunch()
     {
@@ -186,11 +186,11 @@ public sealed class BinarySectionDiffPageViewModelTests : IDisposable
         await tcsTestResultsComplete.Task;
 
         // Not all the compilands have a size diff in this section, so we won't see everything
-        Assert.AreEqual(4, viewmodel.CompilandDiffs!.Count);
-        Assert.AreEqual(1, viewmodel.CompilandDiffs.Where(cd => cd.Name.Contains("a1.obj", StringComparison.Ordinal)).Count());
-        Assert.AreEqual(1, viewmodel.CompilandDiffs.Where(cd => cd.Name.Contains("a2.obj", StringComparison.Ordinal)).Count()); // We find this one even though it's .text SizeDiff==0, because it could have COFF Groups, Libs, Symbols, etc. that differ and a user may want to see them...
-        Assert.AreEqual(1, viewmodel.CompilandDiffs.Where(cd => cd.Name.Contains("b1.obj", StringComparison.Ordinal)).Count());
-        Assert.AreEqual(1, viewmodel.CompilandDiffs.Where(cd => cd.Name.Contains("b2.obj", StringComparison.Ordinal)).Count()); // We find this one even though it's .text SizeDiff==0, because it could have COFF Groups, Libs, Symbols, etc. that differ and a user may want to see them...
+        Assert.HasCount(4, viewmodel.CompilandDiffs);
+        Assert.ContainsSingle(cd => cd.Name.Contains("a1.obj", StringComparison.Ordinal), viewmodel.CompilandDiffs);
+        Assert.ContainsSingle(cd => cd.Name.Contains("a2.obj", StringComparison.Ordinal), viewmodel.CompilandDiffs); // We find this one even though it's .text SizeDiff==0, because it could have COFF Groups, Libs, Symbols, etc. that differ and a user may want to see them...
+        Assert.ContainsSingle(cd => cd.Name.Contains("b1.obj", StringComparison.Ordinal), viewmodel.CompilandDiffs);
+        Assert.ContainsSingle(cd => cd.Name.Contains("b2.obj", StringComparison.Ordinal), viewmodel.CompilandDiffs); // We find this one even though it's .text SizeDiff==0, because it could have COFF Groups, Libs, Symbols, etc. that differ and a user may want to see them...
 
         // Now let's switch back to the COFF Groups tab, then back to Compilands, a couple times - we should still only have loaded the compilands once
         viewmodel.SelectedTab = (int)BinarySectionDiffPageViewModel.BinarySectionDiffPageTabIndex.COFFGroupsTab;
@@ -202,7 +202,7 @@ public sealed class BinarySectionDiffPageViewModelTests : IDisposable
         this.MockUITaskScheduler.Verify(uits => uits.StartLongRunningUITask(It.IsAny<string>(), It.IsAny<Func<CancellationToken, Task>>()), Times.Exactly(2));
     }
 
-    [Timeout(5 * 1000)] // 5s
+    [Timeout(5 * 1000, CooperativeCancellation = true)] // 5s
     [TestMethod]
     public async Task SymbolsInitializeWhenTabSelected()
     {
@@ -244,7 +244,7 @@ public sealed class BinarySectionDiffPageViewModelTests : IDisposable
         this.MockUITaskScheduler.Verify(uits => uits.StartLongRunningUITask(It.IsAny<string>(), It.IsAny<Func<CancellationToken, Task>>()), Times.Exactly(2));
     }
 
-    [Timeout(5 * 1000)] // 5s
+    [Timeout(5 * 1000, CooperativeCancellation = true)] // 5s
     [TestMethod]
     public async Task SymbolsLoadOnlyOnceEvenIfYouSwitchTabsABunch()
     {
@@ -291,7 +291,7 @@ public sealed class BinarySectionDiffPageViewModelTests : IDisposable
         this.MockUITaskScheduler.Verify(uits => uits.StartLongRunningUITask(It.IsAny<string>(), It.IsAny<Func<CancellationToken, Task>>()), Times.Exactly(2));
     }
 
-    [Timeout(5 * 1000)] // 5s
+    [Timeout(5 * 1000, CooperativeCancellation = true)] // 5s
     [TestMethod]
     public async Task ExcelExportWorksForEveryTab()
     {

@@ -19,7 +19,7 @@ public class BinarySectionPageViewModelTests
         this.MockUITaskScheduler.SetupForSynchronousCompletionOfLongRunningUITasks();
     }
 
-    [Timeout(5 * 1000)] // 5s
+    [Timeout(5 * 1000, CooperativeCancellation = true)] // 5s
     [TestMethod]
     public async Task LibsInitializeWhenTabSelected()
     {
@@ -57,7 +57,7 @@ public class BinarySectionPageViewModelTests
         this.MockUITaskScheduler.Verify(uits => uits.StartLongRunningUITask(It.IsAny<string>(), It.IsAny<Func<CancellationToken, Task>>()), Times.Exactly(2));
     }
 
-    [Timeout(5 * 1000)] // 5s
+    [Timeout(5 * 1000, CooperativeCancellation = true)] // 5s
     [TestMethod]
     public async Task LibsLoadOnlyOnceEvenIfYouSwitchTabsABunch()
     {
@@ -101,7 +101,7 @@ public class BinarySectionPageViewModelTests
         this.MockUITaskScheduler.Verify(uits => uits.StartLongRunningUITask(It.IsAny<string>(), It.IsAny<Func<CancellationToken, Task>>()), Times.Exactly(2));
     }
 
-    [Timeout(5 * 1000)] // 5s
+    [Timeout(5 * 1000, CooperativeCancellation = true)] // 5s
     [TestMethod]
     public async Task CompilandnsInitializeWhenTabSelected()
     {
@@ -135,15 +135,15 @@ public class BinarySectionPageViewModelTests
         viewmodel.SelectedTab = (int)BinarySectionPageViewModel.BinarySectionPageTabIndex.CompilandsTab;
 
         await tcsTestResultsComplete.Task;
-        Assert.AreEqual(4, viewmodel.Compilands!.Count);
-        Assert.AreEqual(1, viewmodel.Compilands.Where(viewmodel.CompilandFilter).Count());
-        Assert.IsTrue(viewmodel.Compilands.Where(viewmodel.CompilandFilter).Contains(generator.A1Compiland));
+        Assert.HasCount(4, viewmodel.Compilands);
+        Assert.ContainsSingle(viewmodel.CompilandFilter, viewmodel.Compilands);
+        Assert.Contains(generator.A1Compiland, viewmodel.Compilands.Where(viewmodel.CompilandFilter));
 
         // We should have started 2 long-running tasks, one for the binary section load and one for the libs/compilands
         this.MockUITaskScheduler.Verify(uits => uits.StartLongRunningUITask(It.IsAny<string>(), It.IsAny<Func<CancellationToken, Task>>()), Times.Exactly(2));
     }
 
-    [Timeout(5 * 1000)] // 5s
+    [Timeout(5 * 1000, CooperativeCancellation = true)] // 5s
     [TestMethod]
     public async Task CompilandsLoadOnlyOnceEvenIfYouSwitchTabsABunch()
     {
@@ -177,9 +177,9 @@ public class BinarySectionPageViewModelTests
         viewmodel.SelectedTab = (int)BinarySectionPageViewModel.BinarySectionPageTabIndex.CompilandsTab;
 
         await tcsTestResultsComplete.Task;
-        Assert.AreEqual(4, viewmodel.Compilands!.Count);
-        Assert.AreEqual(1, viewmodel.Compilands.Where(viewmodel.CompilandFilter).Count());
-        Assert.IsTrue(viewmodel.Compilands.Where(viewmodel.CompilandFilter).Contains(generator.A1Compiland));
+        Assert.HasCount(4, viewmodel.Compilands);
+        Assert.ContainsSingle(viewmodel.CompilandFilter, viewmodel.Compilands);
+        Assert.Contains(generator.A1Compiland, viewmodel.Compilands.Where(viewmodel.CompilandFilter));
 
         // Now let's switch back to the COFF Groups tab, then back to Compilands, a couple times - we should still only have loaded the compilands once
         viewmodel.SelectedTab = (int)BinarySectionPageViewModel.BinarySectionPageTabIndex.COFFGroupsTab;
@@ -191,7 +191,7 @@ public class BinarySectionPageViewModelTests
         this.MockUITaskScheduler.Verify(uits => uits.StartLongRunningUITask(It.IsAny<string>(), It.IsAny<Func<CancellationToken, Task>>()), Times.Exactly(2));
     }
 
-    [Timeout(5 * 1000)] // 5s
+    [Timeout(5 * 1000, CooperativeCancellation = true)] // 5s
     [TestMethod]
     public async Task SymbolsInitializeWhenTabSelected()
     {
@@ -234,15 +234,15 @@ public class BinarySectionPageViewModelTests
         viewmodel.SelectedTab = (int)BinarySectionPageViewModel.BinarySectionPageTabIndex.SymbolsTab;
 
         await tcsTestResultsComplete.Task;
-        Assert.AreEqual(2, viewmodel.Symbols!.Count);
-        Assert.IsTrue(viewmodel.Symbols.Contains(symbols[0]));
-        Assert.IsTrue(viewmodel.Symbols.Contains(symbols[1]));
+        Assert.HasCount(2, viewmodel.Symbols);
+        Assert.Contains(symbols[0], viewmodel.Symbols);
+        Assert.Contains(symbols[1], viewmodel.Symbols);
 
         // We should have started 2 long-running tasks, one for the binary section load and one for the symbols
         this.MockUITaskScheduler.Verify(uits => uits.StartLongRunningUITask(It.IsAny<string>(), It.IsAny<Func<CancellationToken, Task>>()), Times.Exactly(2));
     }
 
-    [Timeout(5 * 1000)] // 5s
+    [Timeout(5 * 1000, CooperativeCancellation = true)] // 5s
     [TestMethod]
     public async Task SymbolsLoadOnlyOnceEvenIfYouSwitchTabsABunch()
     {
@@ -285,9 +285,9 @@ public class BinarySectionPageViewModelTests
         viewmodel.SelectedTab = (int)BinarySectionPageViewModel.BinarySectionPageTabIndex.SymbolsTab;
 
         await tcsTestResultsComplete.Task;
-        Assert.AreEqual(2, viewmodel.Symbols!.Count);
-        Assert.IsTrue(viewmodel.Symbols.Contains(symbols[0]));
-        Assert.IsTrue(viewmodel.Symbols.Contains(symbols[1]));
+        Assert.HasCount(2, viewmodel.Symbols);
+        Assert.Contains(symbols[0], viewmodel.Symbols);
+        Assert.Contains(symbols[1], viewmodel.Symbols);
 
         // Now let's switch back to the COFF Groups tab, then back to Symbols, a couple times - we should still only have loaded the symbols once
         viewmodel.SelectedTab = (int)BinarySectionPageViewModel.BinarySectionPageTabIndex.COFFGroupsTab;
@@ -299,7 +299,7 @@ public class BinarySectionPageViewModelTests
         this.MockUITaskScheduler.Verify(uits => uits.StartLongRunningUITask(It.IsAny<string>(), It.IsAny<Func<CancellationToken, Task>>()), Times.Exactly(2));
     }
 
-    //[Timeout(5 * 1000)] // 5s
+    [Timeout(5 * 1000, CooperativeCancellation = true)] // 5s
     [TestMethod]
     public async Task ExcelExportWorksForEveryTab()
     {

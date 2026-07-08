@@ -404,7 +404,7 @@ public sealed class SingleBinaryDataGenerator : IDisposable
         Assert.AreEqual(5000u, this.TextSection.Size);
         Assert.AreEqual(5000u, this.TextSection.VirtualSize);
         Assert.AreEqual(0u, this.TextSection.TailSlopVirtualSizeAlignment);
-        Assert.AreEqual(2, this.TextSection.COFFGroups.Count);
+        Assert.HasCount(2, this.TextSection.COFFGroups);
         Assert.AreEqual(5000, this.TextSection.COFFGroups.Sum(cg => cg.Size)); // No Byte Left Behind!
         Assert.AreEqual(0, this.TextSection.COFFGroups.Sum(cg => cg.TailSlopSizeAlignment));
         Assert.AreEqual(5000, this.TextSection.COFFGroups.Sum(cg => cg.VirtualSize));
@@ -418,7 +418,7 @@ public sealed class SingleBinaryDataGenerator : IDisposable
         Assert.AreEqual(1000u, this.DataSection.Size);
         Assert.AreEqual(1450u, this.DataSection.VirtualSize);
         Assert.AreEqual(3550u, this.DataSection.TailSlopVirtualSizeAlignment);
-        Assert.AreEqual(3, this.DataSection.COFFGroups.Count);
+        Assert.HasCount(3, this.DataSection.COFFGroups);
         Assert.AreEqual(1000 - 50, this.DataSection.COFFGroups.Sum(cg => cg.Size)); // No Byte Left Behind!
         Assert.AreEqual(50, this.DataSection.COFFGroups.Sum(cg => cg.TailSlopSizeAlignment));
         Assert.AreEqual(5000 - 3550, this.DataSection.COFFGroups.Sum(cg => cg.VirtualSize));
@@ -432,7 +432,7 @@ public sealed class SingleBinaryDataGenerator : IDisposable
         Assert.AreEqual(1800u, this.RDataSection.Size);
         Assert.AreEqual(1700u, this.RDataSection.VirtualSize);
         Assert.AreEqual(3300u, this.RDataSection.TailSlopVirtualSizeAlignment);
-        Assert.AreEqual(2, this.RDataSection.COFFGroups.Count);
+        Assert.HasCount(2, this.RDataSection.COFFGroups);
         Assert.AreEqual(1800 - 100, this.RDataSection.COFFGroups.Sum(cg => cg.Size)); // No Byte Left Behind!
         Assert.AreEqual(100, this.RDataSection.COFFGroups.Sum(cg => cg.TailSlopSizeAlignment));
         Assert.AreEqual(5000 - 3300, this.RDataSection.COFFGroups.Sum(cg => cg.VirtualSize));
@@ -511,10 +511,10 @@ public sealed class SingleBinaryDataGenerator : IDisposable
         Assert.AreEqual(6375, this.ALib.COFFGroupContributionsByName.Values.Sum(sc => sc.VirtualSize)); // No Byte Left Behind!
         Assert.AreEqual("a.lib", this.ALib.Name);
         Assert.AreEqual("a", this.ALib.ShortName);
-        Assert.AreEqual(2, this.ALib.SectionContributions.Count);
-        Assert.AreEqual(2, this.ALib.SectionContributionsByName.Count);
-        Assert.AreEqual(5, this.ALib.COFFGroupContributions.Count);
-        Assert.AreEqual(5, this.ALib.COFFGroupContributionsByName.Count);
+        Assert.HasCount(2, this.ALib.SectionContributions);
+        Assert.HasCount(2, this.ALib.SectionContributionsByName);
+        Assert.HasCount(5, this.ALib.COFFGroupContributions);
+        Assert.HasCount(5, this.ALib.COFFGroupContributionsByName);
 
         Assert.AreEqual(25u, this.BLib.Size);
         Assert.AreEqual(25, this.BLib.Compilands.Values.Sum(c => c.Size)); // No Byte Left Behind!
@@ -530,10 +530,10 @@ public sealed class SingleBinaryDataGenerator : IDisposable
         Assert.AreEqual(75, this.BLib.COFFGroupContributionsByName.Values.Sum(sc => sc.VirtualSize)); // No Byte Left Behind!
         Assert.AreEqual("b.lib", this.BLib.Name);
         Assert.AreEqual("b", this.BLib.ShortName);
-        Assert.AreEqual(1, this.BLib.SectionContributions.Count);
-        Assert.AreEqual(1, this.BLib.SectionContributionsByName.Count);
-        Assert.AreEqual(2, this.BLib.COFFGroupContributions.Count);
-        Assert.AreEqual(2, this.BLib.COFFGroupContributionsByName.Count);
+        Assert.HasCount(1, this.BLib.SectionContributions);
+        Assert.HasCount(1, this.BLib.SectionContributionsByName);
+        Assert.HasCount(2, this.BLib.COFFGroupContributions);
+        Assert.HasCount(2, this.BLib.COFFGroupContributionsByName);
 
 
         // Compilands
@@ -550,10 +550,10 @@ public sealed class SingleBinaryDataGenerator : IDisposable
         Assert.IsTrue(ReferenceEquals(this.ALib, this.A1Compiland.Lib));
         Assert.AreEqual(@"c:\a\a1.obj", this.A1Compiland.Name);
         Assert.AreEqual("a1.obj", this.A1Compiland.ShortName);
-        Assert.AreEqual(2, this.A1Compiland.SectionContributions.Count);
-        Assert.AreEqual(2, this.A1Compiland.SectionContributionsByName.Count);
-        Assert.AreEqual(3, this.A1Compiland.COFFGroupContributions.Count);
-        Assert.AreEqual(3, this.A1Compiland.COFFGroupContributionsByName.Count);
+        Assert.HasCount(2, this.A1Compiland.SectionContributions);
+        Assert.HasCount(2, this.A1Compiland.SectionContributionsByName);
+        Assert.HasCount(3, this.A1Compiland.COFFGroupContributions);
+        Assert.HasCount(3, this.A1Compiland.COFFGroupContributionsByName);
 
         Assert.AreEqual(0u, this.A2Compiland.Size);
         Assert.AreEqual(0, this.A2Compiland.SectionContributions.Values.Sum(sc => sc.Size)); // No Byte Left Behind!
@@ -568,10 +568,10 @@ public sealed class SingleBinaryDataGenerator : IDisposable
         Assert.IsTrue(ReferenceEquals(this.ALib, this.A2Compiland.Lib));
         Assert.AreEqual(@"a2.obj", this.A2Compiland.Name);
         Assert.AreEqual("a2.obj", this.A2Compiland.ShortName);
-        Assert.AreEqual(1, this.A2Compiland.SectionContributions.Count);
-        Assert.AreEqual(1, this.A2Compiland.SectionContributionsByName.Count);
-        Assert.AreEqual(1, this.A2Compiland.COFFGroupContributions.Count);
-        Assert.AreEqual(1, this.A2Compiland.COFFGroupContributionsByName.Count);
+        Assert.HasCount(1, this.A2Compiland.SectionContributions);
+        Assert.HasCount(1, this.A2Compiland.SectionContributionsByName);
+        Assert.HasCount(1, this.A2Compiland.COFFGroupContributions);
+        Assert.HasCount(1, this.A2Compiland.COFFGroupContributionsByName);
 
         Assert.AreEqual(900u, this.A3Compiland.Size);
         Assert.AreEqual(900, this.A3Compiland.SectionContributions.Values.Sum(sc => sc.Size)); // No Byte Left Behind!
@@ -586,10 +586,10 @@ public sealed class SingleBinaryDataGenerator : IDisposable
         Assert.IsTrue(ReferenceEquals(this.ALib, this.A3Compiland.Lib));
         Assert.AreEqual(@"a3.obj", this.A3Compiland.Name);
         Assert.AreEqual("a3.obj", this.A3Compiland.ShortName);
-        Assert.AreEqual(1, this.A3Compiland.SectionContributions.Count);
-        Assert.AreEqual(1, this.A3Compiland.SectionContributionsByName.Count);
-        Assert.AreEqual(3, this.A3Compiland.COFFGroupContributions.Count);
-        Assert.AreEqual(3, this.A3Compiland.COFFGroupContributionsByName.Count);
+        Assert.HasCount(1, this.A3Compiland.SectionContributions);
+        Assert.HasCount(1, this.A3Compiland.SectionContributionsByName);
+        Assert.HasCount(3, this.A3Compiland.COFFGroupContributions);
+        Assert.HasCount(3, this.A3Compiland.COFFGroupContributionsByName);
 
         Assert.AreEqual(25u, this.B1Compiland.Size);
         Assert.AreEqual(25, this.B1Compiland.SectionContributions.Values.Sum(sc => sc.Size)); // No Byte Left Behind!
@@ -604,10 +604,10 @@ public sealed class SingleBinaryDataGenerator : IDisposable
         Assert.IsTrue(ReferenceEquals(this.BLib, this.B1Compiland.Lib));
         Assert.AreEqual(@"b1.obj", this.B1Compiland.Name);
         Assert.AreEqual("b1.obj", this.B1Compiland.ShortName);
-        Assert.AreEqual(1, this.B1Compiland.SectionContributions.Count);
-        Assert.AreEqual(1, this.B1Compiland.SectionContributionsByName.Count);
-        Assert.AreEqual(2, this.B1Compiland.COFFGroupContributions.Count);
-        Assert.AreEqual(2, this.B1Compiland.COFFGroupContributionsByName.Count);
+        Assert.HasCount(1, this.B1Compiland.SectionContributions);
+        Assert.HasCount(1, this.B1Compiland.SectionContributionsByName);
+        Assert.HasCount(2, this.B1Compiland.COFFGroupContributions);
+        Assert.HasCount(2, this.B1Compiland.COFFGroupContributionsByName);
 
         // Source Files
         Assert.AreEqual(500u, this.A1CppSourceFile.Size);
@@ -622,15 +622,15 @@ public sealed class SingleBinaryDataGenerator : IDisposable
         Assert.AreEqual(500, this.A1CppSourceFile.COFFGroupContributions.Values.Sum(sc => sc.VirtualSize)); // No Byte Left Behind!
         Assert.AreEqual(500, this.A1CppSourceFile.COFFGroupContributionsByName.Values.Sum(sc => sc.VirtualSize)); // No Byte Left Behind!
         Assert.AreEqual(500, this.A1CppSourceFile.CompilandContributions.Values.Sum(sc => sc.VirtualSize)); // No Byte Left Behind!
-        Assert.AreEqual(1, this.A1CppSourceFile.Compilands.Count);
-        Assert.IsTrue(this.A1CppSourceFile.Compilands.Contains(this.A1Compiland));
+        Assert.HasCount(1, this.A1CppSourceFile.Compilands);
+        Assert.Contains(this.A1Compiland, this.A1CppSourceFile.Compilands);
         Assert.AreEqual("a1.cpp", this.A1CppSourceFile.Name);
         Assert.AreEqual("a1.cpp", this.A1CppSourceFile.ShortName);
-        Assert.AreEqual(1, this.A1CppSourceFile.SectionContributions.Count);
-        Assert.AreEqual(1, this.A1CppSourceFile.SectionContributionsByName.Count);
-        Assert.AreEqual(2, this.A1CppSourceFile.COFFGroupContributions.Count);
-        Assert.AreEqual(2, this.A1CppSourceFile.COFFGroupContributionsByName.Count);
-        Assert.AreEqual(1, this.A1CppSourceFile.CompilandContributions.Count);
+        Assert.HasCount(1, this.A1CppSourceFile.SectionContributions);
+        Assert.HasCount(1, this.A1CppSourceFile.SectionContributionsByName);
+        Assert.HasCount(2, this.A1CppSourceFile.COFFGroupContributions);
+        Assert.HasCount(2, this.A1CppSourceFile.COFFGroupContributionsByName);
+        Assert.HasCount(1, this.A1CppSourceFile.CompilandContributions);
 
         Assert.AreEqual(825u, this.XHSourceFile.Size);
         Assert.AreEqual(825, this.XHSourceFile.SectionContributions.Values.Sum(sc => sc.Size)); // No Byte Left Behind!
@@ -644,17 +644,17 @@ public sealed class SingleBinaryDataGenerator : IDisposable
         Assert.AreEqual(825, this.XHSourceFile.COFFGroupContributions.Values.Sum(sc => sc.VirtualSize)); // No Byte Left Behind!
         Assert.AreEqual(825, this.XHSourceFile.COFFGroupContributionsByName.Values.Sum(sc => sc.VirtualSize)); // No Byte Left Behind!
         Assert.AreEqual(825, this.XHSourceFile.CompilandContributions.Values.Sum(sc => sc.VirtualSize)); // No Byte Left Behind!
-        Assert.AreEqual(3, this.XHSourceFile.Compilands.Count);
-        Assert.IsTrue(this.XHSourceFile.Compilands.Contains(this.A1Compiland));
-        Assert.IsTrue(this.XHSourceFile.Compilands.Contains(this.A3Compiland));
-        Assert.IsTrue(this.XHSourceFile.Compilands.Contains(this.B1Compiland));
+        Assert.HasCount(3, this.XHSourceFile.Compilands);
+        Assert.Contains(this.A1Compiland, this.XHSourceFile.Compilands);
+        Assert.Contains(this.A3Compiland, this.XHSourceFile.Compilands);
+        Assert.Contains(this.B1Compiland, this.XHSourceFile.Compilands);
         Assert.AreEqual("x.h", this.XHSourceFile.Name);
         Assert.AreEqual("x.h", this.XHSourceFile.ShortName);
-        Assert.AreEqual(2, this.XHSourceFile.SectionContributions.Count);
-        Assert.AreEqual(2, this.XHSourceFile.SectionContributionsByName.Count);
-        Assert.AreEqual(3, this.XHSourceFile.COFFGroupContributions.Count);
-        Assert.AreEqual(3, this.XHSourceFile.COFFGroupContributionsByName.Count);
-        Assert.AreEqual(3, this.XHSourceFile.CompilandContributions.Count);
+        Assert.HasCount(2, this.XHSourceFile.SectionContributions);
+        Assert.HasCount(2, this.XHSourceFile.SectionContributionsByName);
+        Assert.HasCount(3, this.XHSourceFile.COFFGroupContributions);
+        Assert.HasCount(3, this.XHSourceFile.COFFGroupContributionsByName);
+        Assert.HasCount(3, this.XHSourceFile.CompilandContributions);
     }
 
     public void Dispose() => this.DataCache.Dispose();

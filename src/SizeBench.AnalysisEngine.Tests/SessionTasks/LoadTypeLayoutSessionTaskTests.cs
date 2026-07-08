@@ -43,12 +43,12 @@ public sealed class LoadTypeLayoutSessionTaskTests : IDisposable
         var modifiedInt = new ModifiedTypeSymbol(this.DataCache, basicType, "const int", 4, nextSymIndexId++);
         var pointerToInt = new PointerTypeSymbol(this.DataCache, basicType, "int*", 4, nextSymIndexId++);
 
-        Assert.ThrowsException<ArgumentException>(() => new LoadTypeLayoutSessionTask(this.SessionTaskParameters!, null, basicType, 0, null, CancellationToken.None));
-        Assert.ThrowsException<ArgumentException>(() => new LoadTypeLayoutSessionTask(this.SessionTaskParameters!, null, enumType, 0, null, CancellationToken.None));
-        Assert.ThrowsException<ArgumentException>(() => new LoadTypeLayoutSessionTask(this.SessionTaskParameters!, null, functionType, 0, null, CancellationToken.None));
-        Assert.ThrowsException<ArgumentException>(() => new LoadTypeLayoutSessionTask(this.SessionTaskParameters!, null, arrayOfBasicTypes, 0, null, CancellationToken.None));
-        Assert.ThrowsException<ArgumentException>(() => new LoadTypeLayoutSessionTask(this.SessionTaskParameters!, null, modifiedInt, 0, null, CancellationToken.None));
-        Assert.ThrowsException<ArgumentException>(() => new LoadTypeLayoutSessionTask(this.SessionTaskParameters!, null, pointerToInt, 0, null, CancellationToken.None));
+        Assert.ThrowsExactly<ArgumentException>(() => new LoadTypeLayoutSessionTask(this.SessionTaskParameters!, null, basicType, 0, null, CancellationToken.None));
+        Assert.ThrowsExactly<ArgumentException>(() => new LoadTypeLayoutSessionTask(this.SessionTaskParameters!, null, enumType, 0, null, CancellationToken.None));
+        Assert.ThrowsExactly<ArgumentException>(() => new LoadTypeLayoutSessionTask(this.SessionTaskParameters!, null, functionType, 0, null, CancellationToken.None));
+        Assert.ThrowsExactly<ArgumentException>(() => new LoadTypeLayoutSessionTask(this.SessionTaskParameters!, null, arrayOfBasicTypes, 0, null, CancellationToken.None));
+        Assert.ThrowsExactly<ArgumentException>(() => new LoadTypeLayoutSessionTask(this.SessionTaskParameters!, null, modifiedInt, 0, null, CancellationToken.None));
+        Assert.ThrowsExactly<ArgumentException>(() => new LoadTypeLayoutSessionTask(this.SessionTaskParameters!, null, pointerToInt, 0, null, CancellationToken.None));
     }
 
     [TestMethod]
@@ -139,8 +139,8 @@ public sealed class LoadTypeLayoutSessionTaskTests : IDisposable
         using var logger = new NoOpLogger();
         var typeLayouts = task.Execute(logger);
 
-        Assert.AreEqual(1, typeLayouts.Count);
-        Assert.AreEqual(1, typeLayouts[0].BaseTypeLayouts!.Count);
+        Assert.HasCount(1, typeLayouts);
+        Assert.HasCount(1, typeLayouts[0].BaseTypeLayouts);
 
         // Assertions about the base type layout
         Assert.IsTrue(ReferenceEquals(baseUdt, typeLayouts[0].BaseTypeLayouts![0].UserDefinedType));
@@ -148,7 +148,7 @@ public sealed class LoadTypeLayoutSessionTaskTests : IDisposable
         Assert.AreEqual(3.875m, typeLayouts[0].BaseTypeLayouts![0].AlignmentWasteIncludingBaseTypes);
         Assert.AreEqual(8u, typeLayouts[0].BaseTypeLayouts![0].UsedForVFPtrsExclusive);
         Assert.AreEqual(8u, typeLayouts[0].BaseTypeLayouts![0].UsedForVFPtrsIncludingBaseTypes);
-        Assert.AreEqual(4, typeLayouts[0].BaseTypeLayouts![0].MemberLayouts!.Count);
+        Assert.HasCount(4, typeLayouts[0].BaseTypeLayouts![0].MemberLayouts);
 
         Assert.AreEqual("vfptr", typeLayouts[0].BaseTypeLayouts![0].MemberLayouts![0].Name);
         Assert.AreEqual(8m, typeLayouts[0].BaseTypeLayouts![0].MemberLayouts![0].Size);
@@ -183,7 +183,7 @@ public sealed class LoadTypeLayoutSessionTaskTests : IDisposable
         Assert.AreEqual(8u, typeLayouts[0].UsedForVFPtrsIncludingBaseTypes);
         Assert.AreEqual(6.125m, typeLayouts[0].AlignmentWasteExclusive);
         Assert.AreEqual(10.0m, typeLayouts[0].AlignmentWasteIncludingBaseTypes);
-        Assert.AreEqual(5, typeLayouts[0].MemberLayouts!.Count);
+        Assert.HasCount(5, typeLayouts[0].MemberLayouts);
 
         Assert.AreEqual("bitField1", typeLayouts[0].MemberLayouts![0].Name);
         Assert.AreEqual(0.125m, typeLayouts[0].MemberLayouts![0].Size);
@@ -253,7 +253,7 @@ public sealed class LoadTypeLayoutSessionTaskTests : IDisposable
         using var logger = new NoOpLogger();
         var typeLayouts = task.Execute(logger);
 
-        Assert.AreEqual(1, typeLayouts.Count);
+        Assert.HasCount(1, typeLayouts);
         Assert.IsNull(typeLayouts[0].BaseTypeLayouts);
 
         // Assertions about the base type layout
@@ -262,7 +262,7 @@ public sealed class LoadTypeLayoutSessionTaskTests : IDisposable
         Assert.AreEqual(8m, typeLayouts[0].AlignmentWasteIncludingBaseTypes);
         Assert.AreEqual(8u, typeLayouts[0].UsedForVFPtrsExclusive);
         Assert.AreEqual(8u, typeLayouts[0].UsedForVFPtrsIncludingBaseTypes);
-        Assert.AreEqual(3, typeLayouts[0].MemberLayouts!.Count);
+        Assert.HasCount(3, typeLayouts[0].MemberLayouts);
 
         Assert.AreEqual("vfptr", typeLayouts[0].MemberLayouts![0].Name);
         Assert.AreEqual(8m, typeLayouts[0].MemberLayouts![0].Size);
@@ -300,13 +300,13 @@ public sealed class LoadTypeLayoutSessionTaskTests : IDisposable
         using var logger = new NoOpLogger();
         var typeLayouts = task.Execute(logger);
 
-        Assert.AreEqual(6, typeLayouts.Count);
-        Assert.IsTrue(typeLayouts.Any(udt => udt.UserDefinedType.Name == "TestType0"));
-        Assert.IsTrue(typeLayouts.Any(udt => udt.UserDefinedType.Name == "TestType1"));
-        Assert.IsTrue(typeLayouts.Any(udt => udt.UserDefinedType.Name == "TestType2"));
-        Assert.IsTrue(typeLayouts.Any(udt => udt.UserDefinedType.Name == "ADifferentName0"));
-        Assert.IsTrue(typeLayouts.Any(udt => udt.UserDefinedType.Name == "ADifferentName1"));
-        Assert.IsTrue(typeLayouts.Any(udt => udt.UserDefinedType.Name == "ADifferentName2"));
+        Assert.HasCount(6, typeLayouts);
+        Assert.Contains(udt => udt.UserDefinedType.Name == "TestType0", typeLayouts);
+        Assert.Contains(udt => udt.UserDefinedType.Name == "TestType1", typeLayouts);
+        Assert.Contains(udt => udt.UserDefinedType.Name == "TestType2", typeLayouts);
+        Assert.Contains(udt => udt.UserDefinedType.Name == "ADifferentName0", typeLayouts);
+        Assert.Contains(udt => udt.UserDefinedType.Name == "ADifferentName1", typeLayouts);
+        Assert.Contains(udt => udt.UserDefinedType.Name == "ADifferentName2", typeLayouts);
     }
 
     [TestMethod]
@@ -319,10 +319,10 @@ public sealed class LoadTypeLayoutSessionTaskTests : IDisposable
         using var logger = new NoOpLogger();
         var typeLayouts = task.Execute(logger);
 
-        Assert.AreEqual(3, typeLayouts.Count);
-        Assert.IsTrue(typeLayouts.Any(udt => udt.UserDefinedType.Name == "TestType0"));
-        Assert.IsTrue(typeLayouts.Any(udt => udt.UserDefinedType.Name == "TestType1"));
-        Assert.IsTrue(typeLayouts.Any(udt => udt.UserDefinedType.Name == "TestType2"));
+        Assert.HasCount(3, typeLayouts);
+        Assert.Contains(udt => udt.UserDefinedType.Name == "TestType0", typeLayouts);
+        Assert.Contains(udt => udt.UserDefinedType.Name == "TestType1", typeLayouts);
+        Assert.Contains(udt => udt.UserDefinedType.Name == "TestType2", typeLayouts);
     }
 
     public void Dispose() => this.DataCache.Dispose();

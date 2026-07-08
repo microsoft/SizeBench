@@ -7,3 +7,4 @@ using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Usage", "CA2201:Do not raise reserved exception types", Justification = "Not important for test code.")]
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Not important for test code")]
+[assembly: SuppressMessage("Maintainability", "CA1515:Consider making public types internal", Justification = "Not important for tests - in fact TestClass types MUST be public for MSTest so doing this loses test coverage.")]

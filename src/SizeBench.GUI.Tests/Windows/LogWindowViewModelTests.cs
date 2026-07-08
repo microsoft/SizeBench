@@ -16,7 +16,7 @@ public class LogWindowViewModelTests
             SessionLogs = new ObservableCollection<NoOpLogger>()
         };
         var vm = new LogWindowViewModel(appLogger);
-        Assert.AreEqual(1, vm.LogScopesSourceCollection.Count);
+        Assert.HasCount(1, vm.LogScopesSourceCollection);
         Assert.AreEqual(appLogger, vm.LogScopesSourceCollection[0]);
 
         Assert.AreEqual(0, vm.LogScopes.CurrentPosition);
@@ -34,7 +34,7 @@ public class LogWindowViewModelTests
                 }
         };
         var vm = new LogWindowViewModel(appLogger);
-        Assert.AreEqual(2, vm.LogScopesSourceCollection.Count);
+        Assert.HasCount(2, vm.LogScopesSourceCollection);
         Assert.AreEqual(appLogger, vm.LogScopesSourceCollection[0]);
         Assert.AreEqual(appLogger.SessionLogs.ElementAt(0), vm.LogScopesSourceCollection[1]);
 
@@ -53,7 +53,7 @@ public class LogWindowViewModelTests
                 }
         };
         var vm = new LogWindowViewModel(appLogger);
-        Assert.AreEqual(2, vm.LogScopesSourceCollection.Count);
+        Assert.HasCount(2, vm.LogScopesSourceCollection);
         Assert.AreEqual(appLogger, vm.LogScopesSourceCollection[0]);
         Assert.AreEqual(appLogger.SessionLogs.ElementAt(0), vm.LogScopesSourceCollection[1]);
 
@@ -61,7 +61,7 @@ public class LogWindowViewModelTests
 
         (appLogger.SessionLogs as ObservableCollection<NoOpLogger>)!.Add(new NoOpLogger() { Name = "Fake Session 2" });
 
-        Assert.AreEqual(3, vm.LogScopesSourceCollection.Count);
+        Assert.HasCount(3, vm.LogScopesSourceCollection);
         Assert.AreEqual(appLogger, vm.LogScopesSourceCollection[0]);
         Assert.AreEqual(appLogger.SessionLogs.ElementAt(0), vm.LogScopesSourceCollection[1]);
         Assert.AreEqual(appLogger.SessionLogs.ElementAt(1), vm.LogScopesSourceCollection[2]);
@@ -82,7 +82,7 @@ public class LogWindowViewModelTests
                 }
         };
         var vm = new LogWindowViewModel(appLogger);
-        Assert.AreEqual(2, vm.LogScopesSourceCollection.Count);
+        Assert.HasCount(2, vm.LogScopesSourceCollection);
         Assert.AreEqual(appLogger, vm.LogScopesSourceCollection[0]);
         Assert.AreEqual(appLogger.SessionLogs.ElementAt(0), vm.LogScopesSourceCollection[1]);
 
@@ -92,7 +92,7 @@ public class LogWindowViewModelTests
 
         (appLogger.SessionLogs as ObservableCollection<NoOpLogger>)!.Add(new NoOpLogger() { Name = "Fake Session 2" });
 
-        Assert.AreEqual(3, vm.LogScopesSourceCollection.Count);
+        Assert.HasCount(3, vm.LogScopesSourceCollection);
         Assert.AreEqual(appLogger, vm.LogScopesSourceCollection[0]);
         Assert.AreEqual(appLogger.SessionLogs.ElementAt(0), vm.LogScopesSourceCollection[1]);
         Assert.AreEqual(appLogger.SessionLogs.ElementAt(1), vm.LogScopesSourceCollection[2]);

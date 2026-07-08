@@ -17,8 +17,8 @@ public class ErrorReportTests
     public void NullParametersThrow()
     {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type. This test is intentionally testing null.
-        Assert.ThrowsException<ArgumentNullException>(() => ErrorReport.GetErrorInfo(null, new List<IErrorInfoProvider>()));
-        Assert.ThrowsException<ArgumentNullException>(() => ErrorReport.GetErrorInfo(new InvalidOperationException("test"), null));
+        Assert.ThrowsExactly<ArgumentNullException>(() => ErrorReport.GetErrorInfo(null, new List<IErrorInfoProvider>()));
+        Assert.ThrowsExactly<ArgumentNullException>(() => ErrorReport.GetErrorInfo(new InvalidOperationException("test"), null));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
     }
 
@@ -41,7 +41,7 @@ public class ErrorReportTests
                 testErrorInfoProvider
             });
 
-        StringAssert.Contains(errorInfo, testErrorInfoProvider.Info, StringComparison.Ordinal);
-        StringAssert.Contains(errorInfo, caughtException.Hash(), StringComparison.Ordinal);
+        Assert.Contains(testErrorInfoProvider.Info, errorInfo, StringComparison.Ordinal);
+        Assert.Contains(caughtException.Hash(), errorInfo, StringComparison.Ordinal);
     }
 }

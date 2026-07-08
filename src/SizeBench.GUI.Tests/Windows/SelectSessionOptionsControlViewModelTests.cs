@@ -21,7 +21,7 @@ public sealed class SelectSessionOptionsControlViewModelTests
         Assert.IsTrue(vm.XDATASymbolsSupported);
         Assert.IsTrue(vm.RSRCSymbolsSupported);
         Assert.IsTrue(vm.OtherPESymbolsSupported);
-        Assert.AreEqual(0, propertiesChanged.Count);
+        Assert.IsEmpty(propertiesChanged);
 
         // Toggle just one setting off
         vm.XDATASymbolsSupported = false;
@@ -40,7 +40,7 @@ public sealed class SelectSessionOptionsControlViewModelTests
         Assert.IsTrue(vm.OtherPESymbolsSupported);
         // Calculating all the right properties to refresh is tedious so we just spam empty string to force all properties to be re-evaluated, it's not
         // perf-sensitive and this UI is short-lived.
-        Assert.AreEqual(1, propertiesChanged.Count);
+        Assert.HasCount(1, propertiesChanged);
         CollectionAssert.AreEquivalent(new[] { "" }, propertiesChanged);
 
         // Another setting off
@@ -57,7 +57,7 @@ public sealed class SelectSessionOptionsControlViewModelTests
         Assert.IsFalse(vm.XDATASymbolsSupported);
         Assert.IsFalse(vm.RSRCSymbolsSupported);
         Assert.IsTrue(vm.OtherPESymbolsSupported);
-        Assert.AreEqual(2, propertiesChanged.Count);
+        Assert.HasCount(2, propertiesChanged);
         CollectionAssert.AreEquivalent(new[] { "", "" }, propertiesChanged);
 
         // Turn one back on
@@ -75,7 +75,7 @@ public sealed class SelectSessionOptionsControlViewModelTests
         Assert.IsTrue(vm.XDATASymbolsSupported);
         Assert.IsFalse(vm.RSRCSymbolsSupported);
         Assert.IsTrue(vm.OtherPESymbolsSupported);
-        Assert.AreEqual(3, propertiesChanged.Count);
+        Assert.HasCount(3, propertiesChanged);
         CollectionAssert.AreEquivalent(new[] { "", "", "" }, propertiesChanged);
 
         // And turning the last one on brings us back to the "All" state
@@ -88,7 +88,7 @@ public sealed class SelectSessionOptionsControlViewModelTests
         Assert.IsTrue(vm.XDATASymbolsSupported);
         Assert.IsTrue(vm.RSRCSymbolsSupported);
         Assert.IsTrue(vm.OtherPESymbolsSupported);
-        Assert.AreEqual(4, propertiesChanged.Count);
+        Assert.HasCount(4, propertiesChanged);
         CollectionAssert.AreEquivalent(new[] { "", "", "", "" }, propertiesChanged);
     }
 }

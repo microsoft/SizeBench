@@ -31,7 +31,7 @@ public sealed class FunctionSymbolPageViewModelTests : IDisposable
 
         this.Generator.MockSession.Setup(s => s.LoadSymbolByRVA(rva)).Returns(Task.FromResult<ISymbol?>(function));
         var tcsPlacement = new TaskCompletionSource<SymbolPlacement>();
-        tcsPlacement.SetCanceled();
+        tcsPlacement.SetCanceled(this.TestContext.CancellationToken);
         this.Generator.MockSession.Setup(s => s.LookupSymbolPlacementInBinary(function, It.IsAny<CancellationToken>())).Returns(tcsPlacement.Task);
         this.Generator.MockSession.Setup(s => s.EnumerateAllSymbolsFoldedAtRVA(rva, It.IsAny<CancellationToken>())).Returns(Task.FromResult<IReadOnlyList<ISymbol>>(new List<ISymbol>()));
 
@@ -49,7 +49,7 @@ public sealed class FunctionSymbolPageViewModelTests : IDisposable
         Assert.IsFalse(viewmodel.IsFunctionCodeUsedForMultipleFunctions);
         Assert.IsNull(viewmodel.FoldedFunctions);
         Assert.AreEqual(function, viewmodel.Function);
-        Assert.AreEqual(0, viewmodel.BlockPlacements.Count);
+        Assert.IsEmpty(viewmodel.BlockPlacements);
         Assert.AreEqual("Function Symbol: test function", viewmodel.PageTitle);
         Assert.AreEqual("", viewmodel.FunctionAttributes);
     }
@@ -93,7 +93,7 @@ public sealed class FunctionSymbolPageViewModelTests : IDisposable
         Assert.IsFalse(viewmodel.IsFunctionCodeUsedForMultipleFunctions);
         Assert.IsNull(viewmodel.FoldedFunctions);
         Assert.AreEqual(function, viewmodel.Function);
-        Assert.AreEqual(3, viewmodel.BlockPlacements.Count);
+        Assert.HasCount(3, viewmodel.BlockPlacements);
         // These should come out in block RVA order, so see above for the RVAs for why this order is right
         Assert.AreEqual(separatedBlocks[1], viewmodel.BlockPlacements[0].Key);
         Assert.AreEqual(separatedBlocks[0], viewmodel.BlockPlacements[1].Key);
@@ -147,7 +147,7 @@ public sealed class FunctionSymbolPageViewModelTests : IDisposable
         Assert.IsFalse(viewmodel.IsFunctionCodeUsedForMultipleFunctions);
         Assert.IsNull(viewmodel.FoldedFunctions);
         Assert.AreEqual(function, viewmodel.Function);
-        Assert.AreEqual(1, viewmodel.BlockPlacements.Count);
+        Assert.HasCount(1, viewmodel.BlockPlacements);
         Assert.AreEqual(function, viewmodel.BlockPlacements[0].Key);
         Assert.AreEqual(this.Generator.TextSection, viewmodel.BlockPlacements[0].Value.BinarySection);
         Assert.AreEqual(this.Generator.TextMnCG, viewmodel.BlockPlacements[0].Value.COFFGroup);
@@ -177,7 +177,7 @@ public sealed class FunctionSymbolPageViewModelTests : IDisposable
         Assert.IsNull(viewmodel.FoldedFunctions);
         Assert.AreEqual("MyType::HasAFunction", viewmodel.NameOfNonexistentFunction);
         Assert.IsNull(viewmodel.Function);
-        Assert.AreEqual(0, viewmodel.BlockPlacements.Count);
+        Assert.IsEmpty(viewmodel.BlockPlacements);
         Assert.AreEqual("Function Symbol: MyType::HasAFunction", viewmodel.PageTitle);
         Assert.AreEqual(String.Empty, viewmodel.FunctionAttributes);
     }
@@ -224,7 +224,7 @@ public sealed class FunctionSymbolPageViewModelTests : IDisposable
         Assert.IsFalse(viewmodel.DoesFunctionContainMultipleCodeBlocks);
         Assert.IsTrue(viewmodel.IsFunctionCodeUsedForMultipleFunctions);
         Assert.AreEqual(function, viewmodel.Function);
-        Assert.AreEqual(3, viewmodel.FoldedFunctions!.Count);
+        Assert.HasCount(3, viewmodel.FoldedFunctions);
         // Check that they're in alphabetical order
         Assert.AreEqual("CFoo::DoTheThing", viewmodel.FoldedFunctions[0].FormattedName.IncludeParentType);
         Assert.AreEqual("CFoo::XYZ", viewmodel.FoldedFunctions[1].FormattedName.IncludeParentType);
@@ -232,4 +232,6 @@ public sealed class FunctionSymbolPageViewModelTests : IDisposable
     }
 
     public void Dispose() => this.Generator.Dispose();
+
+    public TestContext TestContext { get; set; }
 }

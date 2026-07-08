@@ -156,17 +156,17 @@ public sealed class EnumerateLibsAndCompilandsSessionTaskTests : IDisposable
         using var logger = new NoOpLogger();
         var libs = task.Execute(logger);
 
-        Assert.AreEqual(3, libs.Count);
+        Assert.HasCount(3, libs);
 
         // Assertions about a.lib
         var aLib = libs.Where(l => l.Name == @"c:\dummy\a.lib").First();
-        Assert.AreEqual(1, aLib.SectionContributions.Count);
+        Assert.HasCount(1, aLib.SectionContributions);
         Assert.AreEqual(".text", aLib.SectionContributionsByName.Keys.First());
         var sectionContrib = aLib.SectionContributions.First();
         Assert.AreEqual(".text", sectionContrib.Key.Name);
         Assert.AreEqual<ulong>(0x800, sectionContrib.Value.Size); // 0x500 + 0x300 for a1.obj and a2.obj above
 
-        Assert.AreEqual(2, aLib.COFFGroupContributions.Count);
+        Assert.HasCount(2, aLib.COFFGroupContributions);
         var cgContrib = aLib.COFFGroupContributions.First();
         Assert.AreEqual(".text$mn", cgContrib.Key.Name);
         Assert.AreEqual<ulong>(0x500, cgContrib.Value.Size);
@@ -174,29 +174,29 @@ public sealed class EnumerateLibsAndCompilandsSessionTaskTests : IDisposable
         Assert.AreEqual(".text$zz", cgContrib.Key.Name);
         Assert.AreEqual<ulong>(0x300, cgContrib.Value.Size);
 
-        Assert.AreEqual(2, aLib.Compilands.Count);
+        Assert.HasCount(2, aLib.Compilands);
         var compiland = aLib.Compilands[@"c:\dummy\a1.obj"];
         Assert.AreEqual(@"c:\dummy\a1.obj", compiland.Name);
         Assert.AreEqual(0x500u, compiland.Size);
-        Assert.AreEqual(1, compiland.SectionContributions.Count);
-        Assert.AreEqual(1, compiland.SectionContributionsByName.Count);
+        Assert.HasCount(1, compiland.SectionContributions);
+        Assert.HasCount(1, compiland.SectionContributionsByName);
         Assert.AreEqual(0x500u, compiland.SectionContributionsByName[".text"].Size);
-        Assert.AreEqual(1, compiland.COFFGroupContributions.Count);
-        Assert.AreEqual(1, compiland.COFFGroupContributionsByName.Count);
+        Assert.HasCount(1, compiland.COFFGroupContributions);
+        Assert.HasCount(1, compiland.COFFGroupContributionsByName);
         Assert.AreEqual(0x500u, compiland.COFFGroupContributionsByName[".text$mn"].Size);
         compiland = aLib.Compilands[@"c:\dummy\a2.obj"];
         Assert.AreEqual(@"c:\dummy\a2.obj", compiland.Name);
         Assert.AreEqual(0x300u, compiland.Size);
-        Assert.AreEqual(1, compiland.SectionContributions.Count);
-        Assert.AreEqual(1, compiland.SectionContributionsByName.Count);
+        Assert.HasCount(1, compiland.SectionContributions);
+        Assert.HasCount(1, compiland.SectionContributionsByName);
         Assert.AreEqual(0x300u, compiland.SectionContributionsByName[".text"].Size);
-        Assert.AreEqual(1, compiland.COFFGroupContributions.Count);
-        Assert.AreEqual(1, compiland.COFFGroupContributionsByName.Count);
+        Assert.HasCount(1, compiland.COFFGroupContributions);
+        Assert.HasCount(1, compiland.COFFGroupContributionsByName);
         Assert.AreEqual(0x300u, compiland.COFFGroupContributionsByName[".text$zz"].Size);
 
         // Assertions about b.lib
         var bLib = libs.Where(l => l.Name == @"c:\dummy\b.lib").First();
-        Assert.AreEqual(2, bLib.SectionContributions.Count);
+        Assert.HasCount(2, bLib.SectionContributions);
         Assert.AreEqual(".rdata", bLib.SectionContributionsByName.Keys.First());
         Assert.AreEqual(".text", bLib.SectionContributionsByName.Keys.Skip(1).First());
         sectionContrib = bLib.SectionContributions.First();
@@ -206,26 +206,26 @@ public sealed class EnumerateLibsAndCompilandsSessionTaskTests : IDisposable
         Assert.AreEqual(".text", sectionContrib.Key.Name);
         Assert.AreEqual<ulong>(0x1100, sectionContrib.Value.Size); // 0x1000 + 0x100 for b2.obj (.text$mn) and b2.obj (.text$zz) above
 
-        Assert.AreEqual(3, bLib.COFFGroupContributions.Count);
+        Assert.HasCount(3, bLib.COFFGroupContributions);
         //TODO: could assert more about b.lib's COFF Group contributions to strengthen this test
 
         compiland = bLib.Compilands[@"c:\dummy\b1.obj"];
         Assert.AreEqual(@"c:\dummy\b1.obj", compiland.Name);
         Assert.AreEqual(0x50u, compiland.Size);
-        Assert.AreEqual(1, compiland.SectionContributions.Count);
-        Assert.AreEqual(1, compiland.SectionContributionsByName.Count);
+        Assert.HasCount(1, compiland.SectionContributions);
+        Assert.HasCount(1, compiland.SectionContributionsByName);
         Assert.AreEqual(0x50u, compiland.SectionContributionsByName[".rdata"].Size);
-        Assert.AreEqual(1, compiland.COFFGroupContributions.Count);
-        Assert.AreEqual(1, compiland.COFFGroupContributionsByName.Count);
+        Assert.HasCount(1, compiland.COFFGroupContributions);
+        Assert.HasCount(1, compiland.COFFGroupContributionsByName);
         Assert.AreEqual(0x50u, compiland.COFFGroupContributionsByName[".CRT$XCA"].Size);
         compiland = bLib.Compilands[@"c:\dummy\b2.obj"];
         Assert.AreEqual(@"c:\dummy\b2.obj", compiland.Name);
         Assert.AreEqual(0x1100u, compiland.Size);
-        Assert.AreEqual(1, compiland.SectionContributions.Count);
-        Assert.AreEqual(1, compiland.SectionContributionsByName.Count);
+        Assert.HasCount(1, compiland.SectionContributions);
+        Assert.HasCount(1, compiland.SectionContributionsByName);
         Assert.AreEqual(0x1100u, compiland.SectionContributionsByName[".text"].Size);
-        Assert.AreEqual(2, compiland.COFFGroupContributions.Count);
-        Assert.AreEqual(2, compiland.COFFGroupContributionsByName.Count);
+        Assert.HasCount(2, compiland.COFFGroupContributions);
+        Assert.HasCount(2, compiland.COFFGroupContributionsByName);
         Assert.AreEqual(0x1000u, compiland.COFFGroupContributionsByName[".text$mn"].Size);
         Assert.AreEqual(0x100u, compiland.COFFGroupContributionsByName[".text$zz"].Size);
 

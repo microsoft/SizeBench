@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     
     <!-- Below this, in this PropertyGroup, is all about Code Analysis -->
-    <AnalysisLevel>8</AnalysisLevel> <!-- Update this when upgrading from net8 -->
+    <AnalysisLevel>10</AnalysisLevel> <!-- Update this when upgrading from net10 -->
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>

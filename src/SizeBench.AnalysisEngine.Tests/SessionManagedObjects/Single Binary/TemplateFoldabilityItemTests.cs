@@ -29,8 +29,8 @@ public sealed class TemplateFoldabilityItemTests : IDisposable
         var item = new TemplateFoldabilityItem("TemplatedThing<T>", symbols, uniqueSymbols, totalSize: 150, percentageSimilarity: 0.86f);
         Assert.AreEqual(150u, item.TotalSize);
         Assert.AreEqual((uint)(150 * 0.86f), item.WastedSize);
-        Assert.AreEqual(2, item.Symbols.Count);
-        Assert.AreEqual(1, item.UniqueSymbols.Count);
+        Assert.HasCount(2, item.Symbols);
+        Assert.HasCount(1, item.UniqueSymbols);
         Assert.AreEqual(0.86f, item.PercentageSimilarity);
         CollectionAssert.AreEquivalent(symbols, item.Symbols.ToList());
         Assert.AreEqual("TemplatedThing<T>", item.TemplateName);

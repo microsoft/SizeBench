@@ -11,7 +11,7 @@ public class RVARangeTests
         Assert.AreEqual(100u, range.RVAStart);
         Assert.AreEqual(114u, range.RVAEnd);
         Assert.AreEqual(15u, range.Size);
-        Assert.AreEqual(false, range.IsVirtualSize);
+        Assert.IsFalse(range.IsVirtualSize);
     }
 
     [TestMethod]
@@ -223,8 +223,8 @@ public class RVARangeTests
         var virtualRange = new RVARange(50, 100, isVirtualSize: true);
         var nonVirtualRange = new RVARange(100, 150);
 
-        Assert.ThrowsException<InvalidOperationException>(() => virtualRange.CombineWith(nonVirtualRange));
-        Assert.ThrowsException<InvalidOperationException>(() => nonVirtualRange.CombineWith(virtualRange));
+        Assert.ThrowsExactly<InvalidOperationException>(() => virtualRange.CombineWith(nonVirtualRange));
+        Assert.ThrowsExactly<InvalidOperationException>(() => nonVirtualRange.CombineWith(virtualRange));
     }
 
     [TestMethod]

@@ -48,7 +48,7 @@ public sealed class AllTemplateFoldabilityPageViewModelTests : IDisposable
         await viewmodel.InitializeAsync();
         viewmodel.GenerateFormattedDataForExcelExport(out var columnHeaders, out var preformattedData);
 
-        Assert.AreEqual(7, columnHeaders.Length);
+        Assert.HasCount(7, columnHeaders);
         Assert.AreEqual("Template Name", columnHeaders[0]);
         Assert.AreEqual("Total Size", columnHeaders[1]);
         Assert.AreEqual("Wasted Size", columnHeaders[2]);
@@ -65,9 +65,9 @@ public sealed class AllTemplateFoldabilityPageViewModelTests : IDisposable
         Assert.AreEqual(3, preformattedData[i]["# Symbols"]);
         Assert.AreEqual(2, preformattedData[i]["# Unique Symbols (post-folding)"]);
         Assert.AreEqual("80.0 %", preformattedData[i]["% Similarity"]);
-        StringAssert.Contains(preformattedData[i]["Example Symbols"].ToString(), "SomeNamespace::MyType::FoldableFunction<AComplex::Type<int>,bool>(bool, AComplex::Type<int>)", StringComparison.Ordinal);
-        StringAssert.Contains(preformattedData[i]["Example Symbols"].ToString(), "SomeNamespace::MyType::FoldableFunction<AComplex::Type<float>,bool>(bool, AComplex::Type<float>)", StringComparison.Ordinal);
-        StringAssert.Contains(preformattedData[i]["Example Symbols"].ToString(), "SomeNamespace::MyType::FoldableFunction<AComplex::Type<SomeUDT>,bool>(bool, AComplex::Type<SomeUDT>)", StringComparison.Ordinal);
+        Assert.Contains("SomeNamespace::MyType::FoldableFunction<AComplex::Type<int>,bool>(bool, AComplex::Type<int>)", preformattedData[i]["Example Symbols"].ToString(), StringComparison.Ordinal);
+        Assert.Contains("SomeNamespace::MyType::FoldableFunction<AComplex::Type<float>,bool>(bool, AComplex::Type<float>)", preformattedData[i]["Example Symbols"].ToString(), StringComparison.Ordinal);
+        Assert.Contains("SomeNamespace::MyType::FoldableFunction<AComplex::Type<SomeUDT>,bool>(bool, AComplex::Type<SomeUDT>)", preformattedData[i]["Example Symbols"].ToString(), StringComparison.Ordinal);
 
         Assert.IsTrue(viewmodel.ExportToExcelCommand.CanExecute());
         viewmodel.ExportToExcelCommand.Execute();

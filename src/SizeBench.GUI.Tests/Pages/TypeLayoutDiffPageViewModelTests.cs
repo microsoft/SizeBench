@@ -83,7 +83,7 @@ public sealed class TypeLayoutDiffPageViewModelTests : IDisposable
         Assert.AreEqual(tlidResult.UserDefinedType.Name, vm.TypeNameToLoad);
         Assert.AreEqual($"Type Layout Diff: {tlidResult.UserDefinedType.Name}", vm.PageTitle);
         this._testDataGenerator.MockDiffSession.Verify(s => s.LoadTypeLayoutDiff(udtTypeDiff, It.IsAny<CancellationToken>()), Times.Exactly(1));
-        Assert.AreEqual(1, vm.TypeLayoutItemDiffs!.Cast<TypeLayoutItemDiff>().Count());
+        Assert.HasCount(1, vm.TypeLayoutItemDiffs!.Cast<TypeLayoutItemDiff>());
         Assert.IsTrue(ReferenceEquals(tlidResult, vm.TypeLayoutItemDiffs!.Cast<TypeLayoutItemDiff>().ToList()[0]));
     }
 

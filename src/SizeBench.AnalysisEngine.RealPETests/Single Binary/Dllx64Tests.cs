@@ -16,7 +16,7 @@ public class Dllx64Tests
 
     private string BinaryPath => MakePath("PEParser.Tests.Dllx64.dll");
     private string PDBPath => MakePath("PEParser.Tests.Dllx64.pdb");
-    private CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
+    private CancellationToken CancellationToken => this.TestContext!.CancellationToken;
 
     private static long RoundSizeUpTo4ByteAlignment(ISymbol sym) => RoundSizeUpToAlignment(sym.Size, 4);
 
@@ -281,7 +281,7 @@ public class Dllx64Tests
         // ICON
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // We should not have directly gotten any Icon symbols back, they're all inside the GroupIcon
-        Assert.AreEqual(0, rsrcSymbols.OfType<RsrcIconDataSymbol>().Count());
+        Assert.IsEmpty(rsrcSymbols.OfType<RsrcIconDataSymbol>());
 
         var groupIconData = rsrcSymbols.OfType<RsrcGroupIconDataSymbol>().Single(sym => sym.Name.Contains("#101", StringComparison.Ordinal));
         Assert.AreEqual(SymbolComparisonClass.RsrcData, groupIconData.SymbolComparisonClass);
@@ -291,7 +291,7 @@ public class Dllx64Tests
         Assert.AreEqual<uint>(45444, groupIconData.VirtualSize);
         Assert.AreEqual(Win32ResourceType.GROUP_ICON, groupIconData.Win32ResourceType);
 
-        Assert.AreEqual(9, groupIconData.Icons.Count);
+        Assert.HasCount(9, groupIconData.Icons);
 
         // #1, 256x256, 8bpp
         var icon = groupIconData.Icons.Single(i => i.Width == 256 && i.Height == 256 && i.BitsPerPixel == 8);
@@ -404,7 +404,7 @@ public class Dllx64Tests
         Assert.AreEqual<uint>(454 + 200 + 60, groupStringTableData.Size);
         Assert.AreEqual<uint>(454 + 200 + 60, groupStringTableData.VirtualSize);
         Assert.AreEqual(Win32ResourceType.STRINGTABLE, groupStringTableData.Win32ResourceType);
-        Assert.AreEqual(3, groupStringTableData.StringTables.Count);
+        Assert.HasCount(3, groupStringTableData.StringTables);
 
         // These will throw if we fail to find 3 string tables with the right names that match up to what other tools show when walking
         // PE resources naively and showing each STRINGTABLE separately.
@@ -418,7 +418,7 @@ public class Dllx64Tests
 
         // I don't honestly care which table contains which string, so for testing we'll just check that all these strings are somewhere
         // in the group.
-        Assert.AreEqual(18, allStringsAcrossTables.Count);
+        Assert.HasCount(18, allStringsAcrossTables);
         CollectionAssert.Contains(allStringsAcrossTables, "Test string 1");
         CollectionAssert.Contains(allStringsAcrossTables, "Test string 2");
         CollectionAssert.Contains(allStringsAcrossTables, "Test string 3");
@@ -442,7 +442,7 @@ public class Dllx64Tests
         // CURSOR
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // We should not have directly gotten any Cursor symbols back, they're all inside the GroupCursor
-        Assert.AreEqual(0, rsrcSymbols.OfType<RsrcCursorDataSymbol>().Count());
+        Assert.IsEmpty(rsrcSymbols.OfType<RsrcCursorDataSymbol>());
 
         // CURSOR2NAMEDRESOURCE
         var groupCursorData = rsrcSymbols.OfType<RsrcGroupCursorDataSymbol>().Single(sym => sym.Name.Contains("CURSOR2NAMEDRESOURCE", StringComparison.Ordinal));
@@ -454,7 +454,7 @@ public class Dllx64Tests
         Assert.AreEqual<uint>(expectedGroupCursorSize, groupCursorData.VirtualSize);
         Assert.AreEqual(Win32ResourceType.GROUP_CURSOR, groupCursorData.Win32ResourceType);
 
-        Assert.AreEqual(3, groupCursorData.Cursors.Count);
+        Assert.HasCount(3, groupCursorData.Cursors);
 
         // 32x32, 1bpp
         var cursor = groupCursorData.Cursors.Single(i => i.Width == 32 && i.Height == 32 && i.BitsPerPixel == 1);
@@ -496,7 +496,7 @@ public class Dllx64Tests
         Assert.AreEqual<uint>(expectedGroupCursorSize, groupCursorData.VirtualSize);
         Assert.AreEqual(Win32ResourceType.GROUP_CURSOR, groupCursorData.Win32ResourceType);
 
-        Assert.AreEqual(1, groupCursorData.Cursors.Count);
+        Assert.HasCount(1, groupCursorData.Cursors);
 
         // 32x32, 1bpp
         cursor = groupCursorData.Cursors.Single(i => i.Width == 32 && i.Height == 32 && i.BitsPerPixel == 1);
@@ -518,7 +518,7 @@ public class Dllx64Tests
         Assert.AreEqual<uint>(expectedGroupCursorSize, groupCursorData.VirtualSize);
         Assert.AreEqual(Win32ResourceType.GROUP_CURSOR, groupCursorData.Win32ResourceType);
 
-        Assert.AreEqual(2, groupCursorData.Cursors.Count);
+        Assert.HasCount(2, groupCursorData.Cursors);
 
         // 32x32, 1bpp
         cursor = groupCursorData.Cursors.Single(i => i.Width == 32 && i.Height == 32 && i.BitsPerPixel == 1);
@@ -645,15 +645,15 @@ public class Dllx64Tests
         Assert.IsNotNull(firstEntry);
         Assert.AreEqual(0x10C0u, firstEntry.RVA);
         Assert.AreEqual(firstEntry.Name, ((Symbol)firstEntry).CanonicalName);
-        StringAssert.Contains(firstEntry.Name, "Dllx64_DerivedClass", StringComparison.Ordinal);
-        StringAssert.Contains(firstEntry.Name, "AVirtualFunction", StringComparison.Ordinal);
+        Assert.Contains("Dllx64_DerivedClass", firstEntry.Name, StringComparison.Ordinal);
+        Assert.Contains("AVirtualFunction", firstEntry.Name, StringComparison.Ordinal);
 
         var secondEntry = await session.LoadSymbolForVTableSlotAsync(derivedClassVftableRVA, slotIndex: 1);
         Assert.IsNotNull(secondEntry);
         Assert.AreEqual(0x1060u, secondEntry.RVA);
         Assert.AreEqual(secondEntry.Name, ((Symbol)secondEntry).CanonicalName);
-        StringAssert.Contains(secondEntry.Name, "Dllx64_BaseClass", StringComparison.Ordinal);
-        StringAssert.Contains(secondEntry.Name, "ASecondVirtualFunction", StringComparison.Ordinal);
+        Assert.Contains("Dllx64_BaseClass", secondEntry.Name, StringComparison.Ordinal);
+        Assert.Contains("ASecondVirtualFunction", secondEntry.Name, StringComparison.Ordinal);
     }
 
     [TestMethod]
@@ -675,7 +675,7 @@ public class Dllx64Tests
         Assert.AreEqual(112u, DllMainSymbol.Size);
         Assert.AreEqual(0x2FF0u, DllMainSymbol.RVA);
 
-        StringAssert.Contains(Dllx64_BaseClassCtorSymbol.Name, "Dllx64_BaseClass::Dllx64_BaseClass", StringComparison.Ordinal);
+        Assert.Contains("Dllx64_BaseClass::Dllx64_BaseClass", Dllx64_BaseClassCtorSymbol.Name, StringComparison.Ordinal);
         // Note the MAP file says this is 48 bytes, but as far as I can tell that's due to padding in the binary
         // between functions.  This function really is 42 bytes, so this Assert is correct despite the MAP file
         // saying otherwise.
@@ -701,17 +701,17 @@ public class Dllx64Tests
         var IsProcessorFeaturePresentImportThunk = (ImportThunkSymbol)(await session.LoadSymbolByRVA(0x4D70))!;
         var DebugBreakImportByName = (ImportByNameSymbol)(await session.LoadSymbolByRVA(0x4E38))!;
 
-        StringAssert.Contains(PDataForDllx64_DerivedClass_AVirtualFunctionSymbol!.Name, "[pdata]", StringComparison.Ordinal);
-        StringAssert.Contains(PDataForDllx64_DerivedClass_AVirtualFunctionSymbol.Name, "Dllx64_DerivedClass::AVirtualFunction", StringComparison.Ordinal);
+        Assert.Contains("[pdata]", PDataForDllx64_DerivedClass_AVirtualFunctionSymbol!.Name, StringComparison.Ordinal);
+        Assert.Contains("Dllx64_DerivedClass::AVirtualFunction", PDataForDllx64_DerivedClass_AVirtualFunctionSymbol.Name, StringComparison.Ordinal);
         Assert.AreEqual(12u, PDataForDllx64_DerivedClass_AVirtualFunctionSymbol.Size);
         Assert.AreEqual(0x700Cu, PDataForDllx64_DerivedClass_AVirtualFunctionSymbol.RVA);
 
-        StringAssert.Contains(UnwindforDllx64_DerivedClass_AVirtualFunctionSymbol!.Name, "[unwind]", StringComparison.Ordinal);
-        StringAssert.Contains(UnwindforDllx64_DerivedClass_AVirtualFunctionSymbol.Name, "Dllx64_DerivedClass::AVirtualFunction", StringComparison.Ordinal);
+        Assert.Contains("[unwind]", UnwindforDllx64_DerivedClass_AVirtualFunctionSymbol!.Name, StringComparison.Ordinal);
+        Assert.Contains("Dllx64_DerivedClass::AVirtualFunction", UnwindforDllx64_DerivedClass_AVirtualFunctionSymbol.Name, StringComparison.Ordinal);
         Assert.AreEqual(8u, UnwindforDllx64_DerivedClass_AVirtualFunctionSymbol.Size);
         Assert.AreEqual(0x4880u, UnwindforDllx64_DerivedClass_AVirtualFunctionSymbol.RVA);
 
-        StringAssert.Contains(groupCursorData.Name, "CURSOR2NAMEDRESOURCE", StringComparison.Ordinal);
+        Assert.Contains("CURSOR2NAMEDRESOURCE", groupCursorData.Name, StringComparison.Ordinal);
         Assert.AreEqual(SymbolComparisonClass.RsrcData, groupCursorData.SymbolComparisonClass);
         Assert.AreEqual("English (United Kingdom)", groupCursorData.Language);
         Assert.AreEqual("GROUP_CURSOR", groupCursorData.ResourceTypeName);
@@ -719,7 +719,7 @@ public class Dllx64Tests
         Assert.AreEqual<uint>(expectedGroupCursorSize, groupCursorData.Size);
         Assert.AreEqual<uint>(expectedGroupCursorSize, groupCursorData.VirtualSize);
         Assert.AreEqual(Win32ResourceType.GROUP_CURSOR, groupCursorData.Win32ResourceType);
-        Assert.AreEqual(3, groupCursorData.Cursors.Count);
+        Assert.HasCount(3, groupCursorData.Cursors);
 
         Assert.AreEqual(SymbolComparisonClass.RsrcData, groupStringTableData.SymbolComparisonClass);
         Assert.AreEqual("English (United States)", groupStringTableData.Language);
@@ -727,7 +727,7 @@ public class Dllx64Tests
         Assert.AreEqual<uint>(454 + 200 + 60, groupStringTableData.Size);
         Assert.AreEqual<uint>(454 + 200 + 60, groupStringTableData.VirtualSize);
         Assert.AreEqual(Win32ResourceType.STRINGTABLE, groupStringTableData.Win32ResourceType);
-        Assert.AreEqual(3, groupStringTableData.StringTables.Count);
+        Assert.HasCount(3, groupStringTableData.StringTables);
 
         Assert.AreEqual(SymbolComparisonClass.RsrcData, japaneseBitmapData.SymbolComparisonClass);
         Assert.AreEqual("Japanese (Japan)", japaneseBitmapData.Language);
@@ -773,5 +773,5 @@ public class Dllx64Tests
             Path.Combine(this.TestContext!.DeploymentDirectory!, "PEParser.Tests.Dllx64.dll"),
             Path.Combine(this.TestContext!.DeploymentDirectory!, "PEParser.Tests.Dllx64.pdb"),
             symbolSources,
-            this.TestContext.CancellationTokenSource.Token);
+            this.TestContext.CancellationToken);
 }

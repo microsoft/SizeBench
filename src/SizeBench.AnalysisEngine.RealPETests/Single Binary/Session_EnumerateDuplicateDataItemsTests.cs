@@ -24,7 +24,7 @@ public sealed class Session_EnumerateDuplicateDataItemsTests
         var duplicates = await session.EnumerateDuplicateDataItems(CancellationToken.None);
         Assert.IsNotNull(duplicates);
 
-        Assert.AreEqual(3, duplicates.Count);
+        Assert.HasCount(3, duplicates);
 
         var duplicatePoint = duplicates.Single(dupe => dupe.Symbol.Name == "duplicatedPoint");
         var duplicatePointArray = duplicates.Single(dupe => dupe.Symbol.Name == "duplicatedPointArray");
@@ -32,18 +32,18 @@ public sealed class Session_EnumerateDuplicateDataItemsTests
 
         Assert.AreEqual(8u, duplicatePoint.Symbol.Size);
         Assert.AreEqual(24u, duplicatePoint.WastedSize);
-        Assert.AreEqual(4, duplicatePoint.ReferencedIn.Count);
-        Assert.IsTrue(duplicatePoint.ReferencedIn.Any(c => c.ShortName == "SourceFile1.obj"));
-        Assert.IsTrue(duplicatePoint.ReferencedIn.Any(c => c.ShortName == "SourceFile2.obj"));
-        Assert.IsTrue(duplicatePoint.ReferencedIn.Any(c => c.ShortName == "dllmain.obj"));
-        Assert.IsTrue(duplicatePoint.ReferencedIn.Any(c => c.ShortName == "stdafx.obj"));
+        Assert.HasCount(4, duplicatePoint.ReferencedIn);
+        Assert.Contains(c => c.ShortName == "SourceFile1.obj", duplicatePoint.ReferencedIn);
+        Assert.Contains(c => c.ShortName == "SourceFile2.obj", duplicatePoint.ReferencedIn);
+        Assert.Contains(c => c.ShortName == "dllmain.obj", duplicatePoint.ReferencedIn);
+        Assert.Contains(c => c.ShortName == "stdafx.obj", duplicatePoint.ReferencedIn);
 
         Assert.AreEqual(24u, duplicatePointArray.Symbol.Size);
         Assert.AreEqual(72u, duplicatePointArray.WastedSize);
-        Assert.AreEqual(4, duplicatePointArray.ReferencedIn.Count);
-        Assert.IsTrue(duplicatePointArray.ReferencedIn.Any(c => c.ShortName == "SourceFile1.obj"));
-        Assert.IsTrue(duplicatePointArray.ReferencedIn.Any(c => c.ShortName == "SourceFile2.obj"));
-        Assert.IsTrue(duplicatePointArray.ReferencedIn.Any(c => c.ShortName == "dllmain.obj"));
-        Assert.IsTrue(duplicatePointArray.ReferencedIn.Any(c => c.ShortName == "stdafx.obj"));
+        Assert.HasCount(4, duplicatePointArray.ReferencedIn);
+        Assert.Contains(c => c.ShortName == "SourceFile1.obj", duplicatePointArray.ReferencedIn);
+        Assert.Contains(c => c.ShortName == "SourceFile2.obj", duplicatePointArray.ReferencedIn);
+        Assert.Contains(c => c.ShortName == "dllmain.obj", duplicatePointArray.ReferencedIn);
+        Assert.Contains(c => c.ShortName == "stdafx.obj", duplicatePointArray.ReferencedIn);
     }
 }

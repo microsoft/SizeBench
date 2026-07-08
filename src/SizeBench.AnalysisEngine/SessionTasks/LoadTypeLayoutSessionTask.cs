@@ -37,14 +37,11 @@ internal class LoadTypeLayoutSessionTask : SessionTask<List<TypeLayoutItem>>
                 throw new ArgumentException("It should be impossible to get here with a TypeSymbol that doesn't support loading a layout.");
             }
 
-            this.TypeSymbol = ChaseThroughToUDT(typeSymbol);
-            if (this.TypeSymbol is null)
-            {
-                throw new ArgumentException("The type symbol provided is not a UserDefinedType nor an indirect version of one (a modified type, " +
-                                            "pointer type, etc. with a UDT beneath them).  Currently we don't know how to load Type Layouts for " +
-                                            "these kinds of types - is this a bug in the caller, or do we need to support this now in the " +
-                                            "AnalysisEngine?");
-            }
+            this.TypeSymbol = ChaseThroughToUDT(typeSymbol) 
+                ?? throw new ArgumentException("The type symbol provided is not a UserDefinedType nor an indirect version of one (a modified type, " +
+                                               "pointer type, etc. with a UDT beneath them).  Currently we don't know how to load Type Layouts for " +
+                                               "these kinds of types - is this a bug in the caller, or do we need to support this now in the " +
+                                               "AnalysisEngine?");
         }
     }
 

@@ -12,7 +12,7 @@ namespace SizeBench.AnalysisEngine.Tests;
 public sealed class DiffSession_EnumerateSymbolsInCompilandTests
 {
     public TestContext? TestContext { get; set; }
-    private CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
+    private CancellationToken CancellationToken => this.TestContext!.CancellationToken;
 
     private string BeforeBinaryPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "CppTestCases_BasicDiffObjectsBefore.dll");
 
@@ -92,7 +92,7 @@ public sealed class DiffSession_EnumerateSymbolsInCompilandTests
                                                             s.AfterSymbol.RVAEnd <= (textXCGDiff.AfterCOFFGroup.RVA + textXCGDiff.AfterCOFFGroup.Size));
         Assert.IsNull(textXSymbolDiff.BeforeSymbol);
         Assert.IsNotNull(textXSymbolDiff.AfterSymbol);
-        Assert.IsTrue(textXSymbolDiff.SizeDiff > 0);
+        Assert.IsGreaterThan(0, textXSymbolDiff.SizeDiff);
 
         // Try something in .xdata since XDATA is parsed specially
         // The xdata symbols have really ugly names due to templates, so just grabbing the one and only tryMap to make the test code
@@ -114,13 +114,13 @@ public sealed class DiffSession_EnumerateSymbolsInCompilandTests
         var sourceFile1InStaticLib2 = compilandDiffs.Single(cd => cd.ShortName == "SourceFile1.obj" && cd.LibDiff.ShortName == "StaticLib2");
         var symbolDiffs = await diffSession.EnumerateSymbolDiffsInCompilandDiff(sourceFile1InStaticLib2, this.CancellationToken);
 
-        Assert.IsTrue(symbolDiffs.Count > 0);
+        Assert.IsNotEmpty(symbolDiffs);
 
         foreach (var sym in symbolDiffs)
         {
             Assert.IsNotNull(sym.BeforeSymbol);
             Assert.IsNull(sym.AfterSymbol);
-            Assert.IsTrue(sym.SizeDiff < 0);
+            Assert.IsLessThan(0, sym.SizeDiff);
         }
     }
 
@@ -135,13 +135,13 @@ public sealed class DiffSession_EnumerateSymbolsInCompilandTests
         var sourceFile1InStaticLib3 = compilandDiffs.Single(cd => cd.ShortName == "SourceFile1.obj" && cd.LibDiff.ShortName == "StaticLib3");
         var symbolDiffs = await diffSession.EnumerateSymbolDiffsInCompilandDiff(sourceFile1InStaticLib3, this.CancellationToken);
 
-        Assert.IsTrue(symbolDiffs.Count > 0);
+        Assert.IsNotEmpty(symbolDiffs);
 
         foreach (var sym in symbolDiffs)
         {
             Assert.IsNull(sym.BeforeSymbol);
             Assert.IsNotNull(sym.AfterSymbol);
-            Assert.IsTrue(sym.SizeDiff > 0);
+            Assert.IsGreaterThan(0, sym.SizeDiff);
         }
     }
 }

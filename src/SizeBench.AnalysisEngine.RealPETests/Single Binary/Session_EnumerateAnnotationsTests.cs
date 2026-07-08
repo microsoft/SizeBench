@@ -23,16 +23,16 @@ public sealed class Session_EnumerateAnnotationsTests
         var annotations = await session.EnumerateAnnotations(CancellationToken.None);
         Assert.IsNotNull(annotations);
 
-        Assert.AreEqual(3, annotations.Where(a => a.SourceFileName != "stdafx.h").Count());
+        Assert.HasCount(3, annotations.Where(a => a.SourceFileName != "stdafx.h"));
 
         var sourceFile2Annotation = annotations.Single(a => a.Text == "This is a test annotation in SourceFile2.cpp");
         Assert.AreEqual(19u, sourceFile2Annotation.LineNumber);
-        StringAssert.EndsWith(sourceFile2Annotation.SourceFile!.Name, @"testpeprojects\sizebenchv2.analysisengine.tests.cpptestcasesbefore\sourcefile2.cpp", StringComparison.OrdinalIgnoreCase);
+        Assert.EndsWith(@"testpeprojects\sizebenchv2.analysisengine.tests.cpptestcasesbefore\sourcefile2.cpp", sourceFile2Annotation.SourceFile!.Name, StringComparison.OrdinalIgnoreCase);
         Assert.IsTrue(sourceFile2Annotation.IsInlinedOrAnnotatingInlineSite);
 
         var sourceFile1Annotation = annotations.Single(a => a.Text == "This is a test annotation in SourceFile1.cpp");
         Assert.AreEqual(24u, sourceFile1Annotation.LineNumber);
-        StringAssert.EndsWith(sourceFile1Annotation.SourceFile!.Name, @"testpeprojects\sizebenchv2.analysisengine.tests.cpptestcasesbefore\sourcefile1.cpp", StringComparison.OrdinalIgnoreCase);
+        Assert.EndsWith(@"testpeprojects\sizebenchv2.analysisengine.tests.cpptestcasesbefore\sourcefile1.cpp", sourceFile1Annotation.SourceFile!.Name, StringComparison.OrdinalIgnoreCase);
         Assert.IsFalse(sourceFile1Annotation.IsInlinedOrAnnotatingInlineSite);
 
         var dllMainAnnotation = annotations.Single(a => a.Text == "annotation in DllMain itself, on the line that gets inlined...");

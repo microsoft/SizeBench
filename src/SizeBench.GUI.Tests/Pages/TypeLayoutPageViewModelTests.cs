@@ -39,7 +39,7 @@ public sealed class TypeLayoutPageViewModelTests
         Assert.IsNotNull(vm.LoadTypeCommand);
         Assert.IsNotNull(vm.ViewLayoutsOfSpecificTypesCommand);
         Assert.IsNull(vm.TypeNameToLoad);
-        Assert.AreEqual(0, vm.TypeLayoutItems.Count);
+        Assert.IsEmpty(vm.TypeLayoutItems);
         Assert.AreEqual("Type Layout", vm.PageTitle);
         Assert.IsFalse(vm.ExportToExcelCommand.CanExecute());
     }
@@ -132,7 +132,7 @@ public sealed class TypeLayoutPageViewModelTests
 
         Assert.AreEqual("MyTypeName", vm.TypeNameToLoad);
         this.MockSession.Verify(s => s.LoadTypeLayout(udt, It.IsAny<CancellationToken>()), Times.Exactly(1));
-        Assert.AreEqual(1, vm.TypeLayoutItems.Count);
+        Assert.HasCount(1, vm.TypeLayoutItems);
         Assert.IsTrue(ReferenceEquals(tli, vm.TypeLayoutItems[0]));
     }
 
@@ -160,7 +160,7 @@ public sealed class TypeLayoutPageViewModelTests
         vm.LoadTypeCommand.Execute(pointerToUDT);
         this.MockSession.Verify(s => s.LoadTypeLayout(pointerToUDT, It.IsAny<CancellationToken>()), Times.Exactly(1));
         Assert.AreEqual(udt.Name, vm.TypeNameToLoad);
-        Assert.AreEqual(1, vm.TypeLayoutItems.Count);
+        Assert.HasCount(1, vm.TypeLayoutItems);
         Assert.IsTrue(ReferenceEquals(tli, vm.TypeLayoutItems[0]));
 
         vm.TypeNameToLoad = "dummy";
@@ -168,7 +168,7 @@ public sealed class TypeLayoutPageViewModelTests
         vm.LoadTypeCommand.Execute(constUDT);
         this.MockSession.Verify(s => s.LoadTypeLayout(constUDT, It.IsAny<CancellationToken>()), Times.Exactly(1));
         Assert.AreEqual(udt.Name, vm.TypeNameToLoad);
-        Assert.AreEqual(1, vm.TypeLayoutItems.Count);
+        Assert.HasCount(1, vm.TypeLayoutItems);
         Assert.IsTrue(ReferenceEquals(tli, vm.TypeLayoutItems[0]));
 
         vm.TypeNameToLoad = "dummy";
@@ -176,7 +176,7 @@ public sealed class TypeLayoutPageViewModelTests
         vm.LoadTypeCommand.Execute(arrayOfUDTs);
         this.MockSession.Verify(s => s.LoadTypeLayout(arrayOfUDTs, It.IsAny<CancellationToken>()), Times.Exactly(1));
         Assert.AreEqual(udt.Name, vm.TypeNameToLoad);
-        Assert.AreEqual(1, vm.TypeLayoutItems.Count);
+        Assert.HasCount(1, vm.TypeLayoutItems);
         Assert.IsTrue(ReferenceEquals(tli, vm.TypeLayoutItems[0]));
 
         vm.TypeNameToLoad = "dummy";
@@ -184,7 +184,7 @@ public sealed class TypeLayoutPageViewModelTests
         vm.LoadTypeCommand.Execute(arrayOfPointerToConstUDT);
         this.MockSession.Verify(s => s.LoadTypeLayout(arrayOfPointerToConstUDT, It.IsAny<CancellationToken>()), Times.Exactly(1));
         Assert.AreEqual(udt.Name, vm.TypeNameToLoad);
-        Assert.AreEqual(1, vm.TypeLayoutItems.Count);
+        Assert.HasCount(1, vm.TypeLayoutItems);
         Assert.IsTrue(ReferenceEquals(tli, vm.TypeLayoutItems[0]));
     }
 

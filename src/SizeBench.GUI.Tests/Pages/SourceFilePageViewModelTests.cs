@@ -19,7 +19,7 @@ public class SourceFilePageViewModelTests
         this.MockUITaskScheduler.SetupForSynchronousCompletionOfLongRunningUITasks();
     }
 
-    [Timeout(5 * 1000)]
+    [Timeout(5 * 1000, CooperativeCancellation = true)]
     [TestMethod]
     public async Task SymbolsInitializeAsyncFromConstruction()
     {
@@ -82,12 +82,12 @@ public class SourceFilePageViewModelTests
 
         viewmodel.PropertyChanged += (s, e) => Assert.Fail("No property changes should happen if Symbol loading is canceled");
 
-        tcsSymbolsReady.SetCanceled();
+        tcsSymbolsReady.SetCanceled(this.TestContext.CancellationToken);
 
         Assert.IsNull(viewmodel.Symbols);
     }
 
-    [Timeout(1000 * 5)] // 5s
+    [Timeout(1000 * 5, CooperativeCancellation = true)] // 5s
     [TestMethod]
     public async Task CanExportSymbolsToExcel()
     {
@@ -123,4 +123,6 @@ public class SourceFilePageViewModelTests
 
         this.MockUITaskScheduler.Verify(uits => uits.StartExcelExport(mockExcelExporter.Object, symbols), Times.Exactly(1));
     }
+
+    public TestContext TestContext { get; set; }
 }

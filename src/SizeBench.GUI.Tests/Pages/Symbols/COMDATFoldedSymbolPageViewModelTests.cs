@@ -64,7 +64,7 @@ public sealed class COMDATFoldedSymbolPageViewModelTests : IDisposable
         Assert.AreEqual(sym, viewmodel.Symbol);
         Assert.AreEqual("Symbol: test symbol", viewmodel.PageTitle);
         Assert.HasCount(3, viewmodel.FoldedSymbols);
-        CollectionAssert.AreEquivalent(allSymsFolded, viewmodel.FoldedSymbols);
+        Assert.AreSequenceEqual(allSymsFolded, viewmodel.FoldedSymbols, Microsoft.VisualStudio.TestTools.UnitTesting.SequenceOrder.InAnyOrder);
         Assert.AreEqual(canonicalSym, viewmodel.CanonicalSymbol);
     }
 

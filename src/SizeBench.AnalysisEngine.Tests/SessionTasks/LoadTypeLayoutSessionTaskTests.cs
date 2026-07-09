@@ -140,7 +140,7 @@ public sealed class LoadTypeLayoutSessionTaskTests : IDisposable
         var typeLayouts = task.Execute(logger);
 
         Assert.HasCount(1, typeLayouts);
-        Assert.HasCount(1, typeLayouts[0].BaseTypeLayouts);
+        Assert.HasCount(1, typeLayouts[0].BaseTypeLayouts!);
 
         // Assertions about the base type layout
         Assert.IsTrue(ReferenceEquals(baseUdt, typeLayouts[0].BaseTypeLayouts![0].UserDefinedType));
@@ -148,7 +148,7 @@ public sealed class LoadTypeLayoutSessionTaskTests : IDisposable
         Assert.AreEqual(3.875m, typeLayouts[0].BaseTypeLayouts![0].AlignmentWasteIncludingBaseTypes);
         Assert.AreEqual(8u, typeLayouts[0].BaseTypeLayouts![0].UsedForVFPtrsExclusive);
         Assert.AreEqual(8u, typeLayouts[0].BaseTypeLayouts![0].UsedForVFPtrsIncludingBaseTypes);
-        Assert.HasCount(4, typeLayouts[0].BaseTypeLayouts![0].MemberLayouts);
+        Assert.HasCount(4, typeLayouts[0].BaseTypeLayouts![0].MemberLayouts!);
 
         Assert.AreEqual("vfptr", typeLayouts[0].BaseTypeLayouts![0].MemberLayouts![0].Name);
         Assert.AreEqual(8m, typeLayouts[0].BaseTypeLayouts![0].MemberLayouts![0].Size);
@@ -183,7 +183,7 @@ public sealed class LoadTypeLayoutSessionTaskTests : IDisposable
         Assert.AreEqual(8u, typeLayouts[0].UsedForVFPtrsIncludingBaseTypes);
         Assert.AreEqual(6.125m, typeLayouts[0].AlignmentWasteExclusive);
         Assert.AreEqual(10.0m, typeLayouts[0].AlignmentWasteIncludingBaseTypes);
-        Assert.HasCount(5, typeLayouts[0].MemberLayouts);
+        Assert.HasCount(5, typeLayouts[0].MemberLayouts!);
 
         Assert.AreEqual("bitField1", typeLayouts[0].MemberLayouts![0].Name);
         Assert.AreEqual(0.125m, typeLayouts[0].MemberLayouts![0].Size);
@@ -262,7 +262,7 @@ public sealed class LoadTypeLayoutSessionTaskTests : IDisposable
         Assert.AreEqual(8m, typeLayouts[0].AlignmentWasteIncludingBaseTypes);
         Assert.AreEqual(8u, typeLayouts[0].UsedForVFPtrsExclusive);
         Assert.AreEqual(8u, typeLayouts[0].UsedForVFPtrsIncludingBaseTypes);
-        Assert.HasCount(3, typeLayouts[0].MemberLayouts);
+        Assert.HasCount(3, typeLayouts[0].MemberLayouts!);
 
         Assert.AreEqual("vfptr", typeLayouts[0].MemberLayouts![0].Name);
         Assert.AreEqual(8m, typeLayouts[0].MemberLayouts![0].Size);

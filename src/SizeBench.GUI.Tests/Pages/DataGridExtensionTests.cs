@@ -31,7 +31,7 @@ public sealed class DataGridExtensionTests
 
         DataGridExtension.SetColumns(this.DataGrid, columns);
 
-        CollectionAssert.AreEqual(columns, this.DataGrid.Columns);
+        Assert.AreSequenceEqual(columns, this.DataGrid.Columns);
     }
 
     [TestMethod]

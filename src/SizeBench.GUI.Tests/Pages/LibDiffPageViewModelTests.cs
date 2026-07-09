@@ -60,7 +60,7 @@ public sealed class LibDiffPageViewModelTests : IDisposable
         await initTask;
 
         Assert.AreEqual(nameof(LibDiffPageViewModel.SymbolDiffs), propertyNameResult);
-        CollectionAssert.AreEqual(allSymbolDiffsInLibDiff, viewmodel.SymbolDiffs!.ToList());
+        Assert.AreSequenceEqual(allSymbolDiffsInLibDiff, viewmodel.SymbolDiffs!.ToList());
     }
 
     [Timeout(1000 * 5, CooperativeCancellation = true)] // 5s

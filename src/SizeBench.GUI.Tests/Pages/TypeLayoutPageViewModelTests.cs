@@ -53,7 +53,7 @@ public sealed class TypeLayoutPageViewModelTests
         await vm.SetCurrentFragment("*");
         Assert.AreEqual("Type Layout: *", vm.PageTitle);
         this.MockSession.Verify(s => s.LoadAllTypeLayouts(It.IsAny<CancellationToken>()), Times.Once());
-        CollectionAssert.AreEqual(new List<TypeLayoutItem>() { tli }, vm.TypeLayoutItems.ToList());
+        Assert.AreSequenceEqual(new List<TypeLayoutItem>() { tli }, vm.TypeLayoutItems.ToList());
     }
 
     [TestMethod]
@@ -74,7 +74,7 @@ public sealed class TypeLayoutPageViewModelTests
         await vm.SetCurrentFragment("TypeNameToLoad");
         Assert.AreEqual("Type Layout: TypeNameToLoad", vm.PageTitle);
         this.MockSession.Verify(s => s.LoadTypeLayoutsByName("TypeNameToLoad", It.IsAny<CancellationToken>()), Times.Once());
-        CollectionAssert.AreEqual(allLayouts, vm.TypeLayoutItems.ToList());
+        Assert.AreSequenceEqual(allLayouts, vm.TypeLayoutItems.ToList());
     }
 
     [TestMethod]
@@ -85,7 +85,7 @@ public sealed class TypeLayoutPageViewModelTests
         var vm = CreateViewModelForTest();
         await vm.SetCurrentFragment("*");
         this.MockSession.Verify(s => s.LoadAllTypeLayouts(It.IsAny<CancellationToken>()), Times.Once());
-        CollectionAssert.AreEqual(new TypeLayoutItem[] { tli }, vm.TypeLayoutItems.ToList());
+        Assert.AreSequenceEqual(new TypeLayoutItem[] { tli }, vm.TypeLayoutItems.ToList());
     }
 
     private TypeLayoutItem CreateSomeTypeLayoutsAndSetupMockAllTypeLayouts()

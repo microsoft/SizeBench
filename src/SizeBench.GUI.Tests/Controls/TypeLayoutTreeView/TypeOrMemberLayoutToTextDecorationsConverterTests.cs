@@ -33,7 +33,7 @@ public class TypeOrMemberLayoutToTextDecorationsConverterTests
         var tliDiffs = testDataGenerator.GenerateTypeLayoutItemDiffs(out var beforeTLIList, out var afterTLIList);
         var input = new TypeLayoutItemDiffViewModel(tliDiffs.First(tlid => tlid.AfterTypeLayout is null), testDataGenerator.MockDiffSession.Object);
 
-        Assert.AreEqual(TextDecorations.Strikethrough, TypeOrMemberLayoutToTextDecorationsConverter.Instance.Convert(input, typeof(TextDecorationCollection), null, null));
+        Assert.AreSequenceEqual(TextDecorations.Strikethrough, (TextDecorationCollection)TypeOrMemberLayoutToTextDecorationsConverter.Instance.Convert(input, typeof(TextDecorationCollection), null, null));
     }
 
     [TestMethod]
@@ -54,7 +54,7 @@ public class TypeOrMemberLayoutToTextDecorationsConverterTests
         var typeVM = new TypeLayoutItemDiffViewModel(tliDiffs.First(tlid => tlid.AfterTypeLayout is null), testDataGenerator.MockDiffSession.Object);
         var input = typeVM.Members.First();
 
-        Assert.AreEqual(TextDecorations.Strikethrough, TypeOrMemberLayoutToTextDecorationsConverter.Instance.Convert(input, typeof(TextDecorationCollection), null, null));
+        Assert.AreSequenceEqual(TextDecorations.Strikethrough, (TextDecorationCollection)TypeOrMemberLayoutToTextDecorationsConverter.Instance.Convert(input, typeof(TextDecorationCollection), null, null));
     }
 
     [TestMethod]

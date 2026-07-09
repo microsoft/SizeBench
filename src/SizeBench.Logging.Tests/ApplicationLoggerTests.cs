@@ -54,8 +54,8 @@ public class ApplicationLoggerTests
             var args = tuple.Item1;
             Assert.AreEqual(testThreadId, tuple.Item2);
             Assert.AreEqual(NotifyCollectionChangedAction.Add, args.Action);
-            Assert.HasCount(1, args.NewItems);
-            Assert.AreEqual(LogLevel.Warning, (args.NewItems[0] as LogEntry)!.LogLevel);
+            Assert.HasCount(1, args.NewItems!);
+            Assert.AreEqual(LogLevel.Warning, (args.NewItems![0] as LogEntry)!.LogLevel);
 
             Assert.HasCount(1, logger.Entries);
         });

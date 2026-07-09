@@ -91,16 +91,16 @@ public sealed class ErrorControlViewModelTests
         var openFilePathsAsList = vm.OpenFilePaths.ToList();
         foreach (var session in openSessions)
         {
-            CollectionAssert.Contains(openFilePathsAsList, session.BinaryPath);
-            CollectionAssert.Contains(openFilePathsAsList, session.PdbPath);
+            Assert.Contains(session.BinaryPath, openFilePathsAsList);
+            Assert.Contains(session.PdbPath, openFilePathsAsList);
         }
 
         foreach (var diffSession in openDiffSessions)
         {
-            CollectionAssert.Contains(openFilePathsAsList, diffSession.BeforeSession.BinaryPath);
-            CollectionAssert.Contains(openFilePathsAsList, diffSession.BeforeSession.PdbPath);
-            CollectionAssert.Contains(openFilePathsAsList, diffSession.AfterSession.BinaryPath);
-            CollectionAssert.Contains(openFilePathsAsList, diffSession.AfterSession.PdbPath);
+            Assert.Contains(diffSession.BeforeSession.BinaryPath, openFilePathsAsList);
+            Assert.Contains(diffSession.BeforeSession.PdbPath, openFilePathsAsList);
+            Assert.Contains(diffSession.AfterSession.BinaryPath, openFilePathsAsList);
+            Assert.Contains(diffSession.AfterSession.PdbPath, openFilePathsAsList);
         }
 
         // Error Details contains the exception data including stack trace info

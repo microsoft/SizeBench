@@ -51,7 +51,7 @@ public class BinarySectionPageViewModelTests
         viewmodel.SelectedTab = (int)BinarySectionPageViewModel.BinarySectionPageTabIndex.LibsTab;
 
         await tcsTestResultsComplete.Task;
-        Assert.AreEqual(generator.Libs, viewmodel.Libs);
+        Assert.AreEquivalent(generator.Libs, viewmodel.Libs);
 
         // We should have started 2 long-running tasks, one for the binary section load and one for the libs
         this.MockUITaskScheduler.Verify(uits => uits.StartLongRunningUITask(It.IsAny<string>(), It.IsAny<Func<CancellationToken, Task>>()), Times.Exactly(2));
@@ -89,7 +89,7 @@ public class BinarySectionPageViewModelTests
         viewmodel.SelectedTab = (int)BinarySectionPageViewModel.BinarySectionPageTabIndex.LibsTab;
 
         await tcsTestResultsComplete.Task;
-        Assert.AreEqual(generator.Libs, viewmodel.Libs);
+        Assert.AreEquivalent(generator.Libs, viewmodel.Libs);
 
         // Now let's switch back to the COFF Groups tab, then back to Libs, a couple times - we should still only have loaded the libs once
         viewmodel.SelectedTab = (int)BinarySectionPageViewModel.BinarySectionPageTabIndex.COFFGroupsTab;
@@ -135,9 +135,9 @@ public class BinarySectionPageViewModelTests
         viewmodel.SelectedTab = (int)BinarySectionPageViewModel.BinarySectionPageTabIndex.CompilandsTab;
 
         await tcsTestResultsComplete.Task;
-        Assert.HasCount(4, viewmodel.Compilands);
-        Assert.ContainsSingle(viewmodel.CompilandFilter, viewmodel.Compilands);
-        Assert.Contains(generator.A1Compiland, viewmodel.Compilands.Where(viewmodel.CompilandFilter));
+        Assert.HasCount(4, viewmodel.Compilands!);
+        Assert.ContainsSingle(viewmodel.CompilandFilter, viewmodel.Compilands!);
+        Assert.Contains(generator.A1Compiland, viewmodel.Compilands!.Where(viewmodel.CompilandFilter));
 
         // We should have started 2 long-running tasks, one for the binary section load and one for the libs/compilands
         this.MockUITaskScheduler.Verify(uits => uits.StartLongRunningUITask(It.IsAny<string>(), It.IsAny<Func<CancellationToken, Task>>()), Times.Exactly(2));
@@ -177,9 +177,9 @@ public class BinarySectionPageViewModelTests
         viewmodel.SelectedTab = (int)BinarySectionPageViewModel.BinarySectionPageTabIndex.CompilandsTab;
 
         await tcsTestResultsComplete.Task;
-        Assert.HasCount(4, viewmodel.Compilands);
-        Assert.ContainsSingle(viewmodel.CompilandFilter, viewmodel.Compilands);
-        Assert.Contains(generator.A1Compiland, viewmodel.Compilands.Where(viewmodel.CompilandFilter));
+        Assert.HasCount(4, viewmodel.Compilands!);
+        Assert.ContainsSingle(viewmodel.CompilandFilter, viewmodel.Compilands!);
+        Assert.Contains(generator.A1Compiland, viewmodel.Compilands!.Where(viewmodel.CompilandFilter));
 
         // Now let's switch back to the COFF Groups tab, then back to Compilands, a couple times - we should still only have loaded the compilands once
         viewmodel.SelectedTab = (int)BinarySectionPageViewModel.BinarySectionPageTabIndex.COFFGroupsTab;
@@ -234,9 +234,9 @@ public class BinarySectionPageViewModelTests
         viewmodel.SelectedTab = (int)BinarySectionPageViewModel.BinarySectionPageTabIndex.SymbolsTab;
 
         await tcsTestResultsComplete.Task;
-        Assert.HasCount(2, viewmodel.Symbols);
-        Assert.Contains(symbols[0], viewmodel.Symbols);
-        Assert.Contains(symbols[1], viewmodel.Symbols);
+        Assert.HasCount(2, viewmodel.Symbols!);
+        Assert.Contains(symbols[0], viewmodel.Symbols!);
+        Assert.Contains(symbols[1], viewmodel.Symbols!);
 
         // We should have started 2 long-running tasks, one for the binary section load and one for the symbols
         this.MockUITaskScheduler.Verify(uits => uits.StartLongRunningUITask(It.IsAny<string>(), It.IsAny<Func<CancellationToken, Task>>()), Times.Exactly(2));
@@ -285,9 +285,9 @@ public class BinarySectionPageViewModelTests
         viewmodel.SelectedTab = (int)BinarySectionPageViewModel.BinarySectionPageTabIndex.SymbolsTab;
 
         await tcsTestResultsComplete.Task;
-        Assert.HasCount(2, viewmodel.Symbols);
-        Assert.Contains(symbols[0], viewmodel.Symbols);
-        Assert.Contains(symbols[1], viewmodel.Symbols);
+        Assert.HasCount(2, viewmodel.Symbols!);
+        Assert.Contains(symbols[0], viewmodel.Symbols!);
+        Assert.Contains(symbols[1], viewmodel.Symbols!);
 
         // Now let's switch back to the COFF Groups tab, then back to Symbols, a couple times - we should still only have loaded the symbols once
         viewmodel.SelectedTab = (int)BinarySectionPageViewModel.BinarySectionPageTabIndex.COFFGroupsTab;

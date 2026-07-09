@@ -73,8 +73,8 @@ public class LoggerTests
             var args = tuple.Item1;
             Assert.AreEqual(testThreadId, tuple.Item2);
             Assert.AreEqual(NotifyCollectionChangedAction.Add, args.Action);
-            Assert.HasCount(1, args.NewItems);
-            Assert.AreEqual(LogLevel.Warning, (args.NewItems[0] as LogEntry)!.LogLevel);
+            Assert.HasCount(1, args.NewItems!);
+            Assert.AreEqual(LogLevel.Warning, (args.NewItems![0] as LogEntry)!.LogLevel);
 
             Assert.HasCount(1, logger.Entries);
         });
@@ -102,9 +102,9 @@ public class LoggerTests
             var args = tuple.Item1;
             Assert.AreEqual(testThreadId, tuple.Item2);
             Assert.AreEqual(NotifyCollectionChangedAction.Add, args.Action);
-            Assert.HasCount(1, args.NewItems);
-            Assert.AreEqual(LogLevel.Info, (args.NewItems[0] as TaskLogEntry)!.LogLevel);
-            Assert.AreEqual("Test Task started off-thread", (args.NewItems[0] as TaskLogEntry)!.Message);
+            Assert.HasCount(1, args.NewItems!);
+            Assert.AreEqual(LogLevel.Info, (args.NewItems![0] as TaskLogEntry)!.LogLevel);
+            Assert.AreEqual("Test Task started off-thread", (args.NewItems![0] as TaskLogEntry)!.Message);
 
             Assert.HasCount(1, logger.Entries);
         });

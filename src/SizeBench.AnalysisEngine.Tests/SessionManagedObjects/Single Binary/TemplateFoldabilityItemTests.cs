@@ -32,7 +32,7 @@ public sealed class TemplateFoldabilityItemTests : IDisposable
         Assert.HasCount(2, item.Symbols);
         Assert.HasCount(1, item.UniqueSymbols);
         Assert.AreEqual(0.86f, item.PercentageSimilarity);
-        CollectionAssert.AreEquivalent(symbols, item.Symbols.ToList());
+        Assert.AreSequenceEqual(symbols, item.Symbols.ToList(), Microsoft.VisualStudio.TestTools.UnitTesting.SequenceOrder.InAnyOrder);
         Assert.AreEqual("TemplatedThing<T>", item.TemplateName);
     }
 

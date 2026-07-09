@@ -57,7 +57,7 @@ public sealed class UserDefinedTypeSymbolPageViewModelTests : IDisposable
         await viewmodel.InitializeAsync();
 
         Assert.AreEqual(aComplexTypeOfSomeUDT, viewmodel.UDT);
-        Assert.AreEqual(typeLayouts, viewmodel.TypeLayoutItems);
+        Assert.AreEquivalent(typeLayouts, viewmodel.TypeLayoutItems);
         Assert.HasCount(3, viewmodel.Functions);
         var fn1ViewModel = viewmodel.Functions.Single(fnVM => fnVM.FunctionCodeSymbol == superImportantFunction1);
         Assert.IsTrue(fn1ViewModel.IsInFinalBinary);

@@ -419,24 +419,24 @@ public class Dllx64Tests
         // I don't honestly care which table contains which string, so for testing we'll just check that all these strings are somewhere
         // in the group.
         Assert.HasCount(18, allStringsAcrossTables);
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 1");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 2");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 3");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 4");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 5");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 6");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 7");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 8");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 9");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 10");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 11");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 12");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 13");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 14");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 15");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 16");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 17");
-        CollectionAssert.Contains(allStringsAcrossTables, "A really long string With newlines in it \nAnd more newlines \nAnd \thorizontal tab");
+        Assert.Contains("Test string 1", allStringsAcrossTables);
+        Assert.Contains("Test string 2", allStringsAcrossTables);
+        Assert.Contains("Test string 3", allStringsAcrossTables);
+        Assert.Contains("Test string 4", allStringsAcrossTables);
+        Assert.Contains("Test string 5", allStringsAcrossTables);
+        Assert.Contains("Test string 6", allStringsAcrossTables);
+        Assert.Contains("Test string 7", allStringsAcrossTables);
+        Assert.Contains("Test string 8", allStringsAcrossTables);
+        Assert.Contains("Test string 9", allStringsAcrossTables);
+        Assert.Contains("Test string 10", allStringsAcrossTables);
+        Assert.Contains("Test string 11", allStringsAcrossTables);
+        Assert.Contains("Test string 12", allStringsAcrossTables);
+        Assert.Contains("Test string 13", allStringsAcrossTables);
+        Assert.Contains("Test string 14", allStringsAcrossTables);
+        Assert.Contains("Test string 15", allStringsAcrossTables);
+        Assert.Contains("Test string 16", allStringsAcrossTables);
+        Assert.Contains("Test string 17", allStringsAcrossTables);
+        Assert.Contains("A really long string With newlines in it \nAnd more newlines \nAnd \thorizontal tab", allStringsAcrossTables);
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // CURSOR

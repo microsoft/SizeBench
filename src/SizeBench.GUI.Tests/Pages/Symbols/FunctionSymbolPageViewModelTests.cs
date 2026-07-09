@@ -224,11 +224,11 @@ public sealed class FunctionSymbolPageViewModelTests : IDisposable
         Assert.IsFalse(viewmodel.DoesFunctionContainMultipleCodeBlocks);
         Assert.IsTrue(viewmodel.IsFunctionCodeUsedForMultipleFunctions);
         Assert.AreEqual(function, viewmodel.Function);
-        Assert.HasCount(3, viewmodel.FoldedFunctions);
+        Assert.HasCount(3, viewmodel.FoldedFunctions!);
         // Check that they're in alphabetical order
-        Assert.AreEqual("CFoo::DoTheThing", viewmodel.FoldedFunctions[0].FormattedName.IncludeParentType);
-        Assert.AreEqual("CFoo::XYZ", viewmodel.FoldedFunctions[1].FormattedName.IncludeParentType);
-        Assert.AreEqual("FunctionInAnotherPlaceEntirely", viewmodel.FoldedFunctions[2].FunctionName);
+        Assert.AreEqual("CFoo::DoTheThing", viewmodel.FoldedFunctions![0].FormattedName.IncludeParentType);
+        Assert.AreEqual("CFoo::XYZ", viewmodel.FoldedFunctions![1].FormattedName.IncludeParentType);
+        Assert.AreEqual("FunctionInAnotherPlaceEntirely", viewmodel.FoldedFunctions![2].FunctionName);
     }
 
     public void Dispose() => this.Generator.Dispose();

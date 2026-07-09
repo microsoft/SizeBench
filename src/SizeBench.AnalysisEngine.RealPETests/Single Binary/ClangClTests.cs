@@ -223,7 +223,7 @@ public sealed class ClangClTests
         Assert.AreEqual("_Float16 TypeWithClangExtensions::GetFloat16() const", getFloat16.FormattedName.All);
 
         var setFloat16 = functions.Single(x => x.FunctionName == "SetFloat16");
-        Assert.HasCount(1, setFloat16.FunctionType!.ArgumentTypes);
+        Assert.HasCount(1, setFloat16.FunctionType!.ArgumentTypes!);
         Assert.AreEqual("_Float16", setFloat16.FunctionType!.ArgumentTypes![0].Name);
         Assert.AreEqual("void TypeWithClangExtensions::SetFloat16(_Float16)", setFloat16.FormattedName.All);
     }

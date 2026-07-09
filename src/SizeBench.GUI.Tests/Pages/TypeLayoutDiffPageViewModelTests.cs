@@ -54,7 +54,7 @@ public sealed class TypeLayoutDiffPageViewModelTests : IDisposable
         await vm.SetCurrentFragment("*");
         Assert.AreEqual("Type Layout Diff: *", vm.PageTitle);
         this._testDataGenerator.MockDiffSession.Verify(s => s.LoadAllTypeLayoutDiffs(It.IsAny<CancellationToken>()), Times.Once());
-        CollectionAssert.AreEquivalent(this.AllTypeLayoutDiffs, vm.TypeLayoutItemDiffs!.Cast<TypeLayoutItemDiff>().ToList());
+        Assert.AreSequenceEqual(this.AllTypeLayoutDiffs, vm.TypeLayoutItemDiffs!.Cast<TypeLayoutItemDiff>().ToList(), Microsoft.VisualStudio.TestTools.UnitTesting.SequenceOrder.InAnyOrder);
     }
 
     [TestMethod]
@@ -65,7 +65,7 @@ public sealed class TypeLayoutDiffPageViewModelTests : IDisposable
         await vm.SetCurrentFragment("TypeNameToLoad");
         Assert.AreEqual("Type Layout Diff: TypeNameToLoad", vm.PageTitle);
         this._testDataGenerator.MockDiffSession.Verify(s => s.LoadTypeLayoutDiffsByName("TypeNameToLoad", It.IsAny<CancellationToken>()), Times.Once());
-        CollectionAssert.AreEquivalent(this.AllTypeLayoutDiffs, vm.TypeLayoutItemDiffs!.Cast<TypeLayoutItemDiff>().ToList());
+        Assert.AreSequenceEqual(this.AllTypeLayoutDiffs, vm.TypeLayoutItemDiffs!.Cast<TypeLayoutItemDiff>().ToList(), Microsoft.VisualStudio.TestTools.UnitTesting.SequenceOrder.InAnyOrder);
     }
 
     [TestMethod]

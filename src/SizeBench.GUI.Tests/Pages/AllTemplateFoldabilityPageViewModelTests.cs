@@ -65,9 +65,9 @@ public sealed class AllTemplateFoldabilityPageViewModelTests : IDisposable
         Assert.AreEqual(3, preformattedData[i]["# Symbols"]);
         Assert.AreEqual(2, preformattedData[i]["# Unique Symbols (post-folding)"]);
         Assert.AreEqual("80.0 %", preformattedData[i]["% Similarity"]);
-        Assert.Contains("SomeNamespace::MyType::FoldableFunction<AComplex::Type<int>,bool>(bool, AComplex::Type<int>)", preformattedData[i]["Example Symbols"].ToString(), StringComparison.Ordinal);
-        Assert.Contains("SomeNamespace::MyType::FoldableFunction<AComplex::Type<float>,bool>(bool, AComplex::Type<float>)", preformattedData[i]["Example Symbols"].ToString(), StringComparison.Ordinal);
-        Assert.Contains("SomeNamespace::MyType::FoldableFunction<AComplex::Type<SomeUDT>,bool>(bool, AComplex::Type<SomeUDT>)", preformattedData[i]["Example Symbols"].ToString(), StringComparison.Ordinal);
+        Assert.Contains("SomeNamespace::MyType::FoldableFunction<AComplex::Type<int>,bool>(bool, AComplex::Type<int>)", preformattedData[i]["Example Symbols"].ToString()!, StringComparison.Ordinal);
+        Assert.Contains("SomeNamespace::MyType::FoldableFunction<AComplex::Type<float>,bool>(bool, AComplex::Type<float>)", preformattedData[i]["Example Symbols"].ToString()!, StringComparison.Ordinal);
+        Assert.Contains("SomeNamespace::MyType::FoldableFunction<AComplex::Type<SomeUDT>,bool>(bool, AComplex::Type<SomeUDT>)", preformattedData[i]["Example Symbols"].ToString()!, StringComparison.Ordinal);
 
         Assert.IsTrue(viewmodel.ExportToExcelCommand.CanExecute());
         viewmodel.ExportToExcelCommand.Execute();

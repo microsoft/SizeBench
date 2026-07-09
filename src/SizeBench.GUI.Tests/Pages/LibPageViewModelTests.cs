@@ -69,7 +69,7 @@ public class LibPageViewModelTests
         await initTask;
 
         Assert.AreEqual("Symbols", propertyNameResult);
-        CollectionAssert.AreEqual(symbols, viewmodel.Symbols!.ToList());
+        Assert.AreSequenceEqual(symbols, viewmodel.Symbols!.ToList());
     }
 
     [TestMethod]

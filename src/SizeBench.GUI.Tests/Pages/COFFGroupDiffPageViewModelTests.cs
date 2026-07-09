@@ -156,7 +156,7 @@ public sealed class COFFGroupDiffPageViewModelTests : IDisposable
 
         // Verify libs are filtered to the CG
         Assert.HasCount(4, this.TestDataGenerator.LibDiffs);
-        CollectionAssert.AreEquivalent(this.TestDataGenerator.LibDiffs.Where(ld => ld.COFFGroupContributionDiffs.ContainsKey(textMnCGDiff)).ToList(), viewmodel.LibDiffs!.Cast<LibDiff>().ToList());
+        Assert.AreSequenceEqual(this.TestDataGenerator.LibDiffs.Where(ld => ld.COFFGroupContributionDiffs.ContainsKey(textMnCGDiff)).ToList(), viewmodel.LibDiffs!.Cast<LibDiff>().ToList(), Microsoft.VisualStudio.TestTools.UnitTesting.SequenceOrder.InAnyOrder);
 
         // Verify compilands are filtered to the CG
         Assert.HasCount(8, this.TestDataGenerator.CompilandDiffs);
@@ -217,7 +217,7 @@ public sealed class COFFGroupDiffPageViewModelTests : IDisposable
 
         // Verify libs are filtered to the CG
         Assert.HasCount(4, this.TestDataGenerator.LibDiffs);
-        CollectionAssert.AreEquivalent(this.TestDataGenerator.LibDiffs.Where(ld => ld.COFFGroupContributionDiffs.ContainsKey(textMnCGDiff)).ToList(), viewmodel.LibDiffs!.Cast<LibDiff>().ToList());
+        Assert.AreSequenceEqual(this.TestDataGenerator.LibDiffs.Where(ld => ld.COFFGroupContributionDiffs.ContainsKey(textMnCGDiff)).ToList(), viewmodel.LibDiffs!.Cast<LibDiff>().ToList(), Microsoft.VisualStudio.TestTools.UnitTesting.SequenceOrder.InAnyOrder);
 
         // Verify compilands are filtered to the CG
         Assert.HasCount(8, this.TestDataGenerator.CompilandDiffs);

@@ -41,7 +41,7 @@ public sealed class SelectSessionOptionsControlViewModelTests
         // Calculating all the right properties to refresh is tedious so we just spam empty string to force all properties to be re-evaluated, it's not
         // perf-sensitive and this UI is short-lived.
         Assert.HasCount(1, propertiesChanged);
-        CollectionAssert.AreEquivalent(new[] { "" }, propertiesChanged);
+        Assert.AreSequenceEqual(new[] { "" }, propertiesChanged, Microsoft.VisualStudio.TestTools.UnitTesting.SequenceOrder.InAnyOrder);
 
         // Another setting off
         vm.RSRCSymbolsSupported = false;
@@ -58,7 +58,7 @@ public sealed class SelectSessionOptionsControlViewModelTests
         Assert.IsFalse(vm.RSRCSymbolsSupported);
         Assert.IsTrue(vm.OtherPESymbolsSupported);
         Assert.HasCount(2, propertiesChanged);
-        CollectionAssert.AreEquivalent(new[] { "", "" }, propertiesChanged);
+        Assert.AreSequenceEqual(new[] { "", "" }, propertiesChanged, Microsoft.VisualStudio.TestTools.UnitTesting.SequenceOrder.InAnyOrder);
 
         // Turn one back on
         vm.XDATASymbolsSupported = true;
@@ -76,7 +76,7 @@ public sealed class SelectSessionOptionsControlViewModelTests
         Assert.IsFalse(vm.RSRCSymbolsSupported);
         Assert.IsTrue(vm.OtherPESymbolsSupported);
         Assert.HasCount(3, propertiesChanged);
-        CollectionAssert.AreEquivalent(new[] { "", "", "" }, propertiesChanged);
+        Assert.AreSequenceEqual(new[] { "", "", "" }, propertiesChanged, Microsoft.VisualStudio.TestTools.UnitTesting.SequenceOrder.InAnyOrder);
 
         // And turning the last one on brings us back to the "All" state
         vm.RSRCSymbolsSupported = true;
@@ -89,6 +89,6 @@ public sealed class SelectSessionOptionsControlViewModelTests
         Assert.IsTrue(vm.RSRCSymbolsSupported);
         Assert.IsTrue(vm.OtherPESymbolsSupported);
         Assert.HasCount(4, propertiesChanged);
-        CollectionAssert.AreEquivalent(new[] { "", "", "", "" }, propertiesChanged);
+        Assert.AreSequenceEqual(new[] { "", "", "", "" }, propertiesChanged, Microsoft.VisualStudio.TestTools.UnitTesting.SequenceOrder.InAnyOrder);
     }
 }

@@ -19,7 +19,7 @@ namespace SizeBench.AnalysisEngine.Tests;
 public sealed class DiffSession_EnumerateSymbolsInBinarySectionTests
 {
     public TestContext? TestContext { get; set; }
-    private CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
+    private CancellationToken CancellationToken => this.TestContext!.CancellationToken;
 
     public string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory!, filename);
 
@@ -101,13 +101,13 @@ public sealed class DiffSession_EnumerateSymbolsInBinarySectionTests
         Assert.IsNotNull(FunctionInStaticLib1Diff);
         Assert.IsNotNull(FunctionInStaticLib1Diff.BeforeSymbol);
         Assert.IsNotNull(FunctionInStaticLib1Diff.AfterSymbol);
-        Assert.AreEqual(1, FunctionInStaticLib1Diff.CodeBlockDiffs.Count);
+        Assert.HasCount(1, FunctionInStaticLib1Diff.CodeBlockDiffs);
         Assert.IsTrue(ReferenceEquals(FunctionInStaticLib1Diff.CodeBlockDiffs[0], FunctionInStaticLib1BlockDiff));
         Assert.AreEqual("FunctionInStaticLib1", FunctionInStaticLib1Diff.FunctionName);
         Assert.IsNotNull(FunctionInStaticLib1Diff.BeforeSymbol.ArgumentNames);
         Assert.IsNotNull(FunctionInStaticLib1Diff.AfterSymbol.ArgumentNames);
-        Assert.AreEqual(1, FunctionInStaticLib1Diff.BeforeSymbol.ArgumentNames.Count);
-        Assert.AreEqual(1, FunctionInStaticLib1Diff.AfterSymbol.ArgumentNames.Count);
+        Assert.HasCount(1, FunctionInStaticLib1Diff.BeforeSymbol.ArgumentNames);
+        Assert.HasCount(1, FunctionInStaticLib1Diff.AfterSymbol.ArgumentNames);
         Assert.AreEqual("x", FunctionInStaticLib1Diff.BeforeSymbol.ArgumentNames[0].Name);
         Assert.AreEqual("int", FunctionInStaticLib1Diff.BeforeSymbol.ArgumentNames[0].Type.Name);
         Assert.AreEqual("x", FunctionInStaticLib1Diff.AfterSymbol.ArgumentNames[0].Name);
@@ -176,7 +176,7 @@ public sealed class DiffSession_EnumerateSymbolsInBinarySectionTests
                                                                logger);
         var sectionDiffs = await diffSession.EnumerateBinarySectionsAndCOFFGroupDiffs(this.CancellationToken);
         var rsrcSectionDiff = sectionDiffs.Single(bsd => bsd.Name == ".rsrc");
-        Assert.AreEqual(2, rsrcSectionDiff.COFFGroupDiffs.Count);
+        Assert.HasCount(2, rsrcSectionDiff.COFFGroupDiffs);
         var rsrc01CGDiff = rsrcSectionDiff.COFFGroupDiffs.Single(cgd => cgd.Name == ".rsrc$01");
         var rsrc02CGDiff = rsrcSectionDiff.COFFGroupDiffs.Single(cgd => cgd.Name == ".rsrc$02");
 
@@ -197,8 +197,8 @@ public sealed class DiffSession_EnumerateSymbolsInBinarySectionTests
         // CURSOR - one cursor image added to a group
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         var groupCursorDiff = rsrcSymbolDiffs.Single(sym => sym.BeforeSymbol is RsrcGroupCursorDataSymbol);
-        Assert.AreEqual(2, (groupCursorDiff.BeforeSymbol as RsrcGroupCursorDataSymbol)!.Cursors.Count);
-        Assert.AreEqual(3, (groupCursorDiff.AfterSymbol as RsrcGroupCursorDataSymbol)!.Cursors.Count);
+        Assert.HasCount(2, (groupCursorDiff.BeforeSymbol as RsrcGroupCursorDataSymbol)!.Cursors);
+        Assert.HasCount(3, (groupCursorDiff.AfterSymbol as RsrcGroupCursorDataSymbol)!.Cursors);
         // We added one cursor, which was the 16x16 1bpp, so the size diff should be equal to the size of that
         // cursor + one CURSORRESDIR
         var cursor16x16_1bppAfter = (groupCursorDiff.AfterSymbol as RsrcGroupCursorDataSymbol)!.Cursors.Single(cursor => cursor.Width == 16 && cursor.Height == 16 && cursor.BitsPerPixel == 1);
@@ -208,8 +208,8 @@ public sealed class DiffSession_EnumerateSymbolsInBinarySectionTests
         // ICON - one icon removed from a group
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         var groupIconDiff = rsrcSymbolDiffs.Single(sym => sym.BeforeSymbol is RsrcGroupIconDataSymbol);
-        Assert.AreEqual(7, (groupIconDiff.BeforeSymbol as RsrcGroupIconDataSymbol)!.Icons.Count);
-        Assert.AreEqual(3, (groupIconDiff.AfterSymbol as RsrcGroupIconDataSymbol)!.Icons.Count);
+        Assert.HasCount(7, (groupIconDiff.BeforeSymbol as RsrcGroupIconDataSymbol)!.Icons);
+        Assert.HasCount(3, (groupIconDiff.AfterSymbol as RsrcGroupIconDataSymbol)!.Icons);
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // VERSION - entirely removed in 'after'
@@ -217,7 +217,7 @@ public sealed class DiffSession_EnumerateSymbolsInBinarySectionTests
         var versionDiff = rsrcSymbolDiffs.Single(sym => sym.BeforeSymbol is RsrcDataSymbol && sym.BeforeSymbol.Name.Contains("VERSION", StringComparison.Ordinal));
         Assert.IsNotNull(groupIconDiff.BeforeSymbol);
         Assert.IsNull(versionDiff.AfterSymbol);
-        Assert.IsTrue(versionDiff.SizeDiff < 0);
+        Assert.IsLessThan(0, versionDiff.SizeDiff);
     }
 
     [TestMethod]
@@ -238,7 +238,7 @@ public sealed class DiffSession_EnumerateSymbolsInBinarySectionTests
         var idata2CGDiff = rdataSectionDiff.COFFGroupDiffs.Single(cgd => cgd.Name == ".idata$2");
         var symbols = await diffSession.EnumerateSymbolDiffsInCOFFGroupDiff(idata2CGDiff, this.CancellationToken);
 
-        Assert.AreEqual(4, symbols.Count);
+        Assert.HasCount(4, symbols);
 
         var descriptor = symbols.Single(sd => sd.Name == "[import descriptor] VCRUNTIME140D.dll");
         Assert.IsNotNull(descriptor.BeforeSymbol);
@@ -268,7 +268,7 @@ public sealed class DiffSession_EnumerateSymbolsInBinarySectionTests
         var idata3CGDiff = rdataSectionDiff.COFFGroupDiffs.Single(cgd => cgd.Name == ".idata$3");
         symbols = await diffSession.EnumerateSymbolDiffsInCOFFGroupDiff(idata3CGDiff, this.CancellationToken);
 
-        Assert.AreEqual(1, symbols.Count);
+        Assert.HasCount(1, symbols);
 
         descriptor = symbols[0];
         Assert.AreEqual("[import descriptor] null terminator", descriptor.Name);

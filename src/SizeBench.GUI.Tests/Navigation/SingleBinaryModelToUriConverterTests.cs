@@ -312,10 +312,9 @@ public sealed class SingleBinaryModelToUriConverterTests : IDisposable
         { }
     }
 
-    [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
     [TestMethod]
     public void NavigatingToContributionThrows()
-        => SingleBinaryModelToUriConverter.ModelToUri(new TestContribution());
+        => Assert.ThrowsExactly<InvalidOperationException>(() => SingleBinaryModelToUriConverter.ModelToUri(new TestContribution()));
 
     [TestMethod]
     public void NavigatingToOtherStuffReturnsError()

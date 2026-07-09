@@ -7,7 +7,7 @@ using SizeBench.Logging;
 
 namespace BinaryBytes;
 
-public static class Program
+internal static class Program
 {
     private static readonly string _outputfile = String.Format(CultureInfo.InvariantCulture, "BinaryBytes-Log-{0:yyyy-MM-dd}.log", DateTime.Now);
 

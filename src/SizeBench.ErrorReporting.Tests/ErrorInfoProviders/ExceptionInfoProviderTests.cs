@@ -5,13 +5,12 @@ namespace SizeBench.ErrorReporting.ErrorInfoProviders.Tests;
 [TestClass]
 public class ExceptionInfoProviderTests
 {
-    [ExpectedException(typeof(ArgumentNullException), AllowDerivedTypes = false)]
     [TestMethod]
     public void NullBodyThrows()
     {
         var provider = new ExceptionInfoProvider(new InvalidOperationException("test"));
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.  This test is intentionally testing null.
-        provider.AddErrorInfo(null);
+        Assert.ThrowsExactly<ArgumentNullException>(() => provider.AddErrorInfo(null));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
     }
 
@@ -43,7 +42,7 @@ public class ExceptionInfoProviderTests
         provider.AddErrorInfo(bodySB);
         var body = bodySB.ToString();
 
-        StringAssert.Contains(body, $"\t{typeof(ArithmeticException).FullName}: {innerExceptionMessage}", StringComparison.Ordinal);
-        StringAssert.Contains(body, $"{typeof(InvalidOperationException).FullName}: {outerExceptionMessage}", StringComparison.Ordinal);
+        Assert.Contains($"\t{typeof(ArithmeticException).FullName}: {innerExceptionMessage}", body, StringComparison.Ordinal);
+        Assert.Contains($"{typeof(InvalidOperationException).FullName}: {outerExceptionMessage}", body, StringComparison.Ordinal);
     }
 }

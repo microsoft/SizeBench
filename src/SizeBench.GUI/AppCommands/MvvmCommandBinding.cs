@@ -59,15 +59,8 @@ internal class MvvmCommandBinding : Freezable
 
     private void OnTargetChanged(ICommand oldValue, ICommand newValue)
     {
-        if (oldValue != null)
-        {
-            oldValue.CanExecuteChanged -= OnTargetCanExecuteChanged;
-        }
-
-        if (newValue != null)
-        {
-            newValue.CanExecuteChanged += OnTargetCanExecuteChanged;
-        }
+        oldValue?.CanExecuteChanged -= OnTargetCanExecuteChanged;
+        newValue?.CanExecuteChanged += OnTargetCanExecuteChanged;
 
         CommandManager.InvalidateRequerySuggested();
     }

@@ -117,7 +117,7 @@ public sealed class COFFGroupDiffPageViewModelTests : IDisposable
         await tcsTestResultsComplete.Task;
     }
 
-    [Timeout(5 * 1000)]
+    [Timeout(5 * 1000, CooperativeCancellation = true)]
     [TestMethod]
     public async Task CompilandsLibsAndSymbolsInitializeAsyncFromConstruction()
     {
@@ -155,18 +155,18 @@ public sealed class COFFGroupDiffPageViewModelTests : IDisposable
         Assert.IsTrue(ReferenceEquals(symbolList, viewmodel.SymbolDiffs));
 
         // Verify libs are filtered to the CG
-        Assert.AreEqual(4, this.TestDataGenerator.LibDiffs.Count);
-        CollectionAssert.AreEquivalent(this.TestDataGenerator.LibDiffs.Where(ld => ld.COFFGroupContributionDiffs.ContainsKey(textMnCGDiff)).ToList(), viewmodel.LibDiffs!.Cast<LibDiff>().ToList());
+        Assert.HasCount(4, this.TestDataGenerator.LibDiffs);
+        Assert.AreSequenceEqual(this.TestDataGenerator.LibDiffs.Where(ld => ld.COFFGroupContributionDiffs.ContainsKey(textMnCGDiff)).ToList(), viewmodel.LibDiffs!.Cast<LibDiff>().ToList(), Microsoft.VisualStudio.TestTools.UnitTesting.SequenceOrder.InAnyOrder);
 
         // Verify compilands are filtered to the CG
-        Assert.AreEqual(8, this.TestDataGenerator.CompilandDiffs.Count);
+        Assert.HasCount(8, this.TestDataGenerator.CompilandDiffs);
         Assert.AreEqual(3, viewmodel.CompilandDiffs!.Count);
         Assert.IsTrue(viewmodel.CompilandDiffs.Contains(this.TestDataGenerator.A1CompilandDiff));
         Assert.IsTrue(viewmodel.CompilandDiffs.Contains(this.TestDataGenerator.A2CompilandDiff));
         Assert.IsTrue(viewmodel.CompilandDiffs.Contains(this.TestDataGenerator.B1CompilandDiff));
     }
 
-    [Timeout(5 * 1000)]
+    [Timeout(5 * 1000, CooperativeCancellation = true)]
     [TestMethod]
     public async Task CancelingSymbolLoadingIsFine()
     {
@@ -216,18 +216,18 @@ public sealed class COFFGroupDiffPageViewModelTests : IDisposable
         Assert.AreEqual("COFFGroupContributionDiffsByName[.text$mn].VirtualSizeDiff", viewmodel.ContributionVirtualSizeSortMemberPath);
 
         // Verify libs are filtered to the CG
-        Assert.AreEqual(4, this.TestDataGenerator.LibDiffs.Count);
-        CollectionAssert.AreEquivalent(this.TestDataGenerator.LibDiffs.Where(ld => ld.COFFGroupContributionDiffs.ContainsKey(textMnCGDiff)).ToList(), viewmodel.LibDiffs!.Cast<LibDiff>().ToList());
+        Assert.HasCount(4, this.TestDataGenerator.LibDiffs);
+        Assert.AreSequenceEqual(this.TestDataGenerator.LibDiffs.Where(ld => ld.COFFGroupContributionDiffs.ContainsKey(textMnCGDiff)).ToList(), viewmodel.LibDiffs!.Cast<LibDiff>().ToList(), Microsoft.VisualStudio.TestTools.UnitTesting.SequenceOrder.InAnyOrder);
 
         // Verify compilands are filtered to the CG
-        Assert.AreEqual(8, this.TestDataGenerator.CompilandDiffs.Count);
+        Assert.HasCount(8, this.TestDataGenerator.CompilandDiffs);
         Assert.AreEqual(3, viewmodel.CompilandDiffs!.Count);
         Assert.IsTrue(viewmodel.CompilandDiffs.Contains(this.TestDataGenerator.A1CompilandDiff));
         Assert.IsTrue(viewmodel.CompilandDiffs.Contains(this.TestDataGenerator.A2CompilandDiff));
         Assert.IsTrue(viewmodel.CompilandDiffs.Contains(this.TestDataGenerator.B1CompilandDiff));
     }
 
-    [Timeout(5 * 1000)]
+    [Timeout(5 * 1000, CooperativeCancellation = true)]
     [TestMethod]
     public async Task ExportToExcelWorks()
     {

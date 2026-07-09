@@ -33,9 +33,9 @@ public class AllCompilandsPageViewModelTests
 
         var sectionsInCompilands = viewmodel.BinarySectionsInCompilands().Select(s => s.Name).ToList();
 
-        Assert.AreEqual(2, sectionsInCompilands.Count);
-        Assert.IsTrue(sectionsInCompilands.Contains(".text"));
-        Assert.IsTrue(sectionsInCompilands.Contains(".data"));
+        Assert.HasCount(2, sectionsInCompilands);
+        Assert.Contains(".text", sectionsInCompilands);
+        Assert.Contains(".data", sectionsInCompilands);
     }
 
     [TestMethod]
@@ -53,12 +53,12 @@ public class AllCompilandsPageViewModelTests
 
         var coffGroupsInCompilands = viewmodel.COFFGroupsInCompilands().Select(cg => cg.Name).ToList();
 
-        Assert.AreEqual(5, coffGroupsInCompilands.Count);
-        Assert.IsTrue(coffGroupsInCompilands.Contains(".text$mn"));
-        Assert.IsTrue(coffGroupsInCompilands.Contains(".text$zz"));
-        Assert.IsTrue(coffGroupsInCompilands.Contains(".data$xx"));
-        Assert.IsTrue(coffGroupsInCompilands.Contains(".data$zz"));
-        Assert.IsTrue(coffGroupsInCompilands.Contains(".bss"));
+        Assert.HasCount(5, coffGroupsInCompilands);
+        Assert.Contains(".text$mn", coffGroupsInCompilands);
+        Assert.Contains(".text$zz", coffGroupsInCompilands);
+        Assert.Contains(".data$xx", coffGroupsInCompilands);
+        Assert.Contains(".data$zz", coffGroupsInCompilands);
+        Assert.Contains(".bss", coffGroupsInCompilands);
     }
 
     [TestMethod]
@@ -79,26 +79,26 @@ public class AllCompilandsPageViewModelTests
         viewmodel.GenerateFormattedDataForExcelExport(out var columnHeaders, out var preformattedData);
 
         var columnHeadersList = new List<string>(columnHeaders);
-        Assert.AreEqual(11, columnHeadersList.Count);
+        Assert.HasCount(11, columnHeadersList);
 
         var compilandNameIndex = columnHeadersList.IndexOf("Compiland Name");
-        Assert.IsTrue(compilandNameIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, compilandNameIndex);
         var compilandShortNameIndex = columnHeadersList.IndexOf("Compiland Short Name");
-        Assert.IsTrue(compilandShortNameIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, compilandShortNameIndex);
         var compilandTotalSizeIndex = columnHeadersList.IndexOf("Compiland Total Size on Disk");
-        Assert.IsTrue(compilandTotalSizeIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, compilandTotalSizeIndex);
 
-        Assert.IsTrue(columnHeadersList.Contains("Lib Name"));
-        Assert.IsTrue(columnHeadersList.Contains("Lib Short Name"));
-        Assert.IsTrue(columnHeadersList.Contains("Section: .text"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .text$mn"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .text$zz"));
-        Assert.IsTrue(columnHeadersList.Contains("Section: .data"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .data$xx"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .data$zz"));
+        Assert.Contains("Lib Name", columnHeadersList);
+        Assert.Contains("Lib Short Name", columnHeadersList);
+        Assert.Contains("Section: .text", columnHeadersList);
+        Assert.Contains("COFF Group: .text$mn", columnHeadersList);
+        Assert.Contains("COFF Group: .text$zz", columnHeadersList);
+        Assert.Contains("Section: .data", columnHeadersList);
+        Assert.Contains("COFF Group: .data$xx", columnHeadersList);
+        Assert.Contains("COFF Group: .data$zz", columnHeadersList);
 
         // And now let's spot-check some of the data - not exhaustive because that's not really necessary
-        Assert.AreEqual(3, preformattedData.Count);
+        Assert.HasCount(3, preformattedData);
         var a1Preformatted = preformattedData.Single(d => d["Compiland Short Name"].ToString() == "a1.obj");
         // Note that a2.obj does not show up here since it does not contribute any size, only VirtualSize
         var a2Preformatted = preformattedData.Single(d => d["Compiland Short Name"].ToString() == "a3.obj");
@@ -138,27 +138,27 @@ public class AllCompilandsPageViewModelTests
         viewmodel.GenerateFormattedDataForExcelExport(out var columnHeaders, out var preformattedData);
 
         var columnHeadersList = new List<string>(columnHeaders);
-        Assert.AreEqual(12, columnHeadersList.Count);
+        Assert.HasCount(12, columnHeadersList);
 
         var compilandNameIndex = columnHeadersList.IndexOf("Compiland Name");
-        Assert.IsTrue(compilandNameIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, compilandNameIndex);
         var compilandShortNameIndex = columnHeadersList.IndexOf("Compiland Short Name");
-        Assert.IsTrue(compilandShortNameIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, compilandShortNameIndex);
         var compilandTotalSizeIndex = columnHeadersList.IndexOf("Compiland Total Size in Memory");
-        Assert.IsTrue(compilandTotalSizeIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, compilandTotalSizeIndex);
 
-        Assert.IsTrue(columnHeadersList.Contains("Lib Name"));
-        Assert.IsTrue(columnHeadersList.Contains("Lib Short Name"));
-        Assert.IsTrue(columnHeadersList.Contains("Section: .text"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .text$mn"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .text$zz"));
-        Assert.IsTrue(columnHeadersList.Contains("Section: .data"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .data$xx"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .data$zz"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .bss"));
+        Assert.Contains("Lib Name", columnHeadersList);
+        Assert.Contains("Lib Short Name", columnHeadersList);
+        Assert.Contains("Section: .text", columnHeadersList);
+        Assert.Contains("COFF Group: .text$mn", columnHeadersList);
+        Assert.Contains("COFF Group: .text$zz", columnHeadersList);
+        Assert.Contains("Section: .data", columnHeadersList);
+        Assert.Contains("COFF Group: .data$xx", columnHeadersList);
+        Assert.Contains("COFF Group: .data$zz", columnHeadersList);
+        Assert.Contains("COFF Group: .bss", columnHeadersList);
 
         // And now let's spot-check some of the data - not exhaustive because that's not really necessary
-        Assert.AreEqual(4, preformattedData.Count);
+        Assert.HasCount(4, preformattedData);
         var a1Preformatted = preformattedData.Single(d => d["Compiland Short Name"].ToString() == "a1.obj");
         var a2Preformatted = preformattedData.Single(d => d["Compiland Short Name"].ToString() == "a2.obj");
         var a3Preformatted = preformattedData.Single(d => d["Compiland Short Name"].ToString() == "a3.obj");

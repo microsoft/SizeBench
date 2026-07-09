@@ -98,15 +98,15 @@ public class ClosedXMLExporterTests
     public void DetermineColumnHeadersUsesDisplayAttributeIfPresent()
     {
         var columnMetadata = ClosedXMLExporter.DetermineColumnHeaders(typeof(TestTypeWithDisplayAttributeUsage));
-        Assert.AreEqual(4, columnMetadata.Count);
+        Assert.HasCount(4, columnMetadata);
 
-        Assert.IsTrue(columnMetadata.Any(cm => cm.columnHeader == "Is A Foo"));
-        Assert.IsTrue(columnMetadata.Any(cm => cm.columnHeader == "IsFoo"));
-        Assert.IsFalse(columnMetadata.Any(cm => cm.columnHeader == "IsFooWithDisplayName"));
-        Assert.IsTrue(columnMetadata.Any(cm => cm.columnHeader == "Bar Amount"));
-        Assert.IsTrue(columnMetadata.Any(cm => cm.columnHeader == "Bar"));
-        Assert.IsFalse(columnMetadata.Any(cm => cm.columnHeader == "BarWithDisplayName"));
-        Assert.IsFalse(columnMetadata.Any(cm => cm.columnHeader == "FieldThatShouldNotAutoGenerate"));
+        Assert.Contains(cm => cm.columnHeader == "Is A Foo", columnMetadata);
+        Assert.Contains(cm => cm.columnHeader == "IsFoo", columnMetadata);
+        Assert.DoesNotContain(cm => cm.columnHeader == "IsFooWithDisplayName", columnMetadata);
+        Assert.Contains(cm => cm.columnHeader == "Bar Amount", columnMetadata);
+        Assert.Contains(cm => cm.columnHeader == "Bar", columnMetadata);
+        Assert.DoesNotContain(cm => cm.columnHeader == "BarWithDisplayName", columnMetadata);
+        Assert.DoesNotContain(cm => cm.columnHeader == "FieldThatShouldNotAutoGenerate", columnMetadata);
         Assert.IsNull(columnMetadata[0].displayFormatAttribute);
         Assert.IsNull(columnMetadata[1].displayFormatAttribute);
         Assert.IsNull(columnMetadata[2].displayFormatAttribute);
@@ -117,17 +117,17 @@ public class ClosedXMLExporterTests
     public void DetermineColumnHeadersUsesDisplayAttributeFromBaseClass()
     {
         var columnMetadata = ClosedXMLExporter.DetermineColumnHeaders(typeof(TestDerivedTypeWithDisplayAttributeUsage));
-        Assert.AreEqual(6, columnMetadata.Count);
+        Assert.HasCount(6, columnMetadata);
 
-        Assert.IsTrue(columnMetadata.Any(cm => cm.columnHeader == "Is A Foo"));
-        Assert.IsTrue(columnMetadata.Any(cm => cm.columnHeader == "IsFoo"));
-        Assert.IsFalse(columnMetadata.Any(cm => cm.columnHeader == "IsFooWithDisplayName"));
-        Assert.IsTrue(columnMetadata.Any(cm => cm.columnHeader == "Bar Amount"));
-        Assert.IsTrue(columnMetadata.Any(cm => cm.columnHeader == "Bar"));
-        Assert.IsFalse(columnMetadata.Any(cm => cm.columnHeader == "BarWithDisplayName"));
-        Assert.IsTrue(columnMetadata.Any(cm => cm.columnHeader == "IsZzz"));
-        Assert.IsTrue(columnMetadata.Any(cm => cm.columnHeader == "Zzz?"));
-        Assert.IsFalse(columnMetadata.Any(cm => cm.columnHeader == "ZzzWithDisplayAttribute"));
+        Assert.Contains(cm => cm.columnHeader == "Is A Foo", columnMetadata);
+        Assert.Contains(cm => cm.columnHeader == "IsFoo", columnMetadata);
+        Assert.DoesNotContain(cm => cm.columnHeader == "IsFooWithDisplayName", columnMetadata);
+        Assert.Contains(cm => cm.columnHeader == "Bar Amount", columnMetadata);
+        Assert.Contains(cm => cm.columnHeader == "Bar", columnMetadata);
+        Assert.DoesNotContain(cm => cm.columnHeader == "BarWithDisplayName", columnMetadata);
+        Assert.Contains(cm => cm.columnHeader == "IsZzz", columnMetadata);
+        Assert.Contains(cm => cm.columnHeader == "Zzz?", columnMetadata);
+        Assert.DoesNotContain(cm => cm.columnHeader == "ZzzWithDisplayAttribute", columnMetadata);
         Assert.IsNull(columnMetadata[0].displayFormatAttribute);
         Assert.IsNull(columnMetadata[1].displayFormatAttribute);
         Assert.IsNull(columnMetadata[2].displayFormatAttribute);
@@ -140,12 +140,12 @@ public class ClosedXMLExporterTests
     public void DetermineColumnHeadersFindsDisplayFormatAttributes()
     {
         var columnMetadata = ClosedXMLExporter.DetermineColumnHeaders(typeof(TestTypeWithFormatAttributeUsage));
-        Assert.AreEqual(2, columnMetadata.Count);
+        Assert.HasCount(2, columnMetadata);
 
-        Assert.IsTrue(columnMetadata.Any(cm => cm.columnHeader == "Relative Virtual Address"));
-        Assert.IsTrue(columnMetadata.Any(cm => cm.columnHeader == "Type Name"));
-        Assert.IsFalse(columnMetadata.Any(cm => cm.columnHeader == "Name"));
-        Assert.IsFalse(columnMetadata.Any(cm => cm.columnHeader == "RVA"));
+        Assert.Contains(cm => cm.columnHeader == "Relative Virtual Address", columnMetadata);
+        Assert.Contains(cm => cm.columnHeader == "Type Name", columnMetadata);
+        Assert.DoesNotContain(cm => cm.columnHeader == "Name", columnMetadata);
+        Assert.DoesNotContain(cm => cm.columnHeader == "RVA", columnMetadata);
 
         int indexOfRVA = -1, indexOfTypeName = -1;
         for (var i = 0; i < 2; i++)
@@ -168,7 +168,7 @@ public class ClosedXMLExporterTests
     public void DetermineColumnHeadersOrdersByDisplayAttributeOrderPropertyIfPresentThenByDeclarationOrder()
     {
         var columnMetadata = ClosedXMLExporter.DetermineColumnHeaders(typeof(TestTypeWithDisplayAttributeUsingOrder));
-        Assert.AreEqual(4, columnMetadata.Count);
+        Assert.HasCount(4, columnMetadata);
 
         Assert.AreEqual("A Property", columnMetadata[0].columnHeader);
         Assert.AreEqual("Another Property", columnMetadata[1].columnHeader);
@@ -180,15 +180,15 @@ public class ClosedXMLExporterTests
     public void DetermineColumnHeadersFindsDisplayFormatAttributesFromBaseClass()
     {
         var columnMetadata = ClosedXMLExporter.DetermineColumnHeaders(typeof(TestDerivedTypeWithFormatAttributeUsage));
-        Assert.AreEqual(4, columnMetadata.Count);
+        Assert.HasCount(4, columnMetadata);
 
-        Assert.IsTrue(columnMetadata.Any(cm => cm.columnHeader == "Relative Virtual Address"));
-        Assert.IsTrue(columnMetadata.Any(cm => cm.columnHeader == "Type Name"));
-        Assert.IsTrue(columnMetadata.Any(cm => cm.columnHeader == "Length"));
-        Assert.IsTrue(columnMetadata.Any(cm => cm.columnHeader == "Is Blah"));
-        Assert.IsFalse(columnMetadata.Any(cm => cm.columnHeader == "Name"));
-        Assert.IsFalse(columnMetadata.Any(cm => cm.columnHeader == "RVA"));
-        Assert.IsFalse(columnMetadata.Any(cm => cm.columnHeader == "IsBlah"));
+        Assert.Contains(cm => cm.columnHeader == "Relative Virtual Address", columnMetadata);
+        Assert.Contains(cm => cm.columnHeader == "Type Name", columnMetadata);
+        Assert.Contains(cm => cm.columnHeader == "Length", columnMetadata);
+        Assert.Contains(cm => cm.columnHeader == "Is Blah", columnMetadata);
+        Assert.DoesNotContain(cm => cm.columnHeader == "Name", columnMetadata);
+        Assert.DoesNotContain(cm => cm.columnHeader == "RVA", columnMetadata);
+        Assert.DoesNotContain(cm => cm.columnHeader == "IsBlah", columnMetadata);
 
         int indexOfRVA = -1, indexOfTypeName = -1, indexOfLength = -1, indexOfIsBlah = -1;
         for (var i = 0; i < 4; i++)
@@ -222,12 +222,12 @@ public class ClosedXMLExporterTests
     public void DetermineColumnHeadersSkipsCollectionsExceptStrings()
     {
         var columnMetadata = ClosedXMLExporter.DetermineColumnHeaders(typeof(TestTypeWithCollectionProperty));
-        Assert.AreEqual(1, columnMetadata.Count);
+        Assert.HasCount(1, columnMetadata);
 
-        Assert.IsTrue(columnMetadata.Any(cm => cm.columnHeader == "Test String"));
-        Assert.IsFalse(columnMetadata.Any(cm => cm.columnHeader == "TestString"));
-        Assert.IsFalse(columnMetadata.Any(cm => cm.columnHeader == "Enumerable Name"));
-        Assert.IsFalse(columnMetadata.Any(cm => cm.columnHeader == "TestEnumerable"));
+        Assert.Contains(cm => cm.columnHeader == "Test String", columnMetadata);
+        Assert.DoesNotContain(cm => cm.columnHeader == "TestString", columnMetadata);
+        Assert.DoesNotContain(cm => cm.columnHeader == "Enumerable Name", columnMetadata);
+        Assert.DoesNotContain(cm => cm.columnHeader == "TestEnumerable", columnMetadata);
 
         Assert.AreEqual("{0}", columnMetadata[0].displayFormatAttribute!.DataFormatString);
         Assert.AreEqual("Whoa...", columnMetadata[0].displayFormatAttribute!.NullDisplayText);
@@ -245,7 +245,7 @@ public class ClosedXMLExporterTests
         var columnMetadata = ClosedXMLExporter.DetermineColumnHeaders(typeof(TestDerivedTypeWithFormatAttributeUsage));
         var results = ClosedXMLExporter.GetTable(items, columnMetadata, null, CancellationToken.None);
 
-        Assert.AreEqual(items.Count * columnMetadata.Count, results.Length);
+        Assert.HasCount(items.Count * columnMetadata.Count, results);
 
         int indexOfRVA = -1, indexOfTypeName = -1, indexOfLength = -1, indexOfIsBlah = -1;
         for (var i = 0; i < 4; i++)

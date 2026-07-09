@@ -11,7 +11,7 @@ public sealed class PGOTests_SymbolSourcesSupported
 {
     public TestContext? TestContext { get; set; }
 
-    private CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
+    private CancellationToken CancellationToken => this.TestContext!.CancellationToken;
 
     public static IEnumerable<object[]> DynamicDataSourceForSymbolSourcesSupportedTests_Slimmed =>
     SymbolSourcesSupportedCommonTests.DynamicDataSourceForSymbolSourcesSupportedTests_Slimmed;

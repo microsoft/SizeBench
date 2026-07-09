@@ -13,7 +13,7 @@ public sealed class Session_RVADuplicationTests
 {
     public TestContext? TestContext { get; set; }
 
-    private CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
+    private CancellationToken CancellationToken => this.TestContext!.CancellationToken;
 
     // PGO'd binaries are complicated and slow to open, so we don't want to re-open this for each test method.
     // But we can't afford to make this a class-level piece of state because MSTest may not clean it up while it's
@@ -47,7 +47,7 @@ public sealed class Session_RVADuplicationTests
         var xamlMetadata = compilands.Single(c => c.Name.Contains("XamlMetadata.obj", StringComparison.Ordinal));
         var symbols = await ReactNativeXamlSession.EnumerateSymbolsInCompiland(xamlMetadata, this.CancellationToken);
         var propertyMap = symbols.Where(c => c.Name.Contains("xamlPropertyMap", StringComparison.Ordinal));
-        Assert.AreEqual(1, propertyMap.Count(), "Verifying that xamlPropertyMap symbol occurs exactly once in XamlMetadata.obj symbols list.");
+        Assert.HasCount(1, propertyMap, "Verifying that xamlPropertyMap symbol occurs exactly once in XamlMetadata.obj symbols list.");
     }
 
     private async Task VerifyNoDuplicationPerRVA(Session ReactNativeXamlSession)
@@ -64,7 +64,7 @@ public sealed class Session_RVADuplicationTests
         SanityCheckSymbolSizesFillTheRVARange(symbols, xamlMetadata);
 
         var groupsWithDuplication = symbols.GroupBy(s => new { s.Name, s.RVA }).Where(g => g.Count() > 1);
-        Assert.AreEqual(0, groupsWithDuplication.Select(k => k.Key).Count(),
+        Assert.IsEmpty(groupsWithDuplication.Select(k => k.Key),
             "Verifying that all Name-RVA pairs in XamlMetadata.obj are unique, i.e. no duplication.");
     }
 

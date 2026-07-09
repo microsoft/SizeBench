@@ -36,12 +36,12 @@ public sealed class AllCompilandDiffsPageViewModelTests : IDisposable
 
         IList<string> sectionsInCompilands = viewmodel.BinarySectionsInCompilands().Select(s => s.Name).ToList();
 
-        Assert.AreEqual(5, sectionsInCompilands.Count);
-        Assert.IsTrue(sectionsInCompilands.Contains(".text"));
-        Assert.IsTrue(sectionsInCompilands.Contains(".data"));
-        Assert.IsTrue(sectionsInCompilands.Contains(".rdata"));
-        Assert.IsTrue(sectionsInCompilands.Contains(".virt"));
-        Assert.IsTrue(sectionsInCompilands.Contains(".rsrc"));
+        Assert.HasCount(5, sectionsInCompilands);
+        Assert.Contains(".text", sectionsInCompilands);
+        Assert.Contains(".data", sectionsInCompilands);
+        Assert.Contains(".rdata", sectionsInCompilands);
+        Assert.Contains(".virt", sectionsInCompilands);
+        Assert.Contains(".rsrc", sectionsInCompilands);
     }
 
     [TestMethod]
@@ -57,19 +57,19 @@ public sealed class AllCompilandDiffsPageViewModelTests : IDisposable
 
         IList<string> coffGroupsInCompilands = viewmodel.COFFGroupsInCompilands().Select(s => s.Name).ToList();
 
-        Assert.AreEqual(12, coffGroupsInCompilands.Count);
-        Assert.IsTrue(coffGroupsInCompilands.Contains(".text$mn"));
-        Assert.IsTrue(coffGroupsInCompilands.Contains(".text$zz"));
-        Assert.IsTrue(coffGroupsInCompilands.Contains(".data$xx"));
-        Assert.IsTrue(coffGroupsInCompilands.Contains(".data$zz"));
-        Assert.IsTrue(coffGroupsInCompilands.Contains(".bss"));
-        Assert.IsTrue(coffGroupsInCompilands.Contains(".rdata$xx"));
-        Assert.IsTrue(coffGroupsInCompilands.Contains(".rdata$zz"));
-        Assert.IsTrue(coffGroupsInCompilands.Contains(".rdata$foo"));
-        Assert.IsTrue(coffGroupsInCompilands.Contains(".rdata$bef"));
-        Assert.IsTrue(coffGroupsInCompilands.Contains(".rdata$aft"));
-        Assert.IsTrue(coffGroupsInCompilands.Contains(".virt"));
-        Assert.IsTrue(coffGroupsInCompilands.Contains(".rsrc"));
+        Assert.HasCount(12, coffGroupsInCompilands);
+        Assert.Contains(".text$mn", coffGroupsInCompilands);
+        Assert.Contains(".text$zz", coffGroupsInCompilands);
+        Assert.Contains(".data$xx", coffGroupsInCompilands);
+        Assert.Contains(".data$zz", coffGroupsInCompilands);
+        Assert.Contains(".bss", coffGroupsInCompilands);
+        Assert.Contains(".rdata$xx", coffGroupsInCompilands);
+        Assert.Contains(".rdata$zz", coffGroupsInCompilands);
+        Assert.Contains(".rdata$foo", coffGroupsInCompilands);
+        Assert.Contains(".rdata$bef", coffGroupsInCompilands);
+        Assert.Contains(".rdata$aft", coffGroupsInCompilands);
+        Assert.Contains(".virt", coffGroupsInCompilands);
+        Assert.Contains(".rsrc", coffGroupsInCompilands);
     }
 
     [TestMethod]
@@ -91,15 +91,15 @@ public sealed class AllCompilandDiffsPageViewModelTests : IDisposable
         var columnHeadersList = new List<string>(columnHeaders);
 
         var libNameIndex = columnHeadersList.IndexOf("Compiland Name");
-        Assert.IsTrue(libNameIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, libNameIndex);
         var libShortNameIndex = columnHeadersList.IndexOf("Compiland Short Name");
-        Assert.IsTrue(libShortNameIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, libShortNameIndex);
         var libBeforeSizeIndex = columnHeadersList.IndexOf("Total Before Size on Disk");
-        Assert.IsTrue(libBeforeSizeIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, libBeforeSizeIndex);
         var libAfterSizeIndex = columnHeadersList.IndexOf("Total After Size on Disk");
-        Assert.IsTrue(libAfterSizeIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, libAfterSizeIndex);
         var libTotalSizeIndex = columnHeadersList.IndexOf("Total Size on Disk Diff");
-        Assert.IsTrue(libTotalSizeIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, libTotalSizeIndex);
 
         var sectionNames = new List<string>();
         var coffGroupNames = new List<string>();
@@ -116,16 +116,16 @@ public sealed class AllCompilandDiffsPageViewModelTests : IDisposable
         // (so if there's a section named .rdata and a COFF Group named .rdata, they need prefixes to distinguish)
         foreach (var sectionName in sectionNames)
         {
-            Assert.IsTrue(columnHeadersList.Contains($"Section: {sectionName}"));
+            Assert.Contains($"Section: {sectionName}", columnHeadersList);
         }
 
         foreach (var coffGroupName in coffGroupNames)
         {
-            Assert.IsTrue(columnHeadersList.Contains($"COFF Group: {coffGroupName}"));
+            Assert.Contains($"COFF Group: {coffGroupName}", columnHeadersList);
         }
 
         // And now let's spot-check some of the data - not exhaustive because that's not really necessary
-        Assert.AreEqual(8, preformattedData.Count);
+        Assert.HasCount(8, preformattedData);
         // Lib present only in 'before'
 
         var compilandOnlyInBeforePreformatted = preformattedData.Single(d => d["Compiland Name"].ToString() == "a3.obj");
@@ -186,15 +186,15 @@ public sealed class AllCompilandDiffsPageViewModelTests : IDisposable
         var columnHeadersList = new List<string>(columnHeaders);
 
         var libNameIndex = columnHeadersList.IndexOf("Compiland Name");
-        Assert.IsTrue(libNameIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, libNameIndex);
         var libShortNameIndex = columnHeadersList.IndexOf("Compiland Short Name");
-        Assert.IsTrue(libShortNameIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, libShortNameIndex);
         var libBeforeSizeIndex = columnHeadersList.IndexOf("Total Before Size in Memory");
-        Assert.IsTrue(libBeforeSizeIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, libBeforeSizeIndex);
         var libAfterSizeIndex = columnHeadersList.IndexOf("Total After Size in Memory");
-        Assert.IsTrue(libAfterSizeIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, libAfterSizeIndex);
         var libTotalSizeIndex = columnHeadersList.IndexOf("Total Size in Memory Diff");
-        Assert.IsTrue(libTotalSizeIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, libTotalSizeIndex);
 
         var sectionNames = new List<string>();
         var coffGroupNames = new List<string>();
@@ -211,16 +211,16 @@ public sealed class AllCompilandDiffsPageViewModelTests : IDisposable
         // (so if there's a section named .rdata and a COFF Group named .rdata, they need prefixes to distinguish)
         foreach (var sectionName in sectionNames)
         {
-            Assert.IsTrue(columnHeadersList.Contains($"Section: {sectionName}"));
+            Assert.Contains($"Section: {sectionName}", columnHeadersList);
         }
 
         foreach (var coffGroupName in coffGroupNames)
         {
-            Assert.IsTrue(columnHeadersList.Contains($"COFF Group: {coffGroupName}"));
+            Assert.Contains($"COFF Group: {coffGroupName}", columnHeadersList);
         }
 
         // And now let's spot-check some of the data - not exhaustive because that's not really necessary
-        Assert.AreEqual(8, preformattedData.Count);
+        Assert.HasCount(8, preformattedData);
         // Lib present only in 'before'
 
         var compilandOnlyInBeforePreformatted = preformattedData.Single(d => d["Compiland Name"].ToString() == "a3.obj");

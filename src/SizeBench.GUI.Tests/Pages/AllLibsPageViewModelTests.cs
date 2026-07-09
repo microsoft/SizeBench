@@ -33,9 +33,9 @@ public class AllLibsPageViewModelTests
         await viewmodel.InitializeAsync();
 
         var sectionsFound = viewmodel.BinarySectionsInLibs();
-        Assert.AreEqual(2, sectionsFound.Count());
-        Assert.IsTrue(sectionsFound.Any(s => s.Name == ".text"));
-        Assert.IsTrue(sectionsFound.Any(s => s.Name == ".data"));
+        Assert.HasCount(2, sectionsFound);
+        Assert.Contains(s => s.Name == ".text", sectionsFound);
+        Assert.Contains(s => s.Name == ".data", sectionsFound);
     }
 
     [TestMethod]
@@ -52,12 +52,12 @@ public class AllLibsPageViewModelTests
         await viewmodel.InitializeAsync();
 
         var coffGroupsFound = viewmodel.COFFGroupsInLibs();
-        Assert.AreEqual(5, coffGroupsFound.Count());
-        Assert.IsTrue(coffGroupsFound.Any(cg => cg.Name == ".text$mn"));
-        Assert.IsTrue(coffGroupsFound.Any(cg => cg.Name == ".text$zz"));
-        Assert.IsTrue(coffGroupsFound.Any(cg => cg.Name == ".data$xx"));
-        Assert.IsTrue(coffGroupsFound.Any(cg => cg.Name == ".data$zz"));
-        Assert.IsTrue(coffGroupsFound.Any(cg => cg.Name == ".bss"));
+        Assert.HasCount(5, coffGroupsFound);
+        Assert.Contains(cg => cg.Name == ".text$mn", coffGroupsFound);
+        Assert.Contains(cg => cg.Name == ".text$zz", coffGroupsFound);
+        Assert.Contains(cg => cg.Name == ".data$xx", coffGroupsFound);
+        Assert.Contains(cg => cg.Name == ".data$zz", coffGroupsFound);
+        Assert.Contains(cg => cg.Name == ".bss", coffGroupsFound);
     }
 
     [TestMethod]
@@ -73,7 +73,7 @@ public class AllLibsPageViewModelTests
 
         await viewmodel.InitializeAsync();
 
-        Assert.AreEqual(2 /* sections */ + 4 /* COFF Groups */, viewmodel.DataGridSizeColumnDescriptions.Count);
+        Assert.HasCount(2 /* sections */ + 4 /* COFF Groups */, viewmodel.DataGridSizeColumnDescriptions);
         Assert.IsNotNull(viewmodel.DataGridSizeColumnDescriptions.Where(cd => cd.Header.ToString() == "Section: .text" &&
                                                                               cd.PropertyPath == "SectionContributionsByName[.text].Size").FirstOrDefault());
         Assert.IsNotNull(viewmodel.DataGridSizeColumnDescriptions.Where(cd => cd.Header.ToString() == "Section: .data" &&
@@ -87,7 +87,7 @@ public class AllLibsPageViewModelTests
         Assert.IsNotNull(viewmodel.DataGridSizeColumnDescriptions.Where(cd => cd.Header.ToString() == "COFF Group: .data$zz" &&
                                                                               cd.PropertyPath == "COFFGroupContributionsByName[.data$zz].Size").FirstOrDefault());
 
-        Assert.AreEqual(2 /* sections */ + 5 /* COFF Groups */, viewmodel.DataGridVirtualSizeColumnDescriptions.Count);
+        Assert.HasCount(2 /* sections */ + 5 /* COFF Groups */, viewmodel.DataGridVirtualSizeColumnDescriptions);
         Assert.IsNotNull(viewmodel.DataGridVirtualSizeColumnDescriptions.Where(cd => cd.Header.ToString() == "Section: .text" &&
                                                                                      cd.PropertyPath == "SectionContributionsByName[.text].VirtualSize").FirstOrDefault());
         Assert.IsNotNull(viewmodel.DataGridVirtualSizeColumnDescriptions.Where(cd => cd.Header.ToString() == "Section: .data" &&
@@ -107,12 +107,12 @@ public class AllLibsPageViewModelTests
         foreach (var column in viewmodel.DataGridSizeColumnDescriptions)
         {
             var columnsWithSameName = viewmodel.DataGridSizeColumnDescriptions.Where(c => c.Header == column.Header);
-            Assert.AreEqual(1, columnsWithSameName.Count());
+            Assert.HasCount(1, columnsWithSameName);
         }
         foreach (var column in viewmodel.DataGridVirtualSizeColumnDescriptions)
         {
             var columnsWithSameName = viewmodel.DataGridVirtualSizeColumnDescriptions.Where(c => c.Header == column.Header);
-            Assert.AreEqual(1, columnsWithSameName.Count());
+            Assert.HasCount(1, columnsWithSameName);
         }
     }
 
@@ -135,24 +135,24 @@ public class AllLibsPageViewModelTests
         viewmodel.GenerateFormattedDataForExcelExport(out var columnHeaders, out var preformattedData);
 
         var columnHeadersList = new List<string>(columnHeaders);
-        Assert.AreEqual(9, columnHeadersList.Count);
+        Assert.HasCount(9, columnHeadersList);
 
         var libNameIndex = columnHeadersList.IndexOf("Lib Name");
-        Assert.IsTrue(libNameIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, libNameIndex);
         var libShortNameIndex = columnHeadersList.IndexOf("Lib Short Name");
-        Assert.IsTrue(libShortNameIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, libShortNameIndex);
         var libTotalSizeIndex = columnHeadersList.IndexOf("Lib Total Size on Disk");
-        Assert.IsTrue(libTotalSizeIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, libTotalSizeIndex);
 
-        Assert.IsTrue(columnHeadersList.Contains("Section: .text"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .text$mn"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .text$zz"));
-        Assert.IsTrue(columnHeadersList.Contains("Section: .data"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .data$xx"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .data$zz"));
+        Assert.Contains("Section: .text", columnHeadersList);
+        Assert.Contains("COFF Group: .text$mn", columnHeadersList);
+        Assert.Contains("COFF Group: .text$zz", columnHeadersList);
+        Assert.Contains("Section: .data", columnHeadersList);
+        Assert.Contains("COFF Group: .data$xx", columnHeadersList);
+        Assert.Contains("COFF Group: .data$zz", columnHeadersList);
 
         // And now let's spot-check some of the data - not exhaustive because that's not really necessary
-        Assert.AreEqual(2, preformattedData.Count);
+        Assert.HasCount(2, preformattedData);
         var aLibPreformatted = preformattedData.Single(d => d["Lib Short Name"].ToString() == "a");
         var bLibPreformatted = preformattedData.Single(d => d["Lib Short Name"].ToString() == "b");
 
@@ -189,25 +189,25 @@ public class AllLibsPageViewModelTests
         viewmodel.GenerateFormattedDataForExcelExport(out var columnHeaders, out var preformattedData);
 
         var columnHeadersList = new List<string>(columnHeaders);
-        Assert.AreEqual(10, columnHeadersList.Count);
+        Assert.HasCount(10, columnHeadersList);
 
         var libNameIndex = columnHeadersList.IndexOf("Lib Name");
-        Assert.IsTrue(libNameIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, libNameIndex);
         var libShortNameIndex = columnHeadersList.IndexOf("Lib Short Name");
-        Assert.IsTrue(libShortNameIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, libShortNameIndex);
         var libTotalSizeIndex = columnHeadersList.IndexOf("Lib Total Size in Memory");
-        Assert.IsTrue(libTotalSizeIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, libTotalSizeIndex);
 
-        Assert.IsTrue(columnHeadersList.Contains("Section: .text"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .text$mn"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .text$zz"));
-        Assert.IsTrue(columnHeadersList.Contains("Section: .data"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .data$xx"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .data$zz"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .bss"));
+        Assert.Contains("Section: .text", columnHeadersList);
+        Assert.Contains("COFF Group: .text$mn", columnHeadersList);
+        Assert.Contains("COFF Group: .text$zz", columnHeadersList);
+        Assert.Contains("Section: .data", columnHeadersList);
+        Assert.Contains("COFF Group: .data$xx", columnHeadersList);
+        Assert.Contains("COFF Group: .data$zz", columnHeadersList);
+        Assert.Contains("COFF Group: .bss", columnHeadersList);
 
         // And now let's spot-check some of the data - not exhaustive because that's not really necessary
-        Assert.AreEqual(2, preformattedData.Count);
+        Assert.HasCount(2, preformattedData);
         var aLibPreformatted = preformattedData.Single(d => d["Lib Short Name"].ToString() == "a");
         var bLibPreformatted = preformattedData.Single(d => d["Lib Short Name"].ToString() == "b");
 

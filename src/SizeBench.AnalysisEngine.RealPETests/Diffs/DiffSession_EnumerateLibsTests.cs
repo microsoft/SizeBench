@@ -30,8 +30,8 @@ public sealed class DiffSession_EnumerateLibsTests
         var libDiffs = await diffSession.EnumerateLibDiffs(CancellationToken.None);
         Assert.IsNotNull(libDiffs);
 
-        Assert.AreEqual(RealPETestingConstants.LibsShared + RealPETestingConstants.LibsUniquelyInBefore +
-                        RealPETestingConstants.ObjsDirectlyInDLLShared + RealPETestingConstants.ObjsDirectlyInDLLUniquelyInBefore, libDiffs.Count);
+        Assert.HasCount(RealPETestingConstants.LibsShared + RealPETestingConstants.LibsUniquelyInBefore +
+                        RealPETestingConstants.ObjsDirectlyInDLLShared + RealPETestingConstants.ObjsDirectlyInDLLUniquelyInBefore, libDiffs);
 
         foreach (var libDiff in libDiffs)
         {
@@ -132,8 +132,8 @@ public sealed class DiffSession_EnumerateLibsTests
         var sectionDiffs = await diffSession.EnumerateBinarySectionsAndCOFFGroupDiffs(CancellationToken.None);
         Assert.IsNotNull(libDiffs);
 
-        Assert.AreEqual(RealPETestingConstants.LibsShared + RealPETestingConstants.LibsUniquelyInBefore + RealPETestingConstants.LibsUniquelyInAfter +
-                        RealPETestingConstants.ObjsDirectlyInDLLShared + RealPETestingConstants.ObjsDirectlyInDLLUniquelyInBefore + RealPETestingConstants.ObjsDirectlyInDLLUniquelyInAfter, libDiffs.Count);
+        Assert.HasCount(RealPETestingConstants.LibsShared + RealPETestingConstants.LibsUniquelyInBefore + RealPETestingConstants.LibsUniquelyInAfter +
+                        RealPETestingConstants.ObjsDirectlyInDLLShared + RealPETestingConstants.ObjsDirectlyInDLLUniquelyInBefore + RealPETestingConstants.ObjsDirectlyInDLLUniquelyInAfter, libDiffs);
 
         var textSectionDiff = sectionDiffs.First(sd => sd.Name == ".text");
         var textMnCGDiff = textSectionDiff.COFFGroupDiffs.First(cgd => cgd.Name == ".text$mn");
@@ -212,7 +212,7 @@ public sealed class DiffSession_EnumerateLibsTests
         Assert.IsNull(msvcprtdLibDiff.BeforeLib);
         Assert.IsNotNull(msvcprtdLibDiff.AfterLib);
         Assert.AreEqual(608, msvcprtdLibDiff.SizeDiff);
-        Assert.AreEqual(1, msvcprtdLibDiff.SectionContributionDiffs.Count);
+        Assert.HasCount(1, msvcprtdLibDiff.SectionContributionDiffs);
         Assert.IsTrue(msvcprtdLibDiff.SectionContributionDiffs.ContainsKey(rdataSectionDiff));
     }
 
@@ -242,10 +242,10 @@ public sealed class DiffSession_EnumerateLibsTests
         var bssCGDiff = dataSectionDiff.COFFGroupDiffs.First(cgd => cgd.Name == ".bss");
 
         // Start with dllmain.obj, which is detected as a lib since it's directly in the dll
-        Assert.AreEqual(1, libDiffs.Where(ld => ld.ShortName == "dllmain").Count());
+        Assert.ContainsSingle(ld => ld.ShortName == "dllmain", libDiffs);
         var dllMainLibDiff = libDiffs.First(ld => ld.ShortName == "dllmain");
 
-        Assert.AreEqual(1, dllMainLibDiff.CompilandDiffs.Count);
+        Assert.HasCount(1, dllMainLibDiff.CompilandDiffs);
         Assert.AreEqual("dllmain.obj", dllMainLibDiff.CompilandDiffs.Values.First().ShortName);
         Assert.AreEqual(dllMainLibDiff.SizeDiff, dllMainLibDiff.CompilandDiffs.Values.First().SizeDiff);
 
@@ -284,12 +284,12 @@ public sealed class DiffSession_EnumerateLibsTests
 
 
         // Move on to SourceFile2.obj, which is only in 'before'
-        Assert.AreEqual(1, libDiffs.Where(ld => ld.ShortName == "SourceFile2").Count());
+        Assert.ContainsSingle(ld => ld.ShortName == "SourceFile2", libDiffs);
         var sourceFile2LibDiff = libDiffs.First(ld => ld.ShortName == "SourceFile2");
         Assert.IsNotNull(sourceFile2LibDiff.BeforeLib);
         Assert.IsNull(sourceFile2LibDiff.AfterLib);
 
-        Assert.AreEqual(1, sourceFile2LibDiff.CompilandDiffs.Count);
+        Assert.HasCount(1, sourceFile2LibDiff.CompilandDiffs);
         Assert.AreEqual("SourceFile2.obj", sourceFile2LibDiff.CompilandDiffs.Values.First().ShortName);
         Assert.AreEqual(sourceFile2LibDiff.SizeDiff, sourceFile2LibDiff.CompilandDiffs.Values.First().SizeDiff);
 
@@ -301,12 +301,12 @@ public sealed class DiffSession_EnumerateLibsTests
 
 
         // And then hit SourceFile3.obj, which is only in 'after'
-        Assert.AreEqual(1, libDiffs.Where(ld => ld.ShortName == "SourceFile3").Count());
+        Assert.ContainsSingle(ld => ld.ShortName == "SourceFile3", libDiffs);
         var sourceFile3LibDiff = libDiffs.First(ld => ld.ShortName == "SourceFile3");
         Assert.IsNull(sourceFile3LibDiff.BeforeLib);
         Assert.IsNotNull(sourceFile3LibDiff.AfterLib);
 
-        Assert.AreEqual(1, sourceFile3LibDiff.CompilandDiffs.Count);
+        Assert.HasCount(1, sourceFile3LibDiff.CompilandDiffs);
         Assert.AreEqual("SourceFile3.obj", sourceFile3LibDiff.CompilandDiffs.Values.First().ShortName);
         Assert.AreEqual(sourceFile3LibDiff.SizeDiff, sourceFile3LibDiff.CompilandDiffs.Values.First().SizeDiff);
 
@@ -316,17 +316,17 @@ public sealed class DiffSession_EnumerateLibsTests
         Assert.AreEqual(sourceFile3RDataSize, sourceFile3LibDiff.COFFGroupContributionDiffs[rdataCGDiff].SizeDiff);
 
         // Now look at static libs 1, 2, and 3
-        Assert.AreEqual(1, libDiffs.Where(ld => ld.ShortName == "StaticLib1").Count());
+        Assert.ContainsSingle(ld => ld.ShortName == "StaticLib1", libDiffs);
         var staticLib1LibDiff = libDiffs.First(ld => ld.ShortName == "StaticLib1");
         Assert.IsNotNull(staticLib1LibDiff.BeforeLib);
         Assert.IsNotNull(staticLib1LibDiff.AfterLib);
 
-        Assert.AreEqual(1, libDiffs.Where(ld => ld.ShortName == "StaticLib2").Count());
+        Assert.ContainsSingle(ld => ld.ShortName == "StaticLib2", libDiffs);
         var staticLib2LibDiff = libDiffs.First(ld => ld.ShortName == "StaticLib2");
         Assert.IsNotNull(staticLib2LibDiff.BeforeLib);
         Assert.IsNull(staticLib2LibDiff.AfterLib);
 
-        Assert.AreEqual(1, libDiffs.Where(ld => ld.ShortName == "StaticLib3").Count());
+        Assert.ContainsSingle(ld => ld.ShortName == "StaticLib3", libDiffs);
         var staticLib3LibDiff = libDiffs.First(ld => ld.ShortName == "StaticLib3");
         Assert.IsNull(staticLib3LibDiff.BeforeLib);
         Assert.IsNotNull(staticLib3LibDiff.AfterLib);

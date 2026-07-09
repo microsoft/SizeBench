@@ -72,38 +72,38 @@ public sealed class EnumerateTemplateFoldabilitySessionTaskTests : IDisposable
         using var logger = new NoOpLogger();
         var foldables = task.Execute(logger);
 
-        Assert.AreEqual(3, foldables.Count);
+        Assert.HasCount(3, foldables);
 
         var myTypeFoldableFunction = foldables.Single(tfi => tfi.TemplateName == "SomeNamespace::MyType::FoldableFunction<T1,T2>(T2, T1)");
         var foldableWithDuplicateType = foldables.Single(tfi => tfi.TemplateName == "FoldableWithDuplicateType<T1,T2,T1>(T1) const");
         var foldableVolatile = foldables.Single(tfi => tfi.TemplateName == "FoldableVolatile<T1>(T1*) volatile");
 
-        Assert.AreEqual(3, myTypeFoldableFunction.Symbols.Count);
-        Assert.AreEqual(2, myTypeFoldableFunction.UniqueSymbols.Count);
-        Assert.AreEqual(3, myTypeFoldableFunction.Symbols.Count);
-        Assert.IsTrue(myTypeFoldableFunction.Symbols.Any(s => s.FormattedName.IncludeParentType == "SomeNamespace::MyType::FoldableFunction<AComplex::Type<int>,bool>"));
-        Assert.IsTrue(myTypeFoldableFunction.Symbols.Any(s => s.FormattedName.IncludeParentType == "SomeNamespace::MyType::FoldableFunction<AComplex::Type<float>,bool>"));
-        Assert.IsTrue(myTypeFoldableFunction.Symbols.Any(s => s.FormattedName.IncludeParentType == "SomeNamespace::MyType::FoldableFunction<AComplex::Type<SomeUDT>,bool>"));
+        Assert.HasCount(3, myTypeFoldableFunction.Symbols);
+        Assert.HasCount(2, myTypeFoldableFunction.UniqueSymbols);
+        Assert.HasCount(3, myTypeFoldableFunction.Symbols);
+        Assert.Contains(s => s.FormattedName.IncludeParentType == "SomeNamespace::MyType::FoldableFunction<AComplex::Type<int>,bool>", myTypeFoldableFunction.Symbols);
+        Assert.Contains(s => s.FormattedName.IncludeParentType == "SomeNamespace::MyType::FoldableFunction<AComplex::Type<float>,bool>", myTypeFoldableFunction.Symbols);
+        Assert.Contains(s => s.FormattedName.IncludeParentType == "SomeNamespace::MyType::FoldableFunction<AComplex::Type<SomeUDT>,bool>", myTypeFoldableFunction.Symbols);
         Assert.AreEqual(20u, myTypeFoldableFunction.TotalSize);
         Assert.AreEqual(0.8f, myTypeFoldableFunction.PercentageSimilarity);
         Assert.AreEqual((uint)(20 * 0.8f), myTypeFoldableFunction.WastedSize);
 
-        Assert.AreEqual(3, foldableWithDuplicateType.Symbols.Count);
-        Assert.AreEqual(3, foldableWithDuplicateType.UniqueSymbols.Count);
-        Assert.AreEqual(3, foldableWithDuplicateType.Symbols.Count);
-        Assert.IsTrue(foldableWithDuplicateType.Symbols.Any(s => s.FormattedName.IncludeParentType == "FoldableWithDuplicateType<int,bool,int>"));
-        Assert.IsTrue(foldableWithDuplicateType.Symbols.Any(s => s.FormattedName.IncludeParentType == "FoldableWithDuplicateType<int*,bool,int*>"));
-        Assert.IsTrue(foldableWithDuplicateType.Symbols.Any(s => s.FormattedName.IncludeParentType == "FoldableWithDuplicateType<AComplex::Type<SomeUDT>,bool,AComplex::Type<SomeUDT>>"));
+        Assert.HasCount(3, foldableWithDuplicateType.Symbols);
+        Assert.HasCount(3, foldableWithDuplicateType.UniqueSymbols);
+        Assert.HasCount(3, foldableWithDuplicateType.Symbols);
+        Assert.Contains(s => s.FormattedName.IncludeParentType == "FoldableWithDuplicateType<int,bool,int>", foldableWithDuplicateType.Symbols);
+        Assert.Contains(s => s.FormattedName.IncludeParentType == "FoldableWithDuplicateType<int*,bool,int*>", foldableWithDuplicateType.Symbols);
+        Assert.Contains(s => s.FormattedName.IncludeParentType == "FoldableWithDuplicateType<AComplex::Type<SomeUDT>,bool,AComplex::Type<SomeUDT>>", foldableWithDuplicateType.Symbols);
         Assert.AreEqual(30u, foldableWithDuplicateType.TotalSize);
         Assert.AreEqual(0.5f /* avg. of 60% and 40% */, foldableWithDuplicateType.PercentageSimilarity);
         Assert.AreEqual((uint)(30 * 0.5f), foldableWithDuplicateType.WastedSize);
 
-        Assert.AreEqual(3, foldableVolatile.Symbols.Count);
-        Assert.AreEqual(2, foldableVolatile.UniqueSymbols.Count);
-        Assert.AreEqual(3, foldableVolatile.Symbols.Count);
-        Assert.IsTrue(foldableVolatile.Symbols.Any(s => s.FormattedName.IncludeParentType == "FoldableVolatile<int>"));
-        Assert.IsTrue(foldableVolatile.Symbols.Any(s => s.FormattedName.IncludeParentType == "FoldableVolatile<bool>"));
-        Assert.IsTrue(foldableVolatile.Symbols.Any(s => s.FormattedName.IncludeParentType == "FoldableVolatile<const bool>"));
+        Assert.HasCount(3, foldableVolatile.Symbols);
+        Assert.HasCount(2, foldableVolatile.UniqueSymbols);
+        Assert.HasCount(3, foldableVolatile.Symbols);
+        Assert.Contains(s => s.FormattedName.IncludeParentType == "FoldableVolatile<int>", foldableVolatile.Symbols);
+        Assert.Contains(s => s.FormattedName.IncludeParentType == "FoldableVolatile<bool>", foldableVolatile.Symbols);
+        Assert.Contains(s => s.FormattedName.IncludeParentType == "FoldableVolatile<const bool>", foldableVolatile.Symbols);
         Assert.AreEqual(20u, foldableVolatile.TotalSize);
         Assert.AreEqual(0.9f, foldableVolatile.PercentageSimilarity);
         Assert.AreEqual((uint)(20 * 0.9f), foldableVolatile.WastedSize);

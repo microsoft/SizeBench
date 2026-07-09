@@ -143,7 +143,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         {
             // If this is one of the well-known DIA HRESULTs at least we can return a friendly string that
             // the CLR can't since it doesn't know about these.
-            var diaHRESULTValues = Enum.GetValues(typeof(DIAHRESULTs));
+            var diaHRESULTValues = Enum.GetValues<DIAHRESULTs>();
             for (var i = 0; i < diaHRESULTValues.Length; i++)
             {
                 if (((uint)comException.HResult) == Convert.ToUInt32(diaHRESULTValues.GetValue(i), CultureInfo.InvariantCulture.NumberFormat))

@@ -10,10 +10,10 @@ public sealed class CompilandDiffAndCOFFGroupDiffToContributionSizeConverterTest
 
     [TestInitialize]
     public void TestInitialize() => this._generator = new DiffTestDataGenerator();
-    [ExpectedException(typeof(ArgumentException), AllowDerivedTypes = false)]
+
     [TestMethod]
     public void ConvertOnlyTakesCompilandDiffAndCOFFGroupDiffValuesInThatOrder()
-        => CompilandDiffAndCOFFGroupDiffToContributionSizeConverter.Instance.Convert(new object[] { this._generator.DataXxCGDiff, this._generator.A1CompilandDiff }, typeof(string), null /* ConverterParameter */, null /* CultureInfo */);
+        => Assert.ThrowsExactly<ArgumentException>(() => CompilandDiffAndCOFFGroupDiffToContributionSizeConverter.Instance.Convert(new object[] { this._generator.DataXxCGDiff, this._generator.A1CompilandDiff }, typeof(string), null /* ConverterParameter */, null /* CultureInfo */));
 
     [TestMethod]
     public void ReturnsCorrectSizeWhenContributionExists()

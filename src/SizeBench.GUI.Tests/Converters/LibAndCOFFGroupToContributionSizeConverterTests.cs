@@ -68,10 +68,9 @@ public sealed class LibAndCOFFGroupToContributionSizeConverterTests : IDisposabl
         this.TestLib2.MarkFullyConstructed();
     }
 
-    [ExpectedException(typeof(ArgumentException), AllowDerivedTypes = false)]
     [TestMethod]
     public void ConvertOnlyTakesLibAndCOFFGroupValuesInThatOrder()
-        => LibAndCOFFGroupToContributionSizeConverter.Instance.Convert(new object[] { this.TestCOFFGroup1, this.TestLib1 }, typeof(string), null /* ConverterParameter */, null /* CultureInfo */);
+        => Assert.ThrowsExactly<ArgumentException>(() => LibAndCOFFGroupToContributionSizeConverter.Instance.Convert(new object[] { this.TestCOFFGroup1, this.TestLib1 }, typeof(string), null /* ConverterParameter */, null /* CultureInfo */));
 
     [TestMethod]
     public void ReturnsCorrectSizeWhenContributionExists()

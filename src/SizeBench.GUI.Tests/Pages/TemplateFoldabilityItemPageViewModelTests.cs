@@ -37,7 +37,7 @@ public sealed class TemplateFoldabilityPageViewModelTests : IDisposable
         this.MockSession.Setup(s => s.EnumerateTemplateFoldabilityItems(It.IsAny<CancellationToken>())).Returns(Task.FromResult((IReadOnlyList<TemplateFoldabilityItem>)this.TemplateFoldabilityItems));
     }
 
-    [Timeout(5 * 1000)]
+    [Timeout(5 * 1000, CooperativeCancellation = true)]
     [TestMethod]
     public async Task SettingBothDisassemblySymbolsKicksOffDisassemblyProcess()
     {

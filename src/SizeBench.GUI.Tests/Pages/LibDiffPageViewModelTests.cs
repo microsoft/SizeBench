@@ -23,7 +23,7 @@ public sealed class LibDiffPageViewModelTests : IDisposable
         this.MockExcelExporter = new Mock<IExcelExporter>();
     }
 
-    [Timeout(5 * 1000)]
+    [Timeout(5 * 1000, CooperativeCancellation = true)]
     [TestMethod]
     public async Task SymbolsInitializeAsyncFromConstruction()
     {
@@ -60,10 +60,10 @@ public sealed class LibDiffPageViewModelTests : IDisposable
         await initTask;
 
         Assert.AreEqual(nameof(LibDiffPageViewModel.SymbolDiffs), propertyNameResult);
-        CollectionAssert.AreEqual(allSymbolDiffsInLibDiff, viewmodel.SymbolDiffs!.ToList());
+        Assert.AreSequenceEqual(allSymbolDiffsInLibDiff, viewmodel.SymbolDiffs!.ToList());
     }
 
-    [Timeout(1000 * 5)] // 5s
+    [Timeout(1000 * 5, CooperativeCancellation = true)] // 5s
     [TestMethod]
     public async Task CanExportSymbolsToExcel()
     {

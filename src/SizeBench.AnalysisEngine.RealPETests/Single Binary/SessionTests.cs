@@ -41,15 +41,12 @@ public class SessionTests
     {
         // I've seen too many cases where someone puts the DLL/EXE in the "PDB" box in the UI, and the PDB in the other one - so let's see if that
         // case generates at least a somewhat-helpful error message.
-        try
-        {
-            using var logger = new NoOpLogger();
-            await using var session = await Session.Create(this.Cpp32BitDllPDBPath, this.Cpp32BitDllBinaryPath, logger);
-            Assert.Fail("It should not be possible to get here!");
-        }
-        catch (PDBNotSuitableForAnalysisException ex)
-        {
-            StringAssert.Contains(ex.Message, "E_PDB_FORMAT", StringComparison.Ordinal);
-        }
+
+        using var logger = new NoOpLogger();
+
+        var ex = await Assert.ThrowsExactlyAsync<PDBNotSuitableForAnalysisException>(async () =>
+            await Session.Create(this.Cpp32BitDllPDBPath, this.Cpp32BitDllBinaryPath, logger));
+
+        Assert.Contains("E_PDB_FORMAT", ex.Message, StringComparison.Ordinal);
     }
 }

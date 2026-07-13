@@ -20,12 +20,12 @@ public class LogEntryForProgressTests
         var output = writer.ToString();
 
         var linesOfOutput = output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-        Assert.AreEqual(1, linesOfOutput.Length);
+        Assert.HasCount(1, linesOfOutput);
 
-        StringAssert.StartsWith(output, "\t\t\t", StringComparison.Ordinal);
-        StringAssert.Contains(output, callingMember, StringComparison.Ordinal);
-        StringAssert.Contains(output, message, StringComparison.Ordinal);
-        StringAssert.Contains(output, logLevel.ToString(), StringComparison.Ordinal);
+        Assert.StartsWith("\t\t\t", output, StringComparison.Ordinal);
+        Assert.Contains(callingMember, output, StringComparison.Ordinal);
+        Assert.Contains(message, output, StringComparison.Ordinal);
+        Assert.Contains(logLevel.ToString(), output, StringComparison.Ordinal);
 
         writer.GetStringBuilder().Clear();
         entry.UpdateProgress("5% done");
@@ -33,12 +33,12 @@ public class LogEntryForProgressTests
 
         output = writer.ToString();
         linesOfOutput = output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-        Assert.AreEqual(1, linesOfOutput.Length);
+        Assert.HasCount(1, linesOfOutput);
 
-        StringAssert.StartsWith(output, "\t\t\t", StringComparison.Ordinal);
-        StringAssert.Contains(output, callingMember, StringComparison.Ordinal);
-        StringAssert.Contains(output, "5% done", StringComparison.Ordinal);
+        Assert.StartsWith("\t\t\t", output, StringComparison.Ordinal);
+        Assert.Contains(callingMember, output, StringComparison.Ordinal);
+        Assert.Contains("5% done", output, StringComparison.Ordinal);
         Assert.IsFalse(output.Contains(message, StringComparison.Ordinal)); // We've moved on in progress, should not still contain the original string
-        StringAssert.Contains(output, logLevel.ToString(), StringComparison.Ordinal);
+        Assert.Contains(logLevel.ToString(), output, StringComparison.Ordinal);
     }
 }

@@ -33,3 +33,6 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Design", "CA1002:Do not expose generic lists",
                            Justification = "This rule is about public types for libraries that will have consumers - the UI library is never going to be consumed externally, it is a leaf in the dependency tree",
                            Scope = "namespaceanddescendants", Target = "~N:SizeBench.GUI")]
+
+[assembly: SuppressMessage("Maintainability", "CA1515:Consider making public types internal",
+                           Justification = "WPF often needs things to be public so I don't want to analyze each type and suppress a bunch of warnings that don't apply due to WPF's needs.")]

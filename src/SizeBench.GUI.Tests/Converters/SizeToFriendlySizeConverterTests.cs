@@ -47,10 +47,7 @@ public class SizeToFriendlySizeConverterTests
         Assert.AreEqual("999.7 GB", output);
     }
 
-    [ExpectedException(typeof(NotImplementedException), AllowDerivedTypes = false)]
     [TestMethod]
     public void ConvertBackShouldThrow()
-    {
-        SizeToFriendlySizeConverter.Instance.ConvertBack(123, typeof(string), null, CultureInfo.CurrentCulture);
-    }
+        => Assert.ThrowsExactly<NotImplementedException>(() => SizeToFriendlySizeConverter.Instance.ConvertBack(123, typeof(string), null, CultureInfo.CurrentCulture));
 }

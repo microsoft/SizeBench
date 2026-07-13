@@ -99,7 +99,7 @@ public sealed class EnumerateSymbolsInCompilandSessionTaskTests : IDisposable
         using var logger = new NoOpLogger();
         var symbols = task.Execute(logger);
 
-        Assert.AreEqual(expectedSymbolCount, symbols.Count);
+        Assert.HasCount(expectedSymbolCount, symbols);
     }
 
     [TestMethod]

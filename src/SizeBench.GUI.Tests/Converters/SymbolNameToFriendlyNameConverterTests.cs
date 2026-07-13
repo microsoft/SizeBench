@@ -6,12 +6,9 @@ namespace SizeBench.GUI.Converters.Tests;
 [TestClass]
 public class SymbolNameToFriendlyNameConverterTests
 {
-    [ExpectedException(typeof(ArgumentException), AllowDerivedTypes = false)]
     [TestMethod]
     public void NullInputThrows()
-    {
-        SymbolNameToFriendlyNameConverter.Instance.Convert(null, typeof(string), null, CultureInfo.CurrentCulture);
-    }
+        => Assert.ThrowsExactly<ArgumentException>(() => SymbolNameToFriendlyNameConverter.Instance.Convert(null, typeof(string), null, CultureInfo.CurrentCulture));
 
     [TestMethod]
     public void AccessModifiersGetStripped()
@@ -40,10 +37,7 @@ public class SymbolNameToFriendlyNameConverterTests
         Assert.AreEqual(expectedFriendlyName, converter.Convert(symbolName, typeof(string), null, CultureInfo.CurrentCulture));
     }
 
-    [ExpectedException(typeof(NotImplementedException), AllowDerivedTypes = false)]
     [TestMethod]
     public void ConvertBackShouldThrow()
-    {
-        SymbolNameToFriendlyNameConverter.Instance.ConvertBack("symbol friendly name", typeof(string), null, CultureInfo.CurrentCulture);
-    }
+        => Assert.ThrowsExactly<NotImplementedException>(() => SymbolNameToFriendlyNameConverter.Instance.ConvertBack("symbol friendly name", typeof(string), null, CultureInfo.CurrentCulture));
 }

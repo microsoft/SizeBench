@@ -303,11 +303,10 @@ public sealed class DiffModelToUriConverterTests : IDisposable
         { }
     }
 
-    [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
     [TestMethod]
     public void NavigatingToContributionDiffThrows() =>
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.  This test is explicitly testing null
-            _ = DiffModelToUriConverter.ModelToUri(new TestContributionDiff(null, null), this._diffSession!);
+            Assert.ThrowsExactly<InvalidOperationException>(() => DiffModelToUriConverter.ModelToUri(new TestContributionDiff(null, null), this._diffSession!));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
 
@@ -317,9 +316,9 @@ public sealed class DiffModelToUriConverterTests : IDisposable
         { }
     }
 
-    [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
     [TestMethod]
-    public void NavigatingToContributionThrows() => _ = DiffModelToUriConverter.ModelToUri(new TestContribution(), this._diffSession!);
+    public void NavigatingToContributionThrows()
+        => Assert.ThrowsExactly<InvalidOperationException>(() => DiffModelToUriConverter.ModelToUri(new TestContribution(), this._diffSession!));
 
     [TestMethod]
     public void NavigatingToOtherStuffReturnsError()

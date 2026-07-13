@@ -25,13 +25,13 @@ public sealed class Session_EnumerateSourceFilesTests
         // <vector> is a good header file to look at, since it contributes to multiple source files and compilands, and also has
         // COMDAT folding going on between two compilands, so it hits a lot of interesting cases.
         var vectorSF = sourceFiles.Single(sf => sf.Name.Contains(@"\vector", StringComparison.OrdinalIgnoreCase));
-        Assert.AreEqual(3, vectorSF.Compilands.Count);
+        Assert.HasCount(3, vectorSF.Compilands);
 
         var sourceFile1Compiland = vectorSF.Compilands.Single(c => c.ShortName == "SourceFile1.obj");
         var sourceFile2Compiland = vectorSF.Compilands.Single(c => c.ShortName == "SourceFile2.obj");
         var dllMainCompiland = vectorSF.Compilands.Single(c => c.ShortName == "dllmain.obj");
 
-        Assert.AreEqual(2, vectorSF.CompilandContributions.Count);
+        Assert.HasCount(2, vectorSF.CompilandContributions);
         Assert.IsTrue(vectorSF.CompilandContributions.ContainsKey(sourceFile1Compiland));
         // Note SourceFile2 is not in the CompilandContributions, since everything was COMDAT-folded with other compilands
         Assert.IsTrue(vectorSF.CompilandContributions.ContainsKey(dllMainCompiland));

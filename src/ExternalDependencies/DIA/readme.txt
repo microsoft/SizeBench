@@ -1,4 +1,4 @@
-The current version of DIA: Visual Studio 2022 17.5
+The current version of DIA: Visual Studio 2026 18.7.3 (June 2026 Feature Update)
 
 Here's how to take a new drop of DIA:
 1. Get msdia<version>.dll from somewhere.

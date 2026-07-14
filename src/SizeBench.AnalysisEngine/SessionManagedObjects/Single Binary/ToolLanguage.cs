@@ -41,6 +41,8 @@ public enum ToolLanguage
 
     Rust = 0x15, // Rust
 
+    Go = 0x16, // Go
+
     Zig = Int32.MaxValue - 1, // Zig, which does not yet have a CV_CFL_LANG value so SizeBench detects it using tool name
     Unknown = Int32.MaxValue
 }

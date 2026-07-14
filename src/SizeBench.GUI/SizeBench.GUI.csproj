@@ -27,7 +27,10 @@
     <PackageReference Include="Castle.Windsor" />
     <PackageReference Include="DiffPlex" />
     <PackageReference Include="Microsoft.Debugging.DataModel.DbgModelApiXtn" />
+    <PackageReference Include="Microsoft.Debugging.Platform.DbgEng" />
     <PackageReference Include="Microsoft.Debugging.Platform.DbgX" />
+    <PackageReference Include="Microsoft.Debugging.Platform.SymSrv" />
+    <PackageReference Include="DiffPlex.Wpf" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" />
     <PackageReference Include="System.ComponentModel.Composition" />
   </ItemGroup>

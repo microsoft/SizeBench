@@ -56,6 +56,13 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
     private uint _sectionAlignment;
     private readonly int _affinitizedThreadId;
 
+    /// <summary>
+    /// The path DIA actually loaded the PDB from. For explicit-PDB sessions this echoes the path we passed
+    /// to <c>loadDataFromPdb</c>. For symbol-server sessions this is the cached/downloaded location DIA
+    /// resolved via <c>loadDataForExe</c>.
+    /// </summary>
+    internal string? LoadedPdbPath { get; private set; }
+
     private static readonly string[] debugFastlinkSwitchNames = ["/debug:fastlink"];
 
     [ThreadStatic]
@@ -124,6 +131,16 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
     #region Construction, opening, all the startup-y things
 
     internal DIAAdapter(Session session, string pdbPath)
+        : this(session, source => ((IDiaDataSourceEx2)source).loadDataFromPdbEx(pdbPath, fPdbPrefetching: 1), pdbPath)
+    {
+    }
+
+    internal DIAAdapter(Session session, string binaryPath, string symbolSearchPath)
+        : this(session, source => source.loadDataForExe(binaryPath, symbolSearchPath, pCallback: null), binaryPath)
+    {
+    }
+
+    private DIAAdapter(Session session, Action<IDiaDataSource> loadFromSource, string sourceDescriptionForErrors)
     {
         this._session = session;
         this._cache = session.DataCache;
@@ -135,7 +152,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         {
             this._diaDataSource = CoClassLoaderRegFree.CreateInstance<IDiaDataSourceEx2>(_diaLibraryModule, Dia140Clsid);
 
-            this._diaDataSource.loadDataFromPdbEx(pdbPath, fPdbPrefetching: 1);
+            loadFromSource(this._diaDataSource);
 
             this._diaDataSource.openSession(out var diaSession);
             this._diaSession = (IDiaSessionEx)diaSession;
@@ -149,7 +166,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             {
                 if (((uint)comException.HResult) == Convert.ToUInt32(diaHRESULTValues.GetValue(i), CultureInfo.InvariantCulture.NumberFormat))
                 {
-                    throw new PDBNotSuitableForAnalysisException($"Unable to open PDB from '{session.PdbPath}'" + Environment.NewLine +
+                    throw new PDBNotSuitableForAnalysisException($"Unable to open PDB from '{sourceDescriptionForErrors}'" + Environment.NewLine +
                                                                  $"DIA returned this error: {Enum.GetName((DIAHRESULTs)comException.HResult)}", comException);
 
                 }
@@ -158,6 +175,16 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         }
 
         this._globalScope = this._diaSession.globalScope;
+
+        try
+        {
+            this.LoadedPdbPath = this._globalScope.symbolsFileName;
+        }
+        catch (COMException)
+        {
+            // Leave LoadedPdbPath null if DIA can't report it for this PDB type
+        }
+
         var machineType = this._globalScope.machineType;
 
         // See http://msdn.microsoft.com/en-us/library/windows/desktop/ms680313(v=vs.85).aspx

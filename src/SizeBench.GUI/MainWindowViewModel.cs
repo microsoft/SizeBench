@@ -26,11 +26,14 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
 {
     private readonly IApplicationLogger _applicationLogger;
     private readonly ISessionFactory _sessionFactory;
+    private readonly IRecentSessionStore _recentSessionStore;
+    private readonly IRecentSessionLauncher _recentSessionLauncher;
     private readonly IWindsorContainer _appWindsorContainer;
 
     public DelegateCommand<TabBase> CloseTabCommand { get; }
 
     public ObservableCollection<TabBase> OpenTabs { get; } = new ObservableCollection<TabBase>();
+    public ObservableCollection<RecentSession> RecentSessions { get; }
 
     private TabBase? _selectedTab;
 
@@ -45,9 +48,12 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
     }
 
     public bool AreTabsVisible => this.OpenTabs.Count > 0;
+    public bool HasRecentSessions => this.RecentSessions.Count > 0;
 
     public DelegateCommand OpenSingleBinaryCommand { get; }
     public DelegateCommand OpenBinaryDiffCommand { get; }
+    public DelegateCommand<RecentSession> OpenRecentSessionCommand { get; }
+    public DelegateCommand<RecentSession> OpenRecentSessionInNewWindowCommand { get; }
     public DelegateCommand ShowLogWindowCommand { get; }
     public DelegateCommand ShowHelpWindowCommand { get; }
     public DelegateCommand ShowAboutBoxCommand { get; }
@@ -202,8 +208,13 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
             return;
         }
         
-        // TODO: how should deep links include session options like SymbolSourcesSupported?  Or do we always deep-link in with everything turned on which could be quite slow?
-        var session = await OpenSessionFromBinaryPathAndPDBPath(deeplinkLog, binaryPath, pdbPath, new SessionOptions());
+        var sessionOptions = new SessionOptions();
+        if (Enum.TryParse(queryString["SymbolSourcesSupported"], ignoreCase: true, out SymbolSourcesSupported symbolSourcesSupported))
+        {
+            sessionOptions = new SessionOptions() { SymbolSourcesSupported = symbolSourcesSupported };
+        }
+
+        var session = await OpenSessionFromBinaryPathAndPDBPath(deeplinkLog, binaryPath, pdbPath, sessionOptions);
 
         // session can be null if the deeplink fails to open the binary/pdb (like, say, it's not present at the location anymore).
         if (session is null)
@@ -263,14 +274,22 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
 
     public MainWindowViewModel(IWindsorContainer container,
                                IApplicationLogger applicationLogger,
-                               ISessionFactory sessionFactory)
+                               ISessionFactory sessionFactory,
+                               IRecentSessionStore recentSessionStore,
+                               IRecentSessionLauncher recentSessionLauncher)
     {
         this._applicationLogger = applicationLogger;
         this._appWindsorContainer = container;
         this._sessionFactory = sessionFactory;
+        this._recentSessionStore = recentSessionStore;
+        this._recentSessionLauncher = recentSessionLauncher;
         this.CloseTabCommand = new DelegateCommand<TabBase>(CloseTab);
+        this.RecentSessions = new ObservableCollection<RecentSession>(this._recentSessionStore.GetRecentSessions());
+        this.RecentSessions.CollectionChanged += RecentSessions_CollectionChanged;
         this.OpenSingleBinaryCommand = new DelegateCommand(OpenSingleBinaryCommand_Executed);
         this.OpenBinaryDiffCommand = new DelegateCommand(OpenBinaryDiffCommand_Executed);
+        this.OpenRecentSessionCommand = new DelegateCommand<RecentSession>(OpenRecentSessionCommand_Executed);
+        this.OpenRecentSessionInNewWindowCommand = new DelegateCommand<RecentSession>(OpenRecentSessionInNewWindowCommand_Executed);
         this.ShowLogWindowCommand = new DelegateCommand(ShowLogWindow);
         this.ShowHelpWindowCommand = new DelegateCommand(ShowHelpWindow);
         this.ShowAboutBoxCommand = new DelegateCommand(ShowAboutBox);
@@ -388,6 +407,7 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
         }
 
         taskLog.Log($"Session creation complete for {binaryPath}, {pdbPath}");
+        AddOrUpdateRecentSession(RecentSession.CreateSingle(binaryPath, pdbPath, sessionOptions));
         return session;
     }
 
@@ -443,7 +463,95 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
         }
 
         taskLog.Log($"Diff Session creation complete for Before=({beforeBinaryPath}, {beforePdbPath}), After=({afterBinaryPath}, {afterPdbPath})");
+        AddOrUpdateRecentSession(RecentSession.CreateDiff(beforeBinaryPath, beforePdbPath, afterBinaryPath, afterPdbPath));
         return diffSession;
+    }
+
+    private void RecentSessions_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        => RaisePropertyChanged(nameof(this.HasRecentSessions));
+
+    private void OpenRecentSessionCommand_Executed(RecentSession recentSession)
+        => _ = OpenRecentSession(recentSession);
+
+    private void OpenRecentSessionInNewWindowCommand_Executed(RecentSession recentSession)
+    {
+        ArgumentNullException.ThrowIfNull(recentSession);
+
+        if (recentSession.IsLaunchable)
+        {
+            this._recentSessionLauncher.LaunchRecentSession(recentSession);
+        }
+    }
+
+    internal async Task OpenRecentSession(RecentSession recentSession)
+    {
+        ArgumentNullException.ThrowIfNull(recentSession);
+
+        using var taskLog = this._applicationLogger.StartTaskLog("Open Recent Session Command Executed");
+        taskLog.Log($"OpenRecentSession command execution started for '{recentSession.DisplayName}'.");
+
+        if (recentSession.IsLaunchable == false)
+        {
+            await OpenAppWideModalMessageDialog("Recent session unavailable",
+                                                "This recent session cannot be reopened because one or more files are no longer present.");
+            taskLog.Log("OpenRecentSession command aborted because required files are missing.");
+            return;
+        }
+
+        switch (recentSession.Kind)
+        {
+            case RecentSessionKind.SingleBinary:
+            {
+                var session = await OpenSessionFromBinaryPathAndPDBPath(taskLog,
+                                                                        recentSession.BinaryPath!,
+                                                                        recentSession.PDBPath!,
+                                                                        recentSession.ToSessionOptions());
+
+                if (session != null)
+                {
+                    CreateNewSingleBinaryTab(session);
+                }
+
+                break;
+            }
+
+            case RecentSessionKind.BinaryDiff:
+            {
+                var diffSession = await OpenDiffSessionFromBinaryPathsAndPDBPaths(taskLog,
+                                                                                  recentSession.BeforeBinaryPath!,
+                                                                                  recentSession.BeforePdbPath!,
+                                                                                  recentSession.AfterBinaryPath!,
+                                                                                  recentSession.AfterPdbPath!);
+
+                if (diffSession != null)
+                {
+                    CreateNewDiffTab(diffSession);
+                }
+
+                break;
+            }
+
+            default:
+                throw new InvalidOperationException($"Unknown recent session kind '{recentSession.Kind}'.");
+        }
+
+        taskLog.Log("OpenRecentSession command execution ended.");
+    }
+
+    private void AddOrUpdateRecentSession(RecentSession recentSession)
+    {
+        var persistedSession = this._recentSessionStore.RecordSession(recentSession);
+        var existingSession = this.RecentSessions.FirstOrDefault(candidate => candidate.Matches(persistedSession));
+        if (existingSession != null)
+        {
+            this.RecentSessions.Remove(existingSession);
+        }
+
+        this.RecentSessions.Insert(0, persistedSession);
+        if (this.RecentSessions.Count > RecentSessionStore.MaximumStoredSessions)
+        {
+            this.RecentSessions.RemoveAt(this.RecentSessions.Count - 1);
+        }
     }
 
     private static Exception? ExtractExceptionNotWorthErrorReportingIfPossible(Exception ex)

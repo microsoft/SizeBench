@@ -36,13 +36,30 @@
             <commands:MvvmCommandBinding Command="{x:Static commands:AppCommands.ShowAboutBox}"
                                          Target="{Binding ShowAboutBoxCommand}"/>
         </commands:MvvmCommandBindingCollection>
-    </commands:Mvvm.CommandBindings>
+        </commands:Mvvm.CommandBindings>
+    <Window.Resources>
+        <core:BindingProxy x:Key="windowDataContextProxy" Data="{Binding}"/>
+    </Window.Resources>
 
     <DockPanel LastChildFill="True" x:Name="LayoutRoot">
         <Menu Grid.Column="4" DockPanel.Dock="Top" IsMainMenu="True" Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
             <MenuItem Header="_File">
                 <MenuItem Command="{x:Static commands:AppCommands.OpenSingleBinary}"/>
                 <MenuItem Command="{x:Static commands:AppCommands.OpenBinaryDiff}"/>
+                <Separator/>
+                <MenuItem Header="_Recent"
+                          ItemsSource="{Binding RecentSessions}"
+                          IsEnabled="{Binding HasRecentSessions}">
+                    <MenuItem.ItemContainerStyle>
+                        <Style TargetType="{x:Type MenuItem}">
+                            <Setter Property="Header" Value="{Binding DisplayName}"/>
+                            <Setter Property="Command" Value="{Binding Data.OpenRecentSessionInNewWindowCommand, Source={StaticResource windowDataContextProxy}}"/>
+                            <Setter Property="CommandParameter" Value="{Binding}"/>
+                            <Setter Property="IsEnabled" Value="{Binding IsLaunchable}"/>
+                            <Setter Property="ToolTip" Value="{Binding DetailsText}"/>
+                        </Style>
+                    </MenuItem.ItemContainerStyle>
+                </MenuItem>
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Command="{x:Static commands:AppCommands.ShowLogWindow}"/>
@@ -52,14 +69,25 @@
         </Menu>
         <Grid>
             <!-- This is the "Welcome to SizeBench! experience you see before the first tab is opened -->
-            <StackPanel HorizontalAlignment="Center" Margin="50"
-                        Visibility="{Binding Visibility, ElementName=Tabs, Converter={x:Static converters:VisibilityReverseConverter.Instance}}">
-                <StackPanel Grid.ColumnSpan="2" Margin="6" Orientation="Horizontal" HorizontalAlignment="Center">
+            <Grid HorizontalAlignment="Center"
+                  VerticalAlignment="Stretch"
+                  Margin="50"
+                  MaxWidth="700"
+                  Visibility="{Binding Visibility, ElementName=Tabs, Converter={x:Static converters:VisibilityReverseConverter.Instance}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Margin="6" Orientation="Horizontal" HorizontalAlignment="Center">
                     <Image Source="Images/Square150x150Logo.scale-200.png" Width="50"/>
                     <TextBlock Grid.ColumnSpan="2" Text="Welcome to SizeBench!" FontSize="20" TextAlignment="Center" VerticalAlignment="Center"/>
                 </StackPanel>
 
-                <TextBlock FontSize="14" Margin="0,25,0,10" TextWrapping="Wrap" MaxWidth="700">
+                <TextBlock Grid.Row="1" FontSize="14" Margin="0,25,0,10" TextWrapping="Wrap">
                     <Hyperlink Command="{x:Static commands:AppCommands.OpenSingleBinary}">Examine a binary</Hyperlink>
                     <LineBreak/>
                     <Run FontSize="12">
@@ -67,7 +95,7 @@
                     </Run>
                 </TextBlock>
 
-                <TextBlock FontSize="14" Margin="0,25,0,10" TextWrapping="Wrap" MaxWidth="700">
+                <TextBlock Grid.Row="2" FontSize="14" Margin="0,25,0,10" TextWrapping="Wrap">
                     <Hyperlink Command="{x:Static commands:AppCommands.OpenBinaryDiff}">Start a diff</Hyperlink>
                     <LineBreak/>
                     <Run FontSize="12">
@@ -75,7 +103,65 @@
                         same binary.  First select the 'before' then the 'after'.
                     </Run>
                 </TextBlock>
-            </StackPanel>
+
+                <TextBlock Grid.Row="3"
+                           FontSize="16"
+                           Margin="0,35,0,10"
+                           Text="Recent sessions"
+                           Visibility="{Binding HasRecentSessions, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}}"/>
+
+                <ScrollViewer Grid.Row="4"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              Visibility="{Binding HasRecentSessions, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}}">
+                    <ItemsControl ItemsSource="{Binding RecentSessions}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="0,0,0,10"
+                                        Padding="12"
+                                        BorderBrush="#FFD0D0D0"
+                                        BorderThickness="1"
+                                        CornerRadius="4">
+                                    <StackPanel>
+                                        <DockPanel LastChildFill="True">
+                                            <TextBlock DockPanel.Dock="Right"
+                                                       Margin="10,0,0,0"
+                                                       FontSize="11"
+                                                       Foreground="Gray"
+                                                       Text="{Binding SessionKindDisplayName}"/>
+                                            <Button HorizontalAlignment="Left"
+                                                    HorizontalContentAlignment="Left"
+                                                    Padding="0"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Command="{Binding DataContext.OpenRecentSessionCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                    CommandParameter="{Binding}"
+                                                    IsEnabled="{Binding IsLaunchable}">
+                                                <TextBlock FontSize="14"
+                                                           Text="{Binding DisplayName}"
+                                                           TextDecorations="Underline"/>
+                                            </Button>
+                                        </DockPanel>
+
+                                        <TextBlock Margin="0,4,0,0"
+                                                   FontSize="12"
+                                                   Foreground="DarkSlateGray"
+                                                   Text="{Binding DetailsText}"
+                                                   TextWrapping="Wrap"/>
+
+                                        <TextBlock Margin="0,4,0,0"
+                                                   FontSize="12"
+                                                   Foreground="DarkRed"
+                                                   Text="{Binding UnavailableReason}"
+                                                   TextWrapping="Wrap"
+                                                   Visibility="{Binding IsLaunchable, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}, ConverterParameter=Reverse}"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
             
             <!-- The tabs shown when some sessions are opened -->
             <controls:NonReloadingTabControl x:Name="Tabs"

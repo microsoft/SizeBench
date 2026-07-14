@@ -8,7 +8,7 @@ using SizeBench.GUI.Core;
 
 namespace SizeBench.GUI.Pages;
 
-internal sealed class COFFGroupDiffPageViewModel : BinaryDiffViewModelBase
+internal sealed class COFFGroupDiffPageViewModel : DiffSymbolFilterViewModelBase
 {
     private readonly IUITaskScheduler _uiTaskScheduler;
     private readonly IExcelExporter _excelExporter;
@@ -23,7 +23,14 @@ internal sealed class COFFGroupDiffPageViewModel : BinaryDiffViewModelBase
     public IReadOnlyList<SymbolDiff>? SymbolDiffs
     {
         get => this._symbolDiffs;
-        private set { this._symbolDiffs = value; RaisePropertyChanged(); }
+        private set
+        {
+            this._symbolDiffs = value;
+            RaisePropertyChanged();
+            UpdateFilteredSymbolDiffsView(this._symbolDiffs,
+                                          new SortDescription(nameof(SymbolDiff.SizeDiff), ListSortDirection.Descending),
+                                          new SortDescription(nameof(SymbolDiff.VirtualSizeDiff), ListSortDirection.Descending));
+        }
     }
 
     private IReadOnlyList<LibDiff>? _libDiffs;
@@ -211,7 +218,8 @@ internal sealed class COFFGroupDiffPageViewModel : BinaryDiffViewModelBase
 
     private async void ExportSymbolsToExcel()
     {
-        if (this.SymbolDiffs is null)
+        var symbolDiffs = GetFilteredSymbolDiffsForExport();
+        if (symbolDiffs.Count == 0)
         {
             return;
         }
@@ -227,8 +235,8 @@ internal sealed class COFFGroupDiffPageViewModel : BinaryDiffViewModelBase
                 $"Size in Memory Diff",
         };
 
-        var preformattedData = new List<DictionaryThatDoesntThrowWhenKeyNotPresent<object>>(this.SymbolDiffs.Count);
-        foreach (var symbolDiff in this.SymbolDiffs)
+        var preformattedData = new List<DictionaryThatDoesntThrowWhenKeyNotPresent<object>>(symbolDiffs.Count);
+        foreach (var symbolDiff in symbolDiffs)
         {
             var formattedData = new DictionaryThatDoesntThrowWhenKeyNotPresent<object>
                 {

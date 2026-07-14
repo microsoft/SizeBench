@@ -33,19 +33,24 @@ public sealed class SelectableDiffViewer : UserControl
 
     private const double DiffFontSize = 16;
 
+    // Exposed so the zoom-percent behavior (see TwoStringsToDiffViewerUIConverter) can be unit tested.
+    public double EffectiveFontSize { get; }
+
     private readonly FlowDocumentScrollViewer _textViewer;
     private readonly ScrollViewer _gutterScrollViewer;
     private readonly string _longestLine;
     private ScrollViewer? _textInnerScrollViewer;
     private bool _pageWidthSet;
 
-    public SelectableDiffViewer(string oldText, string newText)
+    public SelectableDiffViewer(string oldText, string newText, int zoomPercent = 100)
     {
         ArgumentNullException.ThrowIfNull(oldText);
         ArgumentNullException.ThrowIfNull(newText);
 
+        this.EffectiveFontSize = DiffFontSize * zoomPercent / 100.0;
+
         var fontFamily = new FontFamily("Consolas");
-        var lineHeight = Math.Ceiling(DiffFontSize * fontFamily.LineSpacing);
+        var lineHeight = Math.Ceiling(this.EffectiveFontSize * fontFamily.LineSpacing);
 
         var diff = InlineDiffBuilder.Diff(oldText, newText);
         var rows = DiffRowBuilder.BuildRows(diff);
@@ -53,7 +58,7 @@ public sealed class SelectableDiffViewer : UserControl
         var document = new FlowDocument
         {
             FontFamily = fontFamily,
-            FontSize = DiffFontSize,
+            FontSize = this.EffectiveFontSize,
             PagePadding = new Thickness(0),
         };
 
@@ -97,7 +102,7 @@ public sealed class SelectableDiffViewer : UserControl
                     Text = row.LineNumber,
                     Foreground = LineNumberForeground,
                     FontFamily = fontFamily,
-                    FontSize = DiffFontSize,
+                    FontSize = this.EffectiveFontSize,
                     TextAlignment = TextAlignment.Right,
                     VerticalAlignment = VerticalAlignment.Center,
                     Padding = new Thickness(6, 0, 6, 0),
@@ -192,7 +197,7 @@ public sealed class SelectableDiffViewer : UserControl
                 CultureInfo.CurrentCulture,
                 FlowDirection.LeftToRight,
                 new Typeface(document.FontFamily, document.FontStyle, document.FontWeight, document.FontStretch),
-                DiffFontSize,
+                this.EffectiveFontSize,
                 Brushes.Black,
                 pixelsPerDip);
 

@@ -1,5 +1,6 @@
 ﻿using SizeBench.AnalysisEngine;
 using SizeBench.AnalysisEngine.Symbols;
+using SizeBench.GUI.Commands;
 using SizeBench.GUI.Core;
 
 namespace SizeBench.GUI.Pages;
@@ -7,6 +8,7 @@ namespace SizeBench.GUI.Pages;
 internal sealed class TemplateFoldabilityItemPageViewModel : SingleBinaryViewModelBase
 {
     private readonly IUITaskScheduler _uiTaskScheduler;
+    private readonly IDisassemblySettings _disassemblySettings;
 
     private TemplateFoldabilityItem? _templateFoldabilityItem;
     public TemplateFoldabilityItem? TemplateFoldabilityItem
@@ -60,10 +62,35 @@ internal sealed class TemplateFoldabilityItemPageViewModel : SingleBinaryViewMod
         private set { this._disassembly2 = value; RaisePropertyChanged(); }
     }
 
+    public IReadOnlyList<int> DisassemblyZoomPercentOptions { get; } = Enumerable.Range(0, 11).Select(i => i * 20).ToList();
+
+    private int _disassemblyZoomPercent = 100;
+    public int DisassemblyZoomPercent
+    {
+        get => this._disassemblyZoomPercent;
+        set
+        {
+            if (this._disassemblyZoomPercent != value)
+            {
+                this._disassemblyZoomPercent = value;
+                this._disassemblySettings.TemplateFoldabilityDisassemblyZoomPercent = value;
+                RaisePropertyChanged();
+            }
+        }
+    }
+
+    public DelegateCommand IncreaseDisassemblyZoomCommand { get; }
+    public DelegateCommand DecreaseDisassemblyZoomCommand { get; }
+
     public TemplateFoldabilityItemPageViewModel(IUITaskScheduler taskScheduler,
-                                                ISession session) : base(session)
+                                                ISession session,
+                                                IDisassemblySettings disassemblySettings) : base(session)
     {
         this._uiTaskScheduler = taskScheduler;
+        this._disassemblySettings = disassemblySettings;
+        this._disassemblyZoomPercent = this._disassemblySettings.TemplateFoldabilityDisassemblyZoomPercent;
+        this.IncreaseDisassemblyZoomCommand = new DelegateCommand(IncreaseDisassemblyZoom);
+        this.DecreaseDisassemblyZoomCommand = new DelegateCommand(DecreaseDisassemblyZoom);
     }
 
     protected internal override async Task InitializeAsync()
@@ -136,6 +163,24 @@ internal sealed class TemplateFoldabilityItemPageViewModel : SingleBinaryViewMod
 
                     this.Disassembly2 = await this.Session.DisassembleFunction(this.Disassembly2Symbol, options, token);
                 });
+        }
+    }
+
+    internal void IncreaseDisassemblyZoom()
+    {
+        var currentIndex = this.DisassemblyZoomPercentOptions.ToList().IndexOf(this.DisassemblyZoomPercent);
+        if (currentIndex < this.DisassemblyZoomPercentOptions.Count - 1)
+        {
+            this.DisassemblyZoomPercent = this.DisassemblyZoomPercentOptions[currentIndex + 1];
+        }
+    }
+
+    internal void DecreaseDisassemblyZoom()
+    {
+        var currentIndex = this.DisassemblyZoomPercentOptions.ToList().IndexOf(this.DisassemblyZoomPercent);
+        if (currentIndex > 0)
+        {
+            this.DisassemblyZoomPercent = this.DisassemblyZoomPercentOptions[currentIndex - 1];
         }
     }
 }

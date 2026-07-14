@@ -109,6 +109,18 @@
                     </ComboBox.ItemTemplate>
                 </ComboBox>
             </Grid>
+            <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,8,0,0">
+                <TextBlock VerticalAlignment="Center" Margin="0,0,5,0" Text="Zoom:"/>
+                <ComboBox Width="80"
+                          ItemsSource="{Binding DisassemblyZoomPercentOptions}"
+                          SelectedItem="{Binding DisassemblyZoomPercent, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding StringFormat={}{0}%}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
         </Grid>
 
         <ContentPresenter Grid.Row="1">
@@ -116,6 +128,7 @@
                 <MultiBinding Converter="{x:Static converters:TwoStringsToDiffViewerUIConverter.Instance}" Mode="OneWay">
                     <Binding Path="Disassembly1" Mode="OneWay"/>
                     <Binding Path="Disassembly2" Mode="OneWay"/>
+                    <Binding Path="DisassemblyZoomPercent" Mode="OneWay"/>
                 </MultiBinding>
             </ContentPresenter.Content>
         </ContentPresenter>

@@ -21,6 +21,8 @@
             <RowDefinition Height="Auto"/> <!-- Possible explanatory text about the different types of functions -->
             <RowDefinition Height="Auto"/> <!-- Basic info shared between before and after, like name, full name, parent type -->
             <RowDefinition Height="Auto"/> <!-- Headings "Function in 'before' binary" and "Function in 'after' binary" -->
+            <RowDefinition Height="Auto"/> <!-- Zoom controls -->
+            <RowDefinition Height="Auto"/> <!-- Disassembly comparison -->
             <RowDefinition Height="*"/>    <!-- The scrollable region containing all the details -->
         </Grid.RowDefinitions>
 
@@ -74,11 +76,36 @@
 
         <TextBlock Grid.Column="0" Grid.Row="2" Text="Function in 'Before' binary" FontSize="20"/>
 
-        <Rectangle Fill="Black" Width="2" Margin="5" VerticalAlignment="Stretch" Grid.Row="2" Grid.RowSpan="2" Grid.Column="1"/>
+        <Rectangle Fill="Black" Width="2" Margin="5" VerticalAlignment="Stretch" Grid.Row="2" Grid.RowSpan="4" Grid.Column="1"/>
 
         <TextBlock Grid.Column="2" Grid.Row="2" Text="Function in 'After' binary" FontSize="20"/>
 
-        <ScrollViewer x:Name="beforeDetailsScrollViewer" Grid.Column="0" Grid.Row="3" ScrollChanged="detailsScrollViewer_ScrollChanged">
+        <ScrollViewer Grid.Row="3" Grid.ColumnSpan="3" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" MaxHeight="500">
+            <ContentPresenter>
+                <ContentPresenter.Content>
+                    <MultiBinding Converter="{x:Static converters:TwoStringsToDiffViewerUIConverter.Instance}" Mode="OneWay">
+                        <Binding Path="Disassembly1" Mode="OneWay"/>
+                        <Binding Path="Disassembly2" Mode="OneWay"/>
+                        <Binding Path="DisassemblyZoomPercent" Mode="OneWay"/>
+                    </MultiBinding>
+                </ContentPresenter.Content>
+            </ContentPresenter>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="4" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,8,0,8">
+            <TextBlock VerticalAlignment="Center" Margin="0,0,5,0" Text="Zoom:"/>
+            <ComboBox Width="80"
+                      ItemsSource="{Binding DisassemblyZoomPercentOptions}"
+                      SelectedItem="{Binding DisassemblyZoomPercent, Mode=TwoWay}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding StringFormat={}{0}%}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </StackPanel>
+
+        <ScrollViewer x:Name="beforeDetailsScrollViewer" Grid.Column="0" Grid.Row="5" ScrollChanged="detailsScrollViewer_ScrollChanged">
             <Grid>
                 <Grid Visibility="{Binding DoesBeforeSymbolExist, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}, ConverterParameter=Reverse}"
                       d:Visibility="Collapsed">
@@ -140,7 +167,7 @@
             </Grid>
         </ScrollViewer>
 
-        <ScrollViewer x:Name="afterDetailsScrollViewer" Grid.Column="2" Grid.Row="3" ScrollChanged="detailsScrollViewer_ScrollChanged">
+        <ScrollViewer x:Name="afterDetailsScrollViewer" Grid.Column="2" Grid.Row="5" ScrollChanged="detailsScrollViewer_ScrollChanged">
             <Grid>
                 <Grid Visibility="{Binding DoesAfterSymbolExist, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}, ConverterParameter=Reverse}"
                       d:Visibility="Collapsed">

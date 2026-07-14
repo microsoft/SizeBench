@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using SizeBench.GUI.Controls;
 
 namespace SizeBench.GUI.Converters.Tests;
 #nullable disable // WPF's IValueConverter is not correctly nullable-annotated, so we disable nullable for the source and tests of the value converters.
@@ -11,10 +12,10 @@ public sealed class TwoStringsToDiffViewerUIConverterTests
         => Assert.ThrowsExactly<ArgumentException>(() => TwoStringsToDiffViewerUIConverter.Instance.Convert(new object[] { 5 }, typeof(int), null /* ConverterParameter */, null /* CultureInfo */));
 
     [TestMethod]
-    public void MoreThanTwoInputsNotAccepted()
+    public void MoreThanThreeInputsNotAccepted()
     {
-        Assert.ThrowsExactly<ArgumentException>(() => TwoStringsToDiffViewerUIConverter.Instance.Convert(new object[] { "disasm 1", "disasm 2", "disasm 3" }, typeof(object), null /* ConverterParameter */, null /* CultureInfo */));
         Assert.ThrowsExactly<ArgumentException>(() => TwoStringsToDiffViewerUIConverter.Instance.Convert(new object[] { "disasm 1", "disasm 2", "disasm 3", "disasm 4" }, typeof(object), null /* ConverterParameter */, null /* CultureInfo */));
+        Assert.ThrowsExactly<ArgumentException>(() => TwoStringsToDiffViewerUIConverter.Instance.Convert(new object[] { "disasm 1", "disasm 2", "disasm 3", "disasm 4", "disasm 5" }, typeof(object), null /* ConverterParameter */, null /* CultureInfo */));
     }
 
     [TestMethod]
@@ -35,6 +36,10 @@ public sealed class TwoStringsToDiffViewerUIConverterTests
     }
 
     [TestMethod]
+    public void ThirdArgumentMustBeZoomPercentInt()
+        => Assert.ThrowsExactly<ArgumentException>(() => TwoStringsToDiffViewerUIConverter.Instance.Convert(new object[] { "disasm 1", "disasm 2", "100" }, typeof(object), null /* ConverterParameter */, null /* CultureInfo */));
+
+    [TestMethod]
     public void IfBothInputsAreStringsReturnsSomething()
     {
         // Validating that this is actually a diff viewer, that it is useful (good colors, etc.) is really hard and doesn't seem worth it, so we'll just check
@@ -45,4 +50,11 @@ public sealed class TwoStringsToDiffViewerUIConverterTests
     [TestMethod]
     public void ConvertBackThrows()
         => Assert.ThrowsExactly<NotImplementedException>(() => TwoStringsToDiffViewerUIConverter.Instance.ConvertBack(new FrameworkElement(), new Type[] { typeof(string), typeof(string) }, null /* ConverterParameter */, null /* CultureInfo */));
+
+    [TestMethod]
+    public void ThirdArgumentControlsFontSize()
+    {
+        var diffViewer = (SelectableDiffViewer)TwoStringsToDiffViewerUIConverter.Instance.Convert(new object[] { "disasm 1", "disasm 2", 120 }, typeof(object), null /* ConverterParameter */, null /* CultureInfo */);
+        Assert.AreEqual(19.2, diffViewer.EffectiveFontSize, 0.001);
+    }
 }

@@ -11,6 +11,7 @@ public sealed class TemplateFoldabilityPageViewModelTests : IDisposable
 {
     private Mock<ISession> MockSession = new Mock<ISession>();
     private Mock<IUITaskScheduler> MockUITaskScheduler = new Mock<IUITaskScheduler>();
+    private Mock<IDisassemblySettings> MockDisassemblySettings = new Mock<IDisassemblySettings>();
     private SessionDataCache DataCache = new SessionDataCache();
     private TestDIAAdapter TestDIAAdapter = new TestDIAAdapter();
     private List<TemplateFoldabilityItem> TemplateFoldabilityItems = new List<TemplateFoldabilityItem>();
@@ -24,6 +25,8 @@ public sealed class TemplateFoldabilityPageViewModelTests : IDisposable
 
         this.MockUITaskScheduler = new Mock<IUITaskScheduler>();
         this.MockUITaskScheduler.SetupForSynchronousCompletionOfLongRunningUITasks();
+        this.MockDisassemblySettings = new Mock<IDisassemblySettings>();
+        this.MockDisassemblySettings.SetupProperty(settings => settings.TemplateFoldabilityDisassemblyZoomPercent, 100);
 
         this.DataCache = new SessionDataCache()
         {
@@ -42,7 +45,8 @@ public sealed class TemplateFoldabilityPageViewModelTests : IDisposable
     public async Task SettingBothDisassemblySymbolsKicksOffDisassemblyProcess()
     {
         var viewmodel = new TemplateFoldabilityItemPageViewModel(this.MockUITaskScheduler.Object,
-                                                                 this.MockSession.Object);
+                                                                 this.MockSession.Object,
+                                                                 this.MockDisassemblySettings.Object);
         viewmodel.SetQueryString(new Dictionary<string, string>()
             {
                 { "TemplateName", "SomeNamespace::MyType::FoldableFunction<T1,T2>(T2, T1)" }
@@ -110,6 +114,26 @@ public sealed class TemplateFoldabilityPageViewModelTests : IDisposable
 
         Assert.IsNull(viewmodel.Disassembly1);
         Assert.IsNull(viewmodel.Disassembly2);
+    }
+
+    [TestMethod]
+    public void ZoomPreferenceLoadsAndSavesThroughSettings()
+    {
+        this.MockDisassemblySettings.Object.TemplateFoldabilityDisassemblyZoomPercent = 140;
+
+        var viewmodel = new TemplateFoldabilityItemPageViewModel(this.MockUITaskScheduler.Object,
+                                                                 this.MockSession.Object,
+                                                                 this.MockDisassemblySettings.Object);
+
+        Assert.AreEqual(140, viewmodel.DisassemblyZoomPercent);
+
+        viewmodel.IncreaseDisassemblyZoom();
+        Assert.AreEqual(160, viewmodel.DisassemblyZoomPercent);
+        Assert.AreEqual(160, this.MockDisassemblySettings.Object.TemplateFoldabilityDisassemblyZoomPercent);
+
+        viewmodel.DecreaseDisassemblyZoom();
+        Assert.AreEqual(140, viewmodel.DisassemblyZoomPercent);
+        Assert.AreEqual(140, this.MockDisassemblySettings.Object.TemplateFoldabilityDisassemblyZoomPercent);
     }
 
     public void Dispose() => this.DataCache.Dispose();

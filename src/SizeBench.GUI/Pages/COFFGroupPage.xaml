@@ -11,6 +11,7 @@
                           xmlns:core="clr-namespace:SizeBench.GUI.Core"
                           xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
                           mc:Ignorable="d" 
+      NavigationCacheMode="Enabled"
       d:DesignHeight="300" d:DesignWidth="600"
       Title="{Binding COFFGroup.Name, StringFormat='COFF Group: {0}'}">
     <navigation:SizeBenchPage.Resources>

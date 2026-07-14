@@ -8,10 +8,9 @@ namespace SizeBench.GUI.Converters.Tests;
 [TestClass]
 public class FunctionToFormattedNameConverterTests
 {
-    [ExpectedException(typeof(ArgumentException), AllowDerivedTypes = false)]
     [TestMethod]
     public void ConvertOnlyTakesIFunctionCodeSymbolValue()
-        => FunctionToFormattedNameConverter.Instance.Convert(5, typeof(string), FunctionCodeNameFormatting.IncludeParentType /* ConverterParameter */, Thread.CurrentThread.CurrentCulture);
+        => Assert.ThrowsExactly<ArgumentException>(() => FunctionToFormattedNameConverter.Instance.Convert(5, typeof(string), FunctionCodeNameFormatting.IncludeParentType /* ConverterParameter */, Thread.CurrentThread.CurrentCulture));
 
     [TestMethod]
     public void ConvertOnlyTakesFunctionCodeNameFormattingAsConverterParameter()
@@ -33,10 +32,10 @@ public class FunctionToFormattedNameConverterTests
                                                     accessModifier: AccessModifier.Public, isIntroVirtual: false, isPure: false, isStatic: true, isVirtual: false, isSealed: false, isPGO: false,
                                                     isOptimizedForSpeed: false);
 
-        Assert.ThrowsException<ArgumentException>(() => FunctionToFormattedNameConverter.Instance.Convert(function, typeof(string), null /* ConverterParameter */, Thread.CurrentThread.CurrentCulture));
-        Assert.ThrowsException<ArgumentException>(() => FunctionToFormattedNameConverter.Instance.Convert(function, typeof(string), "test" /* ConverterParameter */, Thread.CurrentThread.CurrentCulture));
-        Assert.ThrowsException<ArgumentException>(() => FunctionToFormattedNameConverter.Instance.Convert(function, typeof(string), 5 /* ConverterParameter */, Thread.CurrentThread.CurrentCulture));
-        Assert.ThrowsException<ArgumentException>(() => FunctionToFormattedNameConverter.Instance.Convert(function, typeof(string), UserDefinedTypeKind.UdtClass /* ConverterParameter */, Thread.CurrentThread.CurrentCulture));
+        Assert.ThrowsExactly<ArgumentException>(() => FunctionToFormattedNameConverter.Instance.Convert(function, typeof(string), null /* ConverterParameter */, Thread.CurrentThread.CurrentCulture));
+        Assert.ThrowsExactly<ArgumentException>(() => FunctionToFormattedNameConverter.Instance.Convert(function, typeof(string), "test" /* ConverterParameter */, Thread.CurrentThread.CurrentCulture));
+        Assert.ThrowsExactly<ArgumentException>(() => FunctionToFormattedNameConverter.Instance.Convert(function, typeof(string), 5 /* ConverterParameter */, Thread.CurrentThread.CurrentCulture));
+        Assert.ThrowsExactly<ArgumentException>(() => FunctionToFormattedNameConverter.Instance.Convert(function, typeof(string), UserDefinedTypeKind.UdtClass /* ConverterParameter */, Thread.CurrentThread.CurrentCulture));
     }
 
     [TestMethod]
@@ -75,11 +74,10 @@ public class FunctionToFormattedNameConverterTests
         Assert.AreEqual("ANamespace::SomeUDT::AMemberFunction", FunctionToFormattedNameConverter.Instance.Convert(function, typeof(string), FunctionCodeNameFormatting.IncludeParentType | FunctionCodeNameFormatting.IncludeVirtualOverride, Thread.CurrentThread.CurrentCulture));
     }
 
-    [ExpectedException(typeof(NotImplementedException), AllowDerivedTypes = false)]
     [TestMethod]
     public void ConvertBackIsNotImplemented()
     {
         var converter = new FunctionToFormattedNameConverter();
-        converter.ConvertBack("MyFunction()", typeof(IFunctionCodeSymbol), null /* ConverterParameter */, Thread.CurrentThread.CurrentCulture);
+        Assert.ThrowsExactly<NotImplementedException>(() => converter.ConvertBack("MyFunction()", typeof(IFunctionCodeSymbol), null /* ConverterParameter */, Thread.CurrentThread.CurrentCulture));
     }
 }

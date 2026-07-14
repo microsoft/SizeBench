@@ -6,13 +6,12 @@ namespace SizeBench.ErrorReporting.ErrorInfoProviders.Tests;
 [TestClass]
 public sealed class ProcessInfoProviderTests
 {
-    [ExpectedException(typeof(ArgumentNullException), AllowDerivedTypes = false)]
     [TestMethod]
     public void NullBodyThrows()
     {
         var provider = new ProcessInfoProvider();
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.  This test is intentionally testing null
-        provider.AddErrorInfo(null);
+        Assert.ThrowsExactly<ArgumentNullException>(() => provider.AddErrorInfo(null));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
     }
 
@@ -24,8 +23,8 @@ public sealed class ProcessInfoProviderTests
         provider.AddErrorInfo(body);
         var output = body.ToString();
 
-        StringAssert.Contains(output, Environment.CommandLine, StringComparison.Ordinal);
-        StringAssert.Contains(output, Process.GetCurrentProcess().ProcessName, StringComparison.Ordinal);
-        StringAssert.Contains(output, $"64-bit Process: {Environment.Is64BitProcess}", StringComparison.Ordinal);
+        Assert.Contains(Environment.CommandLine, output, StringComparison.Ordinal);
+        Assert.Contains(Process.GetCurrentProcess().ProcessName, output, StringComparison.Ordinal);
+        Assert.Contains($"64-bit Process: {Environment.Is64BitProcess}", output, StringComparison.Ordinal);
     }
 }

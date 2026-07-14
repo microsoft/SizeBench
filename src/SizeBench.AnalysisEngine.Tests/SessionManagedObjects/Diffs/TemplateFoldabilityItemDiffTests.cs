@@ -20,7 +20,7 @@ public sealed class TemplateFoldabilityItemDiffTests : IDisposable
     }
 
     [TestMethod]
-    public void BeforeAndAfterNullThrows() => Assert.ThrowsException<ArgumentException>(() => new TemplateFoldabilityItemDiff(null, null));
+    public void BeforeAndAfterNullThrows() => Assert.ThrowsExactly<ArgumentException>(() => new TemplateFoldabilityItemDiff(null, null));
 
     [TestMethod]
     public void BasicPropertiesCalculatedCorrectly()

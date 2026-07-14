@@ -15,9 +15,9 @@ public class TypeSymbolToDisplayTypeNameConverterTests
         uint nextSymIndexId = 0;
         var type = new BasicTypeSymbol(cache, "int", 4, symIndexId: nextSymIndexId++);
         var dataSymbol = new MemberDataSymbol(cache, "test", size: 4, nextSymIndexId++, isStaticMember: false, isBitField: false, bitStartPosition: 0, offset: 8, type: type);
-        Assert.ThrowsException<ArgumentException>(() => TypeSymbolToDisplayTypeNameConverter.Instance.Convert(3, typeof(string), null, null));
-        Assert.ThrowsException<ArgumentException>(() => TypeSymbolToDisplayTypeNameConverter.Instance.Convert("test", typeof(string), null, null));
-        Assert.ThrowsException<ArgumentException>(() => TypeSymbolToDisplayTypeNameConverter.Instance.Convert(dataSymbol, typeof(string), null, null));
+        Assert.ThrowsExactly<ArgumentException>(() => TypeSymbolToDisplayTypeNameConverter.Instance.Convert(3, typeof(string), null, null));
+        Assert.ThrowsExactly<ArgumentException>(() => TypeSymbolToDisplayTypeNameConverter.Instance.Convert("test", typeof(string), null, null));
+        Assert.ThrowsExactly<ArgumentException>(() => TypeSymbolToDisplayTypeNameConverter.Instance.Convert(dataSymbol, typeof(string), null, null));
     }
 
     [TestMethod]
@@ -27,8 +27,8 @@ public class TypeSymbolToDisplayTypeNameConverterTests
         uint nextSymIndexId = 0;
         var type = new BasicTypeSymbol(cache, "int", 4, symIndexId: nextSymIndexId++);
 
-        Assert.ThrowsException<ArgumentException>(() => TypeSymbolToDisplayTypeNameConverter.Instance.Convert(type, typeof(bool), null, null));
-        Assert.ThrowsException<ArgumentException>(() => TypeSymbolToDisplayTypeNameConverter.Instance.Convert(type, typeof(int), null, null));
+        Assert.ThrowsExactly<ArgumentException>(() => TypeSymbolToDisplayTypeNameConverter.Instance.Convert(type, typeof(bool), null, null));
+        Assert.ThrowsExactly<ArgumentException>(() => TypeSymbolToDisplayTypeNameConverter.Instance.Convert(type, typeof(int), null, null));
     }
 
     [TestMethod]
@@ -95,10 +95,7 @@ public class TypeSymbolToDisplayTypeNameConverterTests
         Assert.AreEqual("AReallyReallyRidiculouslyLongTypeName_WhyW...", TypeSymbolToDisplayTypeNameConverter.Instance.Convert(nonTemplate, typeof(string), null, null));
     }
 
-    [ExpectedException(typeof(NotImplementedException), AllowDerivedTypes = false)]
     [TestMethod]
     public void ConvertBackIsNotImplemented()
-    {
-        TypeSymbolToDisplayTypeNameConverter.Instance.ConvertBack("string", typeof(TypeSymbol), null, null);
-    }
+        => Assert.ThrowsExactly<NotImplementedException>(() => TypeSymbolToDisplayTypeNameConverter.Instance.ConvertBack("string", typeof(TypeSymbol), null, null));
 }

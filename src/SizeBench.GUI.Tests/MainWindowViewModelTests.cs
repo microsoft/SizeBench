@@ -107,7 +107,7 @@ public sealed class MainWindowViewModelTests : IDisposable
                                          this.MockRecentSessionLauncher.Object);
         var deeplinkResolutionTask = vm.TryResolveDeeplink(new Uri($"sizebench://2.0/{Uri.EscapeDataString(expectedInAppPage)}?BinaryPath={Uri.EscapeDataString(expectedBinaryPath)}&PDBPath={Uri.EscapeDataString(expectedPDBPath)}"));
 
-        Assert.AreEqual(0, vm.OpenTabs.Count);
+        Assert.IsEmpty(vm.OpenTabs);
         Assert.IsNull(vm.SelectedTab);
 
         this.MockSessionFactory.Verify(sf => sf.CreateSession(expectedBinaryPath, expectedPDBPath, It.IsAny<SessionOptions>(), It.IsAny<ILogger>()), Times.Exactly(1));
@@ -115,9 +115,9 @@ public sealed class MainWindowViewModelTests : IDisposable
 
         await deeplinkResolutionTask;
 
-        Assert.AreEqual(1, vm.OpenTabs.Count);
+        Assert.HasCount(1, vm.OpenTabs);
         Assert.IsTrue(ReferenceEquals(vm.SelectedTab, vm.OpenTabs[0]));
-        Assert.IsInstanceOfType(vm.OpenTabs[0], typeof(SingleBinaryTab));
+        Assert.IsInstanceOfType<SingleBinaryTab>(vm.OpenTabs[0]);
         Assert.AreEqual(new Uri(expectedInAppPage, UriKind.Relative), vm.SelectedTab!.CurrentPage);
     }
 
@@ -223,7 +223,7 @@ public sealed class MainWindowViewModelTests : IDisposable
                                                                     $"&AfterBinaryPath={Uri.EscapeDataString(expectedAfterBinaryPath)}" +
                                                                     $"&AfterPDBPath={Uri.EscapeDataString(expectedAfterPDBPath)}"));
 
-        Assert.AreEqual(0, vm.OpenTabs.Count);
+        Assert.IsEmpty(vm.OpenTabs);
         Assert.IsNull(vm.SelectedTab);
 
         this.MockSessionFactory.Verify(sf => sf.CreateSession(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ILogger>()), Times.Never());
@@ -232,9 +232,9 @@ public sealed class MainWindowViewModelTests : IDisposable
 
         await deeplinkResolutionTask;
 
-        Assert.AreEqual(1, vm.OpenTabs.Count);
+        Assert.HasCount(1, vm.OpenTabs);
         Assert.IsTrue(ReferenceEquals(vm.SelectedTab, vm.OpenTabs[0]));
-        Assert.IsInstanceOfType(vm.OpenTabs[0], typeof(BinaryDiffTab));
+        Assert.IsInstanceOfType<BinaryDiffTab>(vm.OpenTabs[0]);
         Assert.AreEqual(new Uri(expectedInAppPage, UriKind.Relative), vm.SelectedTab!.CurrentPage);
     }
 

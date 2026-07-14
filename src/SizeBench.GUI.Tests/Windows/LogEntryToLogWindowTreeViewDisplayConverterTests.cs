@@ -12,8 +12,8 @@ public sealed class LogEntryToLogWindowTreeViewDisplayConverterTests
     public void BadInputThrowsException()
     {
         var converter = new LogEntryToLogWindowTreeViewDisplayConverter();
-        Assert.ThrowsException<NotSupportedException>(() => converter.Convert(null, typeof(string), null, null));
-        Assert.ThrowsException<NotSupportedException>(() => converter.Convert(42, typeof(string), null, null));
+        Assert.ThrowsExactly<NotSupportedException>(() => converter.Convert(null, typeof(string), null, null));
+        Assert.ThrowsExactly<NotSupportedException>(() => converter.Convert(42, typeof(string), null, null));
     }
 
     [TestMethod]

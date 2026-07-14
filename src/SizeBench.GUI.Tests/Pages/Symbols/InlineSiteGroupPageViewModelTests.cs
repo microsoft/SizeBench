@@ -62,7 +62,7 @@ public sealed class InlineSiteGroupPageViewModelTests
 
         Assert.IsNotNull(viewmodel.InlineSiteGroup);
         Assert.AreEqual("someInlinedFunction", viewmodel.InlineSiteGroup.InlinedFunctionName);
-        Assert.AreEqual(2, viewmodel.InlineSiteGroup.InlineSites.Count);
+        Assert.HasCount(2, viewmodel.InlineSiteGroup.InlineSites);
         Assert.AreEqual("Inlined Function: someInlinedFunction", viewmodel.PageTitle);
     }
 }

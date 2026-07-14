@@ -22,7 +22,7 @@ public sealed class AllBinarySectionDiffsPageViewModelTests : IDisposable
         this.MockUITaskScheduler.SetupForSynchronousCompletionOfLongRunningUITasks();
     }
 
-    [Timeout(30 * 1000)] // 30s
+    [Timeout(30 * 1000, CooperativeCancellation = true)] // 30s
     [TestMethod]
     public async Task CanExportToExcel()
     {

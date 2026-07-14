@@ -7,13 +7,12 @@ namespace SizeBench.ErrorReporting.ErrorInfoProviders.Tests;
 [TestClass]
 public sealed class EnvironmentInfoProviderTests
 {
-    [ExpectedException(typeof(ArgumentNullException), AllowDerivedTypes = false)]
     [TestMethod]
     public void NullBodyThrows()
     {
         var provider = new EnvironmentInfoProvider();
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type. This test is intentionally testing null.
-        provider.AddErrorInfo(null);
+        Assert.ThrowsExactly<ArgumentNullException>(() => provider.AddErrorInfo(null));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
     }
 
@@ -25,11 +24,11 @@ public sealed class EnvironmentInfoProviderTests
         provider.AddErrorInfo(body);
         var output = body.ToString();
 
-        StringAssert.Contains(output, RuntimeInformation.FrameworkDescription, StringComparison.Ordinal);
-        StringAssert.Contains(output, RuntimeInformation.OSDescription, StringComparison.Ordinal);
-        StringAssert.Contains(output, $"OS Architecture: {RuntimeInformation.OSArchitecture}", StringComparison.Ordinal);
-        StringAssert.Contains(output, $"Process Architecture: {RuntimeInformation.ProcessArchitecture}", StringComparison.Ordinal);
-        StringAssert.Contains(output, $"Locale: {CultureInfo.CurrentCulture}", StringComparison.Ordinal);
-        StringAssert.Contains(output, $"UI Locale: {CultureInfo.CurrentUICulture}", StringComparison.Ordinal);
+        Assert.Contains(RuntimeInformation.FrameworkDescription, output, StringComparison.Ordinal);
+        Assert.Contains(RuntimeInformation.OSDescription, output, StringComparison.Ordinal);
+        Assert.Contains($"OS Architecture: {RuntimeInformation.OSArchitecture}", output, StringComparison.Ordinal);
+        Assert.Contains($"Process Architecture: {RuntimeInformation.ProcessArchitecture}", output, StringComparison.Ordinal);
+        Assert.Contains($"Locale: {CultureInfo.CurrentCulture}", output, StringComparison.Ordinal);
+        Assert.Contains($"UI Locale: {CultureInfo.CurrentUICulture}", output, StringComparison.Ordinal);
     }
 }

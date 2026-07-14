@@ -33,6 +33,8 @@ enum NameSearchOptions
 // the following are error HRESULTS returned by an IDiaDataSource they
 // are based on the FACILITY_VISUALCPP (0x6d) defined in delayimp.h
 
+// WARNING: The following enum is append-only.  If we change values internally we will break
+// COM interop, so any new values need to appear after stable values.
 enum 
 {
     E_PDB_OK=((HRESULT) (((unsigned long)(1)<<31) | ((unsigned long)(((LONG)0x6d))<<16) | ((unsigned long)(1))) ),
@@ -61,7 +63,49 @@ enum
     E_PDB_SYMSRV_BAD_CACHE_PATH ,
     E_PDB_SYMSRV_CACHE_FULL     ,
     E_PDB_OBJECT_DISPOSED       ,
-    E_PDB_MAX
+    E_PDB_MAX                   ,  // Unused (DO NOT CHANGE).  This is forever a stale value.
+
+    // In LF_IFC_RECORD, the unique name designating the IFC is missing.
+    E_PDB_IFC_RECORD_MISSING_DESIGNATOR,
+
+    // In LF_IFC_RECORD, the unique identifier does not name an IFC in the list of provided IFCs.
+    E_PDB_IFC_RECORD_MISSING_REFERENCE,
+
+    // The corresponding IFC described by an LF_IFC_RECORD could not be loaded.
+    E_PDB_IFC_FAILED_TO_LOAD,
+
+    // The corresponding IFC described by an LF_IFC_RECORD could not be loaded due to mismatching hash.
+    E_PDB_IFC_FAILED_TO_LOAD_MISMATCH_HASH,
+
+    // When opening the debug stream in an IFC, the stream could not be loaded.
+    E_PDB_IFC_DEBUG_STREAM_FAILED_OPEN,
+
+    // When opening the debug stream in an IFC, the stream was found to be empty.
+    E_PDB_IFC_DEBUG_STREAM_EMPTY,
+
+    // When opening the debug stream in an IFC, the stream hash did not match the hash from LF_IFC_RECORD.
+    E_PDB_IFC_DEBUG_STREAM_HASH_MISMATCH,
+
+    //
+    // Errors returned by IDiaFrameData::execute
+    //
+
+    E_DIA_INPROLOG          // cannot execute stack frame when in prolog
+        = ((HRESULT)(((unsigned long)(1) << 31) | ((unsigned long)(((LONG)0x6d)) << 16) | ((unsigned long)(100)))),
+    E_DIA_SYNTAX,           // error parsing frame program
+    E_DIA_FRAME_ACCESS,     // error accessing registers or memory
+    E_DIA_VALUE,            // error in computer a value (e.g., divide by zero)
+
+    //
+    // Errors on accessing OBJ, LIB or compiler generated PDB, when
+    // querying mini PDB produced by the linker with /DEBUG:fastlink.
+    //
+
+    // error accessing OBJ or LIB
+    E_DIA_COFF_ACCESS = ((DWORD)(((DWORD)(1) << 31) | ((DWORD)(((LONG)0x6d)) << 16) | ((DWORD)(200)))),
+
+    // error accessing compiler generated PDB
+    E_DIA_COMP_PDB_ACCESS,
 };
 
 #define PROPERTY_RW(type, name, prid, help)           \
@@ -108,6 +152,9 @@ interface IDiaLoadCallback;
 interface IDiaLoadCallback2;
 interface IDiaReadExeAtOffsetCallback;
 interface IDiaReadExeAtRVACallback;
+
+interface IDiaEnumSourceLink;
+interface IDiaEnumNamedStreams;
 
 [
     object,
@@ -253,6 +300,83 @@ interface IDiaDataSource: IUnknown
                      BYTE*     pbMiscInfo,
                 [in] IUnknown* pCallback );
 }
+
+typedef HRESULT __cdecl (*PFNMINIPDBERRORCALLBACK2)(void* pvContext, DWORD dwErrorCode, const LPCOLESTR szObjOrPdb, const LPCOLESTR szLib);
+
+[
+    object,
+    uuid(1a21eb69-962a-4bc4-8bd3-681797d38b23),
+    local,
+    helpstring("IDiaDataSourceEx Interface"),
+    pointer_default(unique)
+]
+interface IDiaDataSourceEx: IDiaDataSource
+{
+    HRESULT loadDataFromPdbEx(
+        [in] LPCOLESTR pdbPath,
+        [in] BOOL fPdbPrefetching);
+
+    HRESULT loadAndValidateDataFromPdbEx(
+        [in] LPCOLESTR pdbPath,
+        [in] GUID* pcsig70,
+        [in] DWORD sig,
+        [in] DWORD age,
+        [in] BOOL fPdbPrefetching);
+
+    HRESULT loadDataForExeEx(
+        [in] LPCOLESTR executable,
+        [in] LPCOLESTR searchPath,
+        [in] IUnknown* pCallback,
+        [in] BOOL fPdbPrefetching);
+
+    HRESULT loadDataFromIStreamEx(
+        [in] IStream* pIStream,
+        [in] BOOL fPdbPrefetching);
+
+    HRESULT getStreamSize(
+        [in] LPCOLESTR stream,
+        [out] ULONGLONG* pcb);
+
+    HRESULT getStreamRawData(
+        [in] LPCOLESTR stream,
+        [in] ULONGLONG cbOffset,
+        [in] ULONGLONG cbRead,
+        [out] ULONGLONG *pcbRead,
+        [out, size_is(cbRead)] BYTE* pbData);
+
+    // Allow DIA client to register a callback for convenience of reporting
+    // problems on accessing OBJ, LIB or compiler generated PDB files, for
+    // binaries linked with /DEBUG:mini (aka /DEBUG:fastlink).
+    HRESULT setPfnMiniPDBErrorCallback2(
+        [in] void* pvContext,
+        [in] PFNMINIPDBERRORCALLBACK2 pfn);
+
+    //
+    // ValidatePdb - lightweight API to query basic properties of a PDB without actually opening it
+    //
+    HRESULT ValidatePdb(
+        [in] LPCOLESTR pdbPath,
+        [in] const GUID* pcsig70,
+        [in] DWORD sig,
+        [in] DWORD age,
+        [out] BOOL* pfStripped);
+
+};
+
+[
+    object,
+        uuid(D240C8DD-1A0F-456E-80A6-4F1D06BF5DF4),
+        local,
+        helpstring("IDiaDataSourceEx2 Interface"),
+        pointer_default(unique)
+]
+interface IDiaDataSourceEx2 : IDiaDataSourceEx
+{
+    HRESULT findNamedStreams(
+        [in] LPCOLESTR name,
+        [in] DWORD compareFlags,
+        [out] IDiaEnumNamedStreams** ppResult);
+};
 
 [
     object,
@@ -996,6 +1120,27 @@ interface IDiaSession: IUnknown
         [out] IDiaInputAssemblyFile** ppResult);
 };
 
+[
+    object,
+    uuid(cd24eed5-5fea-4742-a320-6254c920e78b),
+    local,
+    helpstring("IDiaSessionEx Interface"),
+    pointer_default(unique)
+]
+interface IDiaSessionEx : IDiaSession
+{
+    HRESULT isFastLinkPDB(
+        [out] BOOL* pfFastLinkPDB);
+
+    HRESULT isPortablePDB(
+        [out] BOOL* pfPortablePDB);
+
+    HRESULT getSourceLinkInfo(
+        [in] IDiaSymbol* parent,
+        [out] IDiaEnumSourceLink** ppenum);
+
+};
+
 /*
  *  Table Columns
  *
@@ -1509,6 +1654,18 @@ interface IDiaSymbol11 : IDiaSymbol10
         [out, size_is(count)] struct DiaTagValue *rangeValues);
 };
 
+[
+    object,
+    uuid(d4d55c6b-2c67-4c1a-b8f2-7e8f3d5e2a1d),
+    local,
+    helpstring("IDiaSymbol12 Interface"),
+    pointer_default(unique)
+]
+interface IDiaSymbol12 : IDiaSymbol11
+{
+    PROPERTY_RO(DWORD, scalableRegisterType, 234, "scalable vector register type (SVE_Z, SVE_P, etc.)");
+    PROPERTY_RO(BOOL, atomicType, 235, "C _Atomic type");
+};
 
 //
 //  SourceFiles
@@ -1672,19 +1829,6 @@ interface IDiaInjectedSource: IUnknown
         );
 };
 
-//
-// Errors returned by IDiaFrameData::execute
-//
-enum 
-{
-    E_DIA_INPROLOG          // cannot execute stack frame when in prolog
-            =((HRESULT) (((unsigned long)(1)<<31) | ((unsigned long)(((LONG)0x6d))<<16) | ((unsigned long)(100))) ),
-    E_DIA_SYNTAX,           // error parsing frame program
-    E_DIA_FRAME_ACCESS,     // error accessing registers or memory
-    E_DIA_VALUE,            // error in computer a value (e.g., divide by zero)
-};
-
-
 [
     object,
     uuid(07C590C1-438D-4F47-BDCD-4397BC81AD75),
@@ -1815,6 +1959,53 @@ interface IDiaEnumTables: IUnknown
 };
 
 [
+    object,
+    uuid(45cd1eb3-5c6c-43e3-b20a-a4d8035de4e2),
+    local,
+    helpstring("IDiaEnumSourceLink Interface"),
+    pointer_default(unique)
+]
+interface IDiaEnumSourceLink : IUnknown
+{
+    HRESULT Count(
+        [out] DWORD* pCnt);
+
+    HRESULT SizeOfNext(
+        [out] DWORD* pcb);
+
+    HRESULT Next(
+        [in] DWORD cb,
+        [out] DWORD* pcb,
+        [out, size_is(cb)] BYTE* pb);
+
+    HRESULT Skip(
+        [in] DWORD cnt);
+
+    HRESULT Reset();
+
+    HRESULT Clone(
+        [out] IDiaEnumSourceLink** ppenum);
+}
+
+[
+    object,
+    uuid(136d8151-ade7-4704-af13-324080762e8f),
+    local,
+    helpstring("IDiaEnumSourceLink2 Interface with support for larger streams"),
+    pointer_default(unique)
+]
+interface IDiaEnumSourceLink2 : IDiaEnumSourceLink
+{
+    HRESULT SizeOfNext2(
+        [out] ULONGLONG* pcb);
+
+    HRESULT Next2(
+        [in] ULONGLONG cb,
+        [out] ULONGLONG* pcb,
+        [out, size_is(cb)] BYTE* pb);
+}
+
+[
     uuid(106173A0-0173-4e5c-84E7-E915422BE997),
     version(2.0),
     helpstring("dia 2.0 Type Library")
@@ -1830,6 +2021,7 @@ library Dia2Lib
     coclass DiaSource
     {
         [default] interface IDiaDataSource;
+        interface IDiaDataSourceEx2;
     };
 
     //
@@ -1846,6 +2038,7 @@ library Dia2Lib
     coclass DiaSourceAlt
     {
         [default] interface IDiaDataSource;
+        interface IDiaDataSourceEx2;
     };
 
 
@@ -1861,8 +2054,9 @@ library Dia2Lib
 
     interface IDiaSectionContrib;
     interface IDiaEnumSectionContribs;
-    interface IDiaSymbol11;
+    interface IDiaSymbol12;
     interface IDiaEnumSymbolsByAddr2;
+    interface IDiaSessionEx;
 };
 
 //
@@ -2094,6 +2288,41 @@ interface IDiaStackWalker: IUnknown
 ]
 interface IDiaStackWalkHelper2 : IDiaStackWalkHelper
 {
+    // Returns:
+    //     S_OK - Pointer authentication mask known / returned
+    //     E_NOINTERFACE - Invalid for the architecture / target
+    //     Other - Error.
+    //
+    // If AuthMask is returned as a full bit mask (all bits set),
+    // it indicates that the mask should be the same as that for
+    // the currently running process.
+    HRESULT GetPointerAuthenticationMask(
+        [in]  ULONG64 PtrVal,
+        [out] ULONG64* AuthMask
+        );
+}
+
+[
+    object,
+    uuid(9e8a18e3-4d15-4b9a-9c8e-3f2a5b6c7d8e),
+    local,
+    helpstring("IDiaStackWalkHelper3 Interface"),
+    pointer_default(unique)
+]
+interface IDiaStackWalkHelper3 : IDiaStackWalkHelper2
+{
+    HRESULT get_registerValue(
+        [in]  DWORD index,
+        [in]  DWORD cbData,
+        [out] DWORD *pcbData,
+        [out, size_is(cbData)] BYTE *pbData
+        );
+
+    HRESULT put_registerValue(
+        [in] DWORD index,
+        [in] DWORD cbData,
+        [in, size_is(cbData)] BYTE *pbData
+        );
 }
 
 [
@@ -2106,3 +2335,28 @@ interface IDiaStackWalkHelper2 : IDiaStackWalkHelper
 interface IDiaStackWalker2 : IDiaStackWalker
 {
 }
+
+[
+    object,
+        uuid(2B01F5E0-98DB-4824-A9A0-5192833BEF47),
+        local,
+        helpstring("IDiaEnumNamedStreams Interface"),
+        pointer_default(unique)
+]
+interface IDiaEnumNamedStreams : IUnknown
+{
+    PROPERTY_RO(IUnknown*, _NewEnum, DISPID_NEWENUM, "IEnumVARIANT version of IDiaEnumNamedStreams.");
+    PROPERTY_RO(LONG, Count, 1, "Number of named streams.");
+
+    HRESULT Next(
+        [out] BSTR* pName);
+
+    HRESULT Skip(
+        [in] ULONG celt);
+
+    HRESULT Reset();
+
+    HRESULT Clone(
+        [out] IDiaEnumNamedStreams** ppenum);
+};
+

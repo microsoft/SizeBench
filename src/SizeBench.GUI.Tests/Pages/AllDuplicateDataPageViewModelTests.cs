@@ -62,7 +62,7 @@ public sealed class AllDuplicateDataPageViewModelTests : IDisposable
         await viewmodel.InitializeAsync();
         viewmodel.GenerateFormattedDataForExcelExport(out var columnHeaders, out var preformattedData);
 
-        Assert.AreEqual(4, columnHeaders.Length);
+        Assert.HasCount(4, columnHeaders);
         Assert.AreEqual("Symbol Name", columnHeaders[0]);
         Assert.AreEqual("Size", columnHeaders[1]);
         Assert.AreEqual("Wasted Size", columnHeaders[2]);

@@ -125,7 +125,7 @@ internal sealed class RVARangeSet : IEnumerable<RVARange>
         // Guess that we'll have half as many after we combine things, just to avoid some allocations in here as we build it up.
         var rangesToReturn = new List<RVARange>(ranges.Count / 2);
 
-        ranges.Sort(static (RVARange x, RVARange y) => x.RVAStart.CompareTo(y.RVAStart));
+        ranges.Sort(static (x, y) => x.RVAStart.CompareTo(y.RVAStart));
 
         foreach (var range in ranges)
         {

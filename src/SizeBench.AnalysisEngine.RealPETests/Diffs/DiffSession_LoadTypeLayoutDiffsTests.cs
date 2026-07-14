@@ -74,7 +74,7 @@ public sealed class DiffSession_LoadTypeLayoutDiffsTests
                                                                logger);
         var tliDiffs = await diffSession.LoadTypeLayoutDiffsByName("TypeLayoutDiff_*", CancellationToken.None);
 
-        Assert.AreEqual(7, tliDiffs.Count);
+        Assert.HasCount(7, tliDiffs);
 
         // This tests some basic stuff, like changing the type of a member, chewing into padding, etc.
         var tliTypeLayoutDiff_Basics = tliDiffs.Single(tli => tli.UserDefinedType.Name == "TypeLayoutDiff_Basics");
@@ -83,8 +83,8 @@ public sealed class DiffSession_LoadTypeLayoutDiffsTests
         Assert.AreEqual(0, tliTypeLayoutDiff_Basics.AlignmentWasteExclusiveDiff);
         Assert.AreEqual(0, tliTypeLayoutDiff_Basics.AlignmentWasteIncludingBaseTypesDiff);
 
-        Assert.AreEqual(0, tliTypeLayoutDiff_Basics.BaseTypeDiffs.Count);
-        Assert.AreEqual(7, tliTypeLayoutDiff_Basics.MemberDiffs.Count);
+        Assert.IsEmpty(tliTypeLayoutDiff_Basics.BaseTypeDiffs);
+        Assert.HasCount(7, tliTypeLayoutDiff_Basics.MemberDiffs);
 
         // int -> uint16_t, means 4->2 bytes
         Assert.AreEqual("x", tliTypeLayoutDiff_Basics.MemberDiffs![0].Name);
@@ -123,7 +123,7 @@ public sealed class DiffSession_LoadTypeLayoutDiffsTests
         Assert.AreEqual(-2, tliTypeLayoutDiff_MoreDerived.AlignmentWasteExclusiveDiff);
         Assert.AreEqual(-3, tliTypeLayoutDiff_MoreDerived.AlignmentWasteIncludingBaseTypesDiff);
 
-        Assert.AreEqual(2, tliTypeLayoutDiff_MoreDerived.BaseTypeDiffs.Count);
+        Assert.HasCount(2, tliTypeLayoutDiff_MoreDerived.BaseTypeDiffs);
 
         Assert.AreEqual("TypeLayoutDiff_Derived", tliTypeLayoutDiff_MoreDerived.BaseTypeDiffs[0].UserDefinedType.Name);
         Assert.IsNotNull(tliTypeLayoutDiff_MoreDerived.BaseTypeDiffs[0].BeforeTypeLayout);
@@ -135,7 +135,7 @@ public sealed class DiffSession_LoadTypeLayoutDiffsTests
         Assert.IsNotNull(tliTypeLayoutDiff_MoreDerived.BaseTypeDiffs[1].AfterTypeLayout);
         Assert.AreEqual(2, tliTypeLayoutDiff_MoreDerived.BaseTypeDiffs[1].InstanceSizeDiff);
 
-        Assert.AreEqual(3, tliTypeLayoutDiff_MoreDerived.MemberDiffs.Count);
+        Assert.HasCount(3, tliTypeLayoutDiff_MoreDerived.MemberDiffs);
 
         Assert.AreEqual(0, tliTypeLayoutDiff_MoreDerived.MemberDiffs![0].SizeDiff);
 
@@ -151,7 +151,7 @@ public sealed class DiffSession_LoadTypeLayoutDiffsTests
         Assert.AreEqual(2, tliTypeLayoutDiff_MoreDerived2.AlignmentWasteExclusiveDiff);
         Assert.AreEqual(3, tliTypeLayoutDiff_MoreDerived2.AlignmentWasteIncludingBaseTypesDiff);
 
-        Assert.AreEqual(2, tliTypeLayoutDiff_MoreDerived2.BaseTypeDiffs.Count);
+        Assert.HasCount(2, tliTypeLayoutDiff_MoreDerived2.BaseTypeDiffs);
 
         Assert.AreEqual("TypeLayoutDiff_Base", tliTypeLayoutDiff_MoreDerived2.BaseTypeDiffs[0].UserDefinedType.Name);
         Assert.IsNotNull(tliTypeLayoutDiff_MoreDerived2.BaseTypeDiffs[0].BeforeTypeLayout);
@@ -163,7 +163,7 @@ public sealed class DiffSession_LoadTypeLayoutDiffsTests
         Assert.IsNotNull(tliTypeLayoutDiff_MoreDerived2.BaseTypeDiffs[1].AfterTypeLayout);
         Assert.AreEqual(4, tliTypeLayoutDiff_MoreDerived2.BaseTypeDiffs[1].InstanceSizeDiff);
 
-        Assert.AreEqual(3, tliTypeLayoutDiff_MoreDerived2.MemberDiffs.Count);
+        Assert.HasCount(3, tliTypeLayoutDiff_MoreDerived2.MemberDiffs);
 
         Assert.AreEqual(0, tliTypeLayoutDiff_MoreDerived2.MemberDiffs![0].SizeDiff);
 
@@ -180,14 +180,14 @@ public sealed class DiffSession_LoadTypeLayoutDiffsTests
         Assert.AreEqual(3, tliTypeLayoutDiff_Basics_Derived.AlignmentWasteExclusiveDiff);
         Assert.AreEqual(3, tliTypeLayoutDiff_Basics_Derived.AlignmentWasteIncludingBaseTypesDiff);
 
-        Assert.AreEqual(1, tliTypeLayoutDiff_Basics_Derived.BaseTypeDiffs.Count);
+        Assert.HasCount(1, tliTypeLayoutDiff_Basics_Derived.BaseTypeDiffs);
 
         Assert.AreEqual("TypeLayoutDiff_Basics", tliTypeLayoutDiff_Basics_Derived.BaseTypeDiffs[0].UserDefinedType.Name);
         Assert.IsNotNull(tliTypeLayoutDiff_Basics_Derived.BaseTypeDiffs[0].BeforeTypeLayout);
         Assert.IsNotNull(tliTypeLayoutDiff_Basics_Derived.BaseTypeDiffs[0].AfterTypeLayout);
         Assert.AreEqual(-4, tliTypeLayoutDiff_Basics_Derived.BaseTypeDiffs[0].InstanceSizeDiff);
 
-        Assert.AreEqual(2, tliTypeLayoutDiff_Basics_Derived.MemberDiffs.Count);
+        Assert.HasCount(2, tliTypeLayoutDiff_Basics_Derived.MemberDiffs);
 
         Assert.AreEqual("basicsDerivedMember", tliTypeLayoutDiff_Basics_Derived.MemberDiffs![0].Name);
         Assert.IsNull(tliTypeLayoutDiff_Basics_Derived.MemberDiffs![0].BeforeMember);
@@ -206,7 +206,7 @@ public sealed class DiffSession_LoadTypeLayoutDiffsTests
         Assert.AreEqual(-4, tliTypeLayoutDiff_WantsToBeTightlyPacked.AlignmentWasteExclusiveDiff);
         Assert.AreEqual(-4, tliTypeLayoutDiff_WantsToBeTightlyPacked.AlignmentWasteIncludingBaseTypesDiff);
 
-        Assert.AreEqual(6, tliTypeLayoutDiff_WantsToBeTightlyPacked.MemberDiffs.Count);
+        Assert.HasCount(6, tliTypeLayoutDiff_WantsToBeTightlyPacked.MemberDiffs);
 
         Assert.AreEqual("myInt", tliTypeLayoutDiff_WantsToBeTightlyPacked.MemberDiffs![0].Name);
         Assert.IsNotNull(tliTypeLayoutDiff_WantsToBeTightlyPacked.MemberDiffs![0].BeforeMember);

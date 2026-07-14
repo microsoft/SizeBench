@@ -28,12 +28,12 @@ public sealed class EnumerateBinarySectionsAndCOFFGroupDiffsSessionTaskTests : I
         using var logger = new NoOpLogger();
         var results = await task.ExecuteAsync(logger);
 
-        Assert.AreEqual(5, results.Count);
-        Assert.AreEqual(1, results.Where(sectionDiff => sectionDiff.BeforeSection is null).Count());
+        Assert.HasCount(5, results);
+        Assert.ContainsSingle(sectionDiff => sectionDiff.BeforeSection is null, results);
         Assert.AreEqual(".virt", results.First(sectionDiff => sectionDiff.AfterSection is null).Name);
-        Assert.AreEqual(1, results.Where(sectionDiff => sectionDiff.AfterSection is null).Count());
+        Assert.ContainsSingle(sectionDiff => sectionDiff.AfterSection is null, results);
         Assert.AreEqual(".rsrc", results.First(sectionDiff => sectionDiff.BeforeSection is null).Name);
-        Assert.AreEqual(0, results.Where(sectionDiff => sectionDiff.BeforeSection is null && sectionDiff.AfterSection is null).Count());
+        Assert.IsEmpty(results.Where(sectionDiff => sectionDiff.BeforeSection is null && sectionDiff.AfterSection is null));
 
         Assert.AreEqual(500, results.First(sectionDiff => sectionDiff.Name == ".text").SizeDiff);
         Assert.AreEqual(-1000, results.First(sectionDiff => sectionDiff.Name == ".data").SizeDiff);
@@ -60,7 +60,7 @@ public sealed class EnumerateBinarySectionsAndCOFFGroupDiffsSessionTaskTests : I
         var results = await task.ExecuteAsync(logger);
 
         Assert.IsNotNull(this._generator.DiffDataCache.AllBinarySectionDiffs);
-        Assert.AreEqual(5, this._generator.DiffDataCache.AllBinarySectionDiffs.Count);
+        Assert.HasCount(5, this._generator.DiffDataCache.AllBinarySectionDiffs);
 
         var list = this._generator.DiffDataCache.AllBinarySectionDiffs;
 
@@ -73,7 +73,7 @@ public sealed class EnumerateBinarySectionsAndCOFFGroupDiffsSessionTaskTests : I
         var output2 = await task.ExecuteAsync(logger);
 
         Assert.IsNotNull(this._generator.DiffDataCache.AllBinarySectionDiffs);
-        Assert.AreEqual(5, this._generator.DiffDataCache.AllBinarySectionDiffs.Count);
+        Assert.HasCount(5, this._generator.DiffDataCache.AllBinarySectionDiffs);
         Assert.IsTrue(ReferenceEquals(list, this._generator.DiffDataCache.AllBinarySectionDiffs));
     }
 

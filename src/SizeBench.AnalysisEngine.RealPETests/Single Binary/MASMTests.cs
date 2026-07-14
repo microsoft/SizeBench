@@ -10,7 +10,7 @@ namespace SizeBench.AnalysisEngine.RealPETests.Single_Binary;
 public sealed class MASMTests
 {
     public TestContext? TestContext { get; set; }
-    public CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
+    public CancellationToken CancellationToken => this.TestContext!.CancellationToken;
 
     private string BinaryPath => MakePath("SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.dll");
 
@@ -45,11 +45,11 @@ public sealed class MASMTests
         Assert.AreEqual(0u, MyTestEntry!.Size); // It's a pointer, but it's a special pointer that doesn't occupy space, it just refers to an address
         Assert.AreEqual(0x27E8u, MyTestEntry.RVA);
         Assert.AreEqual(0x27E8u, MyTestEntry.RVAEnd);
-        Assert.IsInstanceOfType(MyTestEntry.Type, typeof(FunctionTypeSymbol));
+        Assert.IsInstanceOfType<FunctionTypeSymbol>(MyTestEntry.Type);
         Assert.AreEqual("void (*function)()", MyTestEntry.Type!.Name);
         // This data should be directly in the middle of asmProc's RVA range
-        Assert.IsTrue(MyTestEntry.RVA > asmProc.RVA);
-        Assert.IsTrue(MyTestEntry.RVAEnd < asmProc.RVAEnd);
+        Assert.IsGreaterThan(asmProc.RVA, MyTestEntry.RVA);
+        Assert.IsLessThan(asmProc.RVAEnd, MyTestEntry.RVAEnd);
 
         var SomeAltEntry = await session.LoadSymbolByRVA(0x45DF) as PublicSymbol;
         Assert.AreEqual(33u, SomeAltEntry!.Size); // This is an entry point into a procedure ("altentry") so it does occupy space from here to the end of the procedure
@@ -58,8 +58,8 @@ public sealed class MASMTests
         // This symbol should start in the middle of asmVeryLongBasicBlock, but it extends 'past the end' because the length is from a public symbol that is somewhat distrustworthy.
         // It's important that it extends past the end, as that's a good thing to test for the sanity check in EnumerateSymbolsInRVARangeSessionTask, as it simulates behavior seen
         // in OS Binaries in Windows when SizeBench is run in the Windows Engineering System.
-        Assert.IsTrue(SomeAltEntry.RVA > asmVeryLongBasicBlock.RVA);
-        Assert.IsTrue(SomeAltEntry.RVA < asmVeryLongBasicBlock.RVAEnd);
-        Assert.IsTrue(SomeAltEntry.RVAEnd > asmVeryLongBasicBlock.RVAEnd);
+        Assert.IsGreaterThan(asmVeryLongBasicBlock.RVA, SomeAltEntry.RVA);
+        Assert.IsLessThan(asmVeryLongBasicBlock.RVAEnd, SomeAltEntry.RVA);
+        Assert.IsGreaterThan(asmVeryLongBasicBlock.RVAEnd, SomeAltEntry.RVAEnd);
     }
 }

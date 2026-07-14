@@ -24,10 +24,7 @@ public class NullToCollapsedConverterTests
         Assert.AreEqual(Visibility.Collapsed, result);
     }
 
-    [ExpectedException(typeof(NotImplementedException), AllowDerivedTypes = false)]
     [TestMethod]
     public void ConvertBackIsNotImplemented()
-    {
-        NullToCollapsedConverter.Instance.ConvertBack(Visibility.Visible, typeof(object), null /* ConverterParameter */, null /* CultureInfo */);
-    }
+        => Assert.ThrowsExactly<NotImplementedException>(() => NullToCollapsedConverter.Instance.ConvertBack(Visibility.Visible, typeof(object), null /* ConverterParameter */, null /* CultureInfo */));
 }

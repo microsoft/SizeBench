@@ -32,7 +32,7 @@ public sealed class BlockSymbolPageViewModelTests : IDisposable
 
         this.Generator.MockSession.Setup(s => s.LoadSymbolByRVA(rva)).Returns(Task.FromResult<ISymbol?>(function.PrimaryBlock));
         var tcsPlacement = new TaskCompletionSource<SymbolPlacement>();
-        tcsPlacement.SetCanceled();
+        tcsPlacement.SetCanceled(this.TestContext.CancellationToken);
         this.Generator.MockSession.Setup(s => s.LookupSymbolPlacementInBinary(function.PrimaryBlock, It.IsAny<CancellationToken>())).Returns(tcsPlacement.Task);
         this.Generator.MockSession.Setup(s => s.EnumerateAllSymbolsFoldedAtRVA(rva, It.IsAny<CancellationToken>())).Returns(Task.FromResult<IReadOnlyList<ISymbol>>(new List<ISymbol>() { function.PrimaryBlock }));
 
@@ -178,7 +178,7 @@ public sealed class BlockSymbolPageViewModelTests : IDisposable
 
         Assert.IsTrue(viewmodel.IsBlockCodeUsedForMultipleBlocks);
         Assert.IsNotNull(viewmodel.FoldedBlocks);
-        Assert.AreEqual(3, viewmodel.FoldedBlocks.Count);
+        Assert.HasCount(3, viewmodel.FoldedBlocks);
         // Check that they're in alphabetical order
         Assert.AreEqual("CFoo::XYZ", ((SeparatedCodeBlockSymbol)viewmodel.FoldedBlocks[0]).ParentFunction.FormattedName.IncludeParentType);
         Assert.AreEqual("FunctionInAnotherPlaceEntirely", ((SeparatedCodeBlockSymbol)viewmodel.FoldedBlocks[1]).ParentFunction.FunctionName);
@@ -221,4 +221,6 @@ public sealed class BlockSymbolPageViewModelTests : IDisposable
     }
 
     public void Dispose() => this.Generator.Dispose();
+
+    public TestContext TestContext { get; set; }
 }

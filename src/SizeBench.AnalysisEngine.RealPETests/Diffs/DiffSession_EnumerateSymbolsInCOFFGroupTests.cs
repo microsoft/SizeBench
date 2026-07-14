@@ -18,7 +18,7 @@ namespace SizeBench.AnalysisEngine.Tests;
 public sealed class DiffSession_EnumerateSymbolsInCOFFGroupTests
 {
     public TestContext? TestContext { get; set; }
-    private CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
+    private CancellationToken CancellationToken => this.TestContext!.CancellationToken;
 
     public string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory!, filename);
 
@@ -112,7 +112,7 @@ public sealed class DiffSession_EnumerateSymbolsInCOFFGroupTests
         // Let's try another COFF Group just for fun
         symbolDiffs = await diffSession.EnumerateSymbolDiffsInCOFFGroupDiff(textSectionDiff.COFFGroupDiffs.Single(cgd => cgd.Name == ".text$x"), this.CancellationToken);
 
-        Assert.AreEqual(1, symbolDiffs.Count(sd => sd.Name.Contains("catch$", StringComparison.Ordinal)));
+        Assert.ContainsSingle(sd => sd.Name.Contains("catch$", StringComparison.Ordinal), symbolDiffs);
         Assert.AreEqual(56, symbolDiffs.First(sd => sd.Name.Contains("catch$", StringComparison.Ordinal)).SizeDiff);
     }
 
@@ -176,7 +176,7 @@ public sealed class DiffSession_EnumerateSymbolsInCOFFGroupTests
         {
             Assert.IsNull(sym.BeforeSymbol);
             Assert.IsNotNull(sym.AfterSymbol);
-            Assert.IsTrue(sym.SizeDiff > 0);
+            Assert.IsGreaterThan(0, sym.SizeDiff);
         }
     }
 
@@ -191,7 +191,7 @@ public sealed class DiffSession_EnumerateSymbolsInCOFFGroupTests
                                                                logger);
         var sectionDiffs = await diffSession.EnumerateBinarySectionsAndCOFFGroupDiffs(this.CancellationToken);
         var rsrcSectionDiff = sectionDiffs.Single(bsd => bsd.Name == ".rsrc");
-        Assert.AreEqual(2, rsrcSectionDiff.COFFGroupDiffs.Count);
+        Assert.HasCount(2, rsrcSectionDiff.COFFGroupDiffs);
         var rsrc01CGDiff = rsrcSectionDiff.COFFGroupDiffs.Single(cgd => cgd.Name == ".rsrc$01");
         var rsrc02CGDiff = rsrcSectionDiff.COFFGroupDiffs.Single(cgd => cgd.Name == ".rsrc$02");
 
@@ -212,8 +212,8 @@ public sealed class DiffSession_EnumerateSymbolsInCOFFGroupTests
         // CURSOR - one cursor image added to a group
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         var groupCursorDiff = rsrcSymbolDiffs.Single(sym => sym.BeforeSymbol is RsrcGroupCursorDataSymbol);
-        Assert.AreEqual(2, (groupCursorDiff.BeforeSymbol as RsrcGroupCursorDataSymbol)!.Cursors.Count);
-        Assert.AreEqual(3, (groupCursorDiff.AfterSymbol as RsrcGroupCursorDataSymbol)!.Cursors.Count);
+        Assert.HasCount(2, (groupCursorDiff.BeforeSymbol as RsrcGroupCursorDataSymbol)!.Cursors);
+        Assert.HasCount(3, (groupCursorDiff.AfterSymbol as RsrcGroupCursorDataSymbol)!.Cursors);
         // We added one cursor, which was the 16x16 1bpp, so the size diff should be equal to the size of that
         // cursor + one CURSORRESDIR
         var cursor16x16_1bppAfter = (groupCursorDiff.AfterSymbol as RsrcGroupCursorDataSymbol)!.Cursors.Single(cursor => cursor.Width == 16 && cursor.Height == 16 && cursor.BitsPerPixel == 1);
@@ -223,8 +223,8 @@ public sealed class DiffSession_EnumerateSymbolsInCOFFGroupTests
         // ICON - one icon removed from a group
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         var groupIconDiff = rsrcSymbolDiffs.Single(sym => sym.BeforeSymbol is RsrcGroupIconDataSymbol);
-        Assert.AreEqual(7, (groupIconDiff.BeforeSymbol as RsrcGroupIconDataSymbol)!.Icons.Count);
-        Assert.AreEqual(3, (groupIconDiff.AfterSymbol as RsrcGroupIconDataSymbol)!.Icons.Count);
+        Assert.HasCount(7, (groupIconDiff.BeforeSymbol as RsrcGroupIconDataSymbol)!.Icons);
+        Assert.HasCount(3, (groupIconDiff.AfterSymbol as RsrcGroupIconDataSymbol)!.Icons);
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // VERSION - entirely removed in 'after'
@@ -232,6 +232,6 @@ public sealed class DiffSession_EnumerateSymbolsInCOFFGroupTests
         var versionDiff = rsrcSymbolDiffs.Single(sym => sym.BeforeSymbol!.Name.Contains("VERSION", StringComparison.Ordinal));
         Assert.IsNotNull(groupIconDiff.BeforeSymbol);
         Assert.IsNull(versionDiff.AfterSymbol);
-        Assert.IsTrue(versionDiff.SizeDiff < 0);
+        Assert.IsLessThan(0, versionDiff.SizeDiff);
     }
 }

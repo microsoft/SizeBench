@@ -63,13 +63,13 @@ public sealed class TemplatedUserDefinedTypeSymbolPageViewModelTests : IDisposab
         var templatedUDTExpected = groupings[0].TemplatedUserDefinedType;
 
         Assert.AreEqual(templatedUDTExpected, viewmodel.TemplatedUDT);
-        Assert.AreEqual(2, viewmodel.UDTs.Count);
+        Assert.HasCount(2, viewmodel.UDTs);
         var typeOfIntViewModel = viewmodel.UDTs.Single(udtVM => udtVM.UDT == typeOfIntUDT);
         Assert.AreEqual<uint>(50, typeOfIntViewModel.TotalSizeOfFunctions);
         var typeOfFloatViewModel = viewmodel.UDTs.Single(udtVM => udtVM.UDT == typeOfFloatUDT);
         Assert.AreEqual<uint>(0 + 10, typeOfFloatViewModel.TotalSizeOfFunctions);
 
-        StringAssert.Contains(viewmodel.PageTitle, templatedUDTExpected!.TemplateName, StringComparison.Ordinal);
+        Assert.Contains(templatedUDTExpected!.TemplateName, viewmodel.PageTitle, StringComparison.Ordinal);
     }
 
     [TestMethod]
@@ -89,7 +89,7 @@ public sealed class TemplatedUserDefinedTypeSymbolPageViewModelTests : IDisposab
         await viewmodel.InitializeAsync();
 
         Assert.IsNull(viewmodel.TemplatedUDT);
-        Assert.AreEqual(0, viewmodel.UDTs.Count);
+        Assert.IsEmpty(viewmodel.UDTs);
         Assert.AreEqual("Templated User Defined Type", viewmodel.PageTitle);
     }
 

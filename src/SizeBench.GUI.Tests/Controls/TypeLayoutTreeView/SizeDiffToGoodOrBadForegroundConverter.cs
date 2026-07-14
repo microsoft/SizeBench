@@ -10,9 +10,9 @@ public class SizeDiffToGoodOrBadForegroundConverterTests
     [TestMethod]
     public void ConvertThrowsIfValueNotATypeOrMemberDiffViewModel()
     {
-        Assert.ThrowsException<ArgumentException>(() => SizeDiffToGoodOrBadForegroundConverter.Instance.Convert(3, typeof(Brush), null, null));
-        Assert.ThrowsException<ArgumentException>(() => SizeDiffToGoodOrBadForegroundConverter.Instance.Convert("test", typeof(Brush), null, null));
-        Assert.ThrowsException<ArgumentException>(() => SizeDiffToGoodOrBadForegroundConverter.Instance.Convert(null, typeof(Brush), null, null));
+        Assert.ThrowsExactly<ArgumentException>(() => SizeDiffToGoodOrBadForegroundConverter.Instance.Convert(3, typeof(Brush), null, null));
+        Assert.ThrowsExactly<ArgumentException>(() => SizeDiffToGoodOrBadForegroundConverter.Instance.Convert("test", typeof(Brush), null, null));
+        Assert.ThrowsExactly<ArgumentException>(() => SizeDiffToGoodOrBadForegroundConverter.Instance.Convert(null, typeof(Brush), null, null));
     }
 
     [TestMethod]
@@ -22,8 +22,8 @@ public class SizeDiffToGoodOrBadForegroundConverterTests
         var tliDiffs = testDataGenerator.GenerateTypeLayoutItemDiffs(out var beforeTLIList, out var afterTLIList);
         var input = new TypeLayoutItemDiffViewModel(tliDiffs[0], testDataGenerator.MockDiffSession.Object);
 
-        Assert.ThrowsException<ArgumentException>(() => SizeDiffToGoodOrBadForegroundConverter.Instance.Convert(input, typeof(object), null, null));
-        Assert.ThrowsException<ArgumentException>(() => SizeDiffToGoodOrBadForegroundConverter.Instance.Convert(input, typeof(int), null, null));
+        Assert.ThrowsExactly<ArgumentException>(() => SizeDiffToGoodOrBadForegroundConverter.Instance.Convert(input, typeof(object), null, null));
+        Assert.ThrowsExactly<ArgumentException>(() => SizeDiffToGoodOrBadForegroundConverter.Instance.Convert(input, typeof(int), null, null));
     }
 
     [TestMethod]
@@ -133,8 +133,7 @@ public class SizeDiffToGoodOrBadForegroundConverterTests
         Assert.AreEqual(new SolidColorBrush(Colors.Green).Color, (SizeDiffToGoodOrBadForegroundConverter.Instance.Convert(input, typeof(Brush), null, null) as SolidColorBrush).Color);
     }
 
-    [ExpectedException(typeof(NotImplementedException), AllowDerivedTypes = false)]
     [TestMethod]
     public void ConvertBackIsNotImplemented()
-        => SizeDiffToGoodOrBadForegroundConverter.Instance.ConvertBack(new SolidColorBrush(Colors.Red), typeof(TypeLayoutItemDiffViewModel.MemberDiffViewModel), null, null);
+        => Assert.ThrowsExactly<NotImplementedException>(() => SizeDiffToGoodOrBadForegroundConverter.Instance.ConvertBack(new SolidColorBrush(Colors.Red), typeof(TypeLayoutItemDiffViewModel.MemberDiffViewModel), null, null));
 }

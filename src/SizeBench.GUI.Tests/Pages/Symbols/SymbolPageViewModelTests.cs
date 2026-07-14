@@ -30,7 +30,7 @@ public sealed class SymbolPageViewModelTests : IDisposable
 
         this.Generator.MockSession.Setup(s => s.LoadSymbolByRVA(rva)).Returns(Task.FromResult<ISymbol?>(sym));
         var tcsPlacement = new TaskCompletionSource<SymbolPlacement>();
-        tcsPlacement.SetCanceled();
+        tcsPlacement.SetCanceled(this.TestContext.CancellationToken);
         this.Generator.MockSession.Setup(s => s.LookupSymbolPlacementInBinary(sym, It.IsAny<CancellationToken>())).Returns(tcsPlacement.Task);
 
         var viewmodel = new SymbolPageViewModel(this.MockUITaskScheduler.Object,
@@ -105,4 +105,6 @@ public sealed class SymbolPageViewModelTests : IDisposable
     }
 
     public void Dispose() => this.Generator.Dispose();
+
+    public TestContext TestContext { get; set; }
 }

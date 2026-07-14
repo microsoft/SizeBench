@@ -14,7 +14,9 @@ using SizeBench.Threading.Tasks.Schedulers;
 
 namespace SizeBench.AnalysisEngine;
 
+#pragma warning disable CA1724 // Code analysis says this conflicts with an AspNetCore type named Session but I like my name and it's my own namespace so meh.
 public sealed class Session : ISession
+#pragma warning restore CA1724
 {
     private readonly string _originalPDBPathMayBeRemote;
     private GuaranteedLocalFile? _guaranteedLocalPDBFile;

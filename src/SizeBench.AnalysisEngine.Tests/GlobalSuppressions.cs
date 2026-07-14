@@ -16,3 +16,7 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Not important for test code")]
 
 [assembly: SuppressMessage("Performance", "CA1861:Avoid constant arrays as arguments", Justification = "Performance of the tests isn't *that* important.")]
+
+[assembly: SuppressMessage("Maintainability", "CA1515:Consider making public types internal", Justification = "Not important for tests - in fact TestClass types MUST be public for MSTest so doing this loses test coverage.")]
+
+[assembly: SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "Not important for tests")]

@@ -75,10 +75,7 @@ public sealed class SelectSessionOptionsControlViewModel : INotifyPropertyChange
             if (this._useSymbolServer != value)
             {
                 this._useSymbolServer = value;
-                if (this._appSettings != null)
-                {
-                    this._appSettings.UseSymbolServer = value;
-                }
+                this._appSettings?.UseSymbolServer = value;
                 RaiseOnPropertyChanged(String.Empty);
             }
         }

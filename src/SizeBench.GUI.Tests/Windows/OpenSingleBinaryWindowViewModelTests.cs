@@ -26,7 +26,7 @@ public class OpenSingleBinaryWindowViewModelTests
         vm.SelectSingleBinaryAndPDBControlViewModel.BinaryPath = "Foo.dll";
 
         Assert.IsFalse(vm.OKEnabled);
-        Assert.AreEqual(0, propertiesChanged.Count);
+        Assert.IsEmpty(propertiesChanged);
     }
 
     [TestMethod]

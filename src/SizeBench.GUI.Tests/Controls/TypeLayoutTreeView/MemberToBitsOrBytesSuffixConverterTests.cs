@@ -11,9 +11,9 @@ public class MemberToBitsOrBytesSuffixConverterTests
     [TestMethod]
     public void ConvertThrowsIfValueNotAMemberViewModel()
     {
-        Assert.ThrowsException<ArgumentException>(() => MemberToBitsOrBytesSuffixConverter.Instance.Convert(3, typeof(string), null, null));
-        Assert.ThrowsException<ArgumentException>(() => MemberToBitsOrBytesSuffixConverter.Instance.Convert("test", typeof(string), null, null));
-        Assert.ThrowsException<ArgumentException>(() => MemberToBitsOrBytesSuffixConverter.Instance.Convert(null, typeof(string), null, null));
+        Assert.ThrowsExactly<ArgumentException>(() => MemberToBitsOrBytesSuffixConverter.Instance.Convert(3, typeof(string), null, null));
+        Assert.ThrowsExactly<ArgumentException>(() => MemberToBitsOrBytesSuffixConverter.Instance.Convert("test", typeof(string), null, null));
+        Assert.ThrowsExactly<ArgumentException>(() => MemberToBitsOrBytesSuffixConverter.Instance.Convert(null, typeof(string), null, null));
     }
 
     [TestMethod]
@@ -27,8 +27,8 @@ public class MemberToBitsOrBytesSuffixConverterTests
         var MockSession = new Mock<ISession>();
         var input = new TypeLayoutItemViewModel.MemberViewModel(member, MockSession.Object, true);
 
-        Assert.ThrowsException<ArgumentException>(() => MemberToBitsOrBytesSuffixConverter.Instance.Convert(input, typeof(bool), null, null));
-        Assert.ThrowsException<ArgumentException>(() => MemberToBitsOrBytesSuffixConverter.Instance.Convert(input, typeof(int), null, null));
+        Assert.ThrowsExactly<ArgumentException>(() => MemberToBitsOrBytesSuffixConverter.Instance.Convert(input, typeof(bool), null, null));
+        Assert.ThrowsExactly<ArgumentException>(() => MemberToBitsOrBytesSuffixConverter.Instance.Convert(input, typeof(int), null, null));
     }
 
     [TestMethod]
@@ -139,8 +139,7 @@ public class MemberToBitsOrBytesSuffixConverterTests
         Assert.AreEqual("1 byte", MemberToBitsOrBytesSuffixConverter.Instance.Convert(input, typeof(string), null, null));
     }
 
-    [ExpectedException(typeof(NotImplementedException), AllowDerivedTypes = false)]
     [TestMethod]
     public void ConvertBackIsNotImplemented()
-        => MemberToBitsOrBytesSuffixConverter.Instance.ConvertBack("4 bytes", typeof(TypeLayoutItemViewModel.MemberViewModel), null, null);
+        => Assert.ThrowsExactly<NotImplementedException>(() => MemberToBitsOrBytesSuffixConverter.Instance.ConvertBack("4 bytes", typeof(TypeLayoutItemViewModel.MemberViewModel), null, null));
 }

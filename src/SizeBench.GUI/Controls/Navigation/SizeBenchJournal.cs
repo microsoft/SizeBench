@@ -9,7 +9,7 @@ internal class SizeBenchJournal
 {
     #region Fields
 
-    private readonly object _syncLock = new object();
+    private readonly Lock _syncLock = new Lock();
 
     #endregion Fields
 

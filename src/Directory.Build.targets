@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     
     <!-- Below this, in this PropertyGroup, is all about Code Analysis -->
-    <AnalysisLevel>8</AnalysisLevel> <!-- Update this when upgrading from net8 -->
+    <AnalysisLevel>10</AnalysisLevel> <!-- Update this when upgrading from net10 -->
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
@@ -58,10 +58,8 @@
 
   <!-- This is all the stuff necessary to use DbgX at runtime, it's needed in multiple projects, so it's centralized here -->
   <ItemGroup Condition="'$(IncludeDbgXAssets)'=='true' and '$(MicrosoftDebuggingDataModelDbgModelApiXtnPath)' != ''">
-    <Content Include="$(MicrosoftDebuggingPlatformDbgEngContent)amd64\msdia140.dll" Condition="Exists('$(MicrosoftDebuggingPlatformDbgEngContent)amd64\msdia140.dll')">
-      <Link>msdia140.dll</Link>
+    <Content Include="..\ExternalDependencies\DIA\msdia140.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Visible>False</Visible>
     </Content>
     <None Include="$(MicrosoftDebuggingDataModelDbgModelApiXtnPath)\**\*" CopyToOutputDirectory="PreserveNewest" Visible="False" Link="%(RecursiveDir)%(FileName)%(Extension)"/>
   </ItemGroup>

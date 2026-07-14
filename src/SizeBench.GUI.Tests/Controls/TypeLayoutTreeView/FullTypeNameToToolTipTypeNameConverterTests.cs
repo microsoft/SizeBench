@@ -7,14 +7,14 @@ public class FullTypeNameToToolTipTypeNameConverterTests
     [TestMethod]
     public void ConvertThrowsIfValueNotAString()
     {
-        Assert.ThrowsException<ArgumentException>(() => FullTypeNameToToolTipTypeNameConverter.Instance.Convert(3, typeof(string), null, null));
-        Assert.ThrowsException<ArgumentException>(() => FullTypeNameToToolTipTypeNameConverter.Instance.Convert(true, typeof(string), null, null));
+        Assert.ThrowsExactly<ArgumentException>(() => FullTypeNameToToolTipTypeNameConverter.Instance.Convert(3, typeof(string), null, null));
+        Assert.ThrowsExactly<ArgumentException>(() => FullTypeNameToToolTipTypeNameConverter.Instance.Convert(true, typeof(string), null, null));
     }
 
     [TestMethod]
     public void NullInputIsNullOutput()
     {
-        Assert.AreEqual(null, FullTypeNameToToolTipTypeNameConverter.Instance.Convert(null, typeof(string), null, null));
+        Assert.IsNull(FullTypeNameToToolTipTypeNameConverter.Instance.Convert(null, typeof(string), null, null));
     }
 
     [TestMethod]
@@ -33,14 +33,11 @@ public class FullTypeNameToToolTipTypeNameConverterTests
     [TestMethod]
     public void ShortNamesReturnNull()
     {
-        Assert.AreEqual(null, FullTypeNameToToolTipTypeNameConverter.Instance.Convert("int", typeof(string), null, null));
-        Assert.AreEqual(null, FullTypeNameToToolTipTypeNameConverter.Instance.Convert("MyCustomType<int, char*>", typeof(string), null, null));
+        Assert.IsNull(FullTypeNameToToolTipTypeNameConverter.Instance.Convert("int", typeof(string), null, null));
+        Assert.IsNull(FullTypeNameToToolTipTypeNameConverter.Instance.Convert("MyCustomType<int, char*>", typeof(string), null, null));
     }
 
-    [ExpectedException(typeof(NotImplementedException), AllowDerivedTypes = false)]
     [TestMethod]
     public void ConvertBackIsNotImplemented()
-    {
-        FullTypeNameToToolTipTypeNameConverter.Instance.ConvertBack("string", typeof(string), null, null);
-    }
+        => Assert.ThrowsExactly<NotImplementedException>(() => FullTypeNameToToolTipTypeNameConverter.Instance.ConvertBack("string", typeof(string), null, null));
 }

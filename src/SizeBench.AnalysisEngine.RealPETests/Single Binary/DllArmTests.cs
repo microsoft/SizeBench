@@ -156,14 +156,14 @@ public sealed class DllArmTests
         // Note that this entry is offset by 1 byte from what DIA fetches, because we later compensate for Thumb code RVAs in GetAdjustedRva - so this test
         // is really important that it tests the RVA values explicitly for ARM32.
         Assert.AreEqual(0x15ECu, firstEntry.RVA);
-        StringAssert.Contains(firstEntry.Name, "DllArm_DerivedClass", StringComparison.Ordinal);
-        StringAssert.Contains(firstEntry.Name, "AVirtualFunction", StringComparison.Ordinal);
+        Assert.Contains("DllArm_DerivedClass", firstEntry.Name, StringComparison.Ordinal);
+        Assert.Contains("AVirtualFunction", firstEntry.Name, StringComparison.Ordinal);
 
         var secondEntry = await DllArm32Session.LoadSymbolForVTableSlotAsync(derivedClassVftableRVA, slotIndex: 1);
         Assert.IsNotNull(secondEntry);
         Assert.AreEqual(0x15A8u, secondEntry.RVA);
-        StringAssert.Contains(secondEntry.Name, "DllArm_BaseClass", StringComparison.Ordinal);
-        StringAssert.Contains(secondEntry.Name, "ASecondVirtualFunction", StringComparison.Ordinal);
+        Assert.Contains("DllArm_BaseClass", secondEntry.Name, StringComparison.Ordinal);
+        Assert.Contains("ASecondVirtualFunction", secondEntry.Name, StringComparison.Ordinal);
     }
 
     public static IEnumerable<object[]> DynamicDataSourceForSymbolSourcesSupportedTests => SymbolSourcesSupportedCommonTests.DynamicDataSourceForSymbolSourcesSupportedTests;
@@ -175,5 +175,5 @@ public sealed class DllArmTests
             Path.Combine(this.TestContext!.DeploymentDirectory!, "PEParser.Tests.Dllarm32.dll"),
             Path.Combine(this.TestContext!.DeploymentDirectory!, "PEParser.Tests.Dllarm32.pdb"),
             symbolSources,
-            this.TestContext.CancellationTokenSource.Token);
+            this.TestContext.CancellationToken);
 }

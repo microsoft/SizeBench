@@ -27,4 +27,18 @@ internal enum DIAHRESULTs : uint
     E_PDB_SYMSRV_BAD_CACHE_PATH,
     E_PDB_SYMSRV_CACHE_FULL,
     E_PDB_OBJECT_DISPOSED,
+    E_PDB_MAX, // Name is misleading, this is locked forever due to interop issues in DIA and COM, but there are more beyond it.
+    E_PDB_IFC_RECORD_MISSING_DESIGNATOR,
+    E_PDB_IFC_RECORD_MISSING_REFERENCE,
+    E_PDB_IFC_FAILED_TO_LOAD,
+    E_PDB_IFC_FAILED_TO_LOAD_MISMATCH_HASH,
+    E_PDB_IFC_DEBUG_STREAM_FAILED_OPEN,
+    E_PDB_IFC_DEBUG_STREAM_EMPTY,
+    E_PDB_IFC_DEBUG_STREAM_HASH_MISMATCH,
+    E_DIA_INPROLOG = 0x806D0064, // This is what all the bit shifting and ors in dia2.h resolve to
+    E_DIA_SYNTAX,
+    E_DIA_FRAME_ACCESS,
+    E_DIA_VALUE,
+    E_DIA_COFF_ACCESS = 0x806D00C8, // Again the result of the bit shifting and ors in dia2.h
+    E_DIA_COMP_PDB_ACCESS,
 }

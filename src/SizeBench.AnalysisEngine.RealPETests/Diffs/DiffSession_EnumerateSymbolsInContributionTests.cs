@@ -12,7 +12,7 @@ namespace SizeBench.AnalysisEngine.Tests;
 public sealed class DiffSession_EnumerateSymbolsInContributionTests
 {
     public TestContext? TestContext { get; set; }
-    private CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
+    private CancellationToken CancellationToken => this.TestContext!.CancellationToken;
 
     private string BeforeBinaryPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "CppTestCases_BasicDiffObjectsBefore.dll");
 
@@ -69,7 +69,7 @@ public sealed class DiffSession_EnumerateSymbolsInContributionTests
 
         // Try a basic case in a contribution with Size (not VirtualSize)
         var symbolDiffs = await diffSession.EnumerateSymbolDiffsInContributionDiff(dllMainCompilandDiff.COFFGroupContributionDiffs[textMnCGDiff], this.CancellationToken);
-        Assert.AreEqual(6, symbolDiffs.Count);
+        Assert.HasCount(6, symbolDiffs);
 
         var DllMainDiff = symbolDiffs.Single(s => s.Name == "DllMain(HINSTANCE__*, unsigned long, void*)");
         Assert.AreEqual("int DllMain(HINSTANCE__* hModule, unsigned long ul_reason_for_call, void* lpReserved)", ((CodeBlockSymbolDiff)DllMainDiff).ParentFunctionDiff.FullName);
@@ -79,7 +79,7 @@ public sealed class DiffSession_EnumerateSymbolsInContributionTests
 
         // Try something in .bss to make sure VirtualSize didn't mess us up
         symbolDiffs = await diffSession.EnumerateSymbolDiffsInContributionDiff(dllMainCompilandDiff.COFFGroupContributionDiffs[bssCGDiff], this.CancellationToken);
-        Assert.AreEqual(2, symbolDiffs.Count);
+        Assert.HasCount(2, symbolDiffs);
 
         var intArrayInBssDiff = symbolDiffs.Single(s => s.Name == "intArrayInBss");
         Assert.IsNull(intArrayInBssDiff.BeforeSymbol);
@@ -89,7 +89,7 @@ public sealed class DiffSession_EnumerateSymbolsInContributionTests
 
         // Try something in .pdata since PDATA is parsed specially
         symbolDiffs = await diffSession.EnumerateSymbolDiffsInContributionDiff(dllMainCompilandDiff.SectionContributionDiffs[pdataSectionDiff], this.CancellationToken);
-        Assert.AreEqual(6, symbolDiffs.Count);
+        Assert.HasCount(6, symbolDiffs);
 
         var pdataForDllMainDiff = symbolDiffs.Single(s => s.Name.StartsWith("[pdata] DllMain(", StringComparison.Ordinal));
         Assert.IsNotNull(pdataForDllMainDiff.BeforeSymbol);
@@ -122,14 +122,14 @@ public sealed class DiffSession_EnumerateSymbolsInContributionTests
 
         var symbolDiffs = await diffSession.EnumerateSymbolDiffsInContributionDiff(sourceFile2CompilandDiff.SectionContributionDiffs[rdataSectionDiff], this.CancellationToken);
 
-        Assert.AreEqual(1, symbolDiffs.Count);
+        Assert.HasCount(1, symbolDiffs);
         Assert.IsTrue(symbolDiffs[0].Name.Contains("dummy print from source file 2", StringComparison.Ordinal));
 
         foreach (var sym in symbolDiffs)
         {
             Assert.IsNotNull(sym.BeforeSymbol);
             Assert.IsNull(sym.AfterSymbol);
-            Assert.IsTrue(sym.SizeDiff < 0);
+            Assert.IsLessThan(0, sym.SizeDiff);
         }
     }
 
@@ -150,13 +150,13 @@ public sealed class DiffSession_EnumerateSymbolsInContributionTests
         var symbolDiffs = await diffSession.EnumerateSymbolDiffsInContributionDiff(dllMainCompilandDiff.COFFGroupContributionDiffs[textXCGDiff], this.CancellationToken);
 
         // map file shows 4 symbols, but it's only 3 because the "catch$8" and "[catch]" symbols are the same thing
-        Assert.AreEqual(3, symbolDiffs.Count);
+        Assert.HasCount(3, symbolDiffs);
 
         foreach (var sym in symbolDiffs)
         {
             Assert.IsNull(sym.BeforeSymbol);
             Assert.IsNotNull(sym.AfterSymbol);
-            Assert.IsTrue(sym.SizeDiff > 0);
+            Assert.IsGreaterThan(0, sym.SizeDiff);
         }
     }
 }

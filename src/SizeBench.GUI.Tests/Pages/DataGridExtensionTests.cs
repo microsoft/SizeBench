@@ -27,11 +27,11 @@ public sealed class DataGridExtensionTests
             };
 
         Assert.IsNull(DataGridExtension.GetColumns(this.DataGrid));
-        Assert.AreEqual(0, this.DataGrid.Columns.Count);
+        Assert.IsEmpty(this.DataGrid.Columns);
 
         DataGridExtension.SetColumns(this.DataGrid, columns);
 
-        CollectionAssert.AreEqual(columns, this.DataGrid.Columns);
+        Assert.AreSequenceEqual(columns, this.DataGrid.Columns);
     }
 
     [TestMethod]
@@ -51,15 +51,15 @@ public sealed class DataGridExtensionTests
             };
 
         Assert.IsNull(DataGridExtension.GetColumns(this.DataGrid));
-        Assert.AreEqual(0, this.DataGrid.Columns.Count);
+        Assert.IsEmpty(this.DataGrid.Columns);
 
         DataGridExtension.SetColumns(this.DataGrid, columns);
 
-        Assert.AreEqual(5, this.DataGrid.Columns.Count);
-        Assert.AreEqual(3, this.DataGrid.Columns.OfType<DataGridTextColumn>().Count());
-        Assert.AreEqual(1, this.DataGrid.Columns.OfType<DataGridCheckBoxColumn>().Count());
-        Assert.AreEqual(1, this.DataGrid.Columns.OfType<DataGridComboBoxColumn>().Count());
-        Assert.IsInstanceOfType(this.DataGrid.Columns[2], typeof(DataGridComboBoxColumn));
+        Assert.HasCount(5, this.DataGrid.Columns);
+        Assert.HasCount(3, this.DataGrid.Columns.OfType<DataGridTextColumn>());
+        Assert.HasCount(1, this.DataGrid.Columns.OfType<DataGridCheckBoxColumn>());
+        Assert.HasCount(1, this.DataGrid.Columns.OfType<DataGridComboBoxColumn>());
+        Assert.IsInstanceOfType<DataGridComboBoxColumn>(this.DataGrid.Columns[2]);
     }
 
     [TestMethod]
@@ -79,25 +79,25 @@ public sealed class DataGridExtensionTests
             };
 
         Assert.IsNull(DataGridExtension.GetColumns(this.DataGrid));
-        Assert.AreEqual(0, this.DataGrid.Columns.Count);
+        Assert.IsEmpty(this.DataGrid.Columns);
 
         DataGridExtension.SetColumns(this.DataGrid, columns);
 
-        Assert.AreEqual(5, this.DataGrid.Columns.Count);
-        Assert.AreEqual(3, this.DataGrid.Columns.OfType<DataGridTextColumn>().Count());
-        Assert.AreEqual(1, this.DataGrid.Columns.OfType<DataGridCheckBoxColumn>().Count());
-        Assert.AreEqual(1, this.DataGrid.Columns.OfType<DataGridComboBoxColumn>().Count());
-        Assert.IsInstanceOfType(this.DataGrid.Columns[2], typeof(DataGridComboBoxColumn));
+        Assert.HasCount(5, this.DataGrid.Columns);
+        Assert.HasCount(3, this.DataGrid.Columns.OfType<DataGridTextColumn>());
+        Assert.HasCount(1, this.DataGrid.Columns.OfType<DataGridCheckBoxColumn>());
+        Assert.HasCount(1, this.DataGrid.Columns.OfType<DataGridComboBoxColumn>());
+        Assert.IsInstanceOfType<DataGridComboBoxColumn>(this.DataGrid.Columns[2]);
 
         // Try just adding a column to the main collection
         columns.Add(new DataGridTemplateColumn()); // Index 5
-        Assert.AreEqual(6, this.DataGrid.Columns.Count);
-        Assert.IsInstanceOfType(this.DataGrid.Columns[5], typeof(DataGridTemplateColumn));
+        Assert.HasCount(6, this.DataGrid.Columns);
+        Assert.IsInstanceOfType<DataGridTemplateColumn>(this.DataGrid.Columns[5]);
 
         // Try adding to one of the CollectionContainers within
         ((columns[2] as CollectionContainer)!.Collection as ObservableCollection<DataGridColumn>)!.Add(new DataGridHyperlinkColumn()); // Index 6
-        Assert.AreEqual(7, this.DataGrid.Columns.Count);
-        Assert.IsInstanceOfType(this.DataGrid.Columns[6], typeof(DataGridHyperlinkColumn));
+        Assert.HasCount(7, this.DataGrid.Columns);
+        Assert.IsInstanceOfType<DataGridHyperlinkColumn>(this.DataGrid.Columns[6]);
 
         // Try adding a CollectionContainer
         var newCollectionContainer = new CollectionContainer()
@@ -108,27 +108,27 @@ public sealed class DataGridExtensionTests
                 }
         };
         columns.Add(newCollectionContainer);
-        Assert.AreEqual(9, this.DataGrid.Columns.Count);
-        Assert.IsInstanceOfType(this.DataGrid.Columns[7], typeof(DataGridComboBoxColumn));
+        Assert.HasCount(9, this.DataGrid.Columns);
+        Assert.IsInstanceOfType<DataGridComboBoxColumn>(this.DataGrid.Columns[7]);
 
         // Try adding to that new CollectionContainer
         (newCollectionContainer.Collection as ObservableCollection<DataGridColumn>)!.Add(new DataGridCheckBoxColumn()); // Index 9
-        Assert.AreEqual(10, this.DataGrid.Columns.Count);
-        Assert.IsInstanceOfType(this.DataGrid.Columns[9], typeof(DataGridCheckBoxColumn));
+        Assert.HasCount(10, this.DataGrid.Columns);
+        Assert.IsInstanceOfType<DataGridCheckBoxColumn>(this.DataGrid.Columns[9]);
 
         // Try removing a column from the main collection
         columns.RemoveAt(3); // Removing the TextColumn after the CollectionContainer from the start, which is column 4 in DataGrid.Columns
-        Assert.AreEqual(9, this.DataGrid.Columns.Count);
-        Assert.AreEqual(3, this.DataGrid.Columns.OfType<DataGridTextColumn>().Count()); // Two of the original ones remain, plus the one in newCollectionContainer
-        Assert.IsInstanceOfType(this.DataGrid.Columns[4], typeof(DataGridTemplateColumn)); // The collection 'scooted up'
+        Assert.HasCount(9, this.DataGrid.Columns);
+        Assert.HasCount(3, this.DataGrid.Columns.OfType<DataGridTextColumn>()); // Two of the original ones remain, plus the one in newCollectionContainer
+        Assert.IsInstanceOfType<DataGridTemplateColumn>(this.DataGrid.Columns[4]); // The collection 'scooted up'
 
         // Try removing a CollectionContainer
         //    -- this should let the object die since INCC should be unsubscribed, but that work isn't done yet, so that part
         //       of the test is commented out for now.
         columns.RemoveAt(4); // Removing the newCollectionContainer added above
-        Assert.AreEqual(6, this.DataGrid.Columns.Count);
-        Assert.AreEqual(2, this.DataGrid.Columns.OfType<DataGridTextColumn>().Count());
-        Assert.AreEqual(1, this.DataGrid.Columns.OfType<DataGridComboBoxColumn>().Count());
+        Assert.HasCount(6, this.DataGrid.Columns);
+        Assert.HasCount(2, this.DataGrid.Columns.OfType<DataGridTextColumn>());
+        Assert.HasCount(1, this.DataGrid.Columns.OfType<DataGridComboBoxColumn>());
 
         // TODO: This part of the test is unstable, at some point someone should investigate why.
         //var newCollectionWeakRef = new WeakReference<CollectionContainer>(newCollectionContainer);

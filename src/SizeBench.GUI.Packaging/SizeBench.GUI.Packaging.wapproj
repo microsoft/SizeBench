@@ -19,6 +19,17 @@
     <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
     <WapProjPath Condition="'$(WapProjPath)'==''">$(MSBuildExtensionsPath)\Microsoft\DesktopBridge\</WapProjPath>
   </PropertyGroup>
+  <PropertyGroup>
+    <!--
+    We disable some NuGet warnings because this project restores as .NET Framework but we don't actually use
+    any of its outputs like that, we package up the SizeBench GUI itself which restores its NuGets for its
+    TFM.
+    -->
+    <RestorePackages>false</RestorePackages>
+    <RestoreProjectStyle>None</RestoreProjectStyle>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+    <NoWarn>$(NoWarn);NU1605;NU1701</NoWarn>
+  </PropertyGroup>
   <Import Project="$(WapProjPath)\Microsoft.DesktopBridge.props" />
   <PropertyGroup>
     <ProjectGuid>7c2b0ed6-f9b5-47c0-a531-1dd7731b0681</ProjectGuid>

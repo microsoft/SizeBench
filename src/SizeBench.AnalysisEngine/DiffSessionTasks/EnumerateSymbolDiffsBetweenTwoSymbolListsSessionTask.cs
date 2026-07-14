@@ -31,8 +31,10 @@ internal class EnumerateSymbolDiffsBetweenTwoSymbolListsSessionTask : DiffSessio
 
         using (var beforeAndAfterLog = logger.StartTaskLog("Enumerating symbols in 'before' and 'after'"))
         {
+#pragma warning disable CA2025 // Do not pass 'IDisposable' instances into unawaited tasks - we want to start both in parallel and the analyzer doesn't see this well.
             var beforeTask = this._beforeSymbolsTaskFactory(beforeAndAfterLog);
             var afterTask = this._afterSymbolsTaskFactory(beforeAndAfterLog);
+#pragma warning restore CA2025 // Do not pass 'IDisposable' instances into unawaited tasks
 
             var results = await Task.WhenAll(beforeTask, afterTask).WaitAsync(this.CancellationToken).ConfigureAwait(true);
 

@@ -33,7 +33,7 @@ public sealed class FunctionCodeSymbolDiffPageViewModelTests : IDisposable
         this.Generator.MockDiffSession.Setup(s => s.LoadSymbolDiffByBeforeAndAfterRVA(expectedDiff.BeforeSymbol!.PrimaryBlock.RVA, expectedDiff.AfterSymbol!.PrimaryBlock.RVA, It.IsAny<CancellationToken>()))
                                       .Returns(Task.FromResult<SymbolDiff?>(blockDiff));
         var tcsPlacement = new TaskCompletionSource<SymbolPlacement>();
-        tcsPlacement.SetCanceled();
+        tcsPlacement.SetCanceled(this.TestContext.CancellationToken);
         this.Generator.MockBeforeSession.Setup(s => s.LookupSymbolPlacementInBinary(blockDiff.BeforeSymbol!, It.IsAny<CancellationToken>())).Returns(tcsPlacement.Task);
         this.Generator.MockBeforeSession.Setup(s => s.EnumerateAllSymbolsFoldedAtRVA(blockDiff.BeforeSymbol!.RVA, It.IsAny<CancellationToken>())).Returns(Task.FromResult<IReadOnlyList<ISymbol>>(new List<ISymbol>()));
         this.Generator.MockAfterSession.Setup(s => s.LookupSymbolPlacementInBinary(blockDiff.AfterSymbol!, It.IsAny<CancellationToken>())).Returns(tcsPlacement.Task);
@@ -58,8 +58,8 @@ public sealed class FunctionCodeSymbolDiffPageViewModelTests : IDisposable
         Assert.IsNull(viewmodel.BeforeFoldedFunctions);
         Assert.IsNull(viewmodel.AfterFoldedFunctions);
         Assert.AreEqual($"Function Diff: {expectedDiff.FormattedName.IncludeParentType}", viewmodel.PageTitle);
-        Assert.AreEqual(0, viewmodel.BeforeBlockPlacements.Count);
-        Assert.AreEqual(0, viewmodel.AfterBlockPlacements.Count);
+        Assert.IsEmpty(viewmodel.BeforeBlockPlacements);
+        Assert.IsEmpty(viewmodel.AfterBlockPlacements);
         Assert.IsTrue(ReferenceEquals(expectedDiff, viewmodel.FunctionDiff));
         Assert.AreEqual(String.Empty, viewmodel.BeforeAttributes);
         Assert.AreEqual(String.Empty, viewmodel.AfterAttributes);
@@ -103,10 +103,10 @@ public sealed class FunctionCodeSymbolDiffPageViewModelTests : IDisposable
         Assert.IsNull(viewmodel.BeforeFoldedFunctions);
         Assert.IsNull(viewmodel.AfterFoldedFunctions);
         Assert.AreEqual($"Function Diff: {expectedDiff.FormattedName.IncludeParentType}", viewmodel.PageTitle);
-        Assert.AreEqual(1, viewmodel.BeforeBlockPlacements.Count);
+        Assert.HasCount(1, viewmodel.BeforeBlockPlacements);
         Assert.IsTrue(ReferenceEquals(viewmodel.BeforeBlockPlacements[0].Key, blockDiff.BeforeSymbol));
         Assert.IsTrue(ReferenceEquals(viewmodel.BeforeBlockPlacements[0].Value, beforePlacement));
-        Assert.AreEqual(1, viewmodel.AfterBlockPlacements.Count);
+        Assert.HasCount(1, viewmodel.AfterBlockPlacements);
         Assert.IsTrue(ReferenceEquals(viewmodel.AfterBlockPlacements[0].Key, blockDiff.AfterSymbol));
         Assert.IsTrue(ReferenceEquals(viewmodel.AfterBlockPlacements[0].Value, afterPlacement));
         Assert.IsTrue(ReferenceEquals(expectedDiff, viewmodel.FunctionDiff));
@@ -135,8 +135,8 @@ public sealed class FunctionCodeSymbolDiffPageViewModelTests : IDisposable
         Assert.IsNull(viewmodel.BeforeFoldedFunctions);
         Assert.IsNull(viewmodel.AfterFoldedFunctions);
         Assert.AreEqual("Symbol Diff: MyType::HasAFunction", viewmodel.PageTitle);
-        Assert.AreEqual(0, viewmodel.BeforeBlockPlacements.Count);
-        Assert.AreEqual(0, viewmodel.AfterBlockPlacements.Count);
+        Assert.IsEmpty(viewmodel.BeforeBlockPlacements);
+        Assert.IsEmpty(viewmodel.AfterBlockPlacements);
         Assert.IsNull(viewmodel.FunctionDiff);
         Assert.AreEqual(String.Empty, viewmodel.BeforeAttributes);
         Assert.AreEqual(String.Empty, viewmodel.AfterAttributes);
@@ -213,21 +213,23 @@ public sealed class FunctionCodeSymbolDiffPageViewModelTests : IDisposable
         Assert.IsTrue(viewmodel.AfterFunctionContainsMultipleCodeBlocks);
         Assert.IsTrue(viewmodel.IsBeforeFunctionCodeUsedForMultipleFunctions);
         Assert.IsTrue(viewmodel.IsAfterFunctionCodeUsedForMultipleFunctions);
-        Assert.AreEqual(3, viewmodel.BeforeFoldedFunctions!.Count);
-        Assert.AreEqual("ComplexBeforeComplexAfter", viewmodel.BeforeFoldedFunctions[0].FunctionName);
-        Assert.AreEqual("FoldedBeforeComplex", viewmodel.BeforeFoldedFunctions[1].FunctionName);
-        Assert.AreEqual("FoldedBeforeSimple", viewmodel.BeforeFoldedFunctions[2].FunctionName);
-        Assert.AreEqual(4, viewmodel.AfterFoldedFunctions!.Count);
-        Assert.AreEqual("ComplexBeforeComplexAfter", viewmodel.AfterFoldedFunctions[0].FunctionName);
-        Assert.AreEqual("FoldedAfterComplex1", viewmodel.AfterFoldedFunctions[1].FunctionName);
-        Assert.AreEqual("FoldedAfterComplex2", viewmodel.AfterFoldedFunctions[2].FunctionName);
-        Assert.AreEqual("FoldedAfterSimple", viewmodel.AfterFoldedFunctions[3].FunctionName);
+        Assert.HasCount(3, viewmodel.BeforeFoldedFunctions!);
+        Assert.AreEqual("ComplexBeforeComplexAfter", viewmodel.BeforeFoldedFunctions![0].FunctionName);
+        Assert.AreEqual("FoldedBeforeComplex", viewmodel.BeforeFoldedFunctions![1].FunctionName);
+        Assert.AreEqual("FoldedBeforeSimple", viewmodel.BeforeFoldedFunctions![2].FunctionName);
+        Assert.HasCount(4, viewmodel.AfterFoldedFunctions!);
+        Assert.AreEqual("ComplexBeforeComplexAfter", viewmodel.AfterFoldedFunctions![0].FunctionName);
+        Assert.AreEqual("FoldedAfterComplex1", viewmodel.AfterFoldedFunctions![1].FunctionName);
+        Assert.AreEqual("FoldedAfterComplex2", viewmodel.AfterFoldedFunctions![2].FunctionName);
+        Assert.AreEqual("FoldedAfterSimple", viewmodel.AfterFoldedFunctions![3].FunctionName);
         Assert.AreEqual($"Function Diff: {expectedDiff.FormattedName.IncludeParentType}", viewmodel.PageTitle);
-        Assert.AreEqual(2, viewmodel.BeforeBlockPlacements.Count);
-        Assert.AreEqual(2, viewmodel.AfterBlockPlacements.Count);
+        Assert.HasCount(2, viewmodel.BeforeBlockPlacements);
+        Assert.HasCount(2, viewmodel.AfterBlockPlacements);
         Assert.AreEqual("Attributes: has been PGO'd, has been optimized for speed", viewmodel.BeforeAttributes);
         Assert.AreEqual("Attributes: has been PGO'd, has been optimized for speed", viewmodel.AfterAttributes);
     }
 
     public void Dispose() => this.Generator.Dispose();
+
+    public TestContext TestContext { get; set; }
 }

@@ -23,12 +23,12 @@ public class ExceptionFormatterTests
 
         var text = ExceptionFormatter.GetFormattedTextForLogging(caughtException, "Callsite message", Environment.NewLine);
 
-        StringAssert.Contains(text, "Callsite message", StringComparison.Ordinal);
-        StringAssert.Contains(text, "Important Message", StringComparison.Ordinal);
+        Assert.Contains("Callsite message", text, StringComparison.Ordinal);
+        Assert.Contains("Important Message", text, StringComparison.Ordinal);
 
         var stackTrace = new StackTrace(caughtException, fNeedFileInfo: true);
 
-        StringAssert.Contains(text, stackTrace.ToString(), StringComparison.Ordinal);
+        Assert.Contains(stackTrace.ToString(), text, StringComparison.Ordinal);
     }
 
     [TestMethod]
@@ -54,19 +54,19 @@ public class ExceptionFormatterTests
 
         var text = ExceptionFormatter.GetFormattedTextForLogging(caughtException, "Callsite message", Environment.NewLine);
 
-        StringAssert.Contains(text, "Callsite message", StringComparison.Ordinal);
-        StringAssert.Contains(text, "Important Outer Message", StringComparison.Ordinal);
-        StringAssert.Contains(text, caughtException.GetType().FullName, StringComparison.Ordinal);
+        Assert.Contains("Callsite message", text, StringComparison.Ordinal);
+        Assert.Contains("Important Outer Message", text, StringComparison.Ordinal);
+        Assert.Contains(caughtException.GetType().FullName!, text, StringComparison.Ordinal);
 
         Assert.IsNotNull(caughtException.InnerException);
-        StringAssert.Contains(text, "Important Inner Message", StringComparison.Ordinal);
-        StringAssert.Contains(text, caughtException.InnerException.GetType().FullName, StringComparison.Ordinal);
+        Assert.Contains("Important Inner Message", text, StringComparison.Ordinal);
+        Assert.Contains(caughtException.InnerException.GetType().FullName!, text, StringComparison.Ordinal);
 
         var stackTrace = new StackTrace(caughtException, fNeedFileInfo: true);
-        StringAssert.Contains(text, stackTrace.ToString(), StringComparison.Ordinal);
+        Assert.Contains(stackTrace.ToString(), text, StringComparison.Ordinal);
 
         stackTrace = new StackTrace(caughtException.InnerException, fNeedFileInfo: true);
-        StringAssert.Contains(text, stackTrace.ToString(), StringComparison.Ordinal);
+        Assert.Contains(stackTrace.ToString(), text, StringComparison.Ordinal);
     }
 
     [TestMethod]
@@ -104,26 +104,26 @@ public class ExceptionFormatterTests
 
         var text = ExceptionFormatter.GetFormattedTextForLogging(caughtException, "Callsite message", Environment.NewLine);
 
-        StringAssert.Contains(text, "Callsite message", StringComparison.Ordinal);
+        Assert.Contains("Callsite message", text, StringComparison.Ordinal);
 
-        StringAssert.Contains(text, "Outer aggregate exception", StringComparison.Ordinal);
-        StringAssert.Contains(text, caughtException.GetType().FullName, StringComparison.Ordinal);
+        Assert.Contains("Outer aggregate exception", text, StringComparison.Ordinal);
+        Assert.Contains(caughtException.GetType().FullName!, text, StringComparison.Ordinal);
 
         Assert.IsNotNull(innerException1);
-        StringAssert.Contains(text, "Important Inner Message", StringComparison.Ordinal);
-        StringAssert.Contains(text, innerException1.GetType().FullName, StringComparison.Ordinal);
+        Assert.Contains("Important Inner Message", text, StringComparison.Ordinal);
+        Assert.Contains(innerException1.GetType().FullName!, text, StringComparison.Ordinal);
 
         Assert.IsNotNull(innerException2);
-        StringAssert.Contains(text, "Some argument was out of range", StringComparison.Ordinal);
-        StringAssert.Contains(text, innerException2.GetType().FullName, StringComparison.Ordinal);
+        Assert.Contains("Some argument was out of range", text, StringComparison.Ordinal);
+        Assert.Contains(innerException2.GetType().FullName!, text, StringComparison.Ordinal);
 
         var stackTrace = new StackTrace(caughtException, fNeedFileInfo: true);
-        StringAssert.Contains(text, stackTrace.ToString(), StringComparison.Ordinal);
+        Assert.Contains(stackTrace.ToString(), text, StringComparison.Ordinal);
 
         stackTrace = new StackTrace(innerException1, fNeedFileInfo: true);
-        StringAssert.Contains(text, stackTrace.ToString(), StringComparison.Ordinal);
+        Assert.Contains(stackTrace.ToString(), text, StringComparison.Ordinal);
 
         stackTrace = new StackTrace(innerException2, fNeedFileInfo: true);
-        StringAssert.Contains(text, stackTrace.ToString(), StringComparison.Ordinal);
+        Assert.Contains(stackTrace.ToString(), text, StringComparison.Ordinal);
     }
 }

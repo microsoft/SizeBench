@@ -31,7 +31,7 @@ public sealed class DiffSession_EnumerateWastefulVirtualItemDiffsTests
         Assert.IsNotNull(wviDiffs);
 
         // No entries returned, since every type is 'trivially diffed' to a zero size (no hierarchy changes, no override changes, no size changes)
-        Assert.AreEqual(0, wviDiffs.Count);
+        Assert.IsEmpty(wviDiffs);
     }
 
     [TestMethod]
@@ -44,17 +44,17 @@ public sealed class DiffSession_EnumerateWastefulVirtualItemDiffsTests
         var wviDiffs = await diffSession.EnumerateWastefulVirtualItemDiffs(CancellationToken.None);
         Assert.IsNotNull(wviDiffs);
 
-        Assert.AreEqual(8, wviDiffs.Count);
+        Assert.HasCount(8, wviDiffs);
 
         // Test case for: removing a virtual, which saves on the whole hierarchy of types
         // Base1_Derived1::PureVirtualFunctionWithOneOverride
         var base1_derived1Diff = wviDiffs.Single(wviDiff => wviDiff.TypeName == "Base1_Derived1");
         Assert.AreEqual(-16 + 16, base1_derived1Diff.WastedSizeDiff);
         Assert.AreEqual(48u, base1_derived1Diff.WastedSizeRemaining);
-        Assert.AreEqual(1, base1_derived1Diff.TypeHierarchyChanges.Count);
+        Assert.HasCount(1, base1_derived1Diff.TypeHierarchyChanges);
         Assert.AreEqual("Base1_Derived1_MoreDerived2", base1_derived1Diff.TypeHierarchyChanges[0].Type.Name);
         Assert.AreEqual(16, base1_derived1Diff.TypeHierarchyChanges[0].WasteChange);
-        Assert.AreEqual(1, base1_derived1Diff.WastedOverrideChanges.Count);
+        Assert.HasCount(1, base1_derived1Diff.WastedOverrideChanges);
         Assert.AreEqual("void Base1_Derived1_MoreDerived1::PureVirtualFunctionWithOneOverride() override", base1_derived1Diff.WastedOverrideChanges[0].Function.FullName);
         Assert.AreEqual("void Base1_Derived1_MoreDerived1::PureVirtualFunctionWithOneOverride() override", base1_derived1Diff.WastedOverrideChanges[0].Function.FullName);
         Assert.AreEqual(-16, base1_derived1Diff.WastedOverrideChanges[0].WasteChange);
@@ -65,13 +65,13 @@ public sealed class DiffSession_EnumerateWastefulVirtualItemDiffsTests
 
         // Test case for: adding a virtual, which costs on the whole hierarchy
         // Base1::VirtualFunctionWithNoOverridesOnlyInAfter
-        Assert.AreEqual(1, base1Diff.WastedOverrideChanges.Count);
+        Assert.HasCount(1, base1Diff.WastedOverrideChanges);
         Assert.AreEqual("virtual int Base1::VirtualFunctionWithNoOverridesOnlyInAfter()", base1Diff.WastedOverrideChanges[0].Function.FullName);
         Assert.AreEqual(32, base1Diff.WastedOverrideChanges[0].WasteChange);
 
         // Test case for: removing a type in the hierarchy, which saves on all the wasteful virtual slots on that type
         // Base1_Derived2
-        Assert.AreEqual(2, base1Diff.TypeHierarchyChanges.Count);
+        Assert.HasCount(2, base1Diff.TypeHierarchyChanges);
         var base1_Derived2Change = base1Diff.TypeHierarchyChanges.Single(change => change.Type.Name == "Base1_Derived2");
         Assert.AreEqual(-8, base1_Derived2Change.WasteChange); // removed the one wasteful virtual from 'before'
 
@@ -85,16 +85,16 @@ public sealed class DiffSession_EnumerateWastefulVirtualItemDiffsTests
         var baseWastefulOnlyInBeforeDiff = wviDiffs.Single(wviDiff => wviDiff.TypeName == "BaseWastefulOnlyInBefore");
         Assert.AreEqual(-24, baseWastefulOnlyInBeforeDiff.WastedSizeDiff);
         Assert.AreEqual(0u, baseWastefulOnlyInBeforeDiff.WastedSizeRemaining);
-        Assert.AreEqual(0, baseWastefulOnlyInBeforeDiff.TypeHierarchyChanges.Count); // No change in the number of types, functions account for all of it
-        Assert.AreEqual(1, baseWastefulOnlyInBeforeDiff.WastedOverrideChanges.Count);
+        Assert.IsEmpty(baseWastefulOnlyInBeforeDiff.TypeHierarchyChanges); // No change in the number of types, functions account for all of it
+        Assert.HasCount(1, baseWastefulOnlyInBeforeDiff.WastedOverrideChanges);
         Assert.AreEqual("virtual int BaseWastefulOnlyInBefore::VirtualFunctionWithNoOverrides()", baseWastefulOnlyInBeforeDiff.WastedOverrideChanges[0].Function.FullName);
         Assert.AreEqual(-24, baseWastefulOnlyInBeforeDiff.WastedOverrideChanges[0].WasteChange);
 
         var baseWastefulOnlyInBefore_Derived1Diff = wviDiffs.Single(wviDiff => wviDiff.TypeName == "BaseWastefulOnlyInBefore_Derived1");
         Assert.AreEqual(0 - 16 - 16 - 16, baseWastefulOnlyInBefore_Derived1Diff.WastedSizeDiff);
         Assert.AreEqual(0u, baseWastefulOnlyInBefore_Derived1Diff.WastedSizeRemaining);
-        Assert.AreEqual(0, baseWastefulOnlyInBefore_Derived1Diff.TypeHierarchyChanges.Count); // No change in the number of types, functions account for all of it
-        Assert.AreEqual(3, baseWastefulOnlyInBefore_Derived1Diff.WastedOverrideChanges.Count);
+        Assert.IsEmpty(baseWastefulOnlyInBefore_Derived1Diff.TypeHierarchyChanges); // No change in the number of types, functions account for all of it
+        Assert.HasCount(3, baseWastefulOnlyInBefore_Derived1Diff.WastedOverrideChanges);
         Assert.AreEqual(-16, baseWastefulOnlyInBefore_Derived1Diff.WastedOverrideChanges.Single(change => change.Function.FullName == "void BaseWastefulOnlyInBefore_Derived1_MoreDerived1::PureVirtualFunctionWithOneOverride() override").WasteChange);
         Assert.AreEqual(-16, baseWastefulOnlyInBefore_Derived1Diff.WastedOverrideChanges.Single(change => change.Function.FullName == "virtual void BaseWastefulOnlyInBefore_Derived1::VirtualFunctionWithNoOverrides2()").WasteChange);
         Assert.AreEqual(-16, baseWastefulOnlyInBefore_Derived1Diff.WastedOverrideChanges.Single(change => change.Function.FullName == "virtual int BaseWastefulOnlyInBefore_Derived1::VirtualFunctionWithNoOverrides(int)").WasteChange);
@@ -104,7 +104,7 @@ public sealed class DiffSession_EnumerateWastefulVirtualItemDiffsTests
         var baseWastefulOnlyInAfterDiff = wviDiffs.Single(wviDiff => wviDiff.TypeName == "BaseWastefulOnlyInAfter");
         Assert.AreEqual(8 + 8 + 8, baseWastefulOnlyInAfterDiff.WastedSizeDiff);
         Assert.AreEqual(8u + 8u + 8u, baseWastefulOnlyInAfterDiff.WastedSizeRemaining);
-        Assert.AreEqual(0, baseWastefulOnlyInAfterDiff.TypeHierarchyChanges.Count); // No change in the number of types, functions account for all of it
+        Assert.IsEmpty(baseWastefulOnlyInAfterDiff.TypeHierarchyChanges); // No change in the number of types, functions account for all of it
         Assert.AreEqual("virtual int BaseWastefulOnlyInAfter::VirtualFunctionWithNoOverrides()", baseWastefulOnlyInAfterDiff.WastedOverrideChanges[0].Function.FullName);
         Assert.AreEqual(24, baseWastefulOnlyInAfterDiff.WastedOverrideChanges[0].WasteChange);
 
@@ -112,8 +112,8 @@ public sealed class DiffSession_EnumerateWastefulVirtualItemDiffsTests
         var baseWastefulOnlyInAfter_Derived1Diff = wviDiffs.Single(wviDiff => wviDiff.TypeName == "BaseWastefulOnlyInAfter_Derived1");
         Assert.AreEqual(16 + 16 + 16, baseWastefulOnlyInAfter_Derived1Diff.WastedSizeDiff);
         Assert.AreEqual(16u + 16u + 16u, baseWastefulOnlyInAfter_Derived1Diff.WastedSizeRemaining);
-        Assert.AreEqual(0, baseWastefulOnlyInAfter_Derived1Diff.TypeHierarchyChanges.Count); // No change in the number of types, functions account for all of it
-        Assert.AreEqual(3, baseWastefulOnlyInAfter_Derived1Diff.WastedOverrideChanges.Count);
+        Assert.IsEmpty(baseWastefulOnlyInAfter_Derived1Diff.TypeHierarchyChanges); // No change in the number of types, functions account for all of it
+        Assert.HasCount(3, baseWastefulOnlyInAfter_Derived1Diff.WastedOverrideChanges);
         Assert.AreEqual(16, baseWastefulOnlyInAfter_Derived1Diff.WastedOverrideChanges.Single(change => change.Function.FullName == "void BaseWastefulOnlyInAfter_Derived1_MoreDerived1::PureVirtualFunctionWithOneOverride() override").WasteChange);
         Assert.AreEqual(16, baseWastefulOnlyInAfter_Derived1Diff.WastedOverrideChanges.Single(change => change.Function.FullName == "virtual void BaseWastefulOnlyInAfter_Derived1::VirtualFunctionWithNoOverrides2()").WasteChange);
         Assert.AreEqual(16, baseWastefulOnlyInAfter_Derived1Diff.WastedOverrideChanges.Single(change => change.Function.FullName == "virtual int BaseWastefulOnlyInAfter_Derived1::VirtualFunctionWithNoOverrides(int)").WasteChange);

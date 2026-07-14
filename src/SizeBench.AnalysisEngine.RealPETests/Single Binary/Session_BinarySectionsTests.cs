@@ -41,11 +41,11 @@ public sealed class Session_BinarySectionsTests
         Assert.IsNotNull(relocSection);
 
         Assert.AreEqual(0x1A00u, textSection.Size);
-        Assert.IsTrue(textSection.COFFGroups.Count > 0);
+        Assert.IsNotEmpty(textSection.COFFGroups);
         Assert.AreEqual(0xC00u, rdataSection.Size);
-        Assert.IsTrue(rdataSection.COFFGroups.Count > 0);
+        Assert.IsNotEmpty(rdataSection.COFFGroups);
         Assert.AreEqual(0x200u, relocSection.Size);
-        Assert.AreEqual(1, relocSection.COFFGroups.Count); // We should have synthesized a COFF group for the .reloc section from the base reloc directory in the PE
+        Assert.HasCount(1, relocSection.COFFGroups); // We should have synthesized a COFF group for the .reloc section from the base reloc directory in the PE
 
         var textmnCOFFGroup = (from cg in textSection.COFFGroups where cg.Name == ".text$mn" select cg).First();
         var xdataCOFFGroup = (from cg in rdataSection.COFFGroups where cg.Name == ".xdata" select cg).First();
@@ -92,11 +92,11 @@ public sealed class Session_BinarySectionsTests
         Assert.IsNotNull(relocSection);
 
         Assert.AreEqual(0x1600u, textSection.Size);
-        Assert.IsTrue(textSection.COFFGroups.Count > 0);
+        Assert.IsNotEmpty(textSection.COFFGroups);
         Assert.AreEqual(0xA00u, rdataSection.Size);
-        Assert.IsTrue(rdataSection.COFFGroups.Count > 0);
+        Assert.IsNotEmpty(rdataSection.COFFGroups);
         Assert.AreEqual(0x200u, relocSection.Size);
-        Assert.AreEqual(1, relocSection.COFFGroups.Count); // We should have synthesized a COFF group for the .reloc section from the base reloc directory in the PE
+        Assert.HasCount(1, relocSection.COFFGroups); // We should have synthesized a COFF group for the .reloc section from the base reloc directory in the PE
 
         var textmnCOFFGroup = (from cg in textSection.COFFGroups where cg.Name == ".text$mn" select cg).First();
         var xdataCOFFGroup = (from cg in rdataSection.COFFGroups where cg.Name == ".xdata" select cg).FirstOrDefault();

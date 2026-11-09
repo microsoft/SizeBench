@@ -262,6 +262,100 @@ public sealed class MainWindowViewModelTests : IDisposable
     }
 
     [TestMethod]
+    public void RemoveRecentSessionUpdatesHistoryAndNotifiesWhenEmpty()
+    {
+        var singleSession = RecentSession.CreateSingle(@"c:\dev\foo.dll", @"c:\dev\foo.pdb", new SessionOptions());
+        var diffSession = RecentSession.CreateDiff(@"c:\dev\before.dll", @"c:\dev\before.pdb", @"c:\dev\after.dll", @"c:\dev\after.pdb");
+        this.MockRecentSessionStore.Setup(store => store.GetRecentSessions()).Returns(new[] { singleSession, diffSession });
+
+        using var container = new WindsorContainer();
+        using var appLogger = new TestNoOpApplicationLogger();
+        var vm = new MainWindowViewModel(container, appLogger, this.MockSessionFactory.Object,
+                                         this.MockRecentSessionStore.Object, this.MockRecentSessionLauncher.Object);
+        var notifications = new List<string?>();
+        vm.PropertyChanged += (_, e) => notifications.Add(e.PropertyName);
+
+        vm.RemoveRecentSessionCommand.Execute(singleSession);
+
+        this.MockRecentSessionStore.Verify(store => store.RemoveSession(singleSession), Times.Once());
+        CollectionAssert.AreEqual(new[] { diffSession }, vm.RecentSessions.ToArray());
+        Assert.IsTrue(vm.HasRecentSessions);
+
+        vm.RemoveRecentSessionCommand.Execute(diffSession);
+
+        this.MockRecentSessionStore.Verify(store => store.RemoveSession(diffSession), Times.Once());
+        Assert.IsFalse(vm.HasRecentSessions);
+        Assert.HasCount(2, notifications.Where(name => name == nameof(vm.HasRecentSessions)));
+    }
+
+    [TestMethod]
+    public void ClearRecentSessionsUpdatesHistoryAndNotifiesWhenEmpty()
+    {
+        this.MockRecentSessionStore.Setup(store => store.GetRecentSessions()).Returns(new[]
+        {
+            RecentSession.CreateSingle(@"c:\dev\foo.dll", @"c:\dev\foo.pdb", new SessionOptions()),
+            RecentSession.CreateDiff(@"c:\dev\before.dll", @"c:\dev\before.pdb", @"c:\dev\after.dll", @"c:\dev\after.pdb")
+        });
+
+        using var container = new WindsorContainer();
+        using var appLogger = new TestNoOpApplicationLogger();
+        var vm = new MainWindowViewModel(container, appLogger, this.MockSessionFactory.Object,
+                                         this.MockRecentSessionStore.Object, this.MockRecentSessionLauncher.Object);
+        var notifications = new List<string?>();
+        vm.PropertyChanged += (_, e) => notifications.Add(e.PropertyName);
+
+        vm.ClearRecentSessionsCommand.Execute(null);
+
+        this.MockRecentSessionStore.Verify(store => store.ClearSessions(), Times.Once());
+        Assert.IsEmpty(vm.RecentSessions);
+        Assert.IsFalse(vm.HasRecentSessions);
+        CollectionAssert.Contains(notifications, nameof(vm.HasRecentSessions));
+    }
+
+    [TestMethod]
+    public async Task MissingRecentSessionRemainsAvailableForRetryAfterRebuild()
+    {
+        var tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        Directory.CreateDirectory(tempDirectory);
+
+        try
+        {
+            var binaryPath = Path.Combine(tempDirectory, "foo.dll");
+            var pdbPath = Path.Combine(tempDirectory, "foo.pdb");
+            var recentSession = RecentSession.CreateSingle(binaryPath, pdbPath, new SessionOptions());
+            this.MockRecentSessionStore.Setup(store => store.GetRecentSessions()).Returns(new[] { recentSession });
+            this.MockSessionFactory.Setup(sf => sf.CreateSession(binaryPath, pdbPath, It.IsAny<SessionOptions>(), It.IsAny<ILogger>()))
+                                   .Returns(Task.FromResult<ISession>(new Mock<ISession>().Object));
+
+            using var container = new WindsorContainer();
+            using var appLogger = new TestNoOpApplicationLogger();
+            var vm = new MainWindowViewModel(container, appLogger, this.MockSessionFactory.Object,
+                                             this.MockRecentSessionStore.Object, this.MockRecentSessionLauncher.Object);
+
+            var openTask = vm.OpenRecentSession(recentSession);
+            Assert.IsInstanceOfType<AppWideModalMessageDialogViewModel>(vm.CurrentlyOpenDialog);
+            ((AppWideModalMessageDialogViewModel)vm.CurrentlyOpenDialog).PrimaryButtonCommand.Execute();
+            await openTask;
+
+            CollectionAssert.AreEqual(new[] { recentSession }, vm.RecentSessions.ToArray());
+            this.MockRecentSessionStore.Verify(store => store.RemoveSession(It.IsAny<RecentSession>()), Times.Never());
+            this.MockRecentSessionStore.Verify(store => store.ClearSessions(), Times.Never());
+            this.MockSessionFactory.Verify(sf => sf.CreateSession(binaryPath, pdbPath, It.IsAny<SessionOptions>(), It.IsAny<ILogger>()), Times.Never());
+
+            await File.WriteAllTextAsync(binaryPath, String.Empty);
+            await File.WriteAllTextAsync(pdbPath, String.Empty);
+            await vm.OpenRecentSession(recentSession);
+
+            Assert.HasCount(1, vm.OpenTabs);
+            this.MockSessionFactory.Verify(sf => sf.CreateSession(binaryPath, pdbPath, It.IsAny<SessionOptions>(), It.IsAny<ILogger>()), Times.Once());
+        }
+        finally
+        {
+            Directory.Delete(tempDirectory, recursive: true);
+        }
+    }
+
+    [TestMethod]
     public async Task OpenRecentSingleBinarySessionCreatesTab()
     {
         var tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());

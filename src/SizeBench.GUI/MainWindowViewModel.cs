@@ -54,6 +54,8 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
     public DelegateCommand OpenBinaryDiffCommand { get; }
     public DelegateCommand<RecentSession> OpenRecentSessionCommand { get; }
     public DelegateCommand<RecentSession> OpenRecentSessionInNewWindowCommand { get; }
+    public DelegateCommand<RecentSession> RemoveRecentSessionCommand { get; }
+    public DelegateCommand ClearRecentSessionsCommand { get; }
     public DelegateCommand ShowLogWindowCommand { get; }
     public DelegateCommand ShowHelpWindowCommand { get; }
     public DelegateCommand ShowAboutBoxCommand { get; }
@@ -290,6 +292,8 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
         this.OpenBinaryDiffCommand = new DelegateCommand(OpenBinaryDiffCommand_Executed);
         this.OpenRecentSessionCommand = new DelegateCommand<RecentSession>(OpenRecentSessionCommand_Executed);
         this.OpenRecentSessionInNewWindowCommand = new DelegateCommand<RecentSession>(OpenRecentSessionInNewWindowCommand_Executed);
+        this.RemoveRecentSessionCommand = new DelegateCommand<RecentSession>(RemoveRecentSessionCommand_Executed);
+        this.ClearRecentSessionsCommand = new DelegateCommand(ClearRecentSessionsCommand_Executed);
         this.ShowLogWindowCommand = new DelegateCommand(ShowLogWindow);
         this.ShowHelpWindowCommand = new DelegateCommand(ShowHelpWindow);
         this.ShowAboutBoxCommand = new DelegateCommand(ShowAboutBox);
@@ -481,6 +485,24 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
         {
             this._recentSessionLauncher.LaunchRecentSession(recentSession);
         }
+    }
+
+    private void RemoveRecentSessionCommand_Executed(RecentSession recentSession)
+    {
+        ArgumentNullException.ThrowIfNull(recentSession);
+
+        this._recentSessionStore.RemoveSession(recentSession);
+        var existingSession = this.RecentSessions.FirstOrDefault(candidate => candidate.Matches(recentSession));
+        if (existingSession is not null)
+        {
+            this.RecentSessions.Remove(existingSession);
+        }
+    }
+
+    private void ClearRecentSessionsCommand_Executed()
+    {
+        this._recentSessionStore.ClearSessions();
+        this.RecentSessions.Clear();
     }
 
     internal async Task OpenRecentSession(RecentSession recentSession)

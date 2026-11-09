@@ -104,11 +104,18 @@
                     </Run>
                 </TextBlock>
 
-                <TextBlock Grid.Row="3"
-                           FontSize="16"
+                <DockPanel Grid.Row="3"
                            Margin="0,35,0,10"
-                           Text="Recent sessions"
-                           Visibility="{Binding HasRecentSessions, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}}"/>
+                           Visibility="{Binding HasRecentSessions, Converter={x:Static converters:BooleanToVisibilityConverter.Instance}}">
+                    <Button DockPanel.Dock="Right"
+                            Foreground="Gray"
+                            Padding="0"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Command="{Binding ClearRecentSessionsCommand}"
+                            Content="Clear"/>
+                    <TextBlock FontSize="16" Text="Recent sessions"/>
+                </DockPanel>
 
                 <ScrollViewer Grid.Row="4"
                               VerticalScrollBarVisibility="Auto"
@@ -124,6 +131,15 @@
                                         CornerRadius="4">
                                     <StackPanel>
                                         <DockPanel LastChildFill="True">
+                                            <Button DockPanel.Dock="Right"
+                                                    Margin="10,0,0,0"
+                                                    Foreground="Gray"
+                                                    Padding="0"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Command="{Binding DataContext.RemoveRecentSessionCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                                                    CommandParameter="{Binding}"
+                                                    Content="Remove"/>
                                             <TextBlock DockPanel.Dock="Right"
                                                        Margin="10,0,0,0"
                                                        FontSize="11"

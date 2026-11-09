@@ -75,6 +75,66 @@ public sealed class RecentSessionStoreTests
     }
 
     [TestMethod]
+    public void RemoveSessionPersistsWithoutRemovingOtherEntries()
+    {
+        var tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        Directory.CreateDirectory(tempDirectory);
+
+        try
+        {
+            var storagePath = Path.Combine(tempDirectory, "RecentSessions.json");
+            using var logger = new TestNoOpApplicationLogger();
+            var store = new RecentSessionStore(logger, storagePath);
+            var singleSession = RecentSession.CreateSingle(@"c:\dev\foo.dll", @"c:\dev\foo.pdb", new SessionOptions());
+            var diffSession = RecentSession.CreateDiff(@"c:\dev\before.dll", @"c:\dev\before.pdb", @"c:\dev\after.dll", @"c:\dev\after.pdb");
+            store.RecordSession(singleSession);
+            store.RecordSession(diffSession);
+
+            store.RemoveSession(singleSession.WithUpdatedTimestamp(DateTimeOffset.UtcNow.AddDays(-1)));
+
+            var reloadedStore = new RecentSessionStore(logger, storagePath);
+            Assert.HasCount(1, store.GetRecentSessions());
+            Assert.HasCount(1, reloadedStore.GetRecentSessions());
+            Assert.IsTrue(reloadedStore.GetRecentSessions()[0].Matches(diffSession));
+
+            store.RemoveSession(diffSession);
+            Assert.IsEmpty(new RecentSessionStore(logger, storagePath).GetRecentSessions());
+        }
+        finally
+        {
+            Directory.Delete(tempDirectory, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public void ClearSessionsPersistsEmptyHistoryAndAllowsRecordingAgain()
+    {
+        var tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        Directory.CreateDirectory(tempDirectory);
+
+        try
+        {
+            var storagePath = Path.Combine(tempDirectory, "RecentSessions.json");
+            using var logger = new TestNoOpApplicationLogger();
+            var store = new RecentSessionStore(logger, storagePath);
+            var singleSession = RecentSession.CreateSingle(@"c:\dev\foo.dll", @"c:\dev\foo.pdb", new SessionOptions());
+            store.RecordSession(singleSession);
+            store.RecordSession(RecentSession.CreateDiff(@"c:\dev\before.dll", @"c:\dev\before.pdb", @"c:\dev\after.dll", @"c:\dev\after.pdb"));
+
+            store.ClearSessions();
+
+            Assert.IsEmpty(store.GetRecentSessions());
+            Assert.IsEmpty(new RecentSessionStore(logger, storagePath).GetRecentSessions());
+            store.RecordSession(singleSession);
+            Assert.HasCount(1, new RecentSessionStore(logger, storagePath).GetRecentSessions());
+        }
+        finally
+        {
+            Directory.Delete(tempDirectory, recursive: true);
+        }
+    }
+
+    [TestMethod]
     public void RecordSessionCapsHistoryAtTenEntries()
     {
         var tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());

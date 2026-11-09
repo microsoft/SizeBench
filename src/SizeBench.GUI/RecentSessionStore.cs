@@ -10,6 +10,10 @@ internal interface IRecentSessionStore
     IReadOnlyList<RecentSession> GetRecentSessions();
 
     RecentSession RecordSession(RecentSession recentSession);
+
+    void RemoveSession(RecentSession recentSession);
+
+    void ClearSessions();
 }
 
 internal sealed class RecentSessionStore : IRecentSessionStore
@@ -58,6 +62,20 @@ internal sealed class RecentSessionStore : IRecentSessionStore
 
         PersistRecentSessions();
         return persistedSession;
+    }
+
+    public void RemoveSession(RecentSession recentSession)
+    {
+        ArgumentNullException.ThrowIfNull(recentSession);
+
+        this._recentSessions.RemoveAll(candidate => candidate.Matches(recentSession));
+        PersistRecentSessions();
+    }
+
+    public void ClearSessions()
+    {
+        this._recentSessions.Clear();
+        PersistRecentSessions();
     }
 
     private List<RecentSession> LoadRecentSessions()

@@ -30,7 +30,7 @@ public sealed class DiffSession_EnumerateSectionsAndCOFFGroupsTests
         var sectionDiffs = await diffSession.EnumerateBinarySectionsAndCOFFGroupDiffs(CancellationToken.None);
         Assert.IsNotNull(sectionDiffs);
 
-        Assert.AreEqual(7, sectionDiffs.Count);
+        Assert.HasCount(7, sectionDiffs);
 
         // Validating this against known good output from "link /dump /headers CppTestCases_BasicDiffObjectsBefore.dll"
         var textSectionDiff = (from s in sectionDiffs where s.Name == ".text" select s).FirstOrDefault();
@@ -51,7 +51,7 @@ public sealed class DiffSession_EnumerateSectionsAndCOFFGroupsTests
 
         Assert.AreEqual(0, textSectionDiff.SizeDiff);
         Assert.AreEqual(0, textSectionDiff.VirtualSizeDiff);
-        Assert.AreEqual(3, textSectionDiff.COFFGroupDiffs.Count);
+        Assert.HasCount(3, textSectionDiff.COFFGroupDiffs);
         foreach (var cg in textSectionDiff.COFFGroupDiffs)
         {
             Assert.AreEqual(0, cg.SizeDiff);
@@ -60,7 +60,7 @@ public sealed class DiffSession_EnumerateSectionsAndCOFFGroupsTests
 
         Assert.AreEqual(0, dataSectionDiff.SizeDiff);
         Assert.AreEqual(0, dataSectionDiff.VirtualSizeDiff);
-        Assert.AreEqual(2, dataSectionDiff.COFFGroupDiffs.Count);
+        Assert.HasCount(2, dataSectionDiff.COFFGroupDiffs);
         foreach (var cg in dataSectionDiff.COFFGroupDiffs)
         {
             Assert.AreEqual(0, cg.SizeDiff);
@@ -69,7 +69,7 @@ public sealed class DiffSession_EnumerateSectionsAndCOFFGroupsTests
 
         Assert.AreEqual(0, rdataSectionDiff.SizeDiff);
         Assert.AreEqual(0, rdataSectionDiff.VirtualSizeDiff);
-        Assert.AreEqual(21, rdataSectionDiff.COFFGroupDiffs.Count);
+        Assert.HasCount(21, rdataSectionDiff.COFFGroupDiffs);
         foreach (var cg in rdataSectionDiff.COFFGroupDiffs)
         {
             Assert.AreEqual(0, cg.SizeDiff);
@@ -78,7 +78,7 @@ public sealed class DiffSession_EnumerateSectionsAndCOFFGroupsTests
 
         Assert.AreEqual(0, relocSectionDiff.SizeDiff);
         Assert.AreEqual(0, relocSectionDiff.VirtualSizeDiff);
-        Assert.AreEqual(1, relocSectionDiff.COFFGroupDiffs.Count);
+        Assert.HasCount(1, relocSectionDiff.COFFGroupDiffs);
         foreach (var cg in relocSectionDiff.COFFGroupDiffs)
         {
             Assert.AreEqual(0, cg.SizeDiff);
@@ -87,7 +87,7 @@ public sealed class DiffSession_EnumerateSectionsAndCOFFGroupsTests
 
         Assert.AreEqual(0, pdataSectionDiff.SizeDiff);
         Assert.AreEqual(0, pdataSectionDiff.VirtualSizeDiff);
-        Assert.AreEqual(1, pdataSectionDiff.COFFGroupDiffs.Count);
+        Assert.HasCount(1, pdataSectionDiff.COFFGroupDiffs);
         foreach (var cg in pdataSectionDiff.COFFGroupDiffs)
         {
             Assert.AreEqual(0, cg.SizeDiff);
@@ -96,7 +96,7 @@ public sealed class DiffSession_EnumerateSectionsAndCOFFGroupsTests
 
         Assert.AreEqual(0, gfidsSectionDiff.SizeDiff);
         Assert.AreEqual(0, gfidsSectionDiff.VirtualSizeDiff);
-        Assert.AreEqual(1, gfidsSectionDiff.COFFGroupDiffs.Count);
+        Assert.HasCount(1, gfidsSectionDiff.COFFGroupDiffs);
         foreach (var cg in gfidsSectionDiff.COFFGroupDiffs)
         {
             Assert.AreEqual(0, cg.SizeDiff);
@@ -105,7 +105,7 @@ public sealed class DiffSession_EnumerateSectionsAndCOFFGroupsTests
 
         Assert.AreEqual(0, rsrcSectionDiff.SizeDiff);
         Assert.AreEqual(0, rsrcSectionDiff.VirtualSizeDiff);
-        Assert.AreEqual(2, rsrcSectionDiff.COFFGroupDiffs.Count);
+        Assert.HasCount(2, rsrcSectionDiff.COFFGroupDiffs);
         foreach (var cg in rsrcSectionDiff.COFFGroupDiffs)
         {
             Assert.AreEqual(0, cg.SizeDiff);

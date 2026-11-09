@@ -8,13 +8,13 @@ public sealed class TwoStringsToDiffViewerUIConverterTests
 {
     [TestMethod]
     public void TargetTypeMustBeObject()
-        => Assert.ThrowsException<ArgumentException>(() => TwoStringsToDiffViewerUIConverter.Instance.Convert(new object[] { 5 }, typeof(int), null /* ConverterParameter */, null /* CultureInfo */));
+        => Assert.ThrowsExactly<ArgumentException>(() => TwoStringsToDiffViewerUIConverter.Instance.Convert(new object[] { 5 }, typeof(int), null /* ConverterParameter */, null /* CultureInfo */));
 
     [TestMethod]
     public void MoreThanTwoInputsNotAccepted()
     {
-        Assert.ThrowsException<ArgumentException>(() => TwoStringsToDiffViewerUIConverter.Instance.Convert(new object[] { "disasm 1", "disasm 2", "disasm 3" }, typeof(object), null /* ConverterParameter */, null /* CultureInfo */));
-        Assert.ThrowsException<ArgumentException>(() => TwoStringsToDiffViewerUIConverter.Instance.Convert(new object[] { "disasm 1", "disasm 2", "disasm 3", "disasm 4" }, typeof(object), null /* ConverterParameter */, null /* CultureInfo */));
+        Assert.ThrowsExactly<ArgumentException>(() => TwoStringsToDiffViewerUIConverter.Instance.Convert(new object[] { "disasm 1", "disasm 2", "disasm 3" }, typeof(object), null /* ConverterParameter */, null /* CultureInfo */));
+        Assert.ThrowsExactly<ArgumentException>(() => TwoStringsToDiffViewerUIConverter.Instance.Convert(new object[] { "disasm 1", "disasm 2", "disasm 3", "disasm 4" }, typeof(object), null /* ConverterParameter */, null /* CultureInfo */));
     }
 
     [TestMethod]
@@ -30,8 +30,8 @@ public sealed class TwoStringsToDiffViewerUIConverterTests
     [TestMethod]
     public void IfEitherInputIsNotAStringThrow()
     {
-        Assert.ThrowsException<ArgumentException>(() => TwoStringsToDiffViewerUIConverter.Instance.Convert(new object[] { "disasm 1", 23 }, typeof(object), null /* ConverterParameter */, null /* CultureInfo */));
-        Assert.ThrowsException<ArgumentException>(() => TwoStringsToDiffViewerUIConverter.Instance.Convert(new object[] { 0.8f, "disasm 2" }, typeof(object), null /* ConverterParameter */, null /* CultureInfo */));
+        Assert.ThrowsExactly<ArgumentException>(() => TwoStringsToDiffViewerUIConverter.Instance.Convert(new object[] { "disasm 1", 23 }, typeof(object), null /* ConverterParameter */, null /* CultureInfo */));
+        Assert.ThrowsExactly<ArgumentException>(() => TwoStringsToDiffViewerUIConverter.Instance.Convert(new object[] { 0.8f, "disasm 2" }, typeof(object), null /* ConverterParameter */, null /* CultureInfo */));
     }
 
     [TestMethod]
@@ -39,11 +39,10 @@ public sealed class TwoStringsToDiffViewerUIConverterTests
     {
         // Validating that this is actually a diff viewer, that it is useful (good colors, etc.) is really hard and doesn't seem worth it, so we'll just check
         // that it's a FrameworkElement for now and assume what we got back is good.
-        Assert.IsInstanceOfType(TwoStringsToDiffViewerUIConverter.Instance.Convert(new object[] { "disasm 1", "disasm 2" }, typeof(object), null /* ConverterParameter */, null /* CultureInfo */),
-                                typeof(FrameworkElement));
+        Assert.IsInstanceOfType<FrameworkElement>(TwoStringsToDiffViewerUIConverter.Instance.Convert(new object[] { "disasm 1", "disasm 2" }, typeof(object), null /* ConverterParameter */, null /* CultureInfo */));
     }
 
     [TestMethod]
     public void ConvertBackThrows()
-        => Assert.ThrowsException<NotImplementedException>(() => TwoStringsToDiffViewerUIConverter.Instance.ConvertBack(new FrameworkElement(), new Type[] { typeof(string), typeof(string) }, null /* ConverterParameter */, null /* CultureInfo */));
+        => Assert.ThrowsExactly<NotImplementedException>(() => TwoStringsToDiffViewerUIConverter.Instance.ConvertBack(new FrameworkElement(), new Type[] { typeof(string), typeof(string) }, null /* ConverterParameter */, null /* CultureInfo */));
 }

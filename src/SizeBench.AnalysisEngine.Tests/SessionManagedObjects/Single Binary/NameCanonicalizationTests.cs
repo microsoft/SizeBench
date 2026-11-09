@@ -41,7 +41,7 @@ public sealed class NameCanonicalizationTests
         canonical.AddName(25u, SymTagEnum.SymTagPublicSymbol, name: "public: virtual void Test"); // This would sort first alphabetically but it's not useful and should be discarded
         canonical.Canonicalize();
 
-        Assert.AreEqual(1, canonical.NamesBySymIndexID.Count);
+        Assert.HasCount(1, canonical.NamesBySymIndexID);
         Assert.AreEqual("Test", canonical.CanonicalName);
         Assert.AreEqual(20u, canonical.CanonicalSymIndexID);
     }

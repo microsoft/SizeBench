@@ -13,3 +13,7 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Maintainability", "CA1505:Avoid unmaintainable code", Justification = "Complexity of test methods doesn't seem terribly important.")]
 
 [assembly: SuppressMessage("Performance", "CA1851:Possible multiple enumerations of 'IEnumerable' collection", Justification = "Performance of tests isn't *that* important.")]
+
+[assembly: SuppressMessage("Performance", "CA1859:Use concrete types when possible for improved performance", Justification = "Performance of tests isn't *that* important.")]
+
+[assembly: SuppressMessage("Maintainability", "CA1515:Consider making public types internal", Justification = "Not important for tests - in fact TestClass types MUST be public for MSTest so doing this loses test coverage.")]

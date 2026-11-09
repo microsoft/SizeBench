@@ -43,7 +43,7 @@ public sealed class UserDefinedTypeSymbolTests : IDisposable
 
     // Accessing BaseTypes before you load them should throw - it's up to the caller to do that right for now.  Though that design kinda sucks.
     [TestMethod]
-    public void BaseTypesPropertyThrowsIfCalledWithoutCallingLoadBaseTypes() => Assert.ThrowsException<InvalidOperationException>(() => this.Derived1And2UDT!.BaseTypes);
+    public void BaseTypesPropertyThrowsIfCalledWithoutCallingLoadBaseTypes() => Assert.ThrowsExactly<InvalidOperationException>(() => this.Derived1And2UDT!.BaseTypes);
 
     [TestMethod]
     public void LoadBaseTypesWorksIfTypesAreNotInCacheAlready()
@@ -52,9 +52,9 @@ public sealed class UserDefinedTypeSymbolTests : IDisposable
         this.Derived1And2UDT!.LoadBaseTypes(this.DataCache, this.TestDIAAdapter!, CancellationToken.None);
 
         Assert.IsNotNull(this.Derived1And2UDT.BaseTypes);
-        Assert.AreEqual(2, this.Derived1And2UDT.BaseTypes.Length);
-        Assert.IsTrue(this.Derived1And2UDT.BaseTypes.Any(bt => bt._baseTypeSymbol == this.Base1UDT && bt._offset == 0));
-        Assert.IsTrue(this.Derived1And2UDT.BaseTypes.Any(bt => bt._baseTypeSymbol == this.Base2UDT && bt._offset == 8));
+        Assert.HasCount(2, this.Derived1And2UDT.BaseTypes);
+        Assert.Contains(bt => bt._baseTypeSymbol == this.Base1UDT && bt._offset == 0, this.Derived1And2UDT.BaseTypes);
+        Assert.Contains(bt => bt._baseTypeSymbol == this.Base2UDT && bt._offset == 8, this.Derived1And2UDT.BaseTypes);
     }
 
     [TestMethod]
@@ -68,15 +68,15 @@ public sealed class UserDefinedTypeSymbolTests : IDisposable
         this.Derived1And2UDT!.LoadBaseTypes(this.DataCache, this.TestDIAAdapter, CancellationToken.None);
 
         Assert.IsNotNull(this.Derived1And2UDT.BaseTypes);
-        Assert.AreEqual(2, this.Derived1And2UDT.BaseTypes.Length);
-        Assert.IsTrue(this.Derived1And2UDT.BaseTypes.Any(bt => bt._baseTypeSymbol == this.Base1UDT && bt._offset == 0));
-        Assert.IsTrue(this.Derived1And2UDT.BaseTypes.Any(bt => bt._baseTypeSymbol == this.Base2UDT && bt._offset == 8));
+        Assert.HasCount(2, this.Derived1And2UDT.BaseTypes);
+        Assert.Contains(bt => bt._baseTypeSymbol == this.Base1UDT && bt._offset == 0, this.Derived1And2UDT.BaseTypes);
+        Assert.Contains(bt => bt._baseTypeSymbol == this.Base2UDT && bt._offset == 8, this.Derived1And2UDT.BaseTypes);
     }
 
 
 
     [TestMethod]
-    public void DerivedTypesPropertyThrowsIfCalledWithoutMarkingDerivedTypesAsCompletelyLoaded() => Assert.ThrowsException<InvalidOperationException>(() => this.Base1UDT!.DerivedTypes);
+    public void DerivedTypesPropertyThrowsIfCalledWithoutMarkingDerivedTypesAsCompletelyLoaded() => Assert.ThrowsExactly<InvalidOperationException>(() => this.Base1UDT!.DerivedTypes);
 
     [TestMethod]
     public void AddingTheSameDerivedTypeTwiceIsOK()
@@ -110,7 +110,7 @@ public sealed class UserDefinedTypeSymbolTests : IDisposable
         this.Base2UDT!.AddDerivedType(this.Derived1And2UDT!);
         this.Base2UDT.MarkDerivedTypesLoaded();
 
-        Assert.ThrowsException<InvalidOperationException>(() => this.Base2UDT.AddDerivedType(this.Derived2UDT!));
+        Assert.ThrowsExactly<InvalidOperationException>(() => this.Base2UDT.AddDerivedType(this.Derived2UDT!));
     }
 
     public void Dispose() => this.DataCache?.Dispose();

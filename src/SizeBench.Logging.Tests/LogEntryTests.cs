@@ -29,11 +29,11 @@ public class LogEntryTests
         var output = writer.ToString();
 
         var linesOfOutput = output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-        Assert.AreEqual(1, linesOfOutput.Length);
+        Assert.HasCount(1, linesOfOutput);
 
-        StringAssert.StartsWith(output, "\t\t", StringComparison.Ordinal);
-        StringAssert.Contains(output, callingMember, StringComparison.Ordinal);
-        StringAssert.Contains(output, message, StringComparison.Ordinal);
-        StringAssert.Contains(output, logLevel.ToString(), StringComparison.Ordinal);
+        Assert.StartsWith("\t\t", output, StringComparison.Ordinal);
+        Assert.Contains(callingMember, output, StringComparison.Ordinal);
+        Assert.Contains(message, output, StringComparison.Ordinal);
+        Assert.Contains(logLevel.ToString(), output, StringComparison.Ordinal);
     }
 }

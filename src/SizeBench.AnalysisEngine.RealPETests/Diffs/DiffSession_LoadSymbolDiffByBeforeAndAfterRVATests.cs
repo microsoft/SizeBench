@@ -68,21 +68,21 @@ public sealed class DiffSession_LoadSymbolDiffByBeforeAndAfterRVATests
 
         var cursorDiff = await diffSession.LoadSymbolDiffByBeforeAndAfterRVA(0xB310, 0x7240, CancellationToken.None);
         Assert.IsNotNull(cursorDiff);
-        Assert.IsInstanceOfType(cursorDiff.BeforeSymbol, typeof(RsrcGroupCursorDataSymbol));
-        Assert.IsInstanceOfType(cursorDiff.AfterSymbol, typeof(RsrcGroupCursorDataSymbol));
-        Assert.IsTrue(cursorDiff.SizeDiff > 0);
+        Assert.IsInstanceOfType<RsrcGroupCursorDataSymbol>(cursorDiff.BeforeSymbol);
+        Assert.IsInstanceOfType<RsrcGroupCursorDataSymbol>(cursorDiff.AfterSymbol);
+        Assert.IsGreaterThan(0, cursorDiff.SizeDiff);
 
         var iconDiff = await diffSession.LoadSymbolDiffByBeforeAndAfterRVA(0x100A0, 0xC090, CancellationToken.None);
         Assert.IsNotNull(iconDiff);
-        Assert.IsInstanceOfType(iconDiff.BeforeSymbol, typeof(RsrcGroupIconDataSymbol));
-        Assert.IsInstanceOfType(iconDiff.AfterSymbol, typeof(RsrcGroupIconDataSymbol));
-        Assert.IsTrue(iconDiff.SizeDiff < 0);
+        Assert.IsInstanceOfType<RsrcGroupIconDataSymbol>(iconDiff.BeforeSymbol);
+        Assert.IsInstanceOfType<RsrcGroupIconDataSymbol>(iconDiff.AfterSymbol);
+        Assert.IsLessThan(0, iconDiff.SizeDiff);
 
         var versionDiff = await diffSession.LoadSymbolDiffByBeforeAndAfterRVA(0x19AA0, null, CancellationToken.None);
         Assert.IsNotNull(versionDiff);
-        Assert.IsInstanceOfType(versionDiff.BeforeSymbol, typeof(RsrcDataSymbol));
+        Assert.IsInstanceOfType<RsrcDataSymbol>(versionDiff.BeforeSymbol);
         Assert.IsTrue(versionDiff.BeforeSymbol!.Name.Contains("VERSION", StringComparison.Ordinal));
         Assert.IsNull(versionDiff.AfterSymbol);
-        Assert.IsTrue(versionDiff.SizeDiff < 0);
+        Assert.IsLessThan(0, versionDiff.SizeDiff);
     }
 }

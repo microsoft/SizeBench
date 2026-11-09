@@ -87,7 +87,10 @@ internal sealed partial class PEFile : IPEFile
         Span<byte> bytes = stackalloc byte[4096];
         using (var stream = File.OpenRead(originalBinaryPathMayBeRemote))
         {
-            stream.Read(bytes);
+            if (stream.Read(bytes) != bytes.Length)
+            {
+                throw new InvalidDataException($"Could not read the first {bytes.Length} bytes of the file {originalBinaryPathMayBeRemote}");
+            }
 
             IMAGE_DOS_HEADER dosHeader;
             fixed (byte* pBytes = bytes)
@@ -102,7 +105,10 @@ internal sealed partial class PEFile : IPEFile
             // So, we need to read the bytes again starting from there, in case it may be located way in the binary.
             bytes.Clear();
             stream.Seek(dosHeader.e_lfanew, SeekOrigin.Begin);
-            stream.Read(bytes);
+            if (stream.Read(bytes) != bytes.Length)
+            {
+                throw new InvalidDataException($"Could not read the {bytes.Length} bytes of the file {originalBinaryPathMayBeRemote} pointed to by e_lfanew");
+            }
 
             fixed (byte* pBytes = bytes)
             {
@@ -710,7 +716,7 @@ internal sealed partial class PEFile : IPEFile
                         log.Log("Found RSDS magic signature");
                         var rsdsInfo = Marshal.PtrToStructure<RSDS_DEBUG_FORMAT>(rsdsPtr);
 
-                        var pathPtr = new IntPtr(rsdsPtr.ToInt64() + Marshal.SizeOf(typeof(RSDS_DEBUG_FORMAT)));
+                        var pathPtr = new IntPtr(rsdsPtr.ToInt64() + Marshal.SizeOf<RSDS_DEBUG_FORMAT>());
                         var path = Marshal.PtrToStringAnsi(pathPtr) ?? String.Empty;
 
                         this.DebugSignature = new PEFileDebugSignature(new Guid(rsdsInfo.Guid), rsdsInfo.Age, path);

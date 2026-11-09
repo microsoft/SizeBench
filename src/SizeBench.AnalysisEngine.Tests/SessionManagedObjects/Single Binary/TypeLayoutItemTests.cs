@@ -64,7 +64,7 @@ public sealed class TypeLayoutItemTests : IDisposable
 
         Assert.IsTrue(ReferenceEquals(this.UDT, typeLayoutItem.UserDefinedType));
         Assert.IsNotNull(typeLayoutItem.MemberLayouts);
-        Assert.AreEqual(memberLayouts.Length, typeLayoutItem.MemberLayouts.Count);
+        Assert.HasCount(memberLayouts.Length, typeLayoutItem.MemberLayouts);
         Assert.IsTrue(ReferenceEquals(memberLayouts[0], typeLayoutItem.MemberLayouts[0]));
         Assert.IsTrue(ReferenceEquals(memberLayouts[1], typeLayoutItem.MemberLayouts[1]));
     }

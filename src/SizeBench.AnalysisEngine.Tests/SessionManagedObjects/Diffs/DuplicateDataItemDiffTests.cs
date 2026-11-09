@@ -9,7 +9,7 @@ public sealed class DuplicateDataItemDiffTests : IDisposable
     private readonly DiffTestDataGenerator _testGenerator = new DiffTestDataGenerator();
 
     [TestMethod]
-    public void BeforeAndAfterNullThrows() => Assert.ThrowsException<ArgumentOutOfRangeException>(() => new DuplicateDataItemDiff(null, null, new DiffSessionDataCache()));
+    public void BeforeAndAfterNullThrows() => Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new DuplicateDataItemDiff(null, null, new DiffSessionDataCache()));
 
     [TestMethod]
     public void BasicPropertiesCalculatedCorrectly()

@@ -20,8 +20,10 @@ public sealed class DiffSession : IDiffSession
                                                  string afterBinaryPath, string afterPdbPath,
                                                  ILogger sessionLogger)
     {
+#pragma warning disable CA2000 // Dispose objects before losing scope - these get owned by the DiffSession and it disposes them.
         var beforeOpenTask = Session.Create(beforeBinaryPath, beforePdbPath, sessionLogger);
         var afterOpenTask = Session.Create(afterBinaryPath, afterPdbPath, sessionLogger);
+#pragma warning restore CA2000 // Dispose objects before losing scope
 
         var sessions = await Task.WhenAll(beforeOpenTask, afterOpenTask).ConfigureAwait(true);
 

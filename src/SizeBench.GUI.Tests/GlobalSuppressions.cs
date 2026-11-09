@@ -22,3 +22,5 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Performance", "CA1859:Use concrete types when possible for improved performance", Justification = "Performance of tests isn't *that* important.")]
 
 [assembly: SuppressMessage("Performance", "CA1861:Avoid constant arrays as arguments", Justification = "Performance of tests isn't *that* important.")]
+
+[assembly: SuppressMessage("Maintainability", "CA1515:Consider making public types internal", Justification = "Not important for tests - in fact TestClass types MUST be public for MSTest so doing this loses test coverage.")]

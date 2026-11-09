@@ -33,9 +33,9 @@ public class AllSourceFilesPageViewModelTests
 
         var sectionsInSourceFiles = viewmodel.BinarySectionsInSourceFiles().Select(s => s.Name).ToList();
 
-        Assert.AreEqual(2, sectionsInSourceFiles.Count);
-        Assert.IsTrue(sectionsInSourceFiles.Contains(".text"));
-        Assert.IsTrue(sectionsInSourceFiles.Contains(".data"));
+        Assert.HasCount(2, sectionsInSourceFiles);
+        Assert.Contains(".text", sectionsInSourceFiles);
+        Assert.Contains(".data", sectionsInSourceFiles);
     }
 
     [TestMethod]
@@ -53,11 +53,11 @@ public class AllSourceFilesPageViewModelTests
 
         var coffGroupsInSourceFiles = viewmodel.COFFGroupsInSourceFiles().Select(cg => cg.Name).ToList();
 
-        Assert.AreEqual(4, coffGroupsInSourceFiles.Count);
-        Assert.IsTrue(coffGroupsInSourceFiles.Contains(".text$mn"));
-        Assert.IsTrue(coffGroupsInSourceFiles.Contains(".text$zz"));
-        Assert.IsTrue(coffGroupsInSourceFiles.Contains(".data$xx"));
-        Assert.IsTrue(coffGroupsInSourceFiles.Contains(".data$zz"));
+        Assert.HasCount(4, coffGroupsInSourceFiles);
+        Assert.Contains(".text$mn", coffGroupsInSourceFiles);
+        Assert.Contains(".text$zz", coffGroupsInSourceFiles);
+        Assert.Contains(".data$xx", coffGroupsInSourceFiles);
+        Assert.Contains(".data$zz", coffGroupsInSourceFiles);
     }
 
     [TestMethod]
@@ -78,23 +78,23 @@ public class AllSourceFilesPageViewModelTests
         viewmodel.GenerateFormattedDataForExcelExport(out var columnHeaders, out var preformattedData);
 
         var columnHeadersList = new List<string>(columnHeaders);
-        Assert.AreEqual(9, columnHeadersList.Count);
+        Assert.HasCount(9, columnHeadersList);
 
         var sourceFileNameIndex = columnHeadersList.IndexOf("Source File Name");
-        Assert.IsTrue(sourceFileNameIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, sourceFileNameIndex);
         var sourceFileShortNameIndex = columnHeadersList.IndexOf("Source File Short Name");
-        Assert.IsTrue(sourceFileShortNameIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, sourceFileShortNameIndex);
         var sourceFileTotalSizeIndex = columnHeadersList.IndexOf("Source File Total Size on Disk");
-        Assert.IsTrue(sourceFileTotalSizeIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, sourceFileTotalSizeIndex);
 
-        Assert.IsTrue(columnHeadersList.Contains("Section: .text"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .text$mn"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .text$zz"));
-        Assert.IsTrue(columnHeadersList.Contains("Section: .data"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .data$xx"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .data$zz"));
+        Assert.Contains("Section: .text", columnHeadersList);
+        Assert.Contains("COFF Group: .text$mn", columnHeadersList);
+        Assert.Contains("COFF Group: .text$zz", columnHeadersList);
+        Assert.Contains("Section: .data", columnHeadersList);
+        Assert.Contains("COFF Group: .data$xx", columnHeadersList);
+        Assert.Contains("COFF Group: .data$zz", columnHeadersList);
 
-        Assert.AreEqual(2, preformattedData.Count);
+        Assert.HasCount(2, preformattedData);
         var a1Preformatted = preformattedData.Single(d => d["Source File Short Name"].ToString() == "a1.cpp");
         var xHeaderPreformatted = preformattedData.Single(d => d["Source File Short Name"].ToString() == "x.h");
 
@@ -131,23 +131,23 @@ public class AllSourceFilesPageViewModelTests
         viewmodel.GenerateFormattedDataForExcelExport(out var columnHeaders, out var preformattedData);
 
         var columnHeadersList = new List<string>(columnHeaders);
-        Assert.AreEqual(9, columnHeadersList.Count);
+        Assert.HasCount(9, columnHeadersList);
 
         var sourceFileNameIndex = columnHeadersList.IndexOf("Source File Name");
-        Assert.IsTrue(sourceFileNameIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, sourceFileNameIndex);
         var sourceFileShortNameIndex = columnHeadersList.IndexOf("Source File Short Name");
-        Assert.IsTrue(sourceFileShortNameIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, sourceFileShortNameIndex);
         var sourceFileTotalSizeIndex = columnHeadersList.IndexOf("Source File Total Size in Memory");
-        Assert.IsTrue(sourceFileTotalSizeIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, sourceFileTotalSizeIndex);
 
-        Assert.IsTrue(columnHeadersList.Contains("Section: .text"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .text$mn"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .text$zz"));
-        Assert.IsTrue(columnHeadersList.Contains("Section: .data"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .data$xx"));
-        Assert.IsTrue(columnHeadersList.Contains("COFF Group: .data$zz"));
+        Assert.Contains("Section: .text", columnHeadersList);
+        Assert.Contains("COFF Group: .text$mn", columnHeadersList);
+        Assert.Contains("COFF Group: .text$zz", columnHeadersList);
+        Assert.Contains("Section: .data", columnHeadersList);
+        Assert.Contains("COFF Group: .data$xx", columnHeadersList);
+        Assert.Contains("COFF Group: .data$zz", columnHeadersList);
 
-        Assert.AreEqual(2, preformattedData.Count);
+        Assert.HasCount(2, preformattedData);
         var a1Preformatted = preformattedData.Single(d => d["Source File Short Name"].ToString() == "a1.cpp");
         var xHeaderPreformatted = preformattedData.Single(d => d["Source File Short Name"].ToString() == "x.h");
 

@@ -1770,7 +1770,7 @@ internal sealed class DiffTestDataGenerator : IDisposable
         // Sections
         Assert.AreEqual(500, this.TextSectionDiff.SizeDiff);
         Assert.AreEqual(500, this.TextSectionDiff.VirtualSizeDiff);
-        Assert.AreEqual(2, this.TextSectionDiff.COFFGroupDiffs.Count);
+        Assert.HasCount(2, this.TextSectionDiff.COFFGroupDiffs);
         Assert.AreEqual(500, this.TextSectionDiff.COFFGroupDiffs.Sum(cd => cd.SizeDiff)); // No Byte Left Behind!
         Assert.AreEqual(500, this.TextSectionDiff.COFFGroupDiffs.Sum(cd => cd.VirtualSizeDiff)); // No Byte Left Behind!
         Assert.IsNotNull(this.TextSectionDiff.BeforeSection);
@@ -1783,7 +1783,7 @@ internal sealed class DiffTestDataGenerator : IDisposable
 
         Assert.AreEqual(-1000, this.DataSectionDiff.SizeDiff);
         Assert.AreEqual(-800, this.DataSectionDiff.VirtualSizeDiff);
-        Assert.AreEqual(3, this.DataSectionDiff.COFFGroupDiffs.Count);
+        Assert.HasCount(3, this.DataSectionDiff.COFFGroupDiffs);
         Assert.AreEqual(-1000, this.DataSectionDiff.COFFGroupDiffs.Sum(cd => cd.SizeDiff)); // No Byte Left Behind!
         Assert.AreEqual(-800, this.DataSectionDiff.COFFGroupDiffs.Sum(cd => cd.VirtualSizeDiff)); // No Byte Left Behind!
         Assert.IsNotNull(this.DataSectionDiff.BeforeSection);
@@ -1796,7 +1796,7 @@ internal sealed class DiffTestDataGenerator : IDisposable
 
         Assert.AreEqual(0, this.RDataSectionDiff.SizeDiff);
         Assert.AreEqual(0, this.RDataSectionDiff.VirtualSizeDiff);
-        Assert.AreEqual(5, this.RDataSectionDiff.COFFGroupDiffs.Count);
+        Assert.HasCount(5, this.RDataSectionDiff.COFFGroupDiffs);
         Assert.AreEqual(0, this.RDataSectionDiff.COFFGroupDiffs.Sum(cd => cd.SizeDiff)); // No Byte Left Behind!
         Assert.AreEqual(0, this.RDataSectionDiff.COFFGroupDiffs.Sum(cd => cd.VirtualSizeDiff)); // No Byte Left Behind!
         Assert.IsNotNull(this.RDataSectionDiff.BeforeSection);
@@ -1809,7 +1809,7 @@ internal sealed class DiffTestDataGenerator : IDisposable
 
         Assert.AreEqual(0, this.VirtSectionDiff.SizeDiff);
         Assert.AreEqual(-300, this.VirtSectionDiff.VirtualSizeDiff);
-        Assert.AreEqual(1, this.VirtSectionDiff.COFFGroupDiffs.Count);
+        Assert.HasCount(1, this.VirtSectionDiff.COFFGroupDiffs);
         Assert.AreEqual(0, this.VirtSectionDiff.COFFGroupDiffs.Sum(cd => cd.SizeDiff)); // No Byte Left Behind!
         Assert.AreEqual(-300, this.VirtSectionDiff.COFFGroupDiffs.Sum(cd => cd.VirtualSizeDiff)); // No Byte Left Behind!
         Assert.IsNotNull(this.VirtSectionDiff.BeforeSection);
@@ -1822,7 +1822,7 @@ internal sealed class DiffTestDataGenerator : IDisposable
 
         Assert.AreEqual(200, this.RsrcSectionDiff.SizeDiff);
         Assert.AreEqual(200, this.RsrcSectionDiff.VirtualSizeDiff);
-        Assert.AreEqual(1, this.RsrcSectionDiff.COFFGroupDiffs.Count);
+        Assert.HasCount(1, this.RsrcSectionDiff.COFFGroupDiffs);
         Assert.AreEqual(200, this.RsrcSectionDiff.COFFGroupDiffs.Sum(cd => cd.SizeDiff)); // No Byte Left Behind!
         Assert.AreEqual(200, this.RsrcSectionDiff.COFFGroupDiffs.Sum(cd => cd.VirtualSizeDiff)); // No Byte Left Behind!
         Assert.IsNull(this.RsrcSectionDiff.BeforeSection);
@@ -1935,10 +1935,10 @@ internal sealed class DiffTestDataGenerator : IDisposable
         Assert.IsNotNull(this.ALibDiff.AfterLib);
         Assert.AreEqual("a.lib", this.ALibDiff.Name);
         Assert.AreEqual("a", this.ALibDiff.ShortName);
-        Assert.AreEqual(3, this.ALibDiff.SectionContributionDiffs.Count);
-        Assert.AreEqual(3, this.ALibDiff.SectionContributionDiffsByName.Count);
-        Assert.AreEqual(8, this.ALibDiff.COFFGroupContributionDiffs.Count);
-        Assert.AreEqual(8, this.ALibDiff.COFFGroupContributionDiffsByName.Count);
+        Assert.HasCount(3, this.ALibDiff.SectionContributionDiffs);
+        Assert.HasCount(3, this.ALibDiff.SectionContributionDiffsByName);
+        Assert.HasCount(8, this.ALibDiff.COFFGroupContributionDiffs);
+        Assert.HasCount(8, this.ALibDiff.COFFGroupContributionDiffsByName);
 
         Assert.AreEqual(-900, this.BLibDiff.SizeDiff);
         Assert.AreEqual(-900, this.BLibDiff.CompilandDiffs.Values.Sum(cd => cd.SizeDiff)); // No Byte Left Behind!
@@ -1956,10 +1956,10 @@ internal sealed class DiffTestDataGenerator : IDisposable
         Assert.IsNotNull(this.BLibDiff.AfterLib);
         Assert.AreEqual("b.lib", this.BLibDiff.Name);
         Assert.AreEqual("b", this.BLibDiff.ShortName);
-        Assert.AreEqual(3, this.BLibDiff.SectionContributionDiffs.Count);
-        Assert.AreEqual(3, this.BLibDiff.SectionContributionDiffsByName.Count);
-        Assert.AreEqual(6, this.BLibDiff.COFFGroupContributionDiffs.Count);
-        Assert.AreEqual(6, this.BLibDiff.COFFGroupContributionDiffsByName.Count);
+        Assert.HasCount(3, this.BLibDiff.SectionContributionDiffs);
+        Assert.HasCount(3, this.BLibDiff.SectionContributionDiffsByName);
+        Assert.HasCount(6, this.BLibDiff.COFFGroupContributionDiffs);
+        Assert.HasCount(6, this.BLibDiff.COFFGroupContributionDiffsByName);
 
         Assert.AreEqual(0, this.CLibDiff.SizeDiff);
         Assert.AreEqual(0, this.CLibDiff.CompilandDiffs.Values.Sum(cd => cd.SizeDiff)); // No Byte Left Behind!
@@ -1977,10 +1977,10 @@ internal sealed class DiffTestDataGenerator : IDisposable
         Assert.IsNull(this.CLibDiff.AfterLib);
         Assert.AreEqual("c.lib", this.CLibDiff.Name);
         Assert.AreEqual("c", this.CLibDiff.ShortName);
-        Assert.AreEqual(1, this.CLibDiff.SectionContributionDiffs.Count);
-        Assert.AreEqual(1, this.CLibDiff.SectionContributionDiffsByName.Count);
-        Assert.AreEqual(1, this.CLibDiff.COFFGroupContributionDiffs.Count);
-        Assert.AreEqual(1, this.CLibDiff.COFFGroupContributionDiffsByName.Count);
+        Assert.HasCount(1, this.CLibDiff.SectionContributionDiffs);
+        Assert.HasCount(1, this.CLibDiff.SectionContributionDiffsByName);
+        Assert.HasCount(1, this.CLibDiff.COFFGroupContributionDiffs);
+        Assert.HasCount(1, this.CLibDiff.COFFGroupContributionDiffsByName);
 
         Assert.AreEqual(200, this.DLibDiff.SizeDiff);
         Assert.AreEqual(200, this.DLibDiff.CompilandDiffs.Values.Sum(cd => cd.SizeDiff)); // No Byte Left Behind!
@@ -1998,10 +1998,10 @@ internal sealed class DiffTestDataGenerator : IDisposable
         Assert.IsNotNull(this.DLibDiff.AfterLib);
         Assert.AreEqual("d.lib", this.DLibDiff.Name);
         Assert.AreEqual("d", this.DLibDiff.ShortName);
-        Assert.AreEqual(1, this.DLibDiff.SectionContributionDiffs.Count);
-        Assert.AreEqual(1, this.DLibDiff.SectionContributionDiffsByName.Count);
-        Assert.AreEqual(1, this.DLibDiff.COFFGroupContributionDiffs.Count);
-        Assert.AreEqual(1, this.DLibDiff.COFFGroupContributionDiffsByName.Count);
+        Assert.HasCount(1, this.DLibDiff.SectionContributionDiffs);
+        Assert.HasCount(1, this.DLibDiff.SectionContributionDiffsByName);
+        Assert.HasCount(1, this.DLibDiff.COFFGroupContributionDiffs);
+        Assert.HasCount(1, this.DLibDiff.COFFGroupContributionDiffsByName);
 
         // Compilands
         Assert.AreEqual(400, this.A1CompilandDiff.SizeDiff);
@@ -2019,10 +2019,10 @@ internal sealed class DiffTestDataGenerator : IDisposable
         Assert.IsTrue(ReferenceEquals(this.ALibDiff, this.A1CompilandDiff.LibDiff));
         Assert.AreEqual(@"c:\a\a1.obj", this.A1CompilandDiff.Name);
         Assert.AreEqual("a1.obj", this.A1CompilandDiff.ShortName);
-        Assert.AreEqual(2, this.A1CompilandDiff.SectionContributionDiffs.Count);
-        Assert.AreEqual(2, this.A1CompilandDiff.SectionContributionDiffsByName.Count);
-        Assert.AreEqual(5, this.A1CompilandDiff.COFFGroupContributionDiffs.Count);
-        Assert.AreEqual(5, this.A1CompilandDiff.COFFGroupContributionDiffsByName.Count);
+        Assert.HasCount(2, this.A1CompilandDiff.SectionContributionDiffs);
+        Assert.HasCount(2, this.A1CompilandDiff.SectionContributionDiffsByName);
+        Assert.HasCount(5, this.A1CompilandDiff.COFFGroupContributionDiffs);
+        Assert.HasCount(5, this.A1CompilandDiff.COFFGroupContributionDiffsByName);
 
         Assert.AreEqual(0, this.A2CompilandDiff.SizeDiff);
         Assert.AreEqual(0, this.A2CompilandDiff.SectionContributionDiffs.Values.Sum(sc => sc.SizeDiff)); // No Byte Left Behind!
@@ -2039,10 +2039,10 @@ internal sealed class DiffTestDataGenerator : IDisposable
         Assert.IsTrue(ReferenceEquals(this.ALibDiff, this.A2CompilandDiff.LibDiff));
         Assert.AreEqual(@"a2.obj", this.A2CompilandDiff.Name);
         Assert.AreEqual("a2.obj", this.A2CompilandDiff.ShortName);
-        Assert.AreEqual(2, this.A2CompilandDiff.SectionContributionDiffs.Count);
-        Assert.AreEqual(2, this.A2CompilandDiff.SectionContributionDiffsByName.Count);
-        Assert.AreEqual(3, this.A2CompilandDiff.COFFGroupContributionDiffs.Count);
-        Assert.AreEqual(3, this.A2CompilandDiff.COFFGroupContributionDiffsByName.Count);
+        Assert.HasCount(2, this.A2CompilandDiff.SectionContributionDiffs);
+        Assert.HasCount(2, this.A2CompilandDiff.SectionContributionDiffsByName);
+        Assert.HasCount(3, this.A2CompilandDiff.COFFGroupContributionDiffs);
+        Assert.HasCount(3, this.A2CompilandDiff.COFFGroupContributionDiffsByName);
 
         Assert.AreEqual(-800, this.A3CompilandDiff.SizeDiff);
         Assert.AreEqual(-800, this.A3CompilandDiff.SectionContributionDiffs.Values.Sum(sc => sc.SizeDiff)); // No Byte Left Behind!
@@ -2059,10 +2059,10 @@ internal sealed class DiffTestDataGenerator : IDisposable
         Assert.IsTrue(ReferenceEquals(this.ALibDiff, this.A3CompilandDiff.LibDiff));
         Assert.AreEqual(@"a3.obj", this.A3CompilandDiff.Name);
         Assert.AreEqual("a3.obj", this.A3CompilandDiff.ShortName);
-        Assert.AreEqual(2, this.A3CompilandDiff.SectionContributionDiffs.Count);
-        Assert.AreEqual(2, this.A3CompilandDiff.SectionContributionDiffsByName.Count);
-        Assert.AreEqual(3, this.A3CompilandDiff.COFFGroupContributionDiffs.Count);
-        Assert.AreEqual(3, this.A3CompilandDiff.COFFGroupContributionDiffsByName.Count);
+        Assert.HasCount(2, this.A3CompilandDiff.SectionContributionDiffs);
+        Assert.HasCount(2, this.A3CompilandDiff.SectionContributionDiffsByName);
+        Assert.HasCount(3, this.A3CompilandDiff.COFFGroupContributionDiffs);
+        Assert.HasCount(3, this.A3CompilandDiff.COFFGroupContributionDiffsByName);
 
         Assert.AreEqual(800, this.A4CompilandDiff.SizeDiff);
         Assert.AreEqual(800, this.A4CompilandDiff.SectionContributionDiffs.Values.Sum(sc => sc.SizeDiff)); // No Byte Left Behind!
@@ -2079,10 +2079,10 @@ internal sealed class DiffTestDataGenerator : IDisposable
         Assert.IsTrue(ReferenceEquals(this.ALibDiff, this.A4CompilandDiff.LibDiff));
         Assert.AreEqual(@"a4.obj", this.A4CompilandDiff.Name);
         Assert.AreEqual("a4.obj", this.A4CompilandDiff.ShortName);
-        Assert.AreEqual(2, this.A4CompilandDiff.SectionContributionDiffs.Count);
-        Assert.AreEqual(2, this.A4CompilandDiff.SectionContributionDiffsByName.Count);
-        Assert.AreEqual(3, this.A4CompilandDiff.COFFGroupContributionDiffs.Count);
-        Assert.AreEqual(3, this.A4CompilandDiff.COFFGroupContributionDiffsByName.Count);
+        Assert.HasCount(2, this.A4CompilandDiff.SectionContributionDiffs);
+        Assert.HasCount(2, this.A4CompilandDiff.SectionContributionDiffsByName);
+        Assert.HasCount(3, this.A4CompilandDiff.COFFGroupContributionDiffs);
+        Assert.HasCount(3, this.A4CompilandDiff.COFFGroupContributionDiffsByName);
 
         Assert.AreEqual(-900, this.B1CompilandDiff.SizeDiff);
         Assert.AreEqual(-900, this.B1CompilandDiff.SectionContributionDiffs.Values.Sum(sc => sc.SizeDiff)); // No Byte Left Behind!
@@ -2099,10 +2099,10 @@ internal sealed class DiffTestDataGenerator : IDisposable
         Assert.IsTrue(ReferenceEquals(this.BLibDiff, this.B1CompilandDiff.LibDiff));
         Assert.AreEqual(@"b1.obj", this.B1CompilandDiff.Name);
         Assert.AreEqual("b1.obj", this.B1CompilandDiff.ShortName);
-        Assert.AreEqual(2, this.B1CompilandDiff.SectionContributionDiffs.Count);
-        Assert.AreEqual(2, this.B1CompilandDiff.SectionContributionDiffsByName.Count);
-        Assert.AreEqual(3, this.B1CompilandDiff.COFFGroupContributionDiffs.Count);
-        Assert.AreEqual(3, this.B1CompilandDiff.COFFGroupContributionDiffsByName.Count);
+        Assert.HasCount(2, this.B1CompilandDiff.SectionContributionDiffs);
+        Assert.HasCount(2, this.B1CompilandDiff.SectionContributionDiffsByName);
+        Assert.HasCount(3, this.B1CompilandDiff.COFFGroupContributionDiffs);
+        Assert.HasCount(3, this.B1CompilandDiff.COFFGroupContributionDiffsByName);
 
         Assert.AreEqual(0, this.B2CompilandDiff.SizeDiff);
         Assert.AreEqual(0, this.B2CompilandDiff.SectionContributionDiffs.Values.Sum(sc => sc.SizeDiff)); // No Byte Left Behind!
@@ -2119,10 +2119,10 @@ internal sealed class DiffTestDataGenerator : IDisposable
         Assert.IsTrue(ReferenceEquals(this.BLibDiff, this.B2CompilandDiff.LibDiff));
         Assert.AreEqual(@"b2.obj", this.B2CompilandDiff.Name);
         Assert.AreEqual("b2.obj", this.B2CompilandDiff.ShortName);
-        Assert.AreEqual(2, this.B2CompilandDiff.SectionContributionDiffs.Count);
-        Assert.AreEqual(2, this.B2CompilandDiff.SectionContributionDiffsByName.Count);
-        Assert.AreEqual(3, this.B2CompilandDiff.COFFGroupContributionDiffs.Count);
-        Assert.AreEqual(3, this.B2CompilandDiff.COFFGroupContributionDiffsByName.Count);
+        Assert.HasCount(2, this.B2CompilandDiff.SectionContributionDiffs);
+        Assert.HasCount(2, this.B2CompilandDiff.SectionContributionDiffsByName);
+        Assert.HasCount(3, this.B2CompilandDiff.COFFGroupContributionDiffs);
+        Assert.HasCount(3, this.B2CompilandDiff.COFFGroupContributionDiffsByName);
 
         Assert.AreEqual(0, this.C1CompilandDiff.SizeDiff);
         Assert.AreEqual(0, this.C1CompilandDiff.SectionContributionDiffs.Values.Sum(sc => sc.SizeDiff)); // No Byte Left Behind!
@@ -2139,10 +2139,10 @@ internal sealed class DiffTestDataGenerator : IDisposable
         Assert.IsTrue(ReferenceEquals(this.CLibDiff, this.C1CompilandDiff.LibDiff));
         Assert.AreEqual(@"c1.obj", this.C1CompilandDiff.Name);
         Assert.AreEqual("c1.obj", this.C1CompilandDiff.ShortName);
-        Assert.AreEqual(1, this.C1CompilandDiff.SectionContributionDiffs.Count);
-        Assert.AreEqual(1, this.C1CompilandDiff.SectionContributionDiffsByName.Count);
-        Assert.AreEqual(1, this.C1CompilandDiff.COFFGroupContributionDiffs.Count);
-        Assert.AreEqual(1, this.C1CompilandDiff.COFFGroupContributionDiffsByName.Count);
+        Assert.HasCount(1, this.C1CompilandDiff.SectionContributionDiffs);
+        Assert.HasCount(1, this.C1CompilandDiff.SectionContributionDiffsByName);
+        Assert.HasCount(1, this.C1CompilandDiff.COFFGroupContributionDiffs);
+        Assert.HasCount(1, this.C1CompilandDiff.COFFGroupContributionDiffsByName);
 
         Assert.AreEqual(200, this.D1CompilandDiff.SizeDiff);
         Assert.AreEqual(200, this.D1CompilandDiff.SectionContributionDiffs.Values.Sum(sc => sc.SizeDiff)); // No Byte Left Behind!
@@ -2159,10 +2159,10 @@ internal sealed class DiffTestDataGenerator : IDisposable
         Assert.IsTrue(ReferenceEquals(this.DLibDiff, this.D1CompilandDiff.LibDiff));
         Assert.AreEqual(@"d1.obj", this.D1CompilandDiff.Name);
         Assert.AreEqual("d1.obj", this.D1CompilandDiff.ShortName);
-        Assert.AreEqual(1, this.D1CompilandDiff.SectionContributionDiffs.Count);
-        Assert.AreEqual(1, this.D1CompilandDiff.SectionContributionDiffsByName.Count);
-        Assert.AreEqual(1, this.D1CompilandDiff.COFFGroupContributionDiffs.Count);
-        Assert.AreEqual(1, this.D1CompilandDiff.COFFGroupContributionDiffsByName.Count);
+        Assert.HasCount(1, this.D1CompilandDiff.SectionContributionDiffs);
+        Assert.HasCount(1, this.D1CompilandDiff.SectionContributionDiffsByName);
+        Assert.HasCount(1, this.D1CompilandDiff.COFFGroupContributionDiffs);
+        Assert.HasCount(1, this.D1CompilandDiff.COFFGroupContributionDiffsByName);
     }
 
     public void Dispose()

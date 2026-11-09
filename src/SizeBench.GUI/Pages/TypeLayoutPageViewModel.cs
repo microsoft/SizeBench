@@ -11,7 +11,7 @@ internal sealed class TypeLayoutPageViewModel : SingleBinaryViewModelBase
     private readonly IUITaskScheduler _uiTaskScheduler;
     private readonly IExcelExporter _excelExporter;
 
-    private IReadOnlyList<TypeLayoutItem> _typeLayoutItems = new List<TypeLayoutItem>();
+    private List<TypeLayoutItem> _typeLayoutItems = new List<TypeLayoutItem>();
     public IReadOnlyList<TypeLayoutItem> TypeLayoutItems
     {
         get => this._typeLayoutItems;

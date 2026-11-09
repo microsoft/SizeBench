@@ -12,7 +12,7 @@ namespace SizeBench.AnalysisEngine.Tests;
 public sealed class Session_EnumerateLibsTests
 {
     public TestContext? TestContext { get; set; }
-    public CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
+    public CancellationToken CancellationToken => this.TestContext!.CancellationToken;
     private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory!, filename);
 
     private string CppDllBinaryPath => MakePath("SizeBenchV2.AnalysisEngine.Tests.CppDll.dll");
@@ -52,7 +52,7 @@ public sealed class Session_EnumerateLibsTests
         Assert.AreEqual(pdataSection.VirtualSize, totalLibPDataContributionsFound);
 
         var lib = libs.Where(l => l.Name.Contains("PEParser.Tests.Dllx64.obj", StringComparison.Ordinal)).First();
-        Assert.AreEqual(1, lib.Compilands.Count);
+        Assert.HasCount(1, lib.Compilands);
 
         var compiland = lib.Compilands.Values.First();
 
@@ -83,8 +83,8 @@ public sealed class Session_EnumerateLibsTests
         var libSymbolsInPData = await session.EnumerateSymbolsInContribution(lib.SectionContributionsByName[".pdata"], CancellationToken.None);
         var compilandSymbolsInPData = await session.EnumerateSymbolsInContribution(compiland.SectionContributionsByName[".pdata"], CancellationToken.None);
 
-        Assert.AreEqual(10, libSymbolsInPData.Count);
-        Assert.AreEqual(10, compilandSymbolsInPData.Count);
+        Assert.HasCount(10, libSymbolsInPData);
+        Assert.HasCount(10, compilandSymbolsInPData);
 
         // Let's find all 10 symbols - yes this is really tedious, but this parser was a real pain to get right, so being
         // thorough in the validation is super-important.
@@ -129,8 +129,8 @@ public sealed class Session_EnumerateLibsTests
         Assert.IsNotNull(libSymbolsInRData.Where(s => s.Name == "const std::exception::`vftable'").FirstOrDefault());
         Assert.IsNotNull(compilandSymbolsInRData.Where(s => s.Name == "const std::exception::`vftable'").FirstOrDefault());
 
-        Assert.AreEqual(2, libSymbolsInRData.Count);
-        Assert.AreEqual(2, compilandSymbolsInRData.Count);
+        Assert.HasCount(2, libSymbolsInRData);
+        Assert.HasCount(2, compilandSymbolsInRData);
 
         // Let's check some in .xdata since that is contained in the pure-XDATA RVA ranges so it can skip DIA enumeration
         var libSymbolsInXData = await session.EnumerateSymbolsInContribution(lib.COFFGroupContributionsByName[".xdata"], CancellationToken.None);
@@ -142,8 +142,8 @@ public sealed class Session_EnumerateLibsTests
         Assert.IsNotNull(compilandSymbolsInXData.Where(s => s.Name == "[unwind] Dllx64_CppxdataUsage::MaybeThrow()").FirstOrDefault());
         Assert.IsNotNull(compilandSymbolsInXData.Where(s => s.Name == "[tryMap] Dllx64_CppxdataUsage::MaybeThrow()").FirstOrDefault());
 
-        Assert.AreEqual(14, libSymbolsInXData.Count);
-        Assert.AreEqual(14, compilandSymbolsInXData.Count);
+        Assert.HasCount(14, libSymbolsInXData);
+        Assert.HasCount(14, compilandSymbolsInXData);
 
         // And while we're at it, let's just check on the .text symbols for a couple functions that match these xdata/pdata symbols
         var libSymbolsInText = await session.EnumerateSymbolsInContribution(lib.SectionContributionsByName[".text"], CancellationToken.None);
@@ -163,8 +163,8 @@ public sealed class Session_EnumerateLibsTests
         // When in fact these are one symbol.  Notice how the length is 13+37 for these two symbols, and the
         // catch symbol that we find with DIA is 50 bytes long - so we're attributing all the information and
         // not losing any bytes, but the count is off by one compared to the map file as a result.
-        Assert.AreEqual(10, libSymbolsInText.Count);
-        Assert.AreEqual(10, compilandSymbolsInText.Count);
+        Assert.HasCount(10, libSymbolsInText);
+        Assert.HasCount(10, compilandSymbolsInText);
 
         var catchSymbolInText = libSymbolsInText.Where(s => s.Name == "`Dllx64_CppxdataUsage::MaybeThrow'::`1'::catch$1()").FirstOrDefault();
         Assert.IsNotNull(catchSymbolInText);

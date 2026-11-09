@@ -15,15 +15,14 @@ public class MismatchedBinaryAndPDBTests
 
     private string PDBPath => MakePath("SizeBenchV2.AnalysisEngine.Tests.CppTestCasesAfter.pdb");
 
-    [ExpectedException(typeof(BinaryAndPDBSignatureMismatchException), AllowDerivedTypes = false)]
     [TestMethod]
     public async Task MismatchedBinaryAndPDBGetRejected()
     {
         // When a PDB and binary mismatch in their debug signature, they are rejected outright
         using var logger = new NoOpLogger();
-        await using var session = await Session.Create(this.BinaryPath, this.PDBPath, logger);
-
-        // We shouldn't get this far, as opening the session should throw
-        Assert.Fail();
+        await Assert.ThrowsExactlyAsync<BinaryAndPDBSignatureMismatchException>(async () =>
+        {
+            await using var session = await Session.Create(this.BinaryPath, this.PDBPath, logger);
+        });
     }
 }

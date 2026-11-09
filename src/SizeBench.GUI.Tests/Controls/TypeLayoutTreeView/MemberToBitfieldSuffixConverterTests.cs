@@ -11,9 +11,9 @@ public class MemberToBitfieldSuffixConverterTests
     [TestMethod]
     public void ConvertThrowsIfValueNotAMemberViewModel()
     {
-        Assert.ThrowsException<ArgumentException>(() => MemberToBitfieldSuffixConverter.Instance.Convert(3, typeof(string), null, null));
-        Assert.ThrowsException<ArgumentException>(() => MemberToBitfieldSuffixConverter.Instance.Convert("test", typeof(string), null, null));
-        Assert.ThrowsException<ArgumentException>(() => MemberToBitfieldSuffixConverter.Instance.Convert(null, typeof(string), null, null));
+        Assert.ThrowsExactly<ArgumentException>(() => MemberToBitfieldSuffixConverter.Instance.Convert(3, typeof(string), null, null));
+        Assert.ThrowsExactly<ArgumentException>(() => MemberToBitfieldSuffixConverter.Instance.Convert("test", typeof(string), null, null));
+        Assert.ThrowsExactly<ArgumentException>(() => MemberToBitfieldSuffixConverter.Instance.Convert(null, typeof(string), null, null));
     }
 
     [TestMethod]
@@ -27,8 +27,8 @@ public class MemberToBitfieldSuffixConverterTests
         var MockSession = new Mock<ISession>();
         var input = new TypeLayoutItemViewModel.MemberViewModel(member, MockSession.Object, true);
 
-        Assert.ThrowsException<ArgumentException>(() => MemberToBitfieldSuffixConverter.Instance.Convert(input, typeof(bool), null, null));
-        Assert.ThrowsException<ArgumentException>(() => MemberToBitfieldSuffixConverter.Instance.Convert(input, typeof(int), null, null));
+        Assert.ThrowsExactly<ArgumentException>(() => MemberToBitfieldSuffixConverter.Instance.Convert(input, typeof(bool), null, null));
+        Assert.ThrowsExactly<ArgumentException>(() => MemberToBitfieldSuffixConverter.Instance.Convert(input, typeof(int), null, null));
     }
 
     [TestMethod]
@@ -97,8 +97,7 @@ public class MemberToBitfieldSuffixConverterTests
         Assert.AreEqual("(bits 0-3)", MemberToBitfieldSuffixConverter.Instance.Convert(input, typeof(string), null, null));
     }
 
-    [ExpectedException(typeof(NotImplementedException), AllowDerivedTypes = false)]
     [TestMethod]
     public void ConvertBackIsNotImplemented()
-        => MemberToBitfieldSuffixConverter.Instance.ConvertBack("(bit 5)", typeof(TypeLayoutItemViewModel.MemberViewModel), null, null);
+        => Assert.ThrowsExactly<NotImplementedException>(() => MemberToBitfieldSuffixConverter.Instance.ConvertBack("(bit 5)", typeof(TypeLayoutItemViewModel.MemberViewModel), null, null));
 }

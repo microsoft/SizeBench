@@ -57,8 +57,8 @@ public sealed class UserDefinedTypeSymbolPageViewModelTests : IDisposable
         await viewmodel.InitializeAsync();
 
         Assert.AreEqual(aComplexTypeOfSomeUDT, viewmodel.UDT);
-        Assert.AreEqual(typeLayouts, viewmodel.TypeLayoutItems);
-        Assert.AreEqual(3, viewmodel.Functions.Count);
+        Assert.AreEquivalent(typeLayouts, viewmodel.TypeLayoutItems);
+        Assert.HasCount(3, viewmodel.Functions);
         var fn1ViewModel = viewmodel.Functions.Single(fnVM => fnVM.FunctionCodeSymbol == superImportantFunction1);
         Assert.IsTrue(fn1ViewModel.IsInFinalBinary);
         var fn2ViewModel = viewmodel.Functions.Single(fnVM => fnVM.FunctionCodeSymbol == superImportantFunction2);
@@ -66,7 +66,7 @@ public sealed class UserDefinedTypeSymbolPageViewModelTests : IDisposable
         var fnRemovedViewModel = viewmodel.Functions.Single(fnVM => fnVM.FunctionCodeSymbol == functionRemovedInFinalBinary);
         Assert.IsFalse(fnRemovedViewModel.IsInFinalBinary);
         Assert.AreEqual<uint>(50 + 100, viewmodel.TotalSizeOfAllFunctions);
-        StringAssert.Contains(viewmodel.PageTitle, aComplexTypeOfSomeUDT.Name, StringComparison.Ordinal);
+        Assert.Contains(aComplexTypeOfSomeUDT.Name, viewmodel.PageTitle, StringComparison.Ordinal);
     }
 
     [TestMethod]
@@ -86,8 +86,8 @@ public sealed class UserDefinedTypeSymbolPageViewModelTests : IDisposable
         await viewmodel.InitializeAsync();
 
         Assert.IsNull(viewmodel.UDT);
-        Assert.AreEqual(0, viewmodel.TypeLayoutItems.Count);
-        Assert.AreEqual(0, viewmodel.Functions.Count);
+        Assert.IsEmpty(viewmodel.TypeLayoutItems);
+        Assert.IsEmpty(viewmodel.Functions);
         Assert.AreEqual<uint>(0, viewmodel.TotalSizeOfAllFunctions);
         Assert.AreEqual("User Defined Type", viewmodel.PageTitle);
     }

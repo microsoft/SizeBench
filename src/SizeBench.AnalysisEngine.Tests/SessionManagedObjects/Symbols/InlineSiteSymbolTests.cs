@@ -20,7 +20,7 @@ public sealed class InlineSiteSymbolTests
         Assert.AreEqual(124u, inlineSite.SymIndexId);
         Assert.AreEqual("someInlinedFunction", inlineSite.Name);
         Assert.AreEqual("functionInlinedInto()", inlineSite.BlockInlinedInto.Name);
-        Assert.AreEqual(2, inlineSite.RVARanges.Count());
+        Assert.HasCount(2, inlineSite.RVARanges);
         Assert.AreEqual(10u + 5u, inlineSite.Size);
     }
 }

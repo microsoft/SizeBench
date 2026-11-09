@@ -48,7 +48,6 @@ public sealed class EnumerateSymbolsInBinarySectionSessionTaskTests : IDisposabl
         Assert.IsNotNull(symbols);
     }
 
-    [ExpectedException(typeof(OperationCanceledException), AllowDerivedTypes = false)]
     [TestMethod]
     public void CanCancelInTheMiddleOfEnumerationWhenRVAsAreMonotonicallyIncreasing()
     {
@@ -83,7 +82,6 @@ public sealed class EnumerateSymbolsInBinarySectionSessionTaskTests : IDisposabl
         }
         Assert.IsNull(symbols);
         Assert.IsNotNull(capturedException);
-        throw capturedException;
     }
 
     [TestMethod]
@@ -113,7 +111,7 @@ public sealed class EnumerateSymbolsInBinarySectionSessionTaskTests : IDisposabl
 
         using var logger = new NoOpLogger();
         var symbols = task.Execute(logger);
-        Assert.AreEqual(expectedSymbolCount, symbols.Count);
+        Assert.HasCount(expectedSymbolCount, symbols);
 
         // We expect one "Starting Up..." progress report, then two real ones
         mockProgress.Verify(p => p.Report(It.IsAny<SessionTaskProgress>()), Times.Exactly(3));

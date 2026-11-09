@@ -1,8 +1,7 @@
 ﻿using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
-using System.Windows.Media;
-using DiffPlex.Wpf.Controls;
+using SizeBench.GUI.Controls;
 
 #nullable disable // Disabling nullability for IValueConverters, since WPF doesn't define them correctly yet (they should return object? not object)
 
@@ -41,21 +40,7 @@ public sealed class TwoStringsToDiffViewerUIConverter : IMultiValueConverter
         }
 #pragma warning restore CA1508
 
-        //TODO: Consider showing the function names in the headers (OldTextHeader and NewTextHeader) - but piping that through
-        //      this IMultiValueConverter seems tedious so skipping for now.  In the current UI, the function names are shown in
-        //      the ComboBoxes above anyway.
-        var diffViewer = new DiffViewer()
-        {
-            OldText = leftString,
-            NewText = rightString,
-            InsertedBackground = new SolidColorBrush(Color.FromRgb(255, 255, 187)),
-            DeletedBackground = new SolidColorBrush(Color.FromRgb(255, 168, 168)),
-            FontFamily = new FontFamily("Consolas"),
-            FontSize = 16
-        };
-        diffViewer.ShowInline();
-
-        return diffViewer;
+        return new SelectableDiffViewer(leftString, rightString);
     }
 
     public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)

@@ -27,7 +27,7 @@ public sealed class Session_EnumerateWastefulVirtualsTests
 
         // We should have found wasteful virtuals in Base1, Base1_Derived1, BaseWastefulOnlyInBefore,
         // BaseWastefulOnlyInBefore_Derived1, DerivedTypeWithVfptr and std::exception
-        Assert.AreEqual(6, wasteful.Count);
+        Assert.HasCount(6, wasteful);
         var base1Wasteful = wasteful.Single(wvi => wvi.UserDefinedType.Name == "Base1");
         var base1_derived1Wasteful = wasteful.Single(wvi => wvi.UserDefinedType.Name == "Base1_Derived1");
         var baseWastefulOnlyInBeforeWasteful = wasteful.Single(wvi => wvi.UserDefinedType.Name == "BaseWastefulOnlyInBefore");
@@ -36,7 +36,7 @@ public sealed class Session_EnumerateWastefulVirtualsTests
         var std_exceptionWasteful = wasteful.Single(wvi => wvi.UserDefinedType.Name == "std::exception");
 
         // Base1 should have one function considered wasteful: VirtualFunctionWithNoOverrides
-        Assert.AreEqual(1, base1Wasteful.WastedOverridesNonPureWithNoOverrides.Count);
+        Assert.HasCount(1, base1Wasteful.WastedOverridesNonPureWithNoOverrides);
         Assert.AreEqual("VirtualFunctionWithNoOverrides", base1Wasteful.WastedOverridesNonPureWithNoOverrides.First().FunctionName);
         // Should be (8 bytes per word) * (4 classes in the hierarchy) = 32 bytes waste per slot
         Assert.AreEqual(32, base1Wasteful.WastePerSlot);
@@ -47,11 +47,11 @@ public sealed class Session_EnumerateWastefulVirtualsTests
         // VirtualFunctionWithNoOverrides2
         // PureVirtualFunctionWithOneOverride
         // VirtualFunctionWithNoOverrides(int)
-        Assert.AreEqual(2, base1_derived1Wasteful.WastedOverridesNonPureWithNoOverrides.Count);
-        Assert.AreEqual(1, base1_derived1Wasteful.WastedOverridesNonPureWithNoOverrides.Count(f => f.FunctionName == "VirtualFunctionWithNoOverrides2"));
-        Assert.AreEqual(1, base1_derived1Wasteful.WastedOverridesNonPureWithNoOverrides.Count(f => f.FunctionName == "VirtualFunctionWithNoOverrides" && f.FunctionType?.ArgumentTypes != null && f.FunctionType?.ArgumentTypes?.Count == 1));
-        Assert.AreEqual(1, base1_derived1Wasteful.WastedOverridesPureWithExactlyOneOverride.Count);
-        Assert.AreEqual(1, base1_derived1Wasteful.WastedOverridesPureWithExactlyOneOverride.Count(f => f.FunctionName == "PureVirtualFunctionWithOneOverride"));
+        Assert.HasCount(2, base1_derived1Wasteful.WastedOverridesNonPureWithNoOverrides);
+        Assert.ContainsSingle(f => f.FunctionName == "VirtualFunctionWithNoOverrides2", base1_derived1Wasteful.WastedOverridesNonPureWithNoOverrides);
+        Assert.ContainsSingle(f => f.FunctionName == "VirtualFunctionWithNoOverrides" && f.FunctionType?.ArgumentTypes != null && f.FunctionType?.ArgumentTypes?.Count == 1, base1_derived1Wasteful.WastedOverridesNonPureWithNoOverrides);
+        Assert.HasCount(1, base1_derived1Wasteful.WastedOverridesPureWithExactlyOneOverride);
+        Assert.ContainsSingle(f => f.FunctionName == "PureVirtualFunctionWithOneOverride", base1_derived1Wasteful.WastedOverridesPureWithExactlyOneOverride);
         // Should be (8 bytes per word) * (2 classes in this sub-hierarchy) = 16 bytes waste per slot
         Assert.AreEqual(16, base1_derived1Wasteful.WastePerSlot);
         // Should be 48 bytes total of waste, since there's 3 wasted slots

@@ -46,11 +46,11 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
 {
     // Once we load DIA we never try to unload it, because it's very hard to deterministically collect all the COM objects before we unload the DLL.  That's why this is static.
     private static readonly LibraryModule _diaLibraryModule = LibraryModule.LoadModule(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? ".", @"msdia140.dll"));
-    private IDiaDataSource? _diaDataSource;
+    private IDiaDataSourceEx2? _diaDataSource;
     private Session? _session;
     private PEFile? _peFile;
     private SessionDataCache? _cache;
-    private IDiaSession? _diaSession;
+    private IDiaSessionEx? _diaSession;
     private IDiaSymbol? _globalScope;
     private uint _fileAlignment;
     private uint _sectionAlignment;
@@ -133,17 +133,18 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
 
         try
         {
-            this._diaDataSource = CoClassLoaderRegFree.CreateInstance<IDiaDataSource>(_diaLibraryModule, Dia140Clsid);
+            this._diaDataSource = CoClassLoaderRegFree.CreateInstance<IDiaDataSourceEx2>(_diaLibraryModule, Dia140Clsid);
 
-            this._diaDataSource.loadDataFromPdb(pdbPath);
+            this._diaDataSource.loadDataFromPdbEx(pdbPath, fPdbPrefetching: 1);
 
-            this._diaDataSource.openSession(out this._diaSession);
+            this._diaDataSource.openSession(out var diaSession);
+            this._diaSession = (IDiaSessionEx)diaSession;
         }
         catch (COMException comException)
         {
             // If this is one of the well-known DIA HRESULTs at least we can return a friendly string that
             // the CLR can't since it doesn't know about these.
-            var diaHRESULTValues = Enum.GetValues(typeof(DIAHRESULTs));
+            var diaHRESULTValues = Enum.GetValues<DIAHRESULTs>();
             for (var i = 0; i < diaHRESULTValues.Length; i++)
             {
                 if (((uint)comException.HResult) == Convert.ToUInt32(diaHRESULTValues.GetValue(i), CultureInfo.InvariantCulture.NumberFormat))
@@ -303,9 +304,19 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             throw new PDBNotSuitableForAnalysisException("Unable to find the linker command-line used, this binary was probably produced by using /debug:fastlink in your link command - please generate a full PDB with /debug:full for use with SizeBench.");
         }
 
-        if (linkerCommandLine.GetSwitchState(debugFastlinkSwitchNames, CommandLineSwitchState.SwitchNotFound, CommandLineOrderOfPrecedence.LastWins, StringComparison.OrdinalIgnoreCase) == CommandLineSwitchState.SwitchEnabled)
+        this._diaSession!.isPortablePDB(out var isPortablePdb);
+
+        if (isPortablePdb != 0)
         {
-            throw new PDBNotSuitableForAnalysisException("This PDB is a 'Mini PDB' which is not suitable for static analysis purposes.  This PDB was probably produced by using /debug:fastlink in your link command - please generate a full PDB with /debug:full for use with SizeBench.");
+            throw new PDBNotSuitableForAnalysisException("This PDB is a 'Portable PDB', which has very different data than SizeBench was designed to analyze in traditional PDBs.");
+        }
+
+        this._diaSession!.isFastLinkPDB(out var isFastLinkPdb);
+
+        if (isFastLinkPdb != 0 ||
+            linkerCommandLine.GetSwitchState(debugFastlinkSwitchNames, CommandLineSwitchState.SwitchNotFound, CommandLineOrderOfPrecedence.LastWins, StringComparison.OrdinalIgnoreCase) == CommandLineSwitchState.SwitchEnabled)
+        {
+            throw new PDBNotSuitableForAnalysisException("This PDB is a 'Mini PDB', also known as a 'fast link PDB' which is not suitable for static analysis purposes.  This PDB was probably produced by using /debug:fastlink in your link command - please generate a full PDB with /debug:full for use with SizeBench.");
         }
 
         if (linkerCommandLine.IsPGInstrumented)
@@ -1119,15 +1130,16 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             parentSymbol = parentSymbol.lexicalParent;
         }
 
+        IFunctionCodeSymbol function;
         if (parentSymbol != null && (SymTagEnum)parentSymbol.symTag == SymTagEnum.SymTagFunction)
         {
             // This will in turn parse all the blocks for the function
             // This may be a Complex function with primary and separated blocks (if MSVC arrived here),
             // or this may be a Simple function when clang generates code as it can generate a lone
             // SymTagBlock under a function.
-            var function = GetOrCreateFunctionSymbol(parentSymbol, cancellationToken);
+            function = GetOrCreateFunctionSymbol(parentSymbol, cancellationToken);
 
-            // If we found a simple function, we'll return it right away.  We only go further for MSVC
+            // If we found a simple function, we'll return it right away.  We only go further
             // when we need to find the block within the complex function.
             if (function is SimpleFunctionCodeSymbol simpleFn)
             {
@@ -1139,9 +1151,49 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             throw new InvalidOperationException("We've found a separated block that does not have a function as its parent - how is this possible?  This is a bug in SizeBench's implementation, not your use of it.");
         }
 
-        var block = (CodeBlockSymbol)this.DataCache.AllSymbolsBySymIndexId[diaSymbol.symIndexId];
-        Debug.Assert(!String.IsNullOrEmpty(block.Name));
-        return block;
+        CodeBlockSymbol? parsedBlock = null;
+        if (this.DataCache.AllSymbolsBySymIndexId.TryGetValue(diaSymbol.symIndexId, out var existingBlock))
+        {
+            parsedBlock = (CodeBlockSymbol)existingBlock;
+        }
+        else
+        {
+            // In some cases, LLD has been seen to emit PDBs where functions can look like this:
+            // Primary Block: 0x25E94A-0x25EC39, with SymIndexId = X
+            //  findChildren for SymTagBlock on that SymTagFunction:
+            //    Separated Block: 0x25EBC9-0x25EC39 (fully overlaps with primary), with SymIndexId = Y
+            //    Separated Block: 0xE0741C0-0xE0741D1, with SymIndexId = Z
+            // Then we end up in this path and find a different block like this:
+            //    Block: 0x25EBDE-0x25EC39 (again fully overlaps with primary), with SymIndexId = A
+            //
+            // So, the problem is - we asked the function for all its child block symbols and we somehow didn't
+            // find this one, but it does in fact overlap with another block we *did* find.  This is *probably*
+            // a bug in LLD's PDB generation, but we'll try to compensate here by looking through all the blocks
+            // in the parent function we found, and if any of them fully contains this symbol, we'll just return
+            // that block.
+            var blockRangeToFind = RVARange.FromRVAAndSize(diaSymbol.relativeVirtualAddress, (uint)diaSymbol.length);
+            foreach (var block in function.Blocks)
+            {
+                var blockRange = new RVARange(block.RVA, block.RVAEnd);
+                if (blockRange.Contains(blockRangeToFind))
+                {
+                    // We'll just return this block instead of creating a new one that overlaps it.
+                    parsedBlock = block;
+                    // But we'll also cache this SymIndexId to point to this block so if anyone else looks it up
+                    // by SymIndexId they'll find the right thing.
+                    this.DataCache.AllSymbolsBySymIndexId[diaSymbol.symIndexId] = parsedBlock;
+                    break;
+                }
+            }
+        }
+
+        if (parsedBlock is null)
+        {
+            throw new InvalidOperationException($"Failed to parse block symbol for block with RVA=0x{diaSymbol.relativeVirtualAddress:X}, SymIndexID={diaSymbol.symIndexId}.");
+        }
+
+        Debug.Assert(!String.IsNullOrEmpty(parsedBlock.Name));
+        return parsedBlock;
     }
 
     private InlineSiteSymbol GetOrCreateInlineSiteSymbol(IDiaSymbol diaSymbol, CancellationToken cancellationToken)
@@ -1816,7 +1868,7 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
     {
         ThrowIfOnWrongThread();
 
-        ISymbol? previousNonFoldedSymbolYielded = null;
+        Symbol? previousNonFoldedSymbolYielded = null;
 
         if (this.DataCache.TryFindSymIndicesInRVARange(range, out var symIndicesByRVA, out var minIdx, out var maxIdx))
         {
@@ -2618,6 +2670,16 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                 tls_nameStringBuilder.Append("__unaligned ");
             }
 
+            if (diaSymbol.restrictedType != 0)
+            {
+                tls_nameStringBuilder.Append("__restrict ");
+            }
+
+            if (diaSymbol is IDiaSymbol12 diaSymbol12 && diaSymbol12.atomicType != 0)
+            {
+                tls_nameStringBuilder.Append("_Atomic ");
+            }
+
             tls_nameStringBuilder.Append(unmodifiedArrayType.Name);
             return new ModifiedTypeSymbol(this.DataCache, unmodifiedArrayType, tls_nameStringBuilder.ToString(), symbolLength, diaSymbol.symIndexId);
         }
@@ -2756,11 +2818,12 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             "variant",
             "complex",
             "bit",
-            "BSTR",
+            "BSTR", // 30
             "HRESULT",
             "char16_t",
             "char32_t",
             "char8_t",
+            "sve_vector_t", // 35
         ];
 
     private TypeSymbol ParseBaseType(IDiaSymbol diaSymbol,
@@ -2787,6 +2850,16 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             if (diaSymbol.unalignedType != 0)
             {
                 tls_nameStringBuilder.Append("__unaligned ");
+            }
+
+            if (diaSymbol.restrictedType != 0)
+            {
+                tls_nameStringBuilder.Append("__restrict ");
+            }
+
+            if (diaSymbol is IDiaSymbol12 diaSymbol12 && diaSymbol12.atomicType != 0)
+            {
+                tls_nameStringBuilder.Append("_Atomic ");
             }
 
             tls_nameStringBuilder.Append(unmodifiedBasicType.Name);
@@ -2900,6 +2973,16 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
                 tls_nameStringBuilder.Append(" __unaligned");
             }
 
+            if (diaSymbol.restrictedType != 0)
+            {
+                tls_nameStringBuilder.Append(" __restrict");
+            }
+
+            if (diaSymbol is IDiaSymbol12 diaSymbol12 && diaSymbol12.atomicType != 0)
+            {
+                tls_nameStringBuilder.Append(" _Atomic");
+            }
+
             return new ModifiedTypeSymbol(this.DataCache, unmodifiedPointerType, tls_nameStringBuilder.ToString(), symbolLength, diaSymbol.symIndexId);
         }
 
@@ -2946,6 +3029,16 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             tls_nameStringBuilder.Append(" __unaligned");
         }
 
+        if (pointerTypeSymbol.restrictedType != 0)
+        {
+            tls_nameStringBuilder.Append(" __restrict");
+        }
+
+        if (pointerTypeSymbol is IDiaSymbol12 diaSymbol12 && diaSymbol12.atomicType != 0)
+        {
+            tls_nameStringBuilder.Append(" _Atomic");
+        }
+
         return tls_nameStringBuilder.ToString();
     }
 
@@ -2978,6 +3071,16 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             if (diaSymbol.unalignedType != 0)
             {
                 tls_nameStringBuilder.Append("__unaligned ");
+            }
+
+            if (diaSymbol.restrictedType != 0)
+            {
+                tls_nameStringBuilder.Append("__restrict ");
+            }
+
+            if (diaSymbol is IDiaSymbol12 diaSymbol12 && diaSymbol12.atomicType != 0)
+            {
+                tls_nameStringBuilder.Append("_Atomic ");
             }
 
             tls_nameStringBuilder.Append(unmodifiedEnumType.Name);
@@ -3018,6 +3121,16 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             if (diaSymbol.unalignedType != 0)
             {
                 tls_nameStringBuilder.Append("__unaligned ");
+            }
+
+            if (diaSymbol.restrictedType != 0)
+            {
+                tls_nameStringBuilder.Append("__restrict ");
+            }
+
+            if (diaSymbol is IDiaSymbol12 diaSymbol12 && diaSymbol12.atomicType != 0)
+            {
+                tls_nameStringBuilder.Append("_Atomic ");
             }
 
             tls_nameStringBuilder.Append(unmodifiedUDT.Name);
@@ -3223,12 +3336,24 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         {
             if ((SymTagEnum)symbolType.symTag == SymTagEnum.SymTagPointerType)
             {
-                var pointerTargetType = symbolType.type;
-                if (pointerTargetType != null &&
-                    ((SymTagEnum)pointerTargetType.symTag == SymTagEnum.SymTagNull ||
-                     ((SymTagEnum)pointerTargetType.symTag == SymTagEnum.SymTagBaseType && (BasicTypes)pointerTargetType.baseType == BasicTypes.btVoid)))
+                IDiaSymbol? pointerTargetType = null;
+                var attemptMASMPointerTypeWorkaround = false;
+
+                try
                 {
-                    dataSymbolType = ParseNullDataPointerTargetTypeIfPossible(diaSymbol, pointerTargetType, cancellationToken);
+                    pointerTargetType = symbolType.type;
+                }
+                catch (COMException comException) when (comException.HResult == unchecked((int)DIAHRESULTs.E_PDB_CORRUPT))
+                {
+                    attemptMASMPointerTypeWorkaround = true;
+                }
+
+                if (attemptMASMPointerTypeWorkaround ||
+                    (pointerTargetType != null &&
+                     ((SymTagEnum)pointerTargetType.symTag == SymTagEnum.SymTagNull ||
+                      ((SymTagEnum)pointerTargetType.symTag == SymTagEnum.SymTagBaseType && (BasicTypes)pointerTargetType.baseType == BasicTypes.btVoid))))
+                {
+                    dataSymbolType = ParseNullDataPointerTargetTypeIfPossible(diaSymbol, pointerTargetType, attemptMASMPointerTypeWorkaround, cancellationToken);
                     if (dataSymbolType != null)
                     {
                         // These data symbols are special, they're just a way to refer to an address, they don't themselves take up space - they're sort of like
@@ -3359,7 +3484,8 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
     }
 
     private TypeSymbol? ParseNullDataPointerTargetTypeIfPossible(IDiaSymbol dataDiaSymbol,
-                                                                 IDiaSymbol symbolTypePointerTargetType,
+                                                                 IDiaSymbol? symbolTypePointerTargetType,
+                                                                 bool attemptMASMPointerTypeWorkaround,
                                                                  CancellationToken cancellationToken)
     {
         // It is very rare to end up here, and so far this has only been observed with a construct from MASM.
@@ -3373,7 +3499,8 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
         // the symbol here is MASM.  If it is, then we'll assume it's a SymTagNull/SymTagBaseType(void) that's pointing to a
         // procedure and give back something.
 
-        if (symbolTypePointerTargetType.unmodifiedType is not null)
+        if (!attemptMASMPointerTypeWorkaround &&
+            symbolTypePointerTargetType!.unmodifiedType is not null)
         {
             return null;
         }
@@ -3387,23 +3514,35 @@ internal sealed class DIAAdapter : IDIAAdapter, IDisposable
             var symbolLanguage = this.DiaSession.LanguageOfSymbolAtRva(dataDiaSymbol.relativeVirtualAddress);
             if (symbolLanguage == CompilandLanguage.CV_CFL_MASM)
             {
-                if (this.DataCache.AllTypesBySymIndexId.TryGetValue(symbolTypePointerTargetType.symIndexId, out var foundType))
+                if (attemptMASMPointerTypeWorkaround)
                 {
-                    return foundType;
+                    return CreateVoidFunctionTypeForMASM(dataDiaSymbol.type.typeId, cancellationToken);
                 }
-
-                var voidTypeDiaSymbol = this.DiaSession.findVoidBasicType();
-                var voidType = GetOrCreateTypeSymbol<TypeSymbol>(voidTypeDiaSymbol, cancellationToken);
-                while (voidType is ModifiedTypeSymbol modifiedVoid)
+                else
                 {
-                    voidType = modifiedVoid.UnmodifiedTypeSymbol;
+                    return CreateVoidFunctionTypeForMASM(symbolTypePointerTargetType!.symIndexId, cancellationToken);
                 }
-                var functionTypeName = BuildFunctionTypeName(argumentTypes: null, returnValueType: voidType, functionIsConst: false, functionIsVolatile: false, functionIsUnaligned: false);
-                return new FunctionTypeSymbol(this.DataCache, functionTypeName, 0, symbolTypePointerTargetType.symIndexId, isConst: false, isVolatile: false, argumentTypes: null, returnValueType: voidType);
             }
         }
 
         return null;
+    }
+
+    private TypeSymbol CreateVoidFunctionTypeForMASM(uint symIndexId, CancellationToken cancellationToken)
+    {
+        if (this.DataCache.AllTypesBySymIndexId.TryGetValue(symIndexId, out var foundType))
+        {
+            return foundType;
+        }
+
+        var voidTypeDiaSymbol = this.DiaSession.findVoidBasicType();
+        var voidType = GetOrCreateTypeSymbol<TypeSymbol>(voidTypeDiaSymbol, cancellationToken);
+        while (voidType is ModifiedTypeSymbol modifiedVoid)
+        {
+            voidType = modifiedVoid.UnmodifiedTypeSymbol;
+        }
+        var functionTypeName = BuildFunctionTypeName(argumentTypes: null, returnValueType: voidType, functionIsConst: false, functionIsVolatile: false, functionIsUnaligned: false);
+        return new FunctionTypeSymbol(this.DataCache, functionTypeName, 0, symIndexId, isConst: false, isVolatile: false, argumentTypes: null, returnValueType: voidType);
     }
 
     #endregion

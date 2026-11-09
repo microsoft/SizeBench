@@ -171,7 +171,7 @@ public class BinarySectionTests
         Assert.AreEqual((0x100 - 0xF7 - 1) + (0x300 - 0x2F7 - 1) + (0x600 - 0x401 - 1), bs.COFFGroups.Sum(cg => cg.TailSlopSizeAlignment));
         // VirtualSize has more padding, as it's aligned to SectionAlignment (0x1000)
         Assert.AreEqual(16u + (0x1000 - 0x401 - 1), bs.COFFGroups.Sum(cg => cg.TailSlopVirtualSizeAlignment));
-        Assert.IsTrue(cg1.Size + cg2.Size + cg3.Size < (2 * fileAlignment)); // only 2 FileAlignment-sized chunks come from the COFF Groups
+        Assert.IsLessThan(2 * fileAlignment, cg1.Size + cg2.Size + cg3.Size); // only 2 FileAlignment-sized chunks come from the COFF Groups
         Assert.AreEqual(3 * fileAlignment, bs.Size); // Yet the binary section is 3 FileAlignment chunks in size because of the padding
         Assert.AreEqual(0x1000u, bs.VirtualSize + bs.TailSlopVirtualSizeAlignment);
         Assert.AreEqual(0x1000u, bs.VirtualSizeIncludingPadding);
@@ -220,20 +220,10 @@ public class BinarySectionTests
         bs.AddCOFFGroup(cg2);
         bs.AddCOFFGroup(cg3);
 
-        var exceptionThrown = false;
-        try
-        {
-            bs.MarkFullyConstructed();
-        }
-        catch (Exception e)
-        {
-            exceptionThrown = true;
-            StringAssert.Contains(e.Message, "gap between COFF Groups", StringComparison.Ordinal);
-            StringAssert.Contains(e.Message, cg2.Name, StringComparison.Ordinal);
-            StringAssert.Contains(e.Message, cg3.Name, StringComparison.Ordinal);
-        }
-
-        Assert.IsTrue(exceptionThrown);
+        var e = Assert.Throws<Exception>(() => bs.MarkFullyConstructed());
+        Assert.Contains("gap between COFF Groups", e.Message, StringComparison.Ordinal);
+        Assert.Contains(cg2.Name, e.Message, StringComparison.Ordinal);
+        Assert.Contains(cg3.Name, e.Message, StringComparison.Ordinal);
     }
 
     [TestMethod]
@@ -280,7 +270,7 @@ public class BinarySectionTests
 
         bs.MarkFullyConstructed();
 
-        Assert.ThrowsException<ObjectFullyConstructedAlreadyException>(() => bs.AddCOFFGroup(cg1));
+        Assert.ThrowsExactly<ObjectFullyConstructedAlreadyException>(() => bs.AddCOFFGroup(cg1));
     }
 
     [TestMethod]
@@ -326,7 +316,7 @@ public class BinarySectionTests
         bs.AddCOFFGroup(cg3);
 
         object dummy;
-        Assert.ThrowsException<ObjectNotYetFullyConstructedException>(() => dummy = bs.COFFGroups);
+        Assert.ThrowsExactly<ObjectNotYetFullyConstructedException>(() => dummy = bs.COFFGroups);
 
         // And these properties should be accessible even before fully-constructed as they are safe as soon as the constructor runs:
         dummy = bs.Size;

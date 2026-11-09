@@ -13,7 +13,7 @@ public sealed class PGOTests
 {
     public TestContext? TestContext { get; set; }
 
-    private CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
+    private CancellationToken CancellationToken => this.TestContext!.CancellationToken;
 
     // PGO'd binaries are complicated and slow to open, so we don't want to re-open this for each test method.
     // But we can't afford to make this a class-level piece of state because MSTest may not clean it up while it's
@@ -113,13 +113,13 @@ public sealed class PGOTests
         var PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function = await MUXSession!.LoadSymbolByRVA(0x3C63E0) as SimpleFunctionCodeSymbol;
         Assert.AreEqual(AccessModifier.Public, PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function!.AccessModifier);
         Assert.IsNotNull(PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.ArgumentNames);
-        Assert.AreEqual(2, PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.ArgumentNames.Count);
+        Assert.HasCount(2, PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.ArgumentNames);
         Assert.AreEqual(1, PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.BlockCount);
         Assert.IsTrue(PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.CanBeFolded);
         Assert.AreEqual(PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.Name, PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.CanonicalName);
         Assert.IsNotNull(PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.FunctionType);
         Assert.IsNotNull(PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.FunctionType.ArgumentTypes);
-        Assert.AreEqual(2, PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.FunctionType.ArgumentTypes.Count);
+        Assert.HasCount(2, PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.FunctionType.ArgumentTypes);
         Assert.IsFalse(PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.FunctionType.CanLoadLayout);
         Assert.AreEqual(0u, PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.FunctionType.InstanceSize);
         Assert.IsFalse(PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.FunctionType.IsConst);
@@ -146,19 +146,19 @@ public sealed class PGOTests
         Assert.AreEqual(80u, PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.VirtualSize);
 
         var PipsPagerProperties_FoldedColdFunctions = await MUXSession.EnumerateAllSymbolsFoldedAtRVA(0x3C63E0, this.CancellationToken);
-        Assert.AreEqual(11, PipsPagerProperties_FoldedColdFunctions.Count);
+        Assert.HasCount(11, PipsPagerProperties_FoldedColdFunctions);
         var PipsPagerProperties_FoldedColdFunctions_Attributed_To = PipsPagerProperties_FoldedColdFunctions.Single(sym => !sym.IsCOMDATFolded);
         Assert.AreEqual(PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function, PipsPagerProperties_FoldedColdFunctions_Attributed_To);
         var PipsPagerProperties_OnNextButtonStylePropertyChanged_Function = PipsPagerProperties_FoldedColdFunctions.OfType<SimpleFunctionCodeSymbol>().Single(sym => sym.Name == "PipsPagerProperties::OnNextButtonStylePropertyChanged(const winrt::Windows::UI::Xaml::DependencyObject&, const winrt::Windows::UI::Xaml::DependencyPropertyChangedEventArgs&)");
         Assert.AreEqual(AccessModifier.Public, PipsPagerProperties_OnNextButtonStylePropertyChanged_Function!.AccessModifier);
         Assert.IsNotNull(PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.ArgumentNames);
-        Assert.AreEqual(2, PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.ArgumentNames.Count);
+        Assert.HasCount(2, PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.ArgumentNames);
         Assert.AreEqual(1, PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.BlockCount);
         Assert.IsTrue(PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.CanBeFolded);
         Assert.AreEqual(PipsPagerProperties_OnMaxVisiblePipsPropertyChanged_Function.Name, PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.CanonicalName); // Note the canonical name is for the 'primary' function above
         Assert.IsNotNull(PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.FunctionType);
         Assert.IsNotNull(PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.FunctionType.ArgumentTypes);
-        Assert.AreEqual(2, PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.FunctionType.ArgumentTypes.Count);
+        Assert.HasCount(2, PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.FunctionType.ArgumentTypes);
         Assert.IsFalse(PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.FunctionType.CanLoadLayout);
         Assert.AreEqual(0u, PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.FunctionType.InstanceSize);
         Assert.IsFalse(PipsPagerProperties_OnNextButtonStylePropertyChanged_Function.FunctionType.IsConst);
@@ -229,16 +229,16 @@ public sealed class PGOTests
 
         var FlowLayoutAlgorithm_Generate_PrimaryBlock = await MUXSession!.LoadSymbolByRVA(0xD710) as PrimaryCodeBlockSymbol;
         var FlowLayoutAlgorithm_Generate_Function = FlowLayoutAlgorithm_Generate_PrimaryBlock!.ParentFunction as ComplexFunctionCodeSymbol;
-        Assert.AreEqual(1, FlowLayoutAlgorithm_Generate_Function!.SeparatedBlocks.Count);
+        Assert.HasCount(1, FlowLayoutAlgorithm_Generate_Function!.SeparatedBlocks);
         var FlowLayoutAlgorithm_Generate_SeparatedBlock = FlowLayoutAlgorithm_Generate_Function!.SeparatedBlocks[0];
         // Verify stuff about the function
         Assert.AreEqual(AccessModifier.Private, FlowLayoutAlgorithm_Generate_Function!.AccessModifier);
         Assert.IsNotNull(FlowLayoutAlgorithm_Generate_Function.ArgumentNames);
-        Assert.AreEqual(8, FlowLayoutAlgorithm_Generate_Function.ArgumentNames.Count);
+        Assert.HasCount(8, FlowLayoutAlgorithm_Generate_Function.ArgumentNames);
         Assert.AreEqual(2, FlowLayoutAlgorithm_Generate_Function.BlockCount);
         Assert.IsNotNull(FlowLayoutAlgorithm_Generate_Function.FunctionType);
         Assert.IsNotNull(FlowLayoutAlgorithm_Generate_Function.FunctionType.ArgumentTypes);
-        Assert.AreEqual(8, FlowLayoutAlgorithm_Generate_Function.FunctionType.ArgumentTypes.Count);
+        Assert.HasCount(8, FlowLayoutAlgorithm_Generate_Function.FunctionType.ArgumentTypes);
         Assert.IsFalse(FlowLayoutAlgorithm_Generate_Function.FunctionType.CanLoadLayout);
         Assert.AreEqual(0u, FlowLayoutAlgorithm_Generate_Function.FunctionType.InstanceSize);
         Assert.IsFalse(FlowLayoutAlgorithm_Generate_Function.FunctionType.IsConst);
@@ -302,7 +302,7 @@ public sealed class PGOTests
         Assert.AreEqual(11u, AnimatedAcceptVisualSource_AnimatedVisual_ContainerVisual_16_SeparatedBlock.VirtualSize);
 
         var AnimatedAcceptVisualSource_AnimatedVisual_ContainerVisual_FoldedColdBlocks = await MUXSession.EnumerateAllSymbolsFoldedAtRVA(0xD63C6, this.CancellationToken);
-        Assert.AreEqual(4, AnimatedAcceptVisualSource_AnimatedVisual_ContainerVisual_FoldedColdBlocks.Count);
+        Assert.HasCount(4, AnimatedAcceptVisualSource_AnimatedVisual_ContainerVisual_FoldedColdBlocks);
         var AnimatedAcceptVisualSource_AnimatedVisual_ContainerVisual_19_SeparatedBlock = AnimatedAcceptVisualSource_AnimatedVisual_ContainerVisual_FoldedColdBlocks.Single(s => s.Name.StartsWith("Block of code in AnimatedAcceptVisualSource_AnimatedVisual::ContainerVisual_19", StringComparison.Ordinal)) as SeparatedCodeBlockSymbol;
         Assert.IsTrue(AnimatedAcceptVisualSource_AnimatedVisual_ContainerVisual_19_SeparatedBlock!.CanBeFolded);
         Assert.AreEqual(AnimatedAcceptVisualSource_AnimatedVisual_ContainerVisual_16_SeparatedBlock.Name, AnimatedAcceptVisualSource_AnimatedVisual_ContainerVisual_19_SeparatedBlock.CanonicalName); // Note the canonical name should come from the block in 16 (the symbol we attributed the bytes to)
@@ -339,7 +339,7 @@ public sealed class PGOTests
         Assert.AreEqual(17u, segIp2State!.Size);
         Assert.AreEqual(AnimatedAcceptVisualSource_AnimatedVisual_ContainerVisual_16_PrimaryBlock.RVA, segIp2State.TargetStartRVA);
         Assert.AreEqual($"[seg2ip2state] {AnimatedAcceptVisualSource_AnimatedVisual_ContainerVisual_16_PrimaryBlock.Name}", segIp2State.Name);
-        Assert.AreEqual(2, segIp2State!.Entries.Length);
+        Assert.HasCount(2, segIp2State!.Entries);
         Assert.AreEqual(0x4D21AAu, segIp2State.Entries.Single(entry => entry.RVAOfBlock == AnimatedAcceptVisualSource_AnimatedVisual_ContainerVisual_16_PrimaryBlock.RVA).RVAOfIpToStateMap);
         Assert.AreEqual(0x4D21B1u, segIp2State.Entries.Single(entry => entry.RVAOfBlock == AnimatedAcceptVisualSource_AnimatedVisual_ContainerVisual_16_SeparatedBlock.RVA).RVAOfIpToStateMap);
 
@@ -410,9 +410,9 @@ public sealed class PGOTests
         Assert.AreEqual(8u, primaryVTable.Size);
 
         var foldedVTables = await MUXSession.EnumerateAllSymbolsFoldedAtRVA(0x48F8E0, this.CancellationToken);
-        Assert.AreEqual(4, foldedVTables.Count);
+        Assert.HasCount(4, foldedVTables);
 
-        Assert.IsTrue(foldedVTables.Contains(primaryVTable));
+        Assert.Contains(primaryVTable, foldedVTables);
 
         var folded = foldedVTables.OfType<Symbol>().Single(s => s.Name == "ObservableVectorInnerImpl<VectorOptions<winrt::Windows::UI::Xaml::UIElement,0,0,1,0>,TStorageWrapperImpl<winrt::Windows::UI::Xaml::UIElement,0> >::`vftable'");
         Assert.IsTrue(folded.IsCOMDATFolded);
@@ -451,7 +451,7 @@ public sealed class PGOTests
         var sections = await MUXSession!.EnumerateBinarySectionsAndCOFFGroups(this.CancellationToken);
         var rdataSymbols = await MUXSession.EnumerateSymbolsInBinarySection(sections.Single(s => s.Name == ".rdata"), this.CancellationToken);
 
-        Assert.IsTrue(rdataSymbols.Count > 0);
+        Assert.IsNotEmpty(rdataSymbols);
     }
 
     private async Task ImportSymbolsCanBeEnumerated(Session MUXSession)

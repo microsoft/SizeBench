@@ -177,69 +177,69 @@ public sealed class EnumerateSourceFilesSessionTaskTests : IDisposable
         Assert.IsFalse(String.IsNullOrEmpty(task.TaskName));
         var sourceFiles = task.Execute(logger);
 
-        Assert.AreEqual(3, sourceFiles.Count);
+        Assert.HasCount(3, sourceFiles);
 
         // Assertions about a1.cpp
-        Assert.AreEqual(1, a1SourceFile.SectionContributions.Count);
+        Assert.HasCount(1, a1SourceFile.SectionContributions);
         Assert.AreEqual(".text", a1SourceFile.SectionContributionsByName.Keys.First());
         var sectionContrib = a1SourceFile.SectionContributions.First();
         Assert.AreEqual(".text", sectionContrib.Key.Name);
         Assert.AreEqual<ulong>(0x200, sectionContrib.Value.Size);
-        Assert.AreEqual(1, sectionContrib.Value.RVARanges.Count); // We should have coalesced this into one RVA range, to minimize later processing
+        Assert.HasCount(1, sectionContrib.Value.RVARanges); // We should have coalesced this into one RVA range, to minimize later processing
         Assert.AreEqual<ulong>(0x0, sectionContrib.Value.RVARanges[0].RVAStart);
         Assert.AreEqual<ulong>(0x200, sectionContrib.Value.RVARanges[0].Size);
 
-        Assert.AreEqual(1, a1SourceFile.COFFGroupContributions.Count);
+        Assert.HasCount(1, a1SourceFile.COFFGroupContributions);
         var cgContrib = a1SourceFile.COFFGroupContributions.First();
         Assert.AreEqual(".text$mn", cgContrib.Key.Name);
         Assert.AreEqual<ulong>(0x200, cgContrib.Value.Size);
-        Assert.AreEqual(1, cgContrib.Value.RVARanges.Count); // We should have coalesced this into one RVA range, to minimize later processing
+        Assert.HasCount(1, cgContrib.Value.RVARanges); // We should have coalesced this into one RVA range, to minimize later processing
         Assert.AreEqual<ulong>(0x0, cgContrib.Value.RVARanges[0].RVAStart);
         Assert.AreEqual<ulong>(0x200, cgContrib.Value.RVARanges[0].Size);
 
-        Assert.AreEqual(1, a1SourceFile.Compilands.Count);
+        Assert.HasCount(1, a1SourceFile.Compilands);
         Assert.AreEqual(a1Compiland, a1SourceFile.Compilands.First());
 
-        Assert.AreEqual(1, a1SourceFile.CompilandContributions.Count);
+        Assert.HasCount(1, a1SourceFile.CompilandContributions);
         var compilandContrib = a1SourceFile.CompilandContributions.First();
         Assert.AreEqual(@"c:\dummy\a1.obj", compilandContrib.Key.Name);
         Assert.AreEqual(0x200u, compilandContrib.Value.Size);
-        Assert.AreEqual(1, compilandContrib.Value.RVARanges.Count); // We should have coalesced this into one RVA range, to minimize later processing
+        Assert.HasCount(1, compilandContrib.Value.RVARanges); // We should have coalesced this into one RVA range, to minimize later processing
         Assert.AreEqual(0x0u, compilandContrib.Value.RVARanges[0].RVAStart);
         Assert.AreEqual(0x200u, compilandContrib.Value.RVARanges[0].Size);
 
 
 
         // Assertions about a2.cpp
-        Assert.AreEqual(1, a2SourceFile.SectionContributions.Count);
+        Assert.HasCount(1, a2SourceFile.SectionContributions);
         Assert.AreEqual(".text", a2SourceFile.SectionContributionsByName.Keys.First());
         sectionContrib = a2SourceFile.SectionContributions.First();
         Assert.AreEqual(".text", sectionContrib.Key.Name);
         Assert.AreEqual<ulong>(0x50 + 0x50, sectionContrib.Value.Size);
-        Assert.AreEqual(2, sectionContrib.Value.RVARanges.Count);
+        Assert.HasCount(2, sectionContrib.Value.RVARanges);
         Assert.AreEqual<ulong>(0x1700, sectionContrib.Value.RVARanges[0].RVAStart);
         Assert.AreEqual<ulong>(0x50, sectionContrib.Value.RVARanges[0].Size);
         Assert.AreEqual<ulong>(0x1800, sectionContrib.Value.RVARanges[1].RVAStart);
         Assert.AreEqual<ulong>(0x50, sectionContrib.Value.RVARanges[1].Size);
 
-        Assert.AreEqual(1, a2SourceFile.COFFGroupContributions.Count);
+        Assert.HasCount(1, a2SourceFile.COFFGroupContributions);
         cgContrib = a2SourceFile.COFFGroupContributions.First();
         Assert.AreEqual(".text$zz", cgContrib.Key.Name);
         Assert.AreEqual<ulong>(0x50 + 0x50, cgContrib.Value.Size);
-        Assert.AreEqual(2, cgContrib.Value.RVARanges.Count);
+        Assert.HasCount(2, cgContrib.Value.RVARanges);
         Assert.AreEqual<ulong>(0x1700, cgContrib.Value.RVARanges[0].RVAStart);
         Assert.AreEqual<ulong>(0x50, cgContrib.Value.RVARanges[0].Size);
         Assert.AreEqual<ulong>(0x1800, cgContrib.Value.RVARanges[1].RVAStart);
         Assert.AreEqual<ulong>(0x50, cgContrib.Value.RVARanges[1].Size);
 
-        Assert.AreEqual(1, a2SourceFile.Compilands.Count);
+        Assert.HasCount(1, a2SourceFile.Compilands);
         Assert.AreEqual(a2Compiland, a2SourceFile.Compilands.First());
 
-        Assert.AreEqual(1, a2SourceFile.CompilandContributions.Count);
+        Assert.HasCount(1, a2SourceFile.CompilandContributions);
         compilandContrib = a2SourceFile.CompilandContributions.First();
         Assert.AreEqual(@"c:\dummy\a2.obj", compilandContrib.Key.Name);
         Assert.AreEqual(0x50u + 0x50u, compilandContrib.Value.Size);
-        Assert.AreEqual(2, compilandContrib.Value.RVARanges.Count);
+        Assert.HasCount(2, compilandContrib.Value.RVARanges);
         Assert.AreEqual(0x1700u, compilandContrib.Value.RVARanges[0].RVAStart);
         Assert.AreEqual(0x50u, compilandContrib.Value.RVARanges[0].Size);
         Assert.AreEqual(0x1800u, compilandContrib.Value.RVARanges[1].RVAStart);
@@ -248,42 +248,42 @@ public sealed class EnumerateSourceFilesSessionTaskTests : IDisposable
 
 
         // Assertions about a.h
-        Assert.AreEqual(1, aHeaderFile.SectionContributions.Count);
+        Assert.HasCount(1, aHeaderFile.SectionContributions);
         Assert.AreEqual(".text", aHeaderFile.SectionContributionsByName.Keys.First());
         sectionContrib = aHeaderFile.SectionContributions.First();
         Assert.AreEqual(".text", sectionContrib.Key.Name);
         Assert.AreEqual<ulong>(0x250, sectionContrib.Value.Size);
-        Assert.AreEqual(2, sectionContrib.Value.RVARanges.Count);
+        Assert.HasCount(2, sectionContrib.Value.RVARanges);
         Assert.AreEqual<ulong>(0x400, sectionContrib.Value.RVARanges[0].RVAStart);
         Assert.AreEqual<ulong>(0x200, sectionContrib.Value.RVARanges[0].Size); // Coalesces the first two 0x100-sized ranges since they're right next to each other
         Assert.AreEqual<ulong>(0x1850, sectionContrib.Value.RVARanges[1].RVAStart);
         Assert.AreEqual<ulong>(0x50, sectionContrib.Value.RVARanges[1].Size);
 
-        Assert.AreEqual(2, aHeaderFile.COFFGroupContributions.Count);
+        Assert.HasCount(2, aHeaderFile.COFFGroupContributions);
         cgContrib = aHeaderFile.COFFGroupContributions.Single(cg => cg.Key.Name == ".text$mn");
         Assert.AreEqual<ulong>(0x200, cgContrib.Value.Size);
-        Assert.AreEqual(1, cgContrib.Value.RVARanges.Count);
+        Assert.HasCount(1, cgContrib.Value.RVARanges);
         Assert.AreEqual<ulong>(0x400, sectionContrib.Value.RVARanges[0].RVAStart);
         Assert.AreEqual<ulong>(0x200, sectionContrib.Value.RVARanges[0].Size); // Coalesces the first two 0x100-sized ranges since they're right next to each other
         cgContrib = aHeaderFile.COFFGroupContributions.Single(cg => cg.Key.Name == ".text$zz");
         Assert.AreEqual<ulong>(0x50, cgContrib.Value.Size);
-        Assert.AreEqual(1, cgContrib.Value.RVARanges.Count);
+        Assert.HasCount(1, cgContrib.Value.RVARanges);
         Assert.AreEqual<ulong>(0x1850, cgContrib.Value.RVARanges[0].RVAStart);
         Assert.AreEqual<ulong>(0x50, cgContrib.Value.RVARanges[0].Size);
 
-        Assert.AreEqual(2, aHeaderFile.Compilands.Count);
-        Assert.IsTrue(aHeaderFile.Compilands.Contains(a1Compiland));
-        Assert.IsTrue(aHeaderFile.Compilands.Contains(a2Compiland));
+        Assert.HasCount(2, aHeaderFile.Compilands);
+        Assert.Contains(a1Compiland, aHeaderFile.Compilands);
+        Assert.Contains(a2Compiland, aHeaderFile.Compilands);
 
-        Assert.AreEqual(2, aHeaderFile.CompilandContributions.Count);
+        Assert.HasCount(2, aHeaderFile.CompilandContributions);
         compilandContrib = aHeaderFile.CompilandContributions.Single(c => c.Key.Name == @"c:\dummy\a1.obj");
         Assert.AreEqual(0x100u, compilandContrib.Value.Size);
-        Assert.AreEqual(1, compilandContrib.Value.RVARanges.Count);
+        Assert.HasCount(1, compilandContrib.Value.RVARanges);
         Assert.AreEqual(0x400u, compilandContrib.Value.RVARanges[0].RVAStart);
         Assert.AreEqual(0x100u, compilandContrib.Value.RVARanges[0].Size);
         compilandContrib = aHeaderFile.CompilandContributions.Single(c => c.Key.Name == @"c:\dummy\a2.obj");
         Assert.AreEqual(0x150u, compilandContrib.Value.Size);
-        Assert.AreEqual(2, compilandContrib.Value.RVARanges.Count);
+        Assert.HasCount(2, compilandContrib.Value.RVARanges);
         Assert.AreEqual(0x500u, compilandContrib.Value.RVARanges[0].RVAStart);
         Assert.AreEqual(0x100u, compilandContrib.Value.RVARanges[0].Size);
         Assert.AreEqual(0x1850u, compilandContrib.Value.RVARanges[1].RVAStart);

@@ -10,7 +10,7 @@ namespace SizeBench.AnalysisEngine.RealPETests.Single_Binary;
 public class Dllx86Tests
 {
     public TestContext? TestContext { get; set; }
-    private CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
+    private CancellationToken CancellationToken => this.TestContext!.CancellationToken;
     private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory!, filename);
 
     private string BinaryPath => MakePath("PEParser.Tests.Dllx86.dll");
@@ -142,7 +142,7 @@ public class Dllx86Tests
         // ICON
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // We should not have directly gotten any Icon symbols back, they're all inside the GroupIcon
-        Assert.AreEqual(0, rsrcSymbols.OfType<RsrcIconDataSymbol>().Count());
+        Assert.IsEmpty(rsrcSymbols.OfType<RsrcIconDataSymbol>());
 
         var groupIconData = rsrcSymbols.OfType<RsrcGroupIconDataSymbol>().Single(sym => sym.Name.Contains("#101", StringComparison.Ordinal));
         Assert.AreEqual(SymbolComparisonClass.RsrcData, groupIconData.SymbolComparisonClass);
@@ -152,7 +152,7 @@ public class Dllx86Tests
         Assert.AreEqual<uint>(45444, groupIconData.VirtualSize);
         Assert.AreEqual(Win32ResourceType.GROUP_ICON, groupIconData.Win32ResourceType);
 
-        Assert.AreEqual(9, groupIconData.Icons.Count);
+        Assert.HasCount(9, groupIconData.Icons);
 
         // #1, 256x256, 8bpp
         var icon = groupIconData.Icons.Single(i => i.Width == 256 && i.Height == 256 && i.BitsPerPixel == 8);
@@ -265,7 +265,7 @@ public class Dllx86Tests
         Assert.AreEqual<uint>(454 + 200 + 60, groupStringTableData.Size);
         Assert.AreEqual<uint>(454 + 200 + 60, groupStringTableData.VirtualSize);
         Assert.AreEqual(Win32ResourceType.STRINGTABLE, groupStringTableData.Win32ResourceType);
-        Assert.AreEqual(3, groupStringTableData.StringTables.Count);
+        Assert.HasCount(3, groupStringTableData.StringTables);
 
         // These will throw if we fail to find 3 string tables with the right names that match up to what other tools show when walking
         // PE resources naively and showing each STRINGTABLE separately.
@@ -279,31 +279,31 @@ public class Dllx86Tests
 
         // I don't honestly care which table contains which string, so for testing we'll just check that all these strings are somewhere
         // in the group.
-        Assert.AreEqual(18, allStringsAcrossTables.Count);
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 1");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 2");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 3");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 4");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 5");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 6");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 7");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 8");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 9");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 10");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 11");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 12");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 13");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 14");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 15");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 16");
-        CollectionAssert.Contains(allStringsAcrossTables, "Test string 17");
-        CollectionAssert.Contains(allStringsAcrossTables, "A really long string With newlines in it \nAnd more newlines \nAnd \thorizontal tab");
+        Assert.HasCount(18, allStringsAcrossTables);
+        Assert.Contains("Test string 1", allStringsAcrossTables);
+        Assert.Contains("Test string 2", allStringsAcrossTables);
+        Assert.Contains("Test string 3", allStringsAcrossTables);
+        Assert.Contains("Test string 4", allStringsAcrossTables);
+        Assert.Contains("Test string 5", allStringsAcrossTables);
+        Assert.Contains("Test string 6", allStringsAcrossTables);
+        Assert.Contains("Test string 7", allStringsAcrossTables);
+        Assert.Contains("Test string 8", allStringsAcrossTables);
+        Assert.Contains("Test string 9", allStringsAcrossTables);
+        Assert.Contains("Test string 10", allStringsAcrossTables);
+        Assert.Contains("Test string 11", allStringsAcrossTables);
+        Assert.Contains("Test string 12", allStringsAcrossTables);
+        Assert.Contains("Test string 13", allStringsAcrossTables);
+        Assert.Contains("Test string 14", allStringsAcrossTables);
+        Assert.Contains("Test string 15", allStringsAcrossTables);
+        Assert.Contains("Test string 16", allStringsAcrossTables);
+        Assert.Contains("Test string 17", allStringsAcrossTables);
+        Assert.Contains("A really long string With newlines in it \nAnd more newlines \nAnd \thorizontal tab", allStringsAcrossTables);
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // CURSOR
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // We should not have directly gotten any Cursor symbols back, they're all inside the GroupCursor
-        Assert.AreEqual(0, rsrcSymbols.OfType<RsrcCursorDataSymbol>().Count());
+        Assert.IsEmpty(rsrcSymbols.OfType<RsrcCursorDataSymbol>());
 
         // CURSOR2NAMEDRESOURCE
         var groupCursorData = rsrcSymbols.OfType<RsrcGroupCursorDataSymbol>().Single(sym => sym.Name.Contains("CURSOR2NAMEDRESOURCE", StringComparison.Ordinal));
@@ -315,7 +315,7 @@ public class Dllx86Tests
         Assert.AreEqual<uint>(expectedGroupCursorSize, groupCursorData.VirtualSize);
         Assert.AreEqual(Win32ResourceType.GROUP_CURSOR, groupCursorData.Win32ResourceType);
 
-        Assert.AreEqual(3, groupCursorData.Cursors.Count);
+        Assert.HasCount(3, groupCursorData.Cursors);
 
         // 32x32, 1bpp
         var cursor = groupCursorData.Cursors.Single(i => i.Width == 32 && i.Height == 32 && i.BitsPerPixel == 1);
@@ -357,7 +357,7 @@ public class Dllx86Tests
         Assert.AreEqual<uint>(expectedGroupCursorSize, groupCursorData.VirtualSize);
         Assert.AreEqual(Win32ResourceType.GROUP_CURSOR, groupCursorData.Win32ResourceType);
 
-        Assert.AreEqual(1, groupCursorData.Cursors.Count);
+        Assert.HasCount(1, groupCursorData.Cursors);
 
         // 32x32, 1bpp
         cursor = groupCursorData.Cursors.Single(i => i.Width == 32 && i.Height == 32 && i.BitsPerPixel == 1);
@@ -379,7 +379,7 @@ public class Dllx86Tests
         Assert.AreEqual<uint>(expectedGroupCursorSize, groupCursorData.VirtualSize);
         Assert.AreEqual(Win32ResourceType.GROUP_CURSOR, groupCursorData.Win32ResourceType);
 
-        Assert.AreEqual(2, groupCursorData.Cursors.Count);
+        Assert.HasCount(2, groupCursorData.Cursors);
 
         // 32x32, 1bpp
         cursor = groupCursorData.Cursors.Single(i => i.Width == 32 && i.Height == 32 && i.BitsPerPixel == 1);

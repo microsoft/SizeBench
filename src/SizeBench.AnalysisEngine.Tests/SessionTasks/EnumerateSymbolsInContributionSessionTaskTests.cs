@@ -9,7 +9,7 @@ namespace SizeBench.AnalysisEngine.SessionTasks.Tests;
 public sealed class EnumerateSymbolsInContributionSessionTaskTests : IDisposable
 {
     public TestContext? TestContext { get; set; }
-    public CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
+    public CancellationToken CancellationToken => this.TestContext!.CancellationToken;
 
     private LibCOFFGroupContribution? TestContribution;
     private Library? TestLib;
@@ -131,7 +131,6 @@ public sealed class EnumerateSymbolsInContributionSessionTaskTests : IDisposable
         Assert.AreEqual<uint>(expectedPDATASymbolCount + expectedDiaSymbolCount, (uint)symbols.Count);
     }
 
-    [ExpectedException(typeof(OperationCanceledException), AllowDerivedTypes = false)]
     [TestMethod]
     public void CanCancelInTheMiddleOfEnumerationWhenRVAsAreMonotonicallyIncreasing()
     {
@@ -170,7 +169,6 @@ public sealed class EnumerateSymbolsInContributionSessionTaskTests : IDisposable
         }
         Assert.IsNull(symbols);
         Assert.IsNotNull(capturedException);
-        throw capturedException;
     }
 
     [TestMethod]
@@ -203,7 +201,7 @@ public sealed class EnumerateSymbolsInContributionSessionTaskTests : IDisposable
         Assert.IsTrue(task.TaskName.Contains(this.TestContribution.Name, StringComparison.Ordinal));
         using var logger = new NoOpLogger();
         var symbols = task.Execute(logger);
-        Assert.AreEqual(expectedSymbolCount, symbols.Count);
+        Assert.HasCount(expectedSymbolCount, symbols);
 
         // We expect one "Starting Up..." progress report, then two real ones
         mockProgress.Verify(p => p.Report(It.IsAny<SessionTaskProgress>()), Times.Exactly(3));

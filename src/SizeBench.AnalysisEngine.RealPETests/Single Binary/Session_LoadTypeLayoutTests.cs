@@ -25,7 +25,7 @@ public sealed class Session_LoadTypeLayoutTests
 
         var alignasUnspecifiedTypeLayout = typeLayouts.First(tli => tli.UserDefinedType.Name == "AlignasUnspecifiedType");
         Assert.AreEqual(8u, alignasUnspecifiedTypeLayout.UserDefinedType.InstanceSize);
-        Assert.AreEqual(3, alignasUnspecifiedTypeLayout.MemberLayouts!.Count);
+        Assert.HasCount(3, alignasUnspecifiedTypeLayout.MemberLayouts!);
         Assert.IsNull(alignasUnspecifiedTypeLayout.BaseTypeLayouts);
         Assert.AreEqual(3, alignasUnspecifiedTypeLayout.AlignmentWasteExclusive);
         Assert.AreEqual(3, alignasUnspecifiedTypeLayout.AlignmentWasteIncludingBaseTypes);
@@ -33,7 +33,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0u, alignasUnspecifiedTypeLayout.UsedForVFPtrsIncludingBaseTypes);
 
         Assert.AreEqual("x", alignasUnspecifiedTypeLayout.MemberLayouts![0].Name);
-        Assert.IsInstanceOfType(alignasUnspecifiedTypeLayout.MemberLayouts![0].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(alignasUnspecifiedTypeLayout.MemberLayouts![0].Type);
         Assert.AreEqual("int", alignasUnspecifiedTypeLayout.MemberLayouts![0].Type!.Name);
         Assert.AreEqual(4, alignasUnspecifiedTypeLayout.MemberLayouts![0].Size);
         Assert.IsFalse(alignasUnspecifiedTypeLayout.MemberLayouts![0].IsAlignmentMember);
@@ -43,7 +43,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0, alignasUnspecifiedTypeLayout.MemberLayouts![0].Offset);
 
         Assert.AreEqual("y", alignasUnspecifiedTypeLayout.MemberLayouts![1].Name);
-        Assert.IsInstanceOfType(alignasUnspecifiedTypeLayout.MemberLayouts![1].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(alignasUnspecifiedTypeLayout.MemberLayouts![1].Type);
         Assert.AreEqual("char", alignasUnspecifiedTypeLayout.MemberLayouts![1].Type!.Name);
         Assert.AreEqual(1, alignasUnspecifiedTypeLayout.MemberLayouts![1].Size);
         Assert.IsFalse(alignasUnspecifiedTypeLayout.MemberLayouts![1].IsAlignmentMember);
@@ -68,23 +68,23 @@ public sealed class Session_LoadTypeLayoutTests
         //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         var base1_Derived1_MoreDerived1Layout = typeLayouts.First(tli => tli.UserDefinedType.Name == "Base1_Derived1_MoreDerived1");
         Assert.AreEqual(8u, base1_Derived1_MoreDerived1Layout.UserDefinedType.InstanceSize);
-        Assert.AreEqual(0, base1_Derived1_MoreDerived1Layout.MemberLayouts!.Count);
-        Assert.AreEqual(1, base1_Derived1_MoreDerived1Layout.BaseTypeLayouts!.Count);
+        Assert.IsEmpty(base1_Derived1_MoreDerived1Layout.MemberLayouts!);
+        Assert.HasCount(1, base1_Derived1_MoreDerived1Layout.BaseTypeLayouts!);
         Assert.AreEqual(0, base1_Derived1_MoreDerived1Layout.AlignmentWasteExclusive);
         Assert.AreEqual(0, base1_Derived1_MoreDerived1Layout.AlignmentWasteIncludingBaseTypes);
         Assert.AreEqual(0u, base1_Derived1_MoreDerived1Layout.UsedForVFPtrsExclusive);
         Assert.AreEqual(8u, base1_Derived1_MoreDerived1Layout.UsedForVFPtrsIncludingBaseTypes);
 
         Assert.AreEqual(8u, base1_Derived1_MoreDerived1Layout.BaseTypeLayouts![0].UserDefinedType.InstanceSize);
-        Assert.AreEqual(0, base1_Derived1_MoreDerived1Layout.BaseTypeLayouts![0].MemberLayouts!.Count);
-        Assert.AreEqual(1, base1_Derived1_MoreDerived1Layout.BaseTypeLayouts![0].BaseTypeLayouts!.Count);
+        Assert.IsEmpty(base1_Derived1_MoreDerived1Layout.BaseTypeLayouts![0].MemberLayouts!);
+        Assert.HasCount(1, base1_Derived1_MoreDerived1Layout.BaseTypeLayouts![0].BaseTypeLayouts!);
         Assert.AreEqual(0, base1_Derived1_MoreDerived1Layout.BaseTypeLayouts![0].AlignmentWasteExclusive);
         Assert.AreEqual(0, base1_Derived1_MoreDerived1Layout.BaseTypeLayouts![0].AlignmentWasteIncludingBaseTypes);
         Assert.AreEqual(0u, base1_Derived1_MoreDerived1Layout.BaseTypeLayouts![0].UsedForVFPtrsExclusive);
         Assert.AreEqual(8u, base1_Derived1_MoreDerived1Layout.BaseTypeLayouts![0].UsedForVFPtrsIncludingBaseTypes);
 
         Assert.AreEqual(8u, base1_Derived1_MoreDerived1Layout.BaseTypeLayouts![0].BaseTypeLayouts![0].UserDefinedType.InstanceSize);
-        Assert.AreEqual(1, base1_Derived1_MoreDerived1Layout.BaseTypeLayouts![0].BaseTypeLayouts![0].MemberLayouts!.Count);
+        Assert.HasCount(1, base1_Derived1_MoreDerived1Layout.BaseTypeLayouts![0].BaseTypeLayouts![0].MemberLayouts!);
         Assert.IsNull(base1_Derived1_MoreDerived1Layout.BaseTypeLayouts![0].BaseTypeLayouts![0].BaseTypeLayouts);
         Assert.AreEqual(0, base1_Derived1_MoreDerived1Layout.BaseTypeLayouts![0].BaseTypeLayouts![0].AlignmentWasteExclusive);
         Assert.AreEqual(0, base1_Derived1_MoreDerived1Layout.BaseTypeLayouts![0].BaseTypeLayouts![0].AlignmentWasteIncludingBaseTypes);
@@ -129,7 +129,7 @@ public sealed class Session_LoadTypeLayoutTests
         //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         var arraysTestTypeLayout = typeLayouts.First(tli => tli.UserDefinedType.Name == "ArraysTest");
         Assert.AreEqual(208u, arraysTestTypeLayout.UserDefinedType.InstanceSize);
-        Assert.AreEqual(2, arraysTestTypeLayout.MemberLayouts!.Count);
+        Assert.HasCount(2, arraysTestTypeLayout.MemberLayouts!);
         Assert.IsNull(arraysTestTypeLayout.BaseTypeLayouts);
         Assert.AreEqual(0, arraysTestTypeLayout.AlignmentWasteExclusive);
         Assert.AreEqual(0, arraysTestTypeLayout.AlignmentWasteIncludingBaseTypes);
@@ -137,9 +137,9 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0u, arraysTestTypeLayout.UsedForVFPtrsIncludingBaseTypes);
 
         Assert.AreEqual("float[4]", arraysTestTypeLayout.MemberLayouts![0].Type!.Name);
-        Assert.IsInstanceOfType(arraysTestTypeLayout.MemberLayouts![0].Type, typeof(ArrayTypeSymbol));
+        Assert.IsInstanceOfType<ArrayTypeSymbol>(arraysTestTypeLayout.MemberLayouts![0].Type);
         Assert.AreEqual(4u, (arraysTestTypeLayout.MemberLayouts![0].Type as ArrayTypeSymbol)!.ElementCount);
-        Assert.IsInstanceOfType((arraysTestTypeLayout.MemberLayouts![0].Type as ArrayTypeSymbol)!.ElementType, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>((arraysTestTypeLayout.MemberLayouts![0].Type as ArrayTypeSymbol)!.ElementType);
         Assert.AreEqual("float", (arraysTestTypeLayout.MemberLayouts![0].Type as ArrayTypeSymbol)!.ElementType.Name);
         Assert.AreEqual("testOneDimensionalArray", arraysTestTypeLayout.MemberLayouts![0].Name);
         Assert.AreEqual(16, arraysTestTypeLayout.MemberLayouts![0].Size);
@@ -150,9 +150,9 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0, arraysTestTypeLayout.MemberLayouts![0].Offset);
 
         Assert.AreEqual("float[3][2][8]", arraysTestTypeLayout.MemberLayouts![1].Type!.Name);
-        Assert.IsInstanceOfType(arraysTestTypeLayout.MemberLayouts![1].Type, typeof(ArrayTypeSymbol));
+        Assert.IsInstanceOfType<ArrayTypeSymbol>(arraysTestTypeLayout.MemberLayouts![1].Type);
         Assert.AreEqual(3u, (arraysTestTypeLayout.MemberLayouts![1].Type as ArrayTypeSymbol)!.ElementCount);
-        Assert.IsInstanceOfType((arraysTestTypeLayout.MemberLayouts![1].Type as ArrayTypeSymbol)!.ElementType, typeof(ArrayTypeSymbol));
+        Assert.IsInstanceOfType<ArrayTypeSymbol>((arraysTestTypeLayout.MemberLayouts![1].Type as ArrayTypeSymbol)!.ElementType);
         Assert.AreEqual("float[2][8]", (arraysTestTypeLayout.MemberLayouts![1].Type as ArrayTypeSymbol)!.ElementType.Name);
         Assert.AreEqual("testMultiDimensionalArray", arraysTestTypeLayout.MemberLayouts![1].Name);
         Assert.AreEqual(192, arraysTestTypeLayout.MemberLayouts![1].Size);
@@ -169,7 +169,7 @@ public sealed class Session_LoadTypeLayoutTests
         //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         var interspersedBitfieldsTestTypeLayout = typeLayouts.First(tli => tli.UserDefinedType.Name == "InterspersedBitfieldsTest");
         Assert.AreEqual(16u, interspersedBitfieldsTestTypeLayout.UserDefinedType.InstanceSize);
-        Assert.AreEqual(9, interspersedBitfieldsTestTypeLayout.MemberLayouts!.Count);
+        Assert.HasCount(9, interspersedBitfieldsTestTypeLayout.MemberLayouts!);
         Assert.IsNull(interspersedBitfieldsTestTypeLayout.BaseTypeLayouts);
         Assert.AreEqual(9.75m, interspersedBitfieldsTestTypeLayout.AlignmentWasteExclusive);
         Assert.AreEqual(9.75m, interspersedBitfieldsTestTypeLayout.AlignmentWasteIncludingBaseTypes);
@@ -177,7 +177,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0u, interspersedBitfieldsTestTypeLayout.UsedForVFPtrsIncludingBaseTypes);
 
         Assert.AreEqual("intBitfield1", interspersedBitfieldsTestTypeLayout.MemberLayouts![0].Name);
-        Assert.IsInstanceOfType(interspersedBitfieldsTestTypeLayout.MemberLayouts![0].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(interspersedBitfieldsTestTypeLayout.MemberLayouts![0].Type);
         Assert.AreEqual("int", interspersedBitfieldsTestTypeLayout.MemberLayouts![0].Type!.Name);
         Assert.AreEqual(0.125m, interspersedBitfieldsTestTypeLayout.MemberLayouts![0].Size);
         Assert.IsFalse(interspersedBitfieldsTestTypeLayout.MemberLayouts![0].IsAlignmentMember);
@@ -187,7 +187,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0, interspersedBitfieldsTestTypeLayout.MemberLayouts![0].Offset);
 
         Assert.AreEqual("intBitfield2", interspersedBitfieldsTestTypeLayout.MemberLayouts![1].Name);
-        Assert.IsInstanceOfType(interspersedBitfieldsTestTypeLayout.MemberLayouts![1].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(interspersedBitfieldsTestTypeLayout.MemberLayouts![1].Type);
         Assert.AreEqual("int", interspersedBitfieldsTestTypeLayout.MemberLayouts![1].Type!.Name);
         Assert.AreEqual(0.250m, interspersedBitfieldsTestTypeLayout.MemberLayouts![1].Size);
         Assert.IsFalse(interspersedBitfieldsTestTypeLayout.MemberLayouts![1].IsAlignmentMember);
@@ -206,7 +206,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0.375m, interspersedBitfieldsTestTypeLayout.MemberLayouts![2].Offset);
 
         Assert.AreEqual("flag", interspersedBitfieldsTestTypeLayout.MemberLayouts![3].Name);
-        Assert.IsInstanceOfType(interspersedBitfieldsTestTypeLayout.MemberLayouts![3].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(interspersedBitfieldsTestTypeLayout.MemberLayouts![3].Type);
         Assert.AreEqual("bool", interspersedBitfieldsTestTypeLayout.MemberLayouts![3].Type!.Name);
         Assert.AreEqual(1.0m, interspersedBitfieldsTestTypeLayout.MemberLayouts![3].Size);
         Assert.IsFalse(interspersedBitfieldsTestTypeLayout.MemberLayouts![3].IsAlignmentMember);
@@ -216,7 +216,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(4.0m, interspersedBitfieldsTestTypeLayout.MemberLayouts![3].Offset);
 
         Assert.AreEqual("flagBitfield1", interspersedBitfieldsTestTypeLayout.MemberLayouts![4].Name);
-        Assert.IsInstanceOfType(interspersedBitfieldsTestTypeLayout.MemberLayouts![4].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(interspersedBitfieldsTestTypeLayout.MemberLayouts![4].Type);
         Assert.AreEqual("bool", interspersedBitfieldsTestTypeLayout.MemberLayouts![4].Type!.Name);
         Assert.AreEqual(0.125m, interspersedBitfieldsTestTypeLayout.MemberLayouts![4].Size);
         Assert.IsFalse(interspersedBitfieldsTestTypeLayout.MemberLayouts![4].IsAlignmentMember);
@@ -235,7 +235,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(5.125m, interspersedBitfieldsTestTypeLayout.MemberLayouts![5].Offset);
 
         Assert.AreEqual("x", interspersedBitfieldsTestTypeLayout.MemberLayouts![6].Name);
-        Assert.IsInstanceOfType(interspersedBitfieldsTestTypeLayout.MemberLayouts![6].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(interspersedBitfieldsTestTypeLayout.MemberLayouts![6].Type);
         Assert.AreEqual("int", interspersedBitfieldsTestTypeLayout.MemberLayouts![6].Type!.Name);
         Assert.AreEqual(4.0m, interspersedBitfieldsTestTypeLayout.MemberLayouts![6].Size);
         Assert.IsFalse(interspersedBitfieldsTestTypeLayout.MemberLayouts![6].IsAlignmentMember);
@@ -245,7 +245,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(8m, interspersedBitfieldsTestTypeLayout.MemberLayouts![6].Offset);
 
         Assert.AreEqual("xBitfield1", interspersedBitfieldsTestTypeLayout.MemberLayouts![7].Name);
-        Assert.IsInstanceOfType(interspersedBitfieldsTestTypeLayout.MemberLayouts![7].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(interspersedBitfieldsTestTypeLayout.MemberLayouts![7].Type);
         Assert.AreEqual("int", interspersedBitfieldsTestTypeLayout.MemberLayouts![7].Type!.Name);
         Assert.AreEqual(0.750m, interspersedBitfieldsTestTypeLayout.MemberLayouts![7].Size);
         Assert.IsFalse(interspersedBitfieldsTestTypeLayout.MemberLayouts![7].IsAlignmentMember);
@@ -270,15 +270,15 @@ public sealed class Session_LoadTypeLayoutTests
         //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         var interspersedBitfieldsTest_DerivedTypeLayout = typeLayouts.First(tli => tli.UserDefinedType.Name == "InterspersedBitfieldsTest_Derived");
         Assert.AreEqual(20u, interspersedBitfieldsTest_DerivedTypeLayout.UserDefinedType.InstanceSize);
-        Assert.AreEqual(3, interspersedBitfieldsTest_DerivedTypeLayout.MemberLayouts!.Count);
-        Assert.AreEqual(1, interspersedBitfieldsTest_DerivedTypeLayout.BaseTypeLayouts!.Count);
+        Assert.HasCount(3, interspersedBitfieldsTest_DerivedTypeLayout.MemberLayouts!);
+        Assert.HasCount(1, interspersedBitfieldsTest_DerivedTypeLayout.BaseTypeLayouts!);
         Assert.AreEqual(1.625m, interspersedBitfieldsTest_DerivedTypeLayout.AlignmentWasteExclusive);
         Assert.AreEqual(9.75m + 1.625m, interspersedBitfieldsTest_DerivedTypeLayout.AlignmentWasteIncludingBaseTypes);
         Assert.AreEqual(0u, interspersedBitfieldsTest_DerivedTypeLayout.UsedForVFPtrsExclusive);
         Assert.AreEqual(0u, interspersedBitfieldsTest_DerivedTypeLayout.UsedForVFPtrsIncludingBaseTypes);
 
         Assert.AreEqual(16u, interspersedBitfieldsTest_DerivedTypeLayout.BaseTypeLayouts![0].UserDefinedType.InstanceSize);
-        Assert.AreEqual(9, interspersedBitfieldsTest_DerivedTypeLayout.BaseTypeLayouts![0].MemberLayouts!.Count);
+        Assert.HasCount(9, interspersedBitfieldsTest_DerivedTypeLayout.BaseTypeLayouts![0].MemberLayouts!);
         Assert.IsNull(interspersedBitfieldsTest_DerivedTypeLayout.BaseTypeLayouts![0].BaseTypeLayouts);
         Assert.AreEqual(9.75m, interspersedBitfieldsTest_DerivedTypeLayout.BaseTypeLayouts![0].AlignmentWasteExclusive);
         Assert.AreEqual(9.75m, interspersedBitfieldsTest_DerivedTypeLayout.BaseTypeLayouts![0].AlignmentWasteIncludingBaseTypes);
@@ -286,7 +286,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0u, interspersedBitfieldsTest_DerivedTypeLayout.BaseTypeLayouts![0].UsedForVFPtrsIncludingBaseTypes);
 
         Assert.AreEqual("flagBitfield2", interspersedBitfieldsTest_DerivedTypeLayout.MemberLayouts![0].Name);
-        Assert.IsInstanceOfType(interspersedBitfieldsTest_DerivedTypeLayout.MemberLayouts![0].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(interspersedBitfieldsTest_DerivedTypeLayout.MemberLayouts![0].Type);
         Assert.AreEqual("bool", interspersedBitfieldsTest_DerivedTypeLayout.MemberLayouts![0].Type!.Name);
         Assert.AreEqual(0.375m, interspersedBitfieldsTest_DerivedTypeLayout.MemberLayouts![0].Size);
         Assert.IsFalse(interspersedBitfieldsTest_DerivedTypeLayout.MemberLayouts![0].IsAlignmentMember);
@@ -305,7 +305,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(16.375m, interspersedBitfieldsTest_DerivedTypeLayout.MemberLayouts![1].Offset);
 
         Assert.AreEqual("shortMember", interspersedBitfieldsTest_DerivedTypeLayout.MemberLayouts![2].Name);
-        Assert.IsInstanceOfType(interspersedBitfieldsTest_DerivedTypeLayout.MemberLayouts![2].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(interspersedBitfieldsTest_DerivedTypeLayout.MemberLayouts![2].Type);
         Assert.AreEqual("short", interspersedBitfieldsTest_DerivedTypeLayout.MemberLayouts![2].Type!.Name);
         Assert.AreEqual(2.0m, interspersedBitfieldsTest_DerivedTypeLayout.MemberLayouts![2].Size);
         Assert.IsFalse(interspersedBitfieldsTest_DerivedTypeLayout.MemberLayouts![2].IsAlignmentMember);
@@ -322,15 +322,15 @@ public sealed class Session_LoadTypeLayoutTests
         //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         var interspersedBitfieldsTest_Derived_WithvfptrTypeLayout = typeLayouts.First(tli => tli.UserDefinedType.Name == "InterspersedBitfieldsTest_Derived_Withvfptr");
         Assert.AreEqual(32u, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.UserDefinedType.InstanceSize);
-        Assert.AreEqual(6, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.MemberLayouts!.Count);
-        Assert.AreEqual(1, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts!.Count);
+        Assert.HasCount(6, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.MemberLayouts!);
+        Assert.HasCount(1, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts!);
         Assert.AreEqual(2.375m, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.AlignmentWasteExclusive);
         Assert.AreEqual(9.75m + 2.375m, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.AlignmentWasteIncludingBaseTypes);
         Assert.AreEqual(8u, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.UsedForVFPtrsExclusive);
         Assert.AreEqual(8u, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.UsedForVFPtrsIncludingBaseTypes);
 
         Assert.AreEqual(16u, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].UserDefinedType.InstanceSize);
-        Assert.AreEqual(9, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts!.Count);
+        Assert.HasCount(9, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts!);
         Assert.IsNull(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].BaseTypeLayouts);
         Assert.AreEqual(9.75m, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].AlignmentWasteExclusive);
         Assert.AreEqual(9.75m, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].AlignmentWasteIncludingBaseTypes);
@@ -347,7 +347,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0.0m, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.MemberLayouts![0].Offset);
 
         Assert.AreEqual("anotherFlagBitfield", interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.MemberLayouts![1].Name);
-        Assert.IsInstanceOfType(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.MemberLayouts![1].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.MemberLayouts![1].Type);
         Assert.AreEqual("bool", interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.MemberLayouts![1].Type!.Name);
         Assert.AreEqual(0.625m, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.MemberLayouts![1].Size);
         Assert.IsFalse(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.MemberLayouts![1].IsAlignmentMember);
@@ -366,7 +366,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(24.625m, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.MemberLayouts![2].Offset);
 
         Assert.AreEqual("anotherFlag", interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.MemberLayouts![3].Name);
-        Assert.IsInstanceOfType(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.MemberLayouts![3].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.MemberLayouts![3].Type);
         Assert.AreEqual("bool", interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.MemberLayouts![3].Type!.Name);
         Assert.AreEqual(1.0m, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.MemberLayouts![3].Size);
         Assert.IsFalse(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.MemberLayouts![3].IsAlignmentMember);
@@ -385,7 +385,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(26.0m, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.MemberLayouts![4].Offset);
 
         Assert.AreEqual("finalInt", interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.MemberLayouts![5].Name);
-        Assert.IsInstanceOfType(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.MemberLayouts![5].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.MemberLayouts![5].Type);
         Assert.AreEqual("int", interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.MemberLayouts![5].Type!.Name);
         Assert.AreEqual(4.0m, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.MemberLayouts![5].Size);
         Assert.IsFalse(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.MemberLayouts![5].IsAlignmentMember);
@@ -396,7 +396,7 @@ public sealed class Session_LoadTypeLayoutTests
 
         // Now look at all the fields in the base class - they should all have "+8.0m" on their offset since the vfptr from the derived type "scooted them down"
         Assert.AreEqual("intBitfield1", interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![0].Name);
-        Assert.IsInstanceOfType(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![0].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![0].Type);
         Assert.AreEqual("int", interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![0].Type!.Name);
         Assert.AreEqual(0.125m, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![0].Size);
         Assert.IsFalse(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![0].IsAlignmentMember);
@@ -406,7 +406,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0m + 8.0m, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![0].Offset);
 
         Assert.AreEqual("intBitfield2", interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![1].Name);
-        Assert.IsInstanceOfType(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![1].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![1].Type);
         Assert.AreEqual("int", interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![1].Type!.Name);
         Assert.AreEqual(0.250m, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![1].Size);
         Assert.IsFalse(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![1].IsAlignmentMember);
@@ -425,7 +425,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0.375m + 8.0m, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![2].Offset);
 
         Assert.AreEqual("flag", interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![3].Name);
-        Assert.IsInstanceOfType(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![3].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![3].Type);
         Assert.AreEqual("bool", interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![3].Type!.Name);
         Assert.AreEqual(1.0m, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![3].Size);
         Assert.IsFalse(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![3].IsAlignmentMember);
@@ -435,7 +435,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(4.0m + 8.0m, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![3].Offset);
 
         Assert.AreEqual("flagBitfield1", interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![4].Name);
-        Assert.IsInstanceOfType(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![4].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![4].Type);
         Assert.AreEqual("bool", interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![4].Type!.Name);
         Assert.AreEqual(0.125m, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![4].Size);
         Assert.IsFalse(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![4].IsAlignmentMember);
@@ -454,7 +454,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(5.125m + 8.0m, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![5].Offset);
 
         Assert.AreEqual("x", interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![6].Name);
-        Assert.IsInstanceOfType(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![6].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![6].Type);
         Assert.AreEqual("int", interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![6].Type!.Name);
         Assert.AreEqual(4.0m, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![6].Size);
         Assert.IsFalse(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![6].IsAlignmentMember);
@@ -464,7 +464,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(8m + 8.0m, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![6].Offset);
 
         Assert.AreEqual("xBitfield1", interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![7].Name);
-        Assert.IsInstanceOfType(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![7].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![7].Type);
         Assert.AreEqual("int", interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![7].Type!.Name);
         Assert.AreEqual(0.750m, interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![7].Size);
         Assert.IsFalse(interspersedBitfieldsTest_Derived_WithvfptrTypeLayout.BaseTypeLayouts![0].MemberLayouts![7].IsAlignmentMember);
@@ -492,7 +492,7 @@ public sealed class Session_LoadTypeLayoutTests
         //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         var tightlyPackedBitfieldsTypeLayout = typeLayouts.First(tli => tli.UserDefinedType.Name == "TightlyPackedBitfields");
         Assert.AreEqual(4u, tightlyPackedBitfieldsTypeLayout.UserDefinedType.InstanceSize);
-        Assert.AreEqual(4, tightlyPackedBitfieldsTypeLayout.MemberLayouts!.Count);
+        Assert.HasCount(4, tightlyPackedBitfieldsTypeLayout.MemberLayouts!);
         Assert.IsNull(tightlyPackedBitfieldsTypeLayout.BaseTypeLayouts);
         Assert.AreEqual(0.0m, tightlyPackedBitfieldsTypeLayout.AlignmentWasteExclusive);
         Assert.AreEqual(0.0m, tightlyPackedBitfieldsTypeLayout.AlignmentWasteIncludingBaseTypes);
@@ -500,7 +500,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0u, tightlyPackedBitfieldsTypeLayout.UsedForVFPtrsIncludingBaseTypes);
 
         Assert.AreEqual("bit0", tightlyPackedBitfieldsTypeLayout.MemberLayouts![0].Name);
-        Assert.IsInstanceOfType(tightlyPackedBitfieldsTypeLayout.MemberLayouts![0].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(tightlyPackedBitfieldsTypeLayout.MemberLayouts![0].Type);
         Assert.AreEqual("int", tightlyPackedBitfieldsTypeLayout.MemberLayouts![0].Type!.Name);
         Assert.AreEqual(0.125m, tightlyPackedBitfieldsTypeLayout.MemberLayouts![0].Size);
         Assert.IsFalse(tightlyPackedBitfieldsTypeLayout.MemberLayouts![0].IsAlignmentMember);
@@ -510,7 +510,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0.0m, tightlyPackedBitfieldsTypeLayout.MemberLayouts![0].Offset);
 
         Assert.AreEqual("bits1_to_10", tightlyPackedBitfieldsTypeLayout.MemberLayouts![1].Name);
-        Assert.IsInstanceOfType(tightlyPackedBitfieldsTypeLayout.MemberLayouts![1].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(tightlyPackedBitfieldsTypeLayout.MemberLayouts![1].Type);
         Assert.AreEqual("int", tightlyPackedBitfieldsTypeLayout.MemberLayouts![1].Type!.Name);
         Assert.AreEqual(1.250m, tightlyPackedBitfieldsTypeLayout.MemberLayouts![1].Size);
         Assert.IsFalse(tightlyPackedBitfieldsTypeLayout.MemberLayouts![1].IsAlignmentMember);
@@ -520,7 +520,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0.125m, tightlyPackedBitfieldsTypeLayout.MemberLayouts![1].Offset);
 
         Assert.AreEqual("bits11_to_30", tightlyPackedBitfieldsTypeLayout.MemberLayouts![2].Name);
-        Assert.IsInstanceOfType(tightlyPackedBitfieldsTypeLayout.MemberLayouts![2].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(tightlyPackedBitfieldsTypeLayout.MemberLayouts![2].Type);
         Assert.AreEqual("int", tightlyPackedBitfieldsTypeLayout.MemberLayouts![2].Type!.Name);
         Assert.AreEqual(2.500m, tightlyPackedBitfieldsTypeLayout.MemberLayouts![2].Size);
         Assert.IsFalse(tightlyPackedBitfieldsTypeLayout.MemberLayouts![2].IsAlignmentMember);
@@ -530,7 +530,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(1.375m, tightlyPackedBitfieldsTypeLayout.MemberLayouts![2].Offset);
 
         Assert.AreEqual("bit31", tightlyPackedBitfieldsTypeLayout.MemberLayouts![3].Name);
-        Assert.IsInstanceOfType(tightlyPackedBitfieldsTypeLayout.MemberLayouts![3].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(tightlyPackedBitfieldsTypeLayout.MemberLayouts![3].Type);
         Assert.AreEqual("int", tightlyPackedBitfieldsTypeLayout.MemberLayouts![3].Type!.Name);
         Assert.AreEqual(0.125m, tightlyPackedBitfieldsTypeLayout.MemberLayouts![3].Size);
         Assert.IsFalse(tightlyPackedBitfieldsTypeLayout.MemberLayouts![3].IsAlignmentMember);
@@ -546,7 +546,7 @@ public sealed class Session_LoadTypeLayoutTests
         //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         var simpleUnionTestTypeLayout = typeLayouts.First(tli => tli.UserDefinedType.Name == "SimpleUnionTest");
         Assert.AreEqual(4u, simpleUnionTestTypeLayout.UserDefinedType.InstanceSize);
-        Assert.AreEqual(2, simpleUnionTestTypeLayout.MemberLayouts!.Count);
+        Assert.HasCount(2, simpleUnionTestTypeLayout.MemberLayouts!);
         Assert.IsNull(simpleUnionTestTypeLayout.BaseTypeLayouts);
         Assert.AreEqual(0.0m, simpleUnionTestTypeLayout.AlignmentWasteExclusive);
         Assert.AreEqual(0.0m, simpleUnionTestTypeLayout.AlignmentWasteIncludingBaseTypes);
@@ -554,7 +554,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0u, simpleUnionTestTypeLayout.UsedForVFPtrsIncludingBaseTypes);
 
         Assert.AreEqual("x", simpleUnionTestTypeLayout.MemberLayouts![0].Name);
-        Assert.IsInstanceOfType(simpleUnionTestTypeLayout.MemberLayouts![0].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(simpleUnionTestTypeLayout.MemberLayouts![0].Type);
         Assert.AreEqual("int", simpleUnionTestTypeLayout.MemberLayouts![0].Type!.Name);
         Assert.AreEqual(4.0m, simpleUnionTestTypeLayout.MemberLayouts![0].Size);
         Assert.IsFalse(simpleUnionTestTypeLayout.MemberLayouts![0].IsAlignmentMember);
@@ -564,7 +564,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0.0m, simpleUnionTestTypeLayout.MemberLayouts![0].Offset);
 
         Assert.AreEqual("y", simpleUnionTestTypeLayout.MemberLayouts![1].Name);
-        Assert.IsInstanceOfType(simpleUnionTestTypeLayout.MemberLayouts![1].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(simpleUnionTestTypeLayout.MemberLayouts![1].Type);
         Assert.AreEqual("short", simpleUnionTestTypeLayout.MemberLayouts![1].Type!.Name);
         Assert.AreEqual(2.0m, simpleUnionTestTypeLayout.MemberLayouts![1].Size);
         Assert.IsFalse(simpleUnionTestTypeLayout.MemberLayouts![1].IsAlignmentMember);
@@ -580,8 +580,8 @@ public sealed class Session_LoadTypeLayoutTests
         //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         var simpleUnionTest_DerivedTypeLayout = typeLayouts.First(tli => tli.UserDefinedType.Name == "SimpleUnionTest_Derived");
         Assert.AreEqual(8u, simpleUnionTest_DerivedTypeLayout.UserDefinedType.InstanceSize);
-        Assert.AreEqual(1, simpleUnionTest_DerivedTypeLayout.MemberLayouts!.Count);
-        Assert.AreEqual(1, simpleUnionTest_DerivedTypeLayout.BaseTypeLayouts!.Count);
+        Assert.HasCount(1, simpleUnionTest_DerivedTypeLayout.MemberLayouts!);
+        Assert.HasCount(1, simpleUnionTest_DerivedTypeLayout.BaseTypeLayouts!);
         Assert.AreEqual("SimpleUnionTest", simpleUnionTest_DerivedTypeLayout.BaseTypeLayouts![0].UserDefinedType.Name);
         Assert.AreEqual(0.0m, simpleUnionTest_DerivedTypeLayout.AlignmentWasteExclusive);
         Assert.AreEqual(0.0m, simpleUnionTest_DerivedTypeLayout.AlignmentWasteIncludingBaseTypes);
@@ -589,7 +589,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0u, simpleUnionTest_DerivedTypeLayout.UsedForVFPtrsIncludingBaseTypes);
 
         Assert.AreEqual("z", simpleUnionTest_DerivedTypeLayout.MemberLayouts![0].Name);
-        Assert.IsInstanceOfType(simpleUnionTest_DerivedTypeLayout.MemberLayouts![0].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(simpleUnionTest_DerivedTypeLayout.MemberLayouts![0].Type);
         Assert.AreEqual("int", simpleUnionTest_DerivedTypeLayout.MemberLayouts![0].Type!.Name);
         Assert.AreEqual(4.0m, simpleUnionTest_DerivedTypeLayout.MemberLayouts![0].Size);
         Assert.IsFalse(simpleUnionTest_DerivedTypeLayout.MemberLayouts![0].IsAlignmentMember);
@@ -605,7 +605,7 @@ public sealed class Session_LoadTypeLayoutTests
         //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         var _UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout = typeLayouts.First(tli => tli.UserDefinedType.Name == "_UMS_SYSTEM_THREAD_INFORMATIONTest");
         Assert.AreEqual(8u, _UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.UserDefinedType.InstanceSize);
-        Assert.AreEqual(4, _UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts!.Count);
+        Assert.HasCount(4, _UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts!);
         Assert.IsNull(_UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.BaseTypeLayouts);
         Assert.AreEqual(0.0m, _UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.AlignmentWasteExclusive);
         Assert.AreEqual(0.0m, _UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.AlignmentWasteIncludingBaseTypes);
@@ -613,7 +613,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0u, _UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.UsedForVFPtrsIncludingBaseTypes);
 
         Assert.AreEqual("UmsVersion", _UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![0].Name);
-        Assert.IsInstanceOfType(_UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![0].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(_UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![0].Type);
         Assert.AreEqual("unsigned long", _UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![0].Type!.Name);
         Assert.AreEqual(4.0m, _UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![0].Size);
         Assert.IsFalse(_UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![0].IsAlignmentMember);
@@ -623,7 +623,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0.0m, _UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![0].Offset);
 
         Assert.AreEqual("IsUmsSchedulerThread", _UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![1].Name);
-        Assert.IsInstanceOfType(_UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![1].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(_UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![1].Type);
         Assert.AreEqual("unsigned long", _UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![1].Type!.Name);
         Assert.AreEqual(0.125m, _UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![1].Size);
         Assert.IsFalse(_UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![1].IsAlignmentMember);
@@ -633,7 +633,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(4.0m, _UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![1].Offset);
 
         Assert.AreEqual("ThreadUmsFlags", _UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![2].Name);
-        Assert.IsInstanceOfType(_UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![2].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(_UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![2].Type);
         Assert.AreEqual("unsigned long", _UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![2].Type!.Name);
         Assert.AreEqual(4.0m, _UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![2].Size);
         Assert.IsFalse(_UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![2].IsAlignmentMember);
@@ -643,7 +643,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(4.0m, _UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![2].Offset);
 
         Assert.AreEqual("IsUmsWorkerThread", _UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![3].Name);
-        Assert.IsInstanceOfType(_UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![3].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(_UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![3].Type);
         Assert.AreEqual("unsigned long", _UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![3].Type!.Name);
         Assert.AreEqual(0.125m, _UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![3].Size);
         Assert.IsFalse(_UMS_SYSTEM_THREAD_INFORMATIONTestTypeLayout.MemberLayouts![3].IsAlignmentMember);
@@ -659,7 +659,7 @@ public sealed class Session_LoadTypeLayoutTests
         //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         var _XSTATE_CONFIGURATIONTestTypeLayout = typeLayouts.First(tli => tli.UserDefinedType.Name == "_XSTATE_CONFIGURATIONTest");
         Assert.AreEqual(816u, _XSTATE_CONFIGURATIONTestTypeLayout.UserDefinedType.InstanceSize);
-        Assert.AreEqual(12, _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts!.Count);
+        Assert.HasCount(12, _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts!);
         Assert.IsNull(_XSTATE_CONFIGURATIONTestTypeLayout.BaseTypeLayouts);
         Assert.AreEqual(4.0m, _XSTATE_CONFIGURATIONTestTypeLayout.AlignmentWasteExclusive);
         Assert.AreEqual(4.0m, _XSTATE_CONFIGURATIONTestTypeLayout.AlignmentWasteIncludingBaseTypes);
@@ -667,7 +667,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0u, _XSTATE_CONFIGURATIONTestTypeLayout.UsedForVFPtrsIncludingBaseTypes);
 
         Assert.AreEqual("EnabledFeatures", _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![0].Name);
-        Assert.IsInstanceOfType(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![0].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![0].Type);
         Assert.AreEqual("unsigned int64", _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![0].Type!.Name);
         Assert.AreEqual(8.0m, _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![0].Size);
         Assert.IsFalse(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![0].IsAlignmentMember);
@@ -677,7 +677,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0.0m, _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![0].Offset);
 
         Assert.AreEqual("EnabledVolatileFeatures", _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![1].Name);
-        Assert.IsInstanceOfType(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![1].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![1].Type);
         Assert.AreEqual("unsigned int64", _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![1].Type!.Name);
         Assert.AreEqual(8.0m, _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![1].Size);
         Assert.IsFalse(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![1].IsAlignmentMember);
@@ -687,7 +687,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(8.0m, _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![1].Offset);
 
         Assert.AreEqual("Size", _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![2].Name);
-        Assert.IsInstanceOfType(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![2].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![2].Type);
         Assert.AreEqual("unsigned long", _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![2].Type!.Name);
         Assert.AreEqual(4.0m, _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![2].Size);
         Assert.IsFalse(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![2].IsAlignmentMember);
@@ -697,7 +697,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(16.0m, _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![2].Offset);
 
         Assert.AreEqual("ControlFlags", _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![3].Name);
-        Assert.IsInstanceOfType(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![3].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![3].Type);
         Assert.AreEqual("unsigned long", _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![3].Type!.Name);
         Assert.AreEqual(4.0m, _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![3].Size);
         Assert.IsFalse(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![3].IsAlignmentMember);
@@ -707,7 +707,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(20.0m, _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![3].Offset);
 
         Assert.AreEqual("OptimizedSave", _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![4].Name);
-        Assert.IsInstanceOfType(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![4].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![4].Type);
         Assert.AreEqual("unsigned long", _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![4].Type!.Name);
         Assert.AreEqual(0.125m, _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![4].Size);
         Assert.IsFalse(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![4].IsAlignmentMember);
@@ -717,7 +717,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(20.0m, _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![4].Offset);
 
         Assert.AreEqual("CompactionEnabled", _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![5].Name);
-        Assert.IsInstanceOfType(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![5].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![5].Type);
         Assert.AreEqual("unsigned long", _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![5].Type!.Name);
         Assert.AreEqual(0.125m, _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![5].Size);
         Assert.IsFalse(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![5].IsAlignmentMember);
@@ -727,7 +727,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(20.125m, _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![5].Offset);
 
         Assert.AreEqual("Features", _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![6].Name);
-        Assert.IsInstanceOfType(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![6].Type, typeof(ArrayTypeSymbol));
+        Assert.IsInstanceOfType<ArrayTypeSymbol>(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![6].Type);
         Assert.AreEqual("_XSTATE_FEATURETest[64]", _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![6].Type!.Name);
         Assert.AreEqual(512.0m, _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![6].Size);
         Assert.IsFalse(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![6].IsAlignmentMember);
@@ -737,7 +737,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(24.0m, _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![6].Offset);
 
         Assert.AreEqual("EnabledSupervisorFeatures", _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![7].Name);
-        Assert.IsInstanceOfType(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![7].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![7].Type);
         Assert.AreEqual("unsigned int64", _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![7].Type!.Name);
         Assert.AreEqual(8.0m, _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![7].Size);
         Assert.IsFalse(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![7].IsAlignmentMember);
@@ -747,7 +747,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(536.0m, _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![7].Offset);
 
         Assert.AreEqual("AlignedFeatures", _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![8].Name);
-        Assert.IsInstanceOfType(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![8].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![8].Type);
         Assert.AreEqual("unsigned int64", _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![8].Type!.Name);
         Assert.AreEqual(8.0m, _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![8].Size);
         Assert.IsFalse(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![8].IsAlignmentMember);
@@ -757,7 +757,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(544.0m, _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![8].Offset);
 
         Assert.AreEqual("AllFeatureSize", _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![9].Name);
-        Assert.IsInstanceOfType(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![9].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![9].Type);
         Assert.AreEqual("unsigned long", _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![9].Type!.Name);
         Assert.AreEqual(4.0m, _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![9].Size);
         Assert.IsFalse(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![9].IsAlignmentMember);
@@ -767,7 +767,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(552.0m, _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![9].Offset);
 
         Assert.AreEqual("AllFeatures", _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![10].Name);
-        Assert.IsInstanceOfType(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![10].Type, typeof(ArrayTypeSymbol));
+        Assert.IsInstanceOfType<ArrayTypeSymbol>(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![10].Type);
         Assert.AreEqual("unsigned long[64]", _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![10].Type!.Name);
         Assert.AreEqual(256.0m, _XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![10].Size);
         Assert.IsFalse(_XSTATE_CONFIGURATIONTestTypeLayout.MemberLayouts![10].IsAlignmentMember);
@@ -792,7 +792,7 @@ public sealed class Session_LoadTypeLayoutTests
         //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         var trailingUnionWithBitfieldBaseTypeLayout = typeLayouts.First(tli => tli.UserDefinedType.Name == "TrailingUnionWithBitfieldBase");
         Assert.AreEqual(8u, trailingUnionWithBitfieldBaseTypeLayout.UserDefinedType.InstanceSize);
-        Assert.AreEqual(3, trailingUnionWithBitfieldBaseTypeLayout.MemberLayouts!.Count);
+        Assert.HasCount(3, trailingUnionWithBitfieldBaseTypeLayout.MemberLayouts!);
         Assert.IsNull(trailingUnionWithBitfieldBaseTypeLayout.BaseTypeLayouts);
         Assert.AreEqual(0.0m, trailingUnionWithBitfieldBaseTypeLayout.AlignmentWasteExclusive);
         Assert.AreEqual(0.0m, trailingUnionWithBitfieldBaseTypeLayout.AlignmentWasteIncludingBaseTypes);
@@ -800,7 +800,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0u, trailingUnionWithBitfieldBaseTypeLayout.UsedForVFPtrsIncludingBaseTypes);
 
         Assert.AreEqual("x", trailingUnionWithBitfieldBaseTypeLayout.MemberLayouts![0].Name);
-        Assert.IsInstanceOfType(trailingUnionWithBitfieldBaseTypeLayout.MemberLayouts![0].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(trailingUnionWithBitfieldBaseTypeLayout.MemberLayouts![0].Type);
         Assert.AreEqual("int", trailingUnionWithBitfieldBaseTypeLayout.MemberLayouts![0].Type!.Name);
         Assert.AreEqual(4.0m, trailingUnionWithBitfieldBaseTypeLayout.MemberLayouts![0].Size);
         Assert.IsFalse(trailingUnionWithBitfieldBaseTypeLayout.MemberLayouts![0].IsAlignmentMember);
@@ -810,7 +810,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0.0m, trailingUnionWithBitfieldBaseTypeLayout.MemberLayouts![0].Offset);
 
         Assert.AreEqual("y", trailingUnionWithBitfieldBaseTypeLayout.MemberLayouts![1].Name);
-        Assert.IsInstanceOfType(trailingUnionWithBitfieldBaseTypeLayout.MemberLayouts![1].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(trailingUnionWithBitfieldBaseTypeLayout.MemberLayouts![1].Type);
         Assert.AreEqual("int", trailingUnionWithBitfieldBaseTypeLayout.MemberLayouts![1].Type!.Name);
         Assert.AreEqual(4.0m, trailingUnionWithBitfieldBaseTypeLayout.MemberLayouts![1].Size);
         Assert.IsFalse(trailingUnionWithBitfieldBaseTypeLayout.MemberLayouts![1].IsAlignmentMember);
@@ -820,7 +820,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(4.0m, trailingUnionWithBitfieldBaseTypeLayout.MemberLayouts![1].Offset);
 
         Assert.AreEqual("yBitfield", trailingUnionWithBitfieldBaseTypeLayout.MemberLayouts![2].Name);
-        Assert.IsInstanceOfType(trailingUnionWithBitfieldBaseTypeLayout.MemberLayouts![2].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(trailingUnionWithBitfieldBaseTypeLayout.MemberLayouts![2].Type);
         Assert.AreEqual("int", trailingUnionWithBitfieldBaseTypeLayout.MemberLayouts![2].Type!.Name);
         Assert.AreEqual(0.125m, trailingUnionWithBitfieldBaseTypeLayout.MemberLayouts![2].Size);
         Assert.IsFalse(trailingUnionWithBitfieldBaseTypeLayout.MemberLayouts![2].IsAlignmentMember);
@@ -836,8 +836,8 @@ public sealed class Session_LoadTypeLayoutTests
         //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         var trailingUnionwithBitfieldBase_DerivedTypeLayout = typeLayouts.First(tli => tli.UserDefinedType.Name == "TrailingUnionWithBitfieldBase_Derived");
         Assert.AreEqual(12u, trailingUnionwithBitfieldBase_DerivedTypeLayout.UserDefinedType.InstanceSize);
-        Assert.AreEqual(1, trailingUnionwithBitfieldBase_DerivedTypeLayout.MemberLayouts!.Count);
-        Assert.AreEqual(1, trailingUnionwithBitfieldBase_DerivedTypeLayout.BaseTypeLayouts!.Count);
+        Assert.HasCount(1, trailingUnionwithBitfieldBase_DerivedTypeLayout.MemberLayouts!);
+        Assert.HasCount(1, trailingUnionwithBitfieldBase_DerivedTypeLayout.BaseTypeLayouts!);
         Assert.AreEqual("TrailingUnionWithBitfieldBase", trailingUnionwithBitfieldBase_DerivedTypeLayout.BaseTypeLayouts![0].UserDefinedType.Name);
         Assert.AreEqual(0.0m, trailingUnionwithBitfieldBase_DerivedTypeLayout.AlignmentWasteExclusive);
         Assert.AreEqual(0.0m, trailingUnionwithBitfieldBase_DerivedTypeLayout.AlignmentWasteIncludingBaseTypes);
@@ -845,7 +845,7 @@ public sealed class Session_LoadTypeLayoutTests
         Assert.AreEqual(0u, trailingUnionwithBitfieldBase_DerivedTypeLayout.UsedForVFPtrsIncludingBaseTypes);
 
         Assert.AreEqual("z", trailingUnionwithBitfieldBase_DerivedTypeLayout.MemberLayouts![0].Name);
-        Assert.IsInstanceOfType(trailingUnionwithBitfieldBase_DerivedTypeLayout.MemberLayouts![0].Type, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(trailingUnionwithBitfieldBase_DerivedTypeLayout.MemberLayouts![0].Type);
         Assert.AreEqual("int", trailingUnionwithBitfieldBase_DerivedTypeLayout.MemberLayouts![0].Type!.Name);
         Assert.AreEqual(4.0m, trailingUnionwithBitfieldBase_DerivedTypeLayout.MemberLayouts![0].Size);
         Assert.IsFalse(trailingUnionwithBitfieldBase_DerivedTypeLayout.MemberLayouts![0].IsAlignmentMember);
@@ -875,12 +875,12 @@ public sealed class Session_LoadTypeLayoutTests
         // discovered.
         var ValueTypeInfoOfvalueAnyTypeLayout = typeLayouts.Single(tli => tli.UserDefinedType.Name == "ValueTypeInfo<0>");
         Assert.AreEqual(1u, ValueTypeInfoOfvalueAnyTypeLayout.UserDefinedType.InstanceSize);
-        Assert.AreEqual(2, ValueTypeInfoOfvalueAnyTypeLayout.UserDefinedType.DataMembers.Length);
+        Assert.HasCount(2, ValueTypeInfoOfvalueAnyTypeLayout.UserDefinedType.DataMembers);
         Assert.IsTrue(ValueTypeInfoOfvalueAnyTypeLayout.UserDefinedType.DataMembers.All(ds => ds.IsStaticMember));
         var EmptyDataMember = ValueTypeInfoOfvalueAnyTypeLayout.UserDefinedType.DataMembers.Single(ds => ds.Name == "Empty");
         Assert.AreEqual("void** const", EmptyDataMember.Type!.Name);
-        Assert.IsInstanceOfType(EmptyDataMember.Type, typeof(ModifiedTypeSymbol));
-        Assert.IsInstanceOfType((EmptyDataMember.Type as ModifiedTypeSymbol)!.UnmodifiedTypeSymbol, typeof(PointerTypeSymbol));
+        Assert.IsInstanceOfType<ModifiedTypeSymbol>(EmptyDataMember.Type);
+        Assert.IsInstanceOfType<PointerTypeSymbol>((EmptyDataMember.Type as ModifiedTypeSymbol)!.UnmodifiedTypeSymbol);
 
 
 
@@ -891,23 +891,23 @@ public sealed class Session_LoadTypeLayoutTests
         // Example trimmed down from an xbox game codebase where the bug was discovered.
         var TypeWithPaddingAsFirstMemberLayout = typeLayouts.Single(tli => tli.UserDefinedType.Name == "TypeWithPaddingAsFirstMember");
         Assert.AreEqual(4u, TypeWithPaddingAsFirstMemberLayout.UserDefinedType.InstanceSize);
-        Assert.AreEqual(9, TypeWithPaddingAsFirstMemberLayout.MemberLayouts!.Count);
+        Assert.HasCount(9, TypeWithPaddingAsFirstMemberLayout.MemberLayouts!);
         Assert.AreEqual(TypeLayoutItemMember.AlignmentPaddingName, TypeWithPaddingAsFirstMemberLayout.MemberLayouts![0].Name);
         Assert.AreEqual(0.125m, TypeWithPaddingAsFirstMemberLayout.MemberLayouts![0].Size);
-        Assert.AreEqual(true, TypeWithPaddingAsFirstMemberLayout.MemberLayouts![0].IsBitField);
+        Assert.IsTrue(TypeWithPaddingAsFirstMemberLayout.MemberLayouts![0].IsBitField);
         Assert.AreEqual(0u, TypeWithPaddingAsFirstMemberLayout.MemberLayouts![0].BitStartPosition);
         Assert.AreEqual(1u, TypeWithPaddingAsFirstMemberLayout.MemberLayouts![0].NumberOfBits);
-        Assert.AreEqual(true, TypeWithPaddingAsFirstMemberLayout.MemberLayouts![0].IsAlignmentMember);
-        Assert.AreEqual(false, TypeWithPaddingAsFirstMemberLayout.MemberLayouts![0].IsTailSlopAlignmentMember);
+        Assert.IsTrue(TypeWithPaddingAsFirstMemberLayout.MemberLayouts![0].IsAlignmentMember);
+        Assert.IsFalse(TypeWithPaddingAsFirstMemberLayout.MemberLayouts![0].IsTailSlopAlignmentMember);
         Assert.AreEqual(0, TypeWithPaddingAsFirstMemberLayout.MemberLayouts![0].Offset);
 
         Assert.AreEqual("A3BitBool", TypeWithPaddingAsFirstMemberLayout.MemberLayouts![1].Name);
         Assert.AreEqual(0.375m, TypeWithPaddingAsFirstMemberLayout.MemberLayouts![1].Size);
-        Assert.AreEqual(true, TypeWithPaddingAsFirstMemberLayout.MemberLayouts![1].IsBitField);
+        Assert.IsTrue(TypeWithPaddingAsFirstMemberLayout.MemberLayouts![1].IsBitField);
         Assert.AreEqual(1u, TypeWithPaddingAsFirstMemberLayout.MemberLayouts![1].BitStartPosition);
         Assert.AreEqual(3u, TypeWithPaddingAsFirstMemberLayout.MemberLayouts![1].NumberOfBits);
-        Assert.AreEqual(false, TypeWithPaddingAsFirstMemberLayout.MemberLayouts![1].IsAlignmentMember);
-        Assert.AreEqual(false, TypeWithPaddingAsFirstMemberLayout.MemberLayouts![1].IsTailSlopAlignmentMember);
+        Assert.IsFalse(TypeWithPaddingAsFirstMemberLayout.MemberLayouts![1].IsAlignmentMember);
+        Assert.IsFalse(TypeWithPaddingAsFirstMemberLayout.MemberLayouts![1].IsTailSlopAlignmentMember);
         Assert.AreEqual(0.125m, TypeWithPaddingAsFirstMemberLayout.MemberLayouts![1].Offset);
 
         // Another regression test, for a type hierarchy where the "middle" type is where the vfptr
@@ -917,8 +917,8 @@ public sealed class Session_LoadTypeLayoutTests
         //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         var MoreDerivedTypeLayout = typeLayouts.First(tli => tli.UserDefinedType.Name == "MoreDerivedType");
         Assert.AreEqual(32u, MoreDerivedTypeLayout.UserDefinedType.InstanceSize);
-        Assert.AreEqual(1, MoreDerivedTypeLayout.MemberLayouts!.Count);
-        Assert.AreEqual(1, MoreDerivedTypeLayout.BaseTypeLayouts!.Count);
+        Assert.HasCount(1, MoreDerivedTypeLayout.MemberLayouts!);
+        Assert.HasCount(1, MoreDerivedTypeLayout.BaseTypeLayouts!);
         Assert.AreEqual(0m, MoreDerivedTypeLayout.AlignmentWasteExclusive);
         Assert.AreEqual(0m, MoreDerivedTypeLayout.AlignmentWasteIncludingBaseTypes);
         Assert.AreEqual(0u, MoreDerivedTypeLayout.UsedForVFPtrsExclusive);
@@ -930,7 +930,7 @@ public sealed class Session_LoadTypeLayoutTests
         //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
         var ComplicatedTypeLayoutWithBitfieldsDerivedTypeLayout = typeLayouts.Single(tli => tli.UserDefinedType.Name == "ComplicatedTypeLayoutWithBitfieldsDerived");
         Assert.AreEqual(32u, ComplicatedTypeLayoutWithBitfieldsDerivedTypeLayout.UserDefinedType.InstanceSize);
-        Assert.AreEqual(8, ComplicatedTypeLayoutWithBitfieldsDerivedTypeLayout.MemberLayouts!.Count);
+        Assert.HasCount(8, ComplicatedTypeLayoutWithBitfieldsDerivedTypeLayout.MemberLayouts!);
         // The base type should have no padding, it's a union of a 4-byte value and a bunch of bitfields that don't add up to 4 bytes, but that's still no-padding from our perspective.
         Assert.AreEqual(0, ComplicatedTypeLayoutWithBitfieldsDerivedTypeLayout.BaseTypeLayouts![0].AlignmentWasteExclusive);
         // The first member in the derived type is padding - 4 bytes, between the 4-byte base type and the 8-byte-aligned pointer as the first declared member.

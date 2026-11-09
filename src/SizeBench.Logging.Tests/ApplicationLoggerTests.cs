@@ -13,7 +13,6 @@ public class ApplicationLoggerTests
         using IApplicationLogger logger = new ApplicationLogger("Test App", null);
     }
 
-    [ExpectedException(typeof(ObjectDisposedException), AllowDerivedTypes = false)]
     [TestMethod]
     public void LoggingAfterDisposeThrows()
     {
@@ -22,7 +21,7 @@ public class ApplicationLoggerTests
         {
         }
 
-        logger.Log("should throw");
+        Assert.ThrowsExactly<ObjectDisposedException>(() => logger.Log("should throw"));
     }
 
     [TestMethod]
@@ -30,9 +29,9 @@ public class ApplicationLoggerTests
     {
         using var logger = new ApplicationLogger("Test App", null);
         Assert.IsFalse(logger.Entries is INotifyCollectionChanged);
-        Assert.AreEqual(0, logger.Entries.Count());
+        Assert.IsEmpty(logger.Entries);
         logger.Log("test");
-        Assert.AreEqual(1, logger.Entries.Count());
+        Assert.HasCount(1, logger.Entries);
         var entry = logger.Entries.First();
         Assert.AreEqual("LogWithoutSynchronizationContextIsImmediate", entry.CallingMember);
     }
@@ -49,16 +48,16 @@ public class ApplicationLoggerTests
             var completionSource = new TaskCompletionSource<Tuple<NotifyCollectionChangedEventArgs, int>>();
             observable.CollectionChanged += (s, e) => completionSource.SetResult(new Tuple<NotifyCollectionChangedEventArgs, int>(e, Environment.CurrentManagedThreadId));
 
-            await Task.Run(() => logger.Log("test posting", LogLevel.Warning));
+            await Task.Run(() => logger.Log("test posting", LogLevel.Warning), this.TestContext.CancellationToken);
 
             var tuple = await completionSource.Task;
             var args = tuple.Item1;
             Assert.AreEqual(testThreadId, tuple.Item2);
             Assert.AreEqual(NotifyCollectionChangedAction.Add, args.Action);
-            Assert.AreEqual(1, args.NewItems!.Count);
-            Assert.AreEqual(LogLevel.Warning, (args.NewItems[0] as LogEntry)!.LogLevel);
+            Assert.HasCount(1, args.NewItems!);
+            Assert.AreEqual(LogLevel.Warning, (args.NewItems![0] as LogEntry)!.LogLevel);
 
-            Assert.AreEqual(1, logger.Entries.Count());
+            Assert.HasCount(1, logger.Entries);
         });
     }
 
@@ -88,14 +87,14 @@ public class ApplicationLoggerTests
     {
         using var logger = new ApplicationLogger("Test App", null);
         Assert.IsFalse(logger.SessionLogs is INotifyCollectionChanged);
-        Assert.AreEqual(0, logger.SessionLogs.Count());
+        Assert.IsEmpty(logger.SessionLogs);
 
         using (var session = logger.CreateSessionLog("Session 1"))
         {
-            Assert.AreEqual(1, logger.SessionLogs.Count());
+            Assert.HasCount(1, logger.SessionLogs);
             Assert.AreEqual("Session 1", logger.SessionLogs.ElementAt(0).Name);
         }
-        Assert.AreEqual(0, logger.SessionLogs.Count());
+        Assert.IsEmpty(logger.SessionLogs);
     }
 
     [TestMethod]
@@ -105,7 +104,7 @@ public class ApplicationLoggerTests
         {
             using var logger = new ApplicationLogger("Test App", SynchronizationContext.Current);
             Assert.IsTrue(logger.SessionLogs is INotifyCollectionChanged);
-            Assert.AreEqual(0, logger.SessionLogs.Count());
+            Assert.IsEmpty(logger.SessionLogs);
 
             var firedCollectionChanged = false;
 
@@ -116,10 +115,10 @@ public class ApplicationLoggerTests
             {
                 Assert.IsTrue(firedCollectionChanged);
                 firedCollectionChanged = false;
-                Assert.AreEqual(1, logger.SessionLogs.Count());
+                Assert.HasCount(1, logger.SessionLogs);
                 Assert.AreEqual("Session 1", logger.SessionLogs.ElementAt(0).Name);
             }
-            Assert.AreEqual(0, logger.SessionLogs.Count());
+            Assert.IsEmpty(logger.SessionLogs);
             Assert.IsTrue(firedCollectionChanged);
         });
     }
@@ -129,18 +128,18 @@ public class ApplicationLoggerTests
     {
         using var logger = new ApplicationLogger("Test App", null);
         Assert.IsFalse(logger.Entries is INotifyCollectionChanged);
-        Assert.AreEqual(0, logger.Entries.Count());
+        Assert.IsEmpty(logger.Entries);
 
         using (var task = logger.StartTaskLog("Task 1"))
         {
-            Assert.AreEqual(1, logger.Entries.Count());
+            Assert.HasCount(1, logger.Entries);
             Assert.AreEqual("Task 1", logger.Entries.ElementAt(0).Message);
             task.Log("Test nested message");
         }
 
-        Assert.AreEqual(1, logger.Entries.Count());
+        Assert.HasCount(1, logger.Entries);
         var taskLogEntry = (TaskLogEntry)logger.Entries.ElementAt(0);
-        Assert.AreEqual(1, taskLogEntry.Entries.Count());
+        Assert.HasCount(1, taskLogEntry.Entries);
         Assert.AreEqual("Test nested message", taskLogEntry.Entries.ElementAt(0).Message);
     }
 
@@ -151,7 +150,7 @@ public class ApplicationLoggerTests
         {
             using var logger = new ApplicationLogger("Test App", SynchronizationContext.Current);
             Assert.IsTrue(logger.Entries is INotifyCollectionChanged);
-            Assert.AreEqual(0, logger.Entries.Count());
+            Assert.IsEmpty(logger.Entries);
 
             var firedCollectionChanged = false;
 
@@ -163,13 +162,13 @@ public class ApplicationLoggerTests
                 Assert.IsTrue(firedCollectionChanged);
                 Assert.IsTrue(task.Entries is INotifyCollectionChanged);
                 firedCollectionChanged = false;
-                Assert.AreEqual(1, logger.Entries.Count());
+                Assert.HasCount(1, logger.Entries);
                 Assert.AreEqual("Task 1", logger.Entries.ElementAt(0).Message);
 
-                Assert.AreEqual(1, task.Entries.Count());
+                Assert.HasCount(1, task.Entries);
                 Assert.AreEqual("Test nested message", task.Entries.ElementAt(0).Message);
             }
-            Assert.AreEqual(1, logger.Entries.Count());
+            Assert.HasCount(1, logger.Entries);
             Assert.IsFalse(firedCollectionChanged);
         });
     }
@@ -180,12 +179,12 @@ public class ApplicationLoggerTests
         using var logger = new ApplicationLogger("Test App", null);
         var exceptionToLog = new InvalidOperationException();
         Assert.IsFalse(logger.Entries is INotifyCollectionChanged);
-        Assert.AreEqual(0, logger.Entries.Count());
+        Assert.IsEmpty(logger.Entries);
         logger.LogException("test", exceptionToLog);
-        Assert.AreEqual(1, logger.Entries.Count());
+        Assert.HasCount(1, logger.Entries);
         var entry = (LogExceptionEntry)logger.Entries.First();
         Assert.AreEqual("LoggingExceptionWorks", entry.CallingMember);
-        StringAssert.Contains(entry.Message, "test", StringComparison.Ordinal);
+        Assert.Contains("test", entry.Message, StringComparison.Ordinal);
         Assert.AreEqual(exceptionToLog, entry.Exception);
     }
 
@@ -194,9 +193,9 @@ public class ApplicationLoggerTests
     {
         using var logger = new ApplicationLogger("Test App", null);
         Assert.IsFalse(logger.Entries is INotifyCollectionChanged);
-        Assert.AreEqual(0, logger.Entries.Count());
+        Assert.IsEmpty(logger.Entries);
         logger.StartProgressLogEntry("Starting...");
-        Assert.AreEqual(1, logger.Entries.Count());
+        Assert.HasCount(1, logger.Entries);
         var entry = (LogEntryForProgress)logger.Entries.First();
         Assert.AreEqual("StartProgressLogEntryWorks", entry.CallingMember);
         Assert.AreEqual("Starting...", entry.Message);
@@ -265,33 +264,33 @@ public class ApplicationLoggerTests
 
         // This verifies that all the expected general inforamtion is present.
         // Exact formatting per entry is left to the LogEntry tests.
-        Assert.IsTrue(session1NameIndex > -1);
-        Assert.IsTrue(session2NameIndex > -1);
-        Assert.IsTrue(testLog1Index > -1);
-        Assert.IsTrue(testLog2Index > -1);
-        Assert.IsTrue(testLog3Index > -1);
-        Assert.IsTrue(testTaskLogIndex > -1);
-        Assert.IsTrue(taskPart1LogIndex > -1);
-        Assert.IsTrue(taskPart2LogIndex > -1);
-        Assert.IsTrue(startingThing1Index > -1);
+        Assert.IsGreaterThan(-1, session1NameIndex);
+        Assert.IsGreaterThan(-1, session2NameIndex);
+        Assert.IsGreaterThan(-1, testLog1Index);
+        Assert.IsGreaterThan(-1, testLog2Index);
+        Assert.IsGreaterThan(-1, testLog3Index);
+        Assert.IsGreaterThan(-1, testTaskLogIndex);
+        Assert.IsGreaterThan(-1, taskPart1LogIndex);
+        Assert.IsGreaterThan(-1, taskPart2LogIndex);
+        Assert.IsGreaterThan(-1, startingThing1Index);
         Assert.AreEqual(-1, startingThing2Index); // This should have been replaced with "5% done" when we updated progress
-        Assert.IsTrue(uhOhIndex > -1);
-        Assert.IsTrue(uhOhAgainIndex > -1);
-        Assert.IsTrue(fivePercentDoneIndex > -1);
+        Assert.IsGreaterThan(-1, uhOhIndex);
+        Assert.IsGreaterThan(-1, uhOhAgainIndex);
+        Assert.IsGreaterThan(-1, fivePercentDoneIndex);
 
         // Now assert ordering
-        Assert.IsTrue(session1NameIndex < testLog1Index);
-        Assert.IsTrue(testLog1Index < testTaskLogIndex);
-        Assert.IsTrue(testTaskLogIndex < taskPart1LogIndex);
-        Assert.IsTrue(taskPart1LogIndex < taskPart2LogIndex);
-        Assert.IsTrue(taskPart2LogIndex < startingThing1Index);
-        Assert.IsTrue(startingThing1Index < uhOhIndex);
+        Assert.IsLessThan(testLog1Index, session1NameIndex);
+        Assert.IsLessThan(testTaskLogIndex, testLog1Index);
+        Assert.IsLessThan(taskPart1LogIndex, testTaskLogIndex);
+        Assert.IsLessThan(taskPart2LogIndex, taskPart1LogIndex);
+        Assert.IsLessThan(startingThing1Index, taskPart2LogIndex);
+        Assert.IsLessThan(uhOhIndex, startingThing1Index);
 
-        Assert.IsTrue(uhOhIndex < session2NameIndex);
-        Assert.IsTrue(session2NameIndex < testLog2Index);
-        Assert.IsTrue(testLog2Index < fivePercentDoneIndex);
-        Assert.IsTrue(fivePercentDoneIndex < uhOhAgainIndex);
-        Assert.IsTrue(uhOhAgainIndex < testLog3Index);
+        Assert.IsLessThan(session2NameIndex, uhOhIndex);
+        Assert.IsLessThan(testLog2Index, session2NameIndex);
+        Assert.IsLessThan(fivePercentDoneIndex, testLog2Index);
+        Assert.IsLessThan(uhOhAgainIndex, fivePercentDoneIndex);
+        Assert.IsLessThan(testLog3Index, uhOhAgainIndex);
     }
 
     [TestMethod]
@@ -300,31 +299,33 @@ public class ApplicationLoggerTests
         using var logger = new ApplicationLogger("Test App", null);
         logger.Dispose();
 
-        Assert.ThrowsException<ObjectDisposedException>(() => logger.Log("test"));
-        Assert.ThrowsException<ObjectDisposedException>(() => logger.LogException("test", new Exception()));
-        Assert.ThrowsException<ObjectDisposedException>(() => logger.StartProgressLogEntry("Starting..."));
-        Assert.ThrowsException<ObjectDisposedException>(() => logger.StartTaskLog("sub task"));
-        Assert.ThrowsException<ObjectDisposedException>(() => logger.CreateSessionLog("session name"));
+        Assert.ThrowsExactly<ObjectDisposedException>(() => logger.Log("test"));
+        Assert.ThrowsExactly<ObjectDisposedException>(() => logger.LogException("test", new Exception()));
+        Assert.ThrowsExactly<ObjectDisposedException>(() => logger.StartProgressLogEntry("Starting..."));
+        Assert.ThrowsExactly<ObjectDisposedException>(() => logger.StartTaskLog("sub task"));
+        Assert.ThrowsExactly<ObjectDisposedException>(() => logger.CreateSessionLog("session name"));
         using var writer = new StringWriter();
-        Assert.ThrowsException<ObjectDisposedException>(() => logger.WriteLog(writer));
+        Assert.ThrowsExactly<ObjectDisposedException>(() => logger.WriteLog(writer));
     }
 
     [TestMethod]
     public void DisposingSessionLoggerRemovesItFromApplicationLogger()
     {
         using var appLogger = new ApplicationLogger("Test App", null);
-        Assert.AreEqual(0, appLogger.SessionLogs.Count());
+        Assert.IsEmpty(appLogger.SessionLogs);
 
         ILogger? sessionLogger;
         using (sessionLogger = appLogger.CreateSessionLog("session 1"))
         {
             Assert.IsFalse(((Logger)sessionLogger).IsDisposed);
-            Assert.AreEqual(1, appLogger.SessionLogs.Count());
+            Assert.HasCount(1, appLogger.SessionLogs);
             Assert.IsTrue(ReferenceEquals(sessionLogger, appLogger.SessionLogs.First()));
         }
 
-        Assert.AreEqual(0, appLogger.SessionLogs.Count());
+        Assert.IsEmpty(appLogger.SessionLogs);
         Assert.IsTrue(((Logger)sessionLogger).IsDisposed);
         Assert.IsFalse(appLogger.IsDisposed);
     }
+
+    public TestContext TestContext { get; set; }
 }

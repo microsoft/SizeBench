@@ -15,9 +15,9 @@ public sealed class Session_EnumerateSymbolsInSourceFileTests
 
     private string PDBPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.pdb");
 
-    private CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
+    private CancellationToken CancellationToken => this.TestContext!.CancellationToken;
 
-    [Timeout(60 * 1000)] // 1 minute
+    [Timeout(60 * 1000, CooperativeCancellation = true)] // 1 minute
     [TestMethod]
     public async Task AllVectorSymbolsCanBeFoundFromSourceFile()
     {
@@ -38,8 +38,8 @@ public sealed class Session_EnumerateSymbolsInSourceFileTests
 
         // Ensure we found at least one pdata and at least one xdata symbol when enumerating by section, so that below we'll verify we found all those
         // by source file too - pdata and xdata need to be done manually so ensure source file symbol enumeration took that into account.
-        Assert.IsTrue(vectorSymbolsDiscoveredBySection.Any(sym => sym.Name.StartsWith("[pdata]", StringComparison.Ordinal)));
-        Assert.IsTrue(vectorSymbolsDiscoveredBySection.Any(sym => sym.Name.StartsWith("[cppxdata]", StringComparison.Ordinal)));
+        Assert.Contains(sym => sym.Name.StartsWith("[pdata]", StringComparison.Ordinal), vectorSymbolsDiscoveredBySection);
+        Assert.Contains(sym => sym.Name.StartsWith("[cppxdata]", StringComparison.Ordinal), vectorSymbolsDiscoveredBySection);
 
         var sourceFiles = await session.EnumerateSourceFiles(this.CancellationToken);
         var vectorSF = sourceFiles.Single(sf => sf.Name.Contains(@"\vector", StringComparison.OrdinalIgnoreCase));
@@ -51,7 +51,7 @@ public sealed class Session_EnumerateSymbolsInSourceFileTests
 
         foreach (var symbol in vectorSymbolsDiscoveredBySection)
         {
-            Assert.IsTrue(symbolsDiscoveredInVectorSourceFile.Contains(symbol), $"When enumerating symbols by source file, this std::vector symbol could not be found: {symbol.Name}");
+            Assert.Contains(symbol, symbolsDiscoveredInVectorSourceFile, $"When enumerating symbols by source file, this std::vector symbol could not be found: {symbol.Name}");
         }
     }
 }

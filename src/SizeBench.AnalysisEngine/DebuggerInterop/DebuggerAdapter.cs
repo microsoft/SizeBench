@@ -163,7 +163,7 @@ internal sealed class DebuggerAdapter : IDebuggerAdapter, IDbgEnginePathCustomiz
         await this._engine.SendRequestAsync(new ExecuteRequest(".load DbgModelApiXtn.dll", ExecuteSource.Typed)).ConfigureAwait(true);
     }
 
-    private Process CreateEngineProcess(CreateOutOfProcessArgs args)
+    private CreateOutOfProcessResult CreateEngineProcess(CreateOutOfProcessArgs args)
     {
         var psi = new ProcessStartInfo
         {
@@ -174,7 +174,7 @@ internal sealed class DebuggerAdapter : IDebuggerAdapter, IDbgEnginePathCustomiz
             ErrorDialog = false,
             LoadUserProfile = false,
         };
-        return Process.Start(psi)!;
+        return new CreateOutOfProcessResult(Process.Start(psi)!, debuggerAttached: false);
     }
 
     private static bool DoesFunctionContainRVA(IFunctionCodeSymbol function, uint rva)

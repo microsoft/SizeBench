@@ -9,7 +9,7 @@ using SizeBench.SKUCrawler.CrawlFolder;
 
 namespace SizeBench.SKUCrawler;
 
-public class ProductBinary
+internal sealed class ProductBinary
 {
     public string BinaryPath { get; }
     public string PdbPath { get; }

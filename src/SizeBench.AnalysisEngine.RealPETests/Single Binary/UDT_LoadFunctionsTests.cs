@@ -10,7 +10,7 @@ namespace SizeBench.AnalysisEngine.RealPETests;
 public sealed class UDT_LoadFunctionsTests
 {
     public TestContext? TestContext { get; set; }
-    private CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
+    private CancellationToken CancellationToken => this.TestContext!.CancellationToken;
     private string MakePath(string binary) => Path.Combine(this.TestContext!.DeploymentDirectory!, binary);
 
     private string BinaryPath => MakePath("SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.dll");
@@ -29,11 +29,11 @@ public sealed class UDT_LoadFunctionsTests
         // Base1 assertions
 
         // The two functions we hand-authored, plus 3 constructors, plus 2 operator= overloads (those 5 are put in by the language by default)
-        Assert.AreEqual(7, (await base1UDT.GetFunctionsAsync(this.CancellationToken)).Count);
-        Assert.AreEqual(3, (await base1UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FullName.Contains("Base1::Base1(", StringComparison.Ordinal)).Count()); // 3 constructors
-        Assert.AreEqual(2, (await base1UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FullName.Contains("operator=(", StringComparison.Ordinal)).Count()); // 2 overloads of operator=
-        Assert.AreEqual(1, (await base1UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FullName.Contains("virtual void Base1::VirtualFunctionWithManyOverrides", StringComparison.Ordinal)).Count());
-        Assert.AreEqual(1, (await base1UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FullName.Contains("virtual int Base1::VirtualFunctionWithNoOverrides", StringComparison.Ordinal)).Count());
+        Assert.HasCount(7, await base1UDT.GetFunctionsAsync(this.CancellationToken));
+        Assert.HasCount(3, (await base1UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FullName.Contains("Base1::Base1(", StringComparison.Ordinal))); // 3 constructors
+        Assert.HasCount(2, (await base1UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FullName.Contains("operator=(", StringComparison.Ordinal))); // 2 overloads of operator=
+        Assert.ContainsSingle(f => f.FullName.Contains("virtual void Base1::VirtualFunctionWithManyOverrides", StringComparison.Ordinal), await base1UDT.GetFunctionsAsync(this.CancellationToken));
+        Assert.ContainsSingle(f => f.FullName.Contains("virtual int Base1::VirtualFunctionWithNoOverrides", StringComparison.Ordinal), await base1UDT.GetFunctionsAsync(this.CancellationToken));
 
         var manyOverridesFn = (await base1UDT.GetFunctionsAsync(this.CancellationToken)).First(f => f.FullName == "virtual void Base1::VirtualFunctionWithManyOverrides()");
 
@@ -47,7 +47,7 @@ public sealed class UDT_LoadFunctionsTests
         Assert.IsFalse(manyOverridesFn.FunctionType!.IsConst);
         Assert.IsFalse(manyOverridesFn.FunctionType.IsVolatile);
         Assert.AreEqual(AccessModifier.Public, manyOverridesFn.AccessModifier);
-        Assert.IsInstanceOfType(manyOverridesFn.FunctionType.ReturnValueType, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(manyOverridesFn.FunctionType.ReturnValueType);
         Assert.AreEqual("void", manyOverridesFn.FunctionType.ReturnValueType.Name);
         Assert.IsNull(manyOverridesFn.FunctionType.ArgumentTypes);
         Assert.AreEqual(((SimpleFunctionCodeSymbol)manyOverridesFn).Name, ((SimpleFunctionCodeSymbol)manyOverridesFn).CanonicalName);
@@ -64,7 +64,7 @@ public sealed class UDT_LoadFunctionsTests
         Assert.IsFalse(noOverridesFn.FunctionType!.IsConst);
         Assert.IsFalse(noOverridesFn.FunctionType.IsVolatile);
         Assert.AreEqual(AccessModifier.Public, noOverridesFn.AccessModifier);
-        Assert.IsInstanceOfType(noOverridesFn.FunctionType.ReturnValueType, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(noOverridesFn.FunctionType.ReturnValueType);
         Assert.AreEqual("int", noOverridesFn.FunctionType.ReturnValueType.Name);
         Assert.IsNull(noOverridesFn.FunctionType.ArgumentTypes);
         Assert.AreEqual(((SimpleFunctionCodeSymbol)noOverridesFn).Name, ((SimpleFunctionCodeSymbol)noOverridesFn).CanonicalName);
@@ -76,13 +76,13 @@ public sealed class UDT_LoadFunctionsTests
         var base1_derived1UDT = base1UDT.DerivedTypes!.First(dt => dt.Name == "Base1_Derived1");
 
         // The four functions we hand-authored, plus 3 constructors, plus 2 operator= overloads (those 5 are put in by the language by default)
-        Assert.AreEqual(9, (await base1_derived1UDT.GetFunctionsAsync(this.CancellationToken)).Count);
-        Assert.AreEqual(3, (await base1_derived1UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FullName.Contains("Base1_Derived1::Base1_Derived1(", StringComparison.Ordinal)).Count()); // 3 constructors
-        Assert.AreEqual(2, (await base1_derived1UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FullName.Contains("operator=(", StringComparison.Ordinal)).Count()); // 2 overloads of operator=
-        Assert.AreEqual(1, (await base1_derived1UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FunctionName == "VirtualFunctionWithManyOverrides").Count());
-        Assert.AreEqual(1, (await base1_derived1UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FunctionName == "VirtualFunctionWithNoOverrides").Count());
-        Assert.AreEqual(1, (await base1_derived1UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FunctionName == "PureVirtualFunctionWithOneOverride").Count());
-        Assert.AreEqual(1, (await base1_derived1UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FunctionName == "VirtualFunctionWithNoOverrides2").Count());
+        Assert.HasCount(9, await base1_derived1UDT.GetFunctionsAsync(this.CancellationToken));
+        Assert.HasCount(3, (await base1_derived1UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FullName.Contains("Base1_Derived1::Base1_Derived1(", StringComparison.Ordinal))); // 3 constructors
+        Assert.HasCount(2, (await base1_derived1UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FullName.Contains("operator=(", StringComparison.Ordinal))); // 2 overloads of operator=
+        Assert.ContainsSingle(f => f.FunctionName == "VirtualFunctionWithManyOverrides", await base1_derived1UDT.GetFunctionsAsync(this.CancellationToken));
+        Assert.ContainsSingle(f => f.FunctionName == "VirtualFunctionWithNoOverrides", await base1_derived1UDT.GetFunctionsAsync(this.CancellationToken));
+        Assert.ContainsSingle(f => f.FunctionName == "PureVirtualFunctionWithOneOverride", await base1_derived1UDT.GetFunctionsAsync(this.CancellationToken));
+        Assert.ContainsSingle(f => f.FunctionName == "VirtualFunctionWithNoOverrides2", await base1_derived1UDT.GetFunctionsAsync(this.CancellationToken));
 
         manyOverridesFn = (await base1_derived1UDT.GetFunctionsAsync(this.CancellationToken)).First(f => f.FullName == "void Base1_Derived1::VirtualFunctionWithManyOverrides() override");
 
@@ -96,7 +96,7 @@ public sealed class UDT_LoadFunctionsTests
         Assert.IsFalse(manyOverridesFn.FunctionType!.IsConst);
         Assert.IsFalse(manyOverridesFn.FunctionType.IsVolatile);
         Assert.AreEqual(AccessModifier.Public, manyOverridesFn.AccessModifier);
-        Assert.IsInstanceOfType(manyOverridesFn.FunctionType.ReturnValueType, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(manyOverridesFn.FunctionType.ReturnValueType);
         Assert.AreEqual("void", manyOverridesFn.FunctionType.ReturnValueType.Name);
         Assert.IsNull(manyOverridesFn.FunctionType.ArgumentTypes);
         Assert.AreEqual(((SimpleFunctionCodeSymbol)manyOverridesFn).Name, ((SimpleFunctionCodeSymbol)manyOverridesFn).CanonicalName);
@@ -113,7 +113,7 @@ public sealed class UDT_LoadFunctionsTests
         Assert.IsFalse(pureVirtualWithOneOverrideFn.FunctionType!.IsConst);
         Assert.IsFalse(pureVirtualWithOneOverrideFn.FunctionType.IsVolatile);
         Assert.AreEqual(AccessModifier.Public, pureVirtualWithOneOverrideFn.AccessModifier);
-        Assert.IsInstanceOfType(pureVirtualWithOneOverrideFn.FunctionType.ReturnValueType, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(pureVirtualWithOneOverrideFn.FunctionType.ReturnValueType);
         Assert.AreEqual("void", pureVirtualWithOneOverrideFn.FunctionType.ReturnValueType.Name);
         Assert.IsNull(pureVirtualWithOneOverrideFn.FunctionType.ArgumentTypes);
         Assert.AreEqual(((SimpleFunctionCodeSymbol)pureVirtualWithOneOverrideFn).Name, ((SimpleFunctionCodeSymbol)pureVirtualWithOneOverrideFn).CanonicalName);
@@ -130,7 +130,7 @@ public sealed class UDT_LoadFunctionsTests
         Assert.IsFalse(noOverrides2Fn.FunctionType!.IsConst);
         Assert.IsFalse(noOverrides2Fn.FunctionType.IsVolatile);
         Assert.AreEqual(AccessModifier.Public, noOverrides2Fn.AccessModifier);
-        Assert.IsInstanceOfType(noOverrides2Fn.FunctionType.ReturnValueType, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(noOverrides2Fn.FunctionType.ReturnValueType);
         Assert.AreEqual("void", noOverrides2Fn.FunctionType.ReturnValueType.Name);
         Assert.IsNull(noOverrides2Fn.FunctionType.ArgumentTypes);
         Assert.AreEqual(((SimpleFunctionCodeSymbol)noOverrides2Fn).Name, ((SimpleFunctionCodeSymbol)noOverrides2Fn).CanonicalName);
@@ -147,11 +147,11 @@ public sealed class UDT_LoadFunctionsTests
         Assert.IsFalse(noOverridesIntFn.FunctionType!.IsConst);
         Assert.IsFalse(noOverridesIntFn.FunctionType.IsVolatile);
         Assert.AreEqual(AccessModifier.Public, noOverridesIntFn.AccessModifier);
-        Assert.IsInstanceOfType(noOverridesIntFn.FunctionType.ReturnValueType, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(noOverridesIntFn.FunctionType.ReturnValueType);
         Assert.AreEqual("int", noOverridesIntFn.FunctionType.ReturnValueType.Name);
         Assert.IsNotNull(noOverridesIntFn.FunctionType.ArgumentTypes);
-        Assert.AreEqual(1, noOverridesIntFn.FunctionType.ArgumentTypes.Count);
-        Assert.IsInstanceOfType(noOverridesIntFn.FunctionType.ArgumentTypes[0], typeof(BasicTypeSymbol));
+        Assert.HasCount(1, noOverridesIntFn.FunctionType.ArgumentTypes);
+        Assert.IsInstanceOfType<BasicTypeSymbol>(noOverridesIntFn.FunctionType.ArgumentTypes[0]);
         Assert.AreEqual("int", noOverridesIntFn.FunctionType.ArgumentTypes[0].Name);
         Assert.AreEqual(((SimpleFunctionCodeSymbol)noOverridesIntFn).Name, ((SimpleFunctionCodeSymbol)noOverridesIntFn).CanonicalName);
 
@@ -162,10 +162,10 @@ public sealed class UDT_LoadFunctionsTests
         var base1_derived2UDT = base1UDT.DerivedTypes!.First(dt => dt.Name == "Base1_Derived2");
 
         // The function we hand-authored, plus 3 constructors, plus 2 operator= overloads (those 5 are put in by the language by default)
-        Assert.AreEqual(6, (await base1_derived2UDT.GetFunctionsAsync(this.CancellationToken)).Count);
-        Assert.AreEqual(3, (await base1_derived2UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FullName.Contains("Base1_Derived2::Base1_Derived2(", StringComparison.Ordinal)).Count()); // 3 constructors
-        Assert.AreEqual(2, (await base1_derived2UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FullName.Contains("operator=(", StringComparison.Ordinal)).Count()); // 2 overloads of operator=
-        Assert.AreEqual(1, (await base1_derived2UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FunctionName == "VirtualFunctionWithManyOverrides").Count());
+        Assert.HasCount(6, await base1_derived2UDT.GetFunctionsAsync(this.CancellationToken));
+        Assert.HasCount(3, (await base1_derived2UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FullName.Contains("Base1_Derived2::Base1_Derived2(", StringComparison.Ordinal))); // 3 constructors
+        Assert.HasCount(2, (await base1_derived2UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FullName.Contains("operator=(", StringComparison.Ordinal))); // 2 overloads of operator=
+        Assert.ContainsSingle(f => f.FunctionName == "VirtualFunctionWithManyOverrides", await base1_derived2UDT.GetFunctionsAsync(this.CancellationToken));
 
         manyOverridesFn = (await base1_derived2UDT.GetFunctionsAsync(this.CancellationToken)).First(f => f.FullName == "void Base1_Derived2::VirtualFunctionWithManyOverrides() override final");
 
@@ -179,7 +179,7 @@ public sealed class UDT_LoadFunctionsTests
         Assert.IsFalse(manyOverridesFn.FunctionType!.IsConst);
         Assert.IsFalse(manyOverridesFn.FunctionType.IsVolatile);
         Assert.AreEqual(AccessModifier.Public, manyOverridesFn.AccessModifier);
-        Assert.IsInstanceOfType(manyOverridesFn.FunctionType.ReturnValueType, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(manyOverridesFn.FunctionType.ReturnValueType);
         Assert.AreEqual("void", manyOverridesFn.FunctionType.ReturnValueType.Name);
         Assert.IsNull(manyOverridesFn.FunctionType.ArgumentTypes);
         Assert.AreEqual(((SimpleFunctionCodeSymbol)manyOverridesFn).Name, ((SimpleFunctionCodeSymbol)manyOverridesFn).CanonicalName);
@@ -191,12 +191,12 @@ public sealed class UDT_LoadFunctionsTests
         var base1_derived1_moreDerived1UDT = base1UDT.DerivedTypes!.First(dt => dt.Name == "Base1_Derived1_MoreDerived1");
 
         // The four functions we hand-authored, plus 3 constructors, plus 2 operator= overloads (those 5 are put in by the language by default)
-        Assert.AreEqual(9, (await base1_derived1_moreDerived1UDT.GetFunctionsAsync(this.CancellationToken)).Count);
-        Assert.AreEqual(3, (await base1_derived1_moreDerived1UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FullName.Contains("Base1_Derived1_MoreDerived1(", StringComparison.Ordinal)).Count()); // 3 constructors
-        Assert.AreEqual(2, (await base1_derived1_moreDerived1UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FullName.Contains("operator=(", StringComparison.Ordinal)).Count()); // 2 overloads of operator=
-        Assert.AreEqual(1, (await base1_derived1_moreDerived1UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FunctionName == "VirtualFunctionWithManyOverrides").Count());
-        Assert.AreEqual(2, (await base1_derived1_moreDerived1UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FunctionName == "VirtualFunctionWithNoOverrides").Count());
-        Assert.AreEqual(1, (await base1_derived1_moreDerived1UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FunctionName == "PureVirtualFunctionWithOneOverride").Count());
+        Assert.HasCount(9, await base1_derived1_moreDerived1UDT.GetFunctionsAsync(this.CancellationToken));
+        Assert.HasCount(3, (await base1_derived1_moreDerived1UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FullName.Contains("Base1_Derived1_MoreDerived1(", StringComparison.Ordinal))); // 3 constructors
+        Assert.HasCount(2, (await base1_derived1_moreDerived1UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FullName.Contains("operator=(", StringComparison.Ordinal))); // 2 overloads of operator=
+        Assert.ContainsSingle(f => f.FunctionName == "VirtualFunctionWithManyOverrides", await base1_derived1_moreDerived1UDT.GetFunctionsAsync(this.CancellationToken));
+        Assert.HasCount(2, (await base1_derived1_moreDerived1UDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FunctionName == "VirtualFunctionWithNoOverrides"));
+        Assert.ContainsSingle(f => f.FunctionName == "PureVirtualFunctionWithOneOverride", await base1_derived1_moreDerived1UDT.GetFunctionsAsync(this.CancellationToken));
 
         manyOverridesFn = (await base1_derived1_moreDerived1UDT.GetFunctionsAsync(this.CancellationToken)).First(f => f.FullName == "void Base1_Derived1_MoreDerived1::VirtualFunctionWithManyOverrides() override final");
 
@@ -210,7 +210,7 @@ public sealed class UDT_LoadFunctionsTests
         Assert.IsFalse(manyOverridesFn.FunctionType!.IsConst);
         Assert.IsFalse(manyOverridesFn.FunctionType.IsVolatile);
         Assert.AreEqual(AccessModifier.Public, manyOverridesFn.AccessModifier);
-        Assert.IsInstanceOfType(manyOverridesFn.FunctionType.ReturnValueType, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(manyOverridesFn.FunctionType.ReturnValueType);
         Assert.AreEqual("void", manyOverridesFn.FunctionType.ReturnValueType.Name);
         Assert.IsNull(manyOverridesFn.FunctionType.ArgumentTypes);
         Assert.AreEqual(((SimpleFunctionCodeSymbol)manyOverridesFn).Name, ((SimpleFunctionCodeSymbol)manyOverridesFn).CanonicalName);
@@ -227,7 +227,7 @@ public sealed class UDT_LoadFunctionsTests
         Assert.IsTrue(noOverridesConstFn.FunctionType!.IsConst);
         Assert.IsFalse(noOverridesConstFn.FunctionType.IsVolatile);
         Assert.AreEqual(AccessModifier.Public, noOverridesConstFn.AccessModifier);
-        Assert.IsInstanceOfType(noOverridesConstFn.FunctionType.ReturnValueType, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(noOverridesConstFn.FunctionType.ReturnValueType);
         Assert.AreEqual("int", noOverridesConstFn.FunctionType.ReturnValueType.Name);
         Assert.IsNull(noOverridesConstFn.FunctionType.ArgumentTypes);
         Assert.AreEqual(((SimpleFunctionCodeSymbol)noOverridesConstFn).Name, ((SimpleFunctionCodeSymbol)noOverridesConstFn).CanonicalName);
@@ -244,11 +244,11 @@ public sealed class UDT_LoadFunctionsTests
         Assert.IsFalse(noOverridesFloatFn.FunctionType!.IsConst);
         Assert.IsFalse(noOverridesFloatFn.FunctionType.IsVolatile);
         Assert.AreEqual(AccessModifier.Public, noOverridesFloatFn.AccessModifier);
-        Assert.IsInstanceOfType(noOverridesFloatFn.FunctionType.ReturnValueType, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(noOverridesFloatFn.FunctionType.ReturnValueType);
         Assert.AreEqual("int", noOverridesFloatFn.FunctionType.ReturnValueType.Name);
         Assert.IsNotNull(noOverridesFloatFn.FunctionType.ArgumentTypes);
-        Assert.AreEqual(1, noOverridesFloatFn.FunctionType.ArgumentTypes.Count);
-        Assert.IsInstanceOfType(noOverridesFloatFn.FunctionType.ArgumentTypes[0], typeof(BasicTypeSymbol));
+        Assert.HasCount(1, noOverridesFloatFn.FunctionType.ArgumentTypes);
+        Assert.IsInstanceOfType<BasicTypeSymbol>(noOverridesFloatFn.FunctionType.ArgumentTypes[0]);
         Assert.AreEqual("float", noOverridesFloatFn.FunctionType.ArgumentTypes[0].Name);
         Assert.AreEqual(((SimpleFunctionCodeSymbol)noOverridesFloatFn).Name, ((SimpleFunctionCodeSymbol)noOverridesFloatFn).CanonicalName);
 
@@ -264,7 +264,7 @@ public sealed class UDT_LoadFunctionsTests
         Assert.IsFalse(pureVirtualWithOneOverrideFn.FunctionType!.IsConst);
         Assert.IsFalse(pureVirtualWithOneOverrideFn.FunctionType.IsVolatile);
         Assert.AreEqual(AccessModifier.Public, pureVirtualWithOneOverrideFn.AccessModifier);
-        Assert.IsInstanceOfType(pureVirtualWithOneOverrideFn.FunctionType.ReturnValueType, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(pureVirtualWithOneOverrideFn.FunctionType.ReturnValueType);
         Assert.AreEqual("void", pureVirtualWithOneOverrideFn.FunctionType.ReturnValueType.Name);
         Assert.IsNull(pureVirtualWithOneOverrideFn.FunctionType.ArgumentTypes);
         Assert.AreEqual(((SimpleFunctionCodeSymbol)pureVirtualWithOneOverrideFn).Name, ((SimpleFunctionCodeSymbol)pureVirtualWithOneOverrideFn).CanonicalName);
@@ -275,11 +275,11 @@ public sealed class UDT_LoadFunctionsTests
         // AccessModifiersTests assertions
         var accessModifiersTestsUDT = allTypes.First(udt => udt.Name == "AccessModifiersTests");
 
-        Assert.AreEqual(4, (await accessModifiersTestsUDT.GetFunctionsAsync(this.CancellationToken)).Count);
-        Assert.AreEqual(1, (await accessModifiersTestsUDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FullName.Contains("privateFunction", StringComparison.Ordinal)).Count());
-        Assert.AreEqual(1, (await accessModifiersTestsUDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FullName.Contains("privateStaticFunction", StringComparison.Ordinal)).Count());
-        Assert.AreEqual(1, (await accessModifiersTestsUDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FullName.Contains("protectedConstFunction", StringComparison.Ordinal)).Count());
-        Assert.AreEqual(1, (await accessModifiersTestsUDT.GetFunctionsAsync(this.CancellationToken)).Where(f => f.FullName.Contains("protectedStaticFunction", StringComparison.Ordinal)).Count());
+        Assert.HasCount(4, await accessModifiersTestsUDT.GetFunctionsAsync(this.CancellationToken));
+        Assert.ContainsSingle(f => f.FullName.Contains("privateFunction", StringComparison.Ordinal), await accessModifiersTestsUDT.GetFunctionsAsync(this.CancellationToken));
+        Assert.ContainsSingle(f => f.FullName.Contains("privateStaticFunction", StringComparison.Ordinal), await accessModifiersTestsUDT.GetFunctionsAsync(this.CancellationToken));
+        Assert.ContainsSingle(f => f.FullName.Contains("protectedConstFunction", StringComparison.Ordinal), await accessModifiersTestsUDT.GetFunctionsAsync(this.CancellationToken));
+        Assert.ContainsSingle(f => f.FullName.Contains("protectedStaticFunction", StringComparison.Ordinal), await accessModifiersTestsUDT.GetFunctionsAsync(this.CancellationToken));
 
         var privateFunction = (await accessModifiersTestsUDT.GetFunctionsAsync(this.CancellationToken)).First(f => f.FullName == "bool AccessModifiersTests::privateFunction()");
 
@@ -293,7 +293,7 @@ public sealed class UDT_LoadFunctionsTests
         Assert.IsFalse(privateFunction.FunctionType!.IsConst);
         Assert.IsFalse(privateFunction.FunctionType.IsVolatile);
         Assert.AreEqual(AccessModifier.Private, privateFunction.AccessModifier);
-        Assert.IsInstanceOfType(privateFunction.FunctionType.ReturnValueType, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(privateFunction.FunctionType.ReturnValueType);
         Assert.AreEqual("bool", privateFunction.FunctionType.ReturnValueType.Name);
         Assert.IsNull(privateFunction.FunctionType.ArgumentTypes);
         Assert.AreEqual(((SimpleFunctionCodeSymbol)privateFunction).Name, ((SimpleFunctionCodeSymbol)privateFunction).CanonicalName);
@@ -310,7 +310,7 @@ public sealed class UDT_LoadFunctionsTests
         Assert.IsFalse(privateStaticFunction.FunctionType!.IsConst);
         Assert.IsFalse(privateStaticFunction.FunctionType.IsVolatile);
         Assert.AreEqual(AccessModifier.Private, privateStaticFunction.AccessModifier);
-        Assert.IsInstanceOfType(privateStaticFunction.FunctionType.ReturnValueType, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(privateStaticFunction.FunctionType.ReturnValueType);
         Assert.AreEqual("int", privateStaticFunction.FunctionType.ReturnValueType.Name);
         Assert.IsNull(privateStaticFunction.FunctionType.ArgumentTypes);
         Assert.AreEqual(((SimpleFunctionCodeSymbol)privateStaticFunction).Name, ((SimpleFunctionCodeSymbol)privateStaticFunction).CanonicalName);
@@ -327,7 +327,7 @@ public sealed class UDT_LoadFunctionsTests
         Assert.IsTrue(protectedConstFunction.FunctionType!.IsConst);
         Assert.IsFalse(protectedConstFunction.FunctionType.IsVolatile);
         Assert.AreEqual(AccessModifier.Protected, protectedConstFunction.AccessModifier);
-        Assert.IsInstanceOfType(protectedConstFunction.FunctionType.ReturnValueType, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(protectedConstFunction.FunctionType.ReturnValueType);
         Assert.AreEqual("int", protectedConstFunction.FunctionType.ReturnValueType.Name);
         Assert.IsNull(protectedConstFunction.FunctionType.ArgumentTypes);
         Assert.AreEqual(((SimpleFunctionCodeSymbol)protectedConstFunction).Name, ((SimpleFunctionCodeSymbol)protectedConstFunction).CanonicalName);
@@ -344,7 +344,7 @@ public sealed class UDT_LoadFunctionsTests
         Assert.IsFalse(protectedStaticFunction.FunctionType!.IsConst);
         Assert.IsFalse(protectedStaticFunction.FunctionType.IsVolatile);
         Assert.AreEqual(AccessModifier.Protected, protectedStaticFunction.AccessModifier);
-        Assert.IsInstanceOfType(protectedStaticFunction.FunctionType.ReturnValueType, typeof(BasicTypeSymbol));
+        Assert.IsInstanceOfType<BasicTypeSymbol>(protectedStaticFunction.FunctionType.ReturnValueType);
         Assert.AreEqual("void", protectedStaticFunction.FunctionType.ReturnValueType.Name);
         Assert.IsNull(protectedStaticFunction.FunctionType.ArgumentTypes);
         Assert.AreEqual(((SimpleFunctionCodeSymbol)protectedStaticFunction).Name, ((SimpleFunctionCodeSymbol)protectedStaticFunction).CanonicalName);

@@ -85,46 +85,46 @@ public sealed class ErrorControlViewModelTests
         Assert.AreEqual(leadingText, vm.LeadingText);
 
         // The log path should be temporary with a suffix that suggests its purpose
-        StringAssert.Contains(vm.LogFilePath, Path.GetTempPath(), StringComparison.Ordinal);
-        StringAssert.EndsWith(vm.LogFilePath, ".sizebenchlog.txt", StringComparison.Ordinal);
+        Assert.Contains(Path.GetTempPath(), vm.LogFilePath, StringComparison.Ordinal);
+        Assert.EndsWith(".sizebenchlog.txt", vm.LogFilePath, StringComparison.Ordinal);
 
         var openFilePathsAsList = vm.OpenFilePaths.ToList();
         foreach (var session in openSessions)
         {
-            CollectionAssert.Contains(openFilePathsAsList, session.BinaryPath);
-            CollectionAssert.Contains(openFilePathsAsList, session.PdbPath);
+            Assert.Contains(session.BinaryPath, openFilePathsAsList);
+            Assert.Contains(session.PdbPath, openFilePathsAsList);
         }
 
         foreach (var diffSession in openDiffSessions)
         {
-            CollectionAssert.Contains(openFilePathsAsList, diffSession.BeforeSession.BinaryPath);
-            CollectionAssert.Contains(openFilePathsAsList, diffSession.BeforeSession.PdbPath);
-            CollectionAssert.Contains(openFilePathsAsList, diffSession.AfterSession.BinaryPath);
-            CollectionAssert.Contains(openFilePathsAsList, diffSession.AfterSession.PdbPath);
+            Assert.Contains(diffSession.BeforeSession.BinaryPath, openFilePathsAsList);
+            Assert.Contains(diffSession.BeforeSession.PdbPath, openFilePathsAsList);
+            Assert.Contains(diffSession.AfterSession.BinaryPath, openFilePathsAsList);
+            Assert.Contains(diffSession.AfterSession.PdbPath, openFilePathsAsList);
         }
 
         // Error Details contains the exception data including stack trace info
         var testExceptionStackTrace = new StackTrace(testException);
-        StringAssert.Contains(vm.ErrorDetails, innerExceptionMessage, StringComparison.Ordinal);
-        StringAssert.Contains(vm.ErrorDetails, outerExceptionMessage, StringComparison.Ordinal);
-        StringAssert.Contains(vm.ErrorDetails, testExceptionStackTrace.GetFrame(0)!.GetMethod()!.Name, StringComparison.Ordinal);
+        Assert.Contains(innerExceptionMessage, vm.ErrorDetails, StringComparison.Ordinal);
+        Assert.Contains(outerExceptionMessage, vm.ErrorDetails, StringComparison.Ordinal);
+        Assert.Contains(testExceptionStackTrace.GetFrame(0)!.GetMethod()!.Name, vm.ErrorDetails, StringComparison.Ordinal);
 
         // Error Details also contains information about the process
-        StringAssert.Contains(vm.ErrorDetails, Environment.CommandLine, StringComparison.Ordinal);
-        StringAssert.Contains(vm.ErrorDetails, Process.GetCurrentProcess().ProcessName, StringComparison.Ordinal);
-        StringAssert.Contains(vm.ErrorDetails, $"64-bit Process: {Environment.Is64BitProcess}", StringComparison.Ordinal);
+        Assert.Contains(Environment.CommandLine, vm.ErrorDetails, StringComparison.Ordinal);
+        Assert.Contains(Process.GetCurrentProcess().ProcessName, vm.ErrorDetails, StringComparison.Ordinal);
+        Assert.Contains($"64-bit Process: {Environment.Is64BitProcess}", vm.ErrorDetails, StringComparison.Ordinal);
 
         // And it contains information about the environment
-        StringAssert.Contains(vm.ErrorDetails, RuntimeInformation.FrameworkDescription, StringComparison.Ordinal);
-        StringAssert.Contains(vm.ErrorDetails, RuntimeInformation.OSDescription, StringComparison.Ordinal);
-        StringAssert.Contains(vm.ErrorDetails, $"OS Architecture: {RuntimeInformation.OSArchitecture}", StringComparison.Ordinal);
-        StringAssert.Contains(vm.ErrorDetails, $"Process Architecture: {RuntimeInformation.ProcessArchitecture}", StringComparison.Ordinal);
-        StringAssert.Contains(vm.ErrorDetails, $"Locale: {CultureInfo.CurrentCulture}", StringComparison.Ordinal);
-        StringAssert.Contains(vm.ErrorDetails, $"UI Locale: {CultureInfo.CurrentUICulture}", StringComparison.Ordinal);
+        Assert.Contains(RuntimeInformation.FrameworkDescription, vm.ErrorDetails, StringComparison.Ordinal);
+        Assert.Contains(RuntimeInformation.OSDescription, vm.ErrorDetails, StringComparison.Ordinal);
+        Assert.Contains($"OS Architecture: {RuntimeInformation.OSArchitecture}", vm.ErrorDetails, StringComparison.Ordinal);
+        Assert.Contains($"Process Architecture: {RuntimeInformation.ProcessArchitecture}", vm.ErrorDetails, StringComparison.Ordinal);
+        Assert.Contains($"Locale: {CultureInfo.CurrentCulture}", vm.ErrorDetails, StringComparison.Ordinal);
+        Assert.Contains($"UI Locale: {CultureInfo.CurrentUICulture}", vm.ErrorDetails, StringComparison.Ordinal);
 
         // The e-mail link contains the right address, subject line, and body
-        StringAssert.StartsWith(vm.EmailLink, "mailto:sizebenchcrash@microsoft.com", StringComparison.Ordinal);
-        StringAssert.Contains(vm.EmailLink, $"Subject={Uri.EscapeDataString($"SizeBench error - {testException.Hash()}")}", StringComparison.Ordinal);
-        StringAssert.Contains(vm.EmailLink, $"Body={Uri.EscapeDataString(vm.ErrorDetails)}", StringComparison.Ordinal);
+        Assert.StartsWith("mailto:sizebenchcrash@microsoft.com", vm.EmailLink, StringComparison.Ordinal);
+        Assert.Contains($"Subject={Uri.EscapeDataString($"SizeBench error - {testException.Hash()}")}", vm.EmailLink, StringComparison.Ordinal);
+        Assert.Contains($"Body={Uri.EscapeDataString(vm.ErrorDetails)}", vm.EmailLink, StringComparison.Ordinal);
     }
 }

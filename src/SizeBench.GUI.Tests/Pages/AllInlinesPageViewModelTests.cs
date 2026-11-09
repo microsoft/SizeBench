@@ -24,7 +24,7 @@ public sealed class AllInlinesPageViewModelTests
         this.MockUITaskScheduler.SetupForSynchronousCompletionOfLongRunningUITasks();
     }
 
-    [Timeout(30 * 1000)] // 30s
+    [Timeout(30 * 1000, CooperativeCancellation = true)] // 30s
     [TestMethod]
     public async Task CanExportToExcel()
     {
@@ -100,14 +100,14 @@ public sealed class AllInlinesPageViewModelTests
                                                     this.MockExcelExporter.Object);
         await viewmodel.InitializeAsync();
 
-        Assert.AreEqual(2, viewmodel.InlineSiteGroups.Count);
+        Assert.HasCount(2, viewmodel.InlineSiteGroups);
 
         var group1 = viewmodel.InlineSiteGroups.Single(x => x.InlinedFunctionName == "someInlinedFunction");
-        Assert.AreEqual(2, group1.InlineSites.Count);
+        Assert.HasCount(2, group1.InlineSites);
         Assert.AreEqual(10u + 5u + 12u, group1.TotalSize);
 
         var group2 = viewmodel.InlineSiteGroups.Single(x => x.InlinedFunctionName == "anotherInlinedFunction");
-        Assert.AreEqual(1, group2.InlineSites.Count);
+        Assert.HasCount(1, group2.InlineSites);
         Assert.AreEqual(23u, group2.TotalSize);
     }
 }

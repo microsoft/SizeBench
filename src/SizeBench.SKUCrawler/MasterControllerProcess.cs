@@ -15,7 +15,7 @@ internal sealed class MasterControllerProcess : IDisposable
     private readonly QueuedTaskScheduler _taskScheduler = new QueuedTaskScheduler(threadCount: 3);
     private readonly TaskFactory _taskFactory;
     private readonly List<Task> _batchTasks = new List<Task>();
-    private readonly object _outputSyncObject = new object();
+    private readonly Lock _outputSyncObject = new Lock();
     private readonly ConcurrentDictionary<int, ConcurrentBag<string>> _errorsFromBatchesByPID = new ConcurrentDictionary<int, ConcurrentBag<string>>();
     private readonly ConcurrentDictionary<int, string> _batchCommandLinesByPID = new ConcurrentDictionary<int, string>();
     private readonly ConcurrentDictionary<int, int> _batchNumbersByPID = new ConcurrentDictionary<int, int>();

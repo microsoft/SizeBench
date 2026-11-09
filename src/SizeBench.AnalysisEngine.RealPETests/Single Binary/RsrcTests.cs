@@ -10,7 +10,7 @@ namespace SizeBench.AnalysisEngine.Tests;
 public sealed class RsrcTests
 {
     public TestContext? TestContext { get; set; }
-    private CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
+    private CancellationToken CancellationToken => this.TestContext!.CancellationToken;
     private string MakePath(string filename) => Path.Combine(this.TestContext!.DeploymentDirectory!, filename);
 
     private string BinaryPath => MakePath("SizeBenchV2.AnalysisEngine.Tests.CodePageWin32Rsrc.dll");
@@ -29,6 +29,6 @@ public sealed class RsrcTests
         // The ICON in here should be "LANG_NEUTRAL" even though the ID we find is 0x400 (LANGUAGE_NEUTRAL / SUBLANG_DEFAULT)
         var iconGroup = rsrcSymbols.OfType<RsrcGroupIconDataSymbol>().Single();
 
-        StringAssert.Contains(iconGroup.Name, "LANG_NEUTRAL", StringComparison.Ordinal);
+        Assert.Contains("LANG_NEUTRAL", iconGroup.Name, StringComparison.Ordinal);
     }
 }

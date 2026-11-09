@@ -20,10 +20,10 @@ public class RustEnumTests
     {
         using var logger = new NoOpLogger();
         await using var session = await Session.Create(this.BinaryPath, this.PDBPath, logger);
-        var sections = await session.EnumerateBinarySectionsAndCOFFGroups(this.TestContext!.CancellationTokenSource.Token);
+        var sections = await session.EnumerateBinarySectionsAndCOFFGroups(this.TestContext!.CancellationToken);
         var textSection = sections.Single(s => s.Name == ".text");
 
-        var textSymbols = await session.EnumerateSymbolsInBinarySection(textSection, this.TestContext.CancellationTokenSource.Token);
+        var textSymbols = await session.EnumerateSymbolsInBinarySection(textSection, this.TestContext.CancellationToken);
 
         var testRustEnumWithMethod_Call = textSymbols.OfType<SimpleFunctionCodeSymbol>().Single(s => s.Name.Contains("TestRustEnumWithMethod::call", StringComparison.OrdinalIgnoreCase));
 
@@ -40,6 +40,6 @@ public class RustEnumTests
         Assert.IsFalse(testRustEnumWithMethod_Call.IsStatic);
         Assert.IsFalse(testRustEnumWithMethod_Call.IsVirtual);
         Assert.IsNotNull(testRustEnumWithMethod_Call.ParentType);
-        Assert.IsInstanceOfType(testRustEnumWithMethod_Call.ParentType, typeof(EnumTypeSymbol));
+        Assert.IsInstanceOfType<EnumTypeSymbol>(testRustEnumWithMethod_Call.ParentType);
     }
 }

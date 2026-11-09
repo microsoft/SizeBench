@@ -15,15 +15,14 @@ public class MiniPDBTests
 
     private string PDBPath => MakePath("SizeBenchV2.AnalysisEngine.Tests.Dllx64MinimalPDB.pdb");
 
-    [ExpectedException(typeof(PDBNotSuitableForAnalysisException), AllowDerivedTypes = false)]
     [TestMethod]
     public async Task MiniPDBIsRejected()
     {
         // Minimal PDBs are unsuitable for static analysis, we should reject them outright
         using var logger = new NoOpLogger();
-        await using var session = await Session.Create(this.BinaryPath, this.PDBPath, logger);
-
-        // We shouldn't get this far, as opening the session should throw
-        Assert.Fail();
+        await Assert.ThrowsExactlyAsync<PDBNotSuitableForAnalysisException>(async () =>
+        {
+            await using var session = await Session.Create(this.BinaryPath, this.PDBPath, logger);
+        });
     }
 }

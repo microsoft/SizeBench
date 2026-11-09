@@ -6,7 +6,7 @@ variables:
 
 pool:
   name: Azure Pipelines
-  vmImage: 'windows-2022'
+  vmImage: 'windows-2025-vs2026'
   
 name: 'SizeBench_$(versionMajor).$(pipelineYearMonth).$(pipelineDay)_$(revision)'
 

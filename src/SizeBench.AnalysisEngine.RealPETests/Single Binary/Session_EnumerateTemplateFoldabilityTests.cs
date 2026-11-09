@@ -10,7 +10,7 @@ namespace SizeBench.AnalysisEngine.RealPETests;
 public sealed class Session_EnumerateTemplateFoldabilityTests
 {
     public TestContext? TestContext { get; set; }
-    private CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
+    private CancellationToken CancellationToken => this.TestContext!.CancellationToken;
     private string MakePath(string binary) => Path.Combine(this.TestContext!.DeploymentDirectory!, binary);
 
     private string BinaryPath => MakePath("SizeBenchV2.AnalysisEngine.Tests.CppTestCasesBefore.dll");
@@ -24,12 +24,12 @@ public sealed class Session_EnumerateTemplateFoldabilityTests
         var foldables = await session.EnumerateTemplateFoldabilityItems(this.CancellationToken);
         Assert.IsNotNull(foldables);
 
-        Assert.AreEqual(2, foldables.Count);
+        Assert.HasCount(2, foldables);
 
         var vectorDestructor = foldables.Single(foldable => foldable.TemplateName == "std::vector<T1,T2>::~vector<T1,T2>()");
 
-        Assert.AreEqual(4, vectorDestructor.Symbols.Count);
-        Assert.AreEqual(3, vectorDestructor.UniqueSymbols.Count);
+        Assert.HasCount(4, vectorDestructor.Symbols);
+        Assert.HasCount(3, vectorDestructor.UniqueSymbols);
         Assert.AreEqual(65, Math.Floor(vectorDestructor.PercentageSimilarity * 100)); // Using a floor of the % * 100 to make it more stable than floating point comparison
         Assert.AreEqual(374u, vectorDestructor.TotalSize);
         Assert.AreEqual((uint)(374 * 0.652f), vectorDestructor.WastedSize);

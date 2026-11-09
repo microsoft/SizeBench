@@ -20,10 +20,10 @@ public sealed class ZigTests
     {
         using var logger = new NoOpLogger();
         await using var session = await Session.Create(this.BinaryPath, this.PDBPath, logger);
-        var sections = await session.EnumerateBinarySectionsAndCOFFGroups(this.TestContext!.CancellationTokenSource.Token);
+        var sections = await session.EnumerateBinarySectionsAndCOFFGroups(this.TestContext!.CancellationToken);
         var textSection = sections.Single(s => s.Name == ".text");
 
-        var textSymbols = await session.EnumerateSymbolsInBinarySection(textSection, this.TestContext.CancellationTokenSource.Token);
+        var textSymbols = await session.EnumerateSymbolsInBinarySection(textSection, this.TestContext.CancellationToken);
 
         var fmaq = textSymbols.OfType<SimpleFunctionCodeSymbol>().Single(s => s.Name.Contains("fmaq", StringComparison.OrdinalIgnoreCase));
 
@@ -46,7 +46,7 @@ public sealed class ZigTests
         var fmaqType = fmaq.FunctionType;
         Assert.IsNotNull(fmaqType);
         Assert.IsNotNull(fmaqType.ArgumentTypes);
-        Assert.AreEqual(3, fmaqType.ArgumentTypes.Count);
+        Assert.HasCount(3, fmaqType.ArgumentTypes);
         Assert.AreEqual("__float128", fmaqType.ArgumentTypes[0].Name);
         Assert.AreEqual(16u, fmaqType.ArgumentTypes[0].InstanceSize);
         Assert.AreEqual("__float128", fmaqType.ReturnValueType.Name);
@@ -59,7 +59,7 @@ public sealed class ZigTests
         using var logger = new NoOpLogger();
         await using var session = await Session.Create(this.BinaryPath, this.PDBPath, logger);
 
-        var compilands = await session.EnumerateCompilands(this.TestContext!.CancellationTokenSource.Token);
+        var compilands = await session.EnumerateCompilands(this.TestContext!.CancellationToken);
         var zigCompiland = compilands.Single(c => c.Name.Contains("SizeBenchV2.AnalysisEngine.Tests.Zig.exe.obj", StringComparison.Ordinal));
 
         Assert.AreEqual(ToolLanguage.Zig, zigCompiland.ToolLanguage);
@@ -73,5 +73,5 @@ public sealed class ZigTests
     public Task SymbolSourcesSupportedWorks(SymbolSourcesSupported symbolSources) =>
         SymbolSourcesSupportedCommonTests.VerifyNoUnexpectedSymbolTypesCanBeMaterialized(
             this.BinaryPath, this.PDBPath, symbolSources,
-            this.TestContext!.CancellationTokenSource.Token);
+            this.TestContext!.CancellationToken);
 }

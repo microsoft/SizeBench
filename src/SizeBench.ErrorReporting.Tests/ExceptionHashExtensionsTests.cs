@@ -7,17 +7,8 @@ public class ExceptionHashExtensionsTests
     [TestMethod]
     public void NullExceptionThrows()
     {
-        var exceptionThrown = true;
-        try
-        {
-            ExceptionHashExtensions.Hash(null);
-        }
-        catch (ArgumentNullException e)
-        {
-            Assert.AreEqual("ex", e.ParamName);
-        }
-
-        Assert.IsTrue(exceptionThrown);
+        var ex = Assert.ThrowsExactly<ArgumentNullException>(() => ExceptionHashExtensions.Hash(null));
+        Assert.AreEqual("ex", ex.ParamName);
     }
 #nullable enable
 

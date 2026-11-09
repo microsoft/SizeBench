@@ -22,14 +22,14 @@ public sealed class Session_EnumerateInlineSitesTests
         using var logger = new NoOpLogger();
         await using var session = await Session.Create(this.BinaryPath, this.PDBPath, logger);
 
-        var inlineSites = await session.EnumerateAllInlineSites(this.TestContext!.CancellationTokenSource.Token);
+        var inlineSites = await session.EnumerateAllInlineSites(this.TestContext!.CancellationToken);
 
-        Assert.AreEqual(3, inlineSites.Count);
+        Assert.HasCount(3, inlineSites);
 
         var forceInlinedFunction = inlineSites.Single(x => x.Name == "forceInlinedFunction");
         Assert.AreEqual("DllMain(HINSTANCE__*, unsigned long, void*)", forceInlinedFunction.BlockInlinedInto.Name);
         Assert.IsTrue(ReferenceEquals(forceInlinedFunction.BlockInlinedInto, forceInlinedFunction.CanonicalSymbolInlinedInto));
-        Assert.AreEqual(2, forceInlinedFunction.RVARanges.Count());
+        Assert.HasCount(2, forceInlinedFunction.RVARanges);
     }
 
     [TestMethod]
@@ -38,23 +38,23 @@ public sealed class Session_EnumerateInlineSitesTests
         using var logger = new NoOpLogger();
         await using var session = await Session.Create(this.BinaryPath, this.PDBPath, logger);
 
-        var sections = await session.EnumerateBinarySectionsAndCOFFGroups(this.TestContext!.CancellationTokenSource.Token);
+        var sections = await session.EnumerateBinarySectionsAndCOFFGroups(this.TestContext!.CancellationToken);
         var textSection = sections.Single(x => x.Name == ".text");
-        var textSectionSymbols = await session.EnumerateSymbolsInBinarySection(textSection, this.TestContext.CancellationTokenSource.Token);
+        var textSectionSymbols = await session.EnumerateSymbolsInBinarySection(textSection, this.TestContext.CancellationToken);
         var dllMainFunction = textSectionSymbols.OfType<SimpleFunctionCodeSymbol>().Single(x => x.Name == "DllMain(HINSTANCE__*, unsigned long, void*)");
 
-        var inlineSites = await session.EnumerateAllInlineSitesInFunction(dllMainFunction, this.TestContext.CancellationTokenSource.Token);
+        var inlineSites = await session.EnumerateAllInlineSitesInFunction(dllMainFunction, this.TestContext.CancellationToken);
 
-        Assert.AreEqual(2, inlineSites.Count);
+        Assert.HasCount(2, inlineSites);
 
         var forceInlinedFunction = inlineSites.Single(x => x.Name == "forceInlinedFunction");
         Assert.AreEqual("DllMain(HINSTANCE__*, unsigned long, void*)", forceInlinedFunction.BlockInlinedInto.Name);
         Assert.IsTrue(ReferenceEquals(forceInlinedFunction.BlockInlinedInto, forceInlinedFunction.CanonicalSymbolInlinedInto));
-        Assert.AreEqual(2, forceInlinedFunction.RVARanges.Count());
+        Assert.HasCount(2, forceInlinedFunction.RVARanges);
 
         var anotherForceInlinedFunction = inlineSites.Single(x => x.Name == "anotherForceInlinedFunction");
         Assert.AreEqual("DllMain(HINSTANCE__*, unsigned long, void*)", forceInlinedFunction.BlockInlinedInto.Name);
         Assert.IsTrue(ReferenceEquals(forceInlinedFunction.BlockInlinedInto, forceInlinedFunction.CanonicalSymbolInlinedInto));
-        Assert.AreEqual(2, forceInlinedFunction.RVARanges.Count());
+        Assert.HasCount(2, forceInlinedFunction.RVARanges);
     }
 }

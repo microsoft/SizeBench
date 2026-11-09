@@ -120,7 +120,7 @@ public sealed class EnumerateDuplicateDataSessionTaskTests : IDisposable
         using var logger = new NoOpLogger();
         var duplicates = task.Execute(logger);
 
-        Assert.AreEqual(0, duplicates.Count);
+        Assert.IsEmpty(duplicates);
     }
 
     [TestMethod]
@@ -136,23 +136,23 @@ public sealed class EnumerateDuplicateDataSessionTaskTests : IDisposable
         using var logger = new NoOpLogger();
         var duplicates = task.Execute(logger);
 
-        Assert.AreEqual(2, duplicates.Count);
+        Assert.HasCount(2, duplicates);
 
         var duplicate1 = duplicates.First(ddi => ddi.Symbol.Name == "test 1");
         var duplicate2 = duplicates.First(ddi => ddi.Symbol.Name == "test 2");
 
         Assert.AreEqual(1u, duplicate1.Symbol.Size);
         Assert.AreEqual(2u, duplicate1.WastedSize);
-        Assert.AreEqual(3, duplicate1.ReferencedIn.Count);
-        Assert.IsTrue(duplicate1.ReferencedIn.Contains(a1Compiland));
-        Assert.IsTrue(duplicate1.ReferencedIn.Contains(b2Compiland));
-        Assert.IsTrue(duplicate1.ReferencedIn.Contains(cCompiland));
+        Assert.HasCount(3, duplicate1.ReferencedIn);
+        Assert.Contains(a1Compiland, duplicate1.ReferencedIn);
+        Assert.Contains(b2Compiland, duplicate1.ReferencedIn);
+        Assert.Contains(cCompiland, duplicate1.ReferencedIn);
 
         Assert.AreEqual(4u, duplicate2.Symbol.Size);
         Assert.AreEqual(4u, duplicate2.WastedSize);
-        Assert.AreEqual(2, duplicate2.ReferencedIn.Count);
-        Assert.IsTrue(duplicate2.ReferencedIn.Contains(b2Compiland));
-        Assert.IsTrue(duplicate2.ReferencedIn.Contains(cCompiland));
+        Assert.HasCount(2, duplicate2.ReferencedIn);
+        Assert.Contains(b2Compiland, duplicate2.ReferencedIn);
+        Assert.Contains(cCompiland, duplicate2.ReferencedIn);
     }
 
 

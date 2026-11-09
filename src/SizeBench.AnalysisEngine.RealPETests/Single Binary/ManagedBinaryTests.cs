@@ -14,15 +14,15 @@ public sealed class ManagedBinaryTests
 
     private static string PDBPath => MakePath("SizeBench.AnalysisEngine.RealPETests.pdb");
 
-    [ExpectedException(typeof(BinaryNotAnalyzableException), AllowDerivedTypes = false)]
     [TestMethod]
     public async Task ManagedBinaryIsRejected()
     {
         // SizeBench hasn't been taught how to inspect managed binaries yet, so we should throw to make our limitations clear.
         using var logger = new NoOpLogger();
-        await using var session = await Session.Create(BinaryPath, PDBPath, logger);
-        // We shouldn't get this far, as opening the session should throw
-        Assert.Fail();
+        await Assert.ThrowsExactlyAsync<BinaryNotAnalyzableException>(async () =>
+        {
+            await using var session = await Session.Create(BinaryPath, PDBPath, logger);
+        });
     }
 
 }

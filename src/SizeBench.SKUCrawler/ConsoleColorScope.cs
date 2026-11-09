@@ -1,6 +1,6 @@
 ﻿namespace SizeBench.SKUCrawler;
 
-public sealed class ConsoleColorScope : IDisposable
+internal sealed class ConsoleColorScope : IDisposable
 {
     private readonly ConsoleColor originalForegroundColor = ConsoleColor.White;
 

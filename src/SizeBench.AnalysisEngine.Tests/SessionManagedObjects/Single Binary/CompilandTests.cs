@@ -13,12 +13,12 @@ public class CompilandTests
         var compiland = new Compiland(sdc, "a.obj", lib, CommonCommandLines.NullCommandLine, 1);
 
         object dummy;
-        Assert.ThrowsException<ObjectNotYetFullyConstructedException>(() => dummy = compiland.Size);
-        Assert.ThrowsException<ObjectNotYetFullyConstructedException>(() => dummy = compiland.VirtualSize);
-        Assert.ThrowsException<ObjectNotYetFullyConstructedException>(() => dummy = compiland.SectionContributions);
-        Assert.ThrowsException<ObjectNotYetFullyConstructedException>(() => dummy = compiland.SectionContributionsByName);
-        Assert.ThrowsException<ObjectNotYetFullyConstructedException>(() => dummy = compiland.COFFGroupContributions);
-        Assert.ThrowsException<ObjectNotYetFullyConstructedException>(() => dummy = compiland.COFFGroupContributionsByName);
+        Assert.ThrowsExactly<ObjectNotYetFullyConstructedException>(() => dummy = compiland.Size);
+        Assert.ThrowsExactly<ObjectNotYetFullyConstructedException>(() => dummy = compiland.VirtualSize);
+        Assert.ThrowsExactly<ObjectNotYetFullyConstructedException>(() => dummy = compiland.SectionContributions);
+        Assert.ThrowsExactly<ObjectNotYetFullyConstructedException>(() => dummy = compiland.SectionContributionsByName);
+        Assert.ThrowsExactly<ObjectNotYetFullyConstructedException>(() => dummy = compiland.COFFGroupContributions);
+        Assert.ThrowsExactly<ObjectNotYetFullyConstructedException>(() => dummy = compiland.COFFGroupContributionsByName);
     }
 
     [TestMethod]
@@ -27,7 +27,7 @@ public class CompilandTests
         using var generator = new SingleBinaryDataGenerator();
 
         object dummy;
-        Assert.ThrowsException<ObjectFullyConstructedAlreadyException>(() => dummy = generator.A1Compiland.GetOrCreateSectionContribution(generator.TextSection));
-        Assert.ThrowsException<ObjectFullyConstructedAlreadyException>(() => dummy = generator.A1Compiland.GetOrCreateCOFFGroupContribution(generator.TextMnCG));
+        Assert.ThrowsExactly<ObjectFullyConstructedAlreadyException>(() => dummy = generator.A1Compiland.GetOrCreateSectionContribution(generator.TextSection));
+        Assert.ThrowsExactly<ObjectFullyConstructedAlreadyException>(() => dummy = generator.A1Compiland.GetOrCreateCOFFGroupContribution(generator.TextMnCG));
     }
 }

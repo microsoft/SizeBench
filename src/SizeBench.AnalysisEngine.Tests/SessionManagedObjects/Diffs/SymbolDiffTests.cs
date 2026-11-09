@@ -41,7 +41,7 @@ public sealed class SymbolDiffTests : IDisposable
     }
 
     [TestMethod]
-    public void ThrowsIfBothBeforeAndAfterNull() => Assert.ThrowsException<ArgumentException>(() => new SymbolDiff(null, null));
+    public void ThrowsIfBothBeforeAndAfterNull() => Assert.ThrowsExactly<ArgumentException>(() => new SymbolDiff(null, null));
 
     [TestMethod]
     public void WorksWithPESymbols()

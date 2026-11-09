@@ -80,10 +80,9 @@ public sealed class CompilandAndCOFFGroupToContributionVirtualSizeConverterTests
         this.TestCompiland2.MarkFullyConstructed();
     }
 
-    [ExpectedException(typeof(ArgumentException), AllowDerivedTypes = false)]
     [TestMethod]
     public void ConvertOnlyTakesCompilandAndCOFFGroupValuesInThatOrder()
-        => CompilandAndCOFFGroupToContributionVirtualSizeConverter.Instance.Convert(new object[] { this.TestCOFFGroup1, this.TestCompiland1 }, typeof(string), null /* ConverterParameter */, null /* CultureInfo */);
+        => Assert.ThrowsExactly<ArgumentException>(() => CompilandAndCOFFGroupToContributionVirtualSizeConverter.Instance.Convert(new object[] { this.TestCOFFGroup1, this.TestCompiland1 }, typeof(string), null /* ConverterParameter */, null /* CultureInfo */));
 
     [TestMethod]
     public void ReturnsCorrectSizeWhenContributionExists()

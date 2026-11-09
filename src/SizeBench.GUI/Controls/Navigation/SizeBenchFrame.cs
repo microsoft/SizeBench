@@ -438,28 +438,13 @@ public class SizeBenchFrame : ContentControl
         base.OnApplyTemplate();
 
         // Unhook and rehook our Next button
-        if (this._nextButton != null)
-        {
-            this._nextButton.Click -= new RoutedEventHandler(PART_nextButton_Click);
-        }
-
+        this._nextButton?.Click -= new RoutedEventHandler(PART_nextButton_Click);
         this._nextButton = GetTemplateChild(PART_FrameNextButton) as ButtonBase;
-        if (this._nextButton != null)
-        {
-            this._nextButton.Click += new RoutedEventHandler(PART_nextButton_Click);
-        }
+        this._nextButton?.Click += new RoutedEventHandler(PART_nextButton_Click);
 
-        if (this._previousButton != null)
-        {
-            this._previousButton.Click -= new RoutedEventHandler(PART_previousButton_Click);
-        }
-
+        this._previousButton?.Click -= new RoutedEventHandler(PART_previousButton_Click);
         this._previousButton = GetTemplateChild(PART_FramePreviousButton) as ButtonBase;
-
-        if (this._previousButton != null)
-        {
-            this._previousButton.Click += new RoutedEventHandler(PART_previousButton_Click);
-        }
+        this._previousButton?.Click += new RoutedEventHandler(PART_previousButton_Click);
     }
 
     public void Refresh() => this.NavigationService.Refresh();

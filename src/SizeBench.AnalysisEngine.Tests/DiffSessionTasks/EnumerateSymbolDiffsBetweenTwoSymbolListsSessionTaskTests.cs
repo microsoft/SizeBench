@@ -51,7 +51,7 @@ public sealed class EnumerateSymbolDiffsBetweenTwoSymbolListsSessionTaskTests : 
         using var logger = new NoOpLogger();
         var results = await task.ExecuteAsync(logger);
 
-        Assert.AreEqual(5, results.Count);
+        Assert.HasCount(5, results);
         for (var i = 0; i < 5; i++)
         {
             Assert.AreEqual(-2, results[i].SizeDiff);
@@ -93,9 +93,9 @@ public sealed class EnumerateSymbolDiffsBetweenTwoSymbolListsSessionTaskTests : 
         using var logger = new NoOpLogger();
         var results = await task.ExecuteAsync(logger);
 
-        Assert.AreEqual(15, results.Count);
-        Assert.AreEqual(5, results.Where(sd => sd.Name.StartsWith("[before-only]", StringComparison.Ordinal)).Count());
-        Assert.AreEqual(5, results.Where(sd => sd.Name.StartsWith("[after-only]", StringComparison.Ordinal)).Count());
+        Assert.HasCount(15, results);
+        Assert.HasCount(5, results.Where(sd => sd.Name.StartsWith("[before-only]", StringComparison.Ordinal)));
+        Assert.HasCount(5, results.Where(sd => sd.Name.StartsWith("[after-only]", StringComparison.Ordinal)));
         for (var i = 0; i < 15; i++)
         {
             if (results[i].Name.StartsWith("[before-only]", StringComparison.Ordinal))

@@ -23,25 +23,25 @@ public class LogEntryForExceptionTests
         var linesOfOutput = output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
         foreach (var line in linesOfOutput)
         {
-            StringAssert.StartsWith(line, "\t\t", StringComparison.Ordinal);
+            Assert.StartsWith("\t\t", line, StringComparison.Ordinal);
         }
 
         // The first line should just contain the basics, not the specific exception details - thos are on lines
         // that follow.  Otherwise it's harder to read.
-        StringAssert.Contains(linesOfOutput[0], callingMember, StringComparison.Ordinal);
-        StringAssert.Contains(linesOfOutput[0], message, StringComparison.Ordinal);
-        StringAssert.Contains(linesOfOutput[0], LogLevel.Error.ToString(), StringComparison.Ordinal);
+        Assert.Contains(callingMember, linesOfOutput[0], StringComparison.Ordinal);
+        Assert.Contains(message, linesOfOutput[0], StringComparison.Ordinal);
+        Assert.Contains(LogLevel.Error.ToString(), linesOfOutput[0], StringComparison.Ordinal);
         Assert.IsFalse(linesOfOutput[0].Contains("InvalidOperationException", StringComparison.Ordinal));
         Assert.IsFalse(linesOfOutput[0].Contains("AccessViolationException", StringComparison.Ordinal));
         Assert.IsFalse(linesOfOutput[0].Contains("HRESULT", StringComparison.Ordinal));
 
         // Exception should be indented one level beyond the main error, it's more readable that way
         // in a long log.
-        StringAssert.Contains(output, "\t\t\tSystem.InvalidOperationException: test outer exception", StringComparison.Ordinal);
-        StringAssert.Contains(output, "\t\t\tHRESULT: 0x80131509", StringComparison.Ordinal);
+        Assert.Contains("\t\t\tSystem.InvalidOperationException: test outer exception", output, StringComparison.Ordinal);
+        Assert.Contains("\t\t\tHRESULT: 0x80131509", output, StringComparison.Ordinal);
 
         // InnerException is indented one more level
-        StringAssert.Contains(output, "\t\t\t\tSystem.AccessViolationException: test inner exception", StringComparison.Ordinal);
-        StringAssert.Contains(output, "\t\t\t\tHRESULT: 0x80004003", StringComparison.Ordinal);
+        Assert.Contains("\t\t\t\tSystem.AccessViolationException: test inner exception", output, StringComparison.Ordinal);
+        Assert.Contains("\t\t\t\tHRESULT: 0x80004003", output, StringComparison.Ordinal);
     }
 }

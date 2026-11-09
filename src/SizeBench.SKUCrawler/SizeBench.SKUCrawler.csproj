@@ -20,6 +20,8 @@
     <PackageReference Include="Microsoft.Debugging.Platform.DbgX" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
     <PackageReference Include="Nito.AsyncEx" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" />
+    <PackageReference Include="System.ComponentModel.Composition" />
   </ItemGroup>
 
   <ItemGroup>

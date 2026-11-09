@@ -17,9 +17,9 @@ public sealed class UserDefinedTypeSymbol_STATests
 {
 
     public TestContext? TestContext { get; set; }
-    public CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
+    public CancellationToken CancellationToken => this.TestContext!.CancellationToken;
 
-    [Timeout(30 * 1000)]
+    [Timeout(30 * 1000, CooperativeCancellation = true)]
     [STATestMethod]
     public void AccessingFunctionsForTheFirstTimeOnUIThreadDoesNotDeadlock()
     {
@@ -39,7 +39,7 @@ public sealed class UserDefinedTypeSymbol_STATests
 
             // Simply accessing the Functions before anything else on the DIA thread has done so, should force them to lazy-load without deadlocking
             var functions = await udt.GetFunctionsAsync(this.CancellationToken);
-            Assert.IsTrue(functions.Count > 1);
+            Assert.IsGreaterThan(1, functions.Count);
         });
     }
 }

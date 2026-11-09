@@ -38,18 +38,18 @@ public sealed class AllDuplicateDataDiffsPageViewModelTests : IDisposable
         var columnHeadersList = new List<string>(columnHeaders);
 
         var symbolNameIndex = columnHeadersList.IndexOf("Symbol Name");
-        Assert.IsTrue(symbolNameIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, symbolNameIndex);
         var totalSizeDiffIndex = columnHeadersList.IndexOf("Total Size Diff");
-        Assert.IsTrue(totalSizeDiffIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, totalSizeDiffIndex);
         var wastedSizeIndex = columnHeadersList.IndexOf("Wasted Size Diff");
-        Assert.IsTrue(wastedSizeIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, wastedSizeIndex);
         var remainingWastedSizeIndex = columnHeadersList.IndexOf("Remaining Wasted Size");
-        Assert.IsTrue(remainingWastedSizeIndex >= 0);
+        Assert.IsGreaterThanOrEqualTo(0, remainingWastedSizeIndex);
 
-        Assert.AreEqual(15, preformattedData.Count);
+        Assert.HasCount(15, preformattedData);
     }
 
-    [Timeout(5 * 1000)] // 5s
+    [Timeout(5 * 1000, CooperativeCancellation = true)] // 5s
     [TestMethod]
     public async Task CanExportToExcel()
     {

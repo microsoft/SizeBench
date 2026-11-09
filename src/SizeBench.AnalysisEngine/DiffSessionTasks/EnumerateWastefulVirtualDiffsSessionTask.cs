@@ -26,8 +26,10 @@ internal sealed class EnumerateWastefulVirtualDiffsSessionTask : DiffSessionTask
 
         using (var beforeAndAfterLog = logger.StartTaskLog("Enumerating wasteful virtuals in 'before' and 'after'"))
         {
+#pragma warning disable CA2025 // Do not pass 'IDisposable' instances into unawaited tasks - we want to start both in parallel and the analyzer doesn't see this well.
             var beforeTask = this._beforeWVITaskFactory(beforeAndAfterLog);
             var afterTask = this._afterWVITaskFactory(beforeAndAfterLog);
+#pragma warning restore CA2025 // Do not pass 'IDisposable' instances into unawaited tasks
 
             var results = await Task.WhenAll(beforeTask, afterTask).WaitAsync(this.CancellationToken).ConfigureAwait(true);
 

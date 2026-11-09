@@ -74,7 +74,7 @@ public sealed class AllWastefulVirtualsPageViewModelTests : IDisposable
         await viewmodel.InitializeAsync();
         viewmodel.GenerateFormattedDataForExcelExport(out var columnHeaders, out var preformattedData);
 
-        Assert.AreEqual(5, columnHeaders.Length);
+        Assert.HasCount(5, columnHeaders);
         Assert.AreEqual("Type Name", columnHeaders[0]);
         Assert.AreEqual("Waste Per Slot", columnHeaders[1]);
         Assert.AreEqual("Wasted Size Total", columnHeaders[2]);
@@ -160,21 +160,21 @@ public sealed class AllWastefulVirtualsPageViewModelTests : IDisposable
         viewmodel.WastefulVirtualItems!.CollectionChanged += (s, e) => collectionChangesSeen++;
 
         Assert.IsTrue(viewmodel.ExcludeCOMTypes);
-        Assert.AreEqual(1, viewmodel.WastefulVirtualItems.Cast<WastefulVirtualItem>().ToList().Count);
+        Assert.HasCount(1, viewmodel.WastefulVirtualItems.Cast<WastefulVirtualItem>().ToList());
 
         viewmodel.ExcludeCOMTypes = false;
 
-        Assert.AreEqual(1, vmPropertyChangesSeen.Count);
+        Assert.HasCount(1, vmPropertyChangesSeen);
         Assert.AreEqual(nameof(AllWastefulVirtualsPageViewModel.ExcludeCOMTypes), vmPropertyChangesSeen[0]);
-        Assert.AreEqual(3, viewmodel.WastefulVirtualItems.Cast<WastefulVirtualItem>().ToList().Count);
+        Assert.HasCount(3, viewmodel.WastefulVirtualItems.Cast<WastefulVirtualItem>().ToList());
         Assert.AreEqual(1, collectionChangesSeen); // Even though we filtered out multiple items, should just see one INCC due to the DeferRefresh, to keep the UI responsive
 
         // Toggling back should restore everything to the way it was
         viewmodel.ExcludeCOMTypes = true;
-        Assert.AreEqual(2, vmPropertyChangesSeen.Count);
+        Assert.HasCount(2, vmPropertyChangesSeen);
         Assert.AreEqual(nameof(AllWastefulVirtualsPageViewModel.ExcludeCOMTypes), vmPropertyChangesSeen[0]);
         Assert.AreEqual(nameof(AllWastefulVirtualsPageViewModel.ExcludeCOMTypes), vmPropertyChangesSeen[1]);
-        Assert.AreEqual(1, viewmodel.WastefulVirtualItems.Cast<WastefulVirtualItem>().ToList().Count);
+        Assert.HasCount(1, viewmodel.WastefulVirtualItems.Cast<WastefulVirtualItem>().ToList());
         Assert.AreEqual(2, collectionChangesSeen);
     }
 

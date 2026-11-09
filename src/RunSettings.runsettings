@@ -6,7 +6,7 @@
     <!-- Path relative to solution directory -->
     <ResultsDirectory>.\TestResults</ResultsDirectory>
     <TargetPlatform>x64</TargetPlatform>
-    <TargetFrameworkVersion>.NETCoreApp, Version=8.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>.NETCoreApp, Version=10.0</TargetFrameworkVersion>
 
     <!-- Timeout is in milliseconds, so this is 3 hours, because
          the PGO tests can be very slow to be exhaustive. -->
@@ -157,6 +157,8 @@
   <!-- MSTest adapter -->
   <MSTest>
     <MapInconclusiveToFailed>True</MapInconclusiveToFailed>
+    <TreatClassAndAssemblyCleanupWarningsAsErrors>true</TreatClassAndAssemblyCleanupWarningsAsErrors>
+    <TreatDiscoveryWarningsAsErrors>true</TreatDiscoveryWarningsAsErrors>
     <CaptureTraceOutput>true</CaptureTraceOutput>
     <DeleteDeploymentDirectoryAfterTestRunIsComplete>true</DeleteDeploymentDirectoryAfterTestRunIsComplete>
     <DeploymentEnabled>True</DeploymentEnabled>

@@ -30,12 +30,12 @@ public class COFFGroupTests
         };
         cg1.MarkFullyConstructed();
 
-        Assert.ThrowsException<ObjectFullyConstructedAlreadyException>(() => cg1.Section = bs);
+        Assert.ThrowsExactly<ObjectFullyConstructedAlreadyException>(() => cg1.Section = bs);
 
         // We throw not only on modification, but also on trying to use the RawSize property since it is meant only for pre-fully-constructed scenarios.
         // Post-full-construction, only Size or VirtualSize should be used, as they can be correctly calculated by then.
         object dummy;
-        Assert.ThrowsException<ObjectFullyConstructedAlreadyException>(() => dummy = cg1.RawSize);
+        Assert.ThrowsExactly<ObjectFullyConstructedAlreadyException>(() => dummy = cg1.RawSize);
     }
 
     [TestMethod]
@@ -62,13 +62,13 @@ public class COFFGroupTests
         };
 
         object dummy;
-        Assert.ThrowsException<ObjectNotYetFullyConstructedException>(() => dummy = cg1.Section);
-        Assert.ThrowsException<ObjectNotYetFullyConstructedException>(() => dummy = cg1.IsVirtualSizeOnly);
-        Assert.ThrowsException<ObjectNotYetFullyConstructedException>(() => dummy = cg1.Size);
-        Assert.ThrowsException<ObjectNotYetFullyConstructedException>(() => dummy = cg1.VirtualSize);
-        Assert.ThrowsException<ObjectNotYetFullyConstructedException>(() => dummy = cg1.VirtualSizeIncludingPadding);
-        Assert.ThrowsException<ObjectNotYetFullyConstructedException>(() => dummy = cg1.TailSlopSizeAlignment);
-        Assert.ThrowsException<ObjectNotYetFullyConstructedException>(() => dummy = cg1.TailSlopVirtualSizeAlignment);
+        Assert.ThrowsExactly<ObjectNotYetFullyConstructedException>(() => dummy = cg1.Section);
+        Assert.ThrowsExactly<ObjectNotYetFullyConstructedException>(() => dummy = cg1.IsVirtualSizeOnly);
+        Assert.ThrowsExactly<ObjectNotYetFullyConstructedException>(() => dummy = cg1.Size);
+        Assert.ThrowsExactly<ObjectNotYetFullyConstructedException>(() => dummy = cg1.VirtualSize);
+        Assert.ThrowsExactly<ObjectNotYetFullyConstructedException>(() => dummy = cg1.VirtualSizeIncludingPadding);
+        Assert.ThrowsExactly<ObjectNotYetFullyConstructedException>(() => dummy = cg1.TailSlopSizeAlignment);
+        Assert.ThrowsExactly<ObjectNotYetFullyConstructedException>(() => dummy = cg1.TailSlopVirtualSizeAlignment);
 
         // And these properties should be accessible even before fully-constructed as they are safe as soon as the constructor runs:
         dummy = cg1.FileAlignment;

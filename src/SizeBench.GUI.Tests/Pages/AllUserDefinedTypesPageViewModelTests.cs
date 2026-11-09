@@ -73,7 +73,7 @@ public sealed class AllUserDefinedTypesPageViewModelTests : IDisposable
 
     private void AssertStateWhenShowEachTemplateExpansionSeparatelyIsTrue(AllUserDefinedTypesPageViewModel viewmodel)
     {
-        Assert.AreEqual(3, viewmodel.UDTGroupings.Count);
+        Assert.HasCount(3, viewmodel.UDTGroupings);
 
         var someType = viewmodel.UDTGroupings.Single(grouping => grouping.Name == "SomeType");
         Assert.AreEqual<uint>(50 + 100, someType.TotalSizeOfFunctions); // SuperImportantFunction1 and 2
@@ -93,7 +93,7 @@ public sealed class AllUserDefinedTypesPageViewModelTests : IDisposable
 
     private void AssertStateWhenShowEachTemplateExpansionSeparatelyIsFalse(AllUserDefinedTypesPageViewModel viewmodel)
     {
-        Assert.AreEqual(2, viewmodel.UDTGroupings.Count);
+        Assert.HasCount(2, viewmodel.UDTGroupings);
 
         var someType = viewmodel.UDTGroupings.Single(grouping => grouping.Name == "SomeType");
         Assert.AreEqual<uint>(50 + 100, someType.TotalSizeOfFunctions); // SuperImportantFunction1 and 2
@@ -118,7 +118,7 @@ public sealed class AllUserDefinedTypesPageViewModelTests : IDisposable
         Assert.IsFalse(viewmodel.ShowEachTemplateExpansionSeparately);
         viewmodel.GenerateFormattedDataForExcelExport(out var columnHeaders, out var preformattedData);
 
-        Assert.AreEqual(3, columnHeaders.Length);
+        Assert.HasCount(3, columnHeaders);
         Assert.AreEqual("Type Name", columnHeaders[0]);
         Assert.AreEqual("# Types", columnHeaders[1]);
         Assert.AreEqual("Total Size of Member Functions", columnHeaders[2]);
@@ -143,7 +143,7 @@ public sealed class AllUserDefinedTypesPageViewModelTests : IDisposable
         viewmodel.ShowEachTemplateExpansionSeparately = true;
         viewmodel.GenerateFormattedDataForExcelExport(out columnHeaders, out preformattedData);
 
-        Assert.AreEqual(2, columnHeaders.Length);
+        Assert.HasCount(2, columnHeaders);
         Assert.AreEqual("Type Name", columnHeaders[0]);
         Assert.AreEqual("Total Size of Member Functions", columnHeaders[1]);
 
@@ -194,7 +194,7 @@ public sealed class AllUserDefinedTypesPageViewModelTests : IDisposable
 
         viewmodel.ShowEachTemplateExpansionSeparately = false;
 
-        Assert.AreEqual(1, vmPropertyChangesSeen.Count(prop => prop == nameof(AllUserDefinedTypesPageViewModel.ShowEachTemplateExpansionSeparately)));
+        Assert.ContainsSingle(prop => prop == nameof(AllUserDefinedTypesPageViewModel.ShowEachTemplateExpansionSeparately), vmPropertyChangesSeen);
         AssertStateWhenShowEachTemplateExpansionSeparatelyIsFalse(viewmodel);
 
         // Toggling back should restore everything to the way it was

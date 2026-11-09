@@ -41,7 +41,7 @@ public class COFFGroupPageViewModelTests
         this.MockSession.Setup(s => s.EnumerateCompilands(It.IsAny<CancellationToken>())).Returns(Task.FromCanceled<IReadOnlyCollection<Compiland>>(cts.Token));
     }
 
-    [Timeout(5 * 1000)]
+    [Timeout(5 * 1000, CooperativeCancellation = true)]
     [TestMethod]
     public async Task SymbolsInitializeAsyncFromConstruction()
     {
@@ -105,8 +105,10 @@ public class COFFGroupPageViewModelTests
             }
         };
 
-        tcsSymbolsReady.SetCanceled();
+        tcsSymbolsReady.SetCanceled(this.TestContext.CancellationToken);
 
         Assert.IsNull(viewmodel.Symbols);
     }
+
+    public TestContext TestContext { get; set; }
 }

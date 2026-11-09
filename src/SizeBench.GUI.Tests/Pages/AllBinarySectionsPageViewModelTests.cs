@@ -24,7 +24,7 @@ public class AllBinarySectionsPageViewModelTests
         this.MockUITaskScheduler.SetupForSynchronousCompletionOfLongRunningUITasks();
     }
 
-    [Timeout(30 * 1000)] // 30s
+    [Timeout(30 * 1000, CooperativeCancellation = true)] // 30s
     [TestMethod]
     public void CanExportToExcel()
     {

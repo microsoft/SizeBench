@@ -12,7 +12,7 @@ namespace SizeBench.AnalysisEngine.Tests;
 public sealed class DiffSession_EnumerateSymbolsInLibTests
 {
     public TestContext? TestContext { get; set; }
-    private CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
+    private CancellationToken CancellationToken => this.TestContext!.CancellationToken;
 
     private string BeforeBinaryPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "CppTestCases_BasicDiffObjectsBefore.dll");
 
@@ -92,7 +92,7 @@ public sealed class DiffSession_EnumerateSymbolsInLibTests
                                                             s.AfterSymbol.RVAEnd <= (textXCGDiff.AfterCOFFGroup.RVA + textXCGDiff.AfterCOFFGroup.Size));
         Assert.IsNull(textXSymbolDiff.BeforeSymbol);
         Assert.IsNotNull(textXSymbolDiff.AfterSymbol);
-        Assert.IsTrue(textXSymbolDiff.SizeDiff > 0);
+        Assert.IsGreaterThan(0, textXSymbolDiff.SizeDiff);
 
         // Try something in .xdata since XDATA is parsed specially
         // The xdata symbols have really ugly names due to templates, so just grabbing the one and only tryMap to make the test code
@@ -114,7 +114,7 @@ public sealed class DiffSession_EnumerateSymbolsInLibTests
         var staticLib2 = libDiffs.Single(ld => ld.ShortName == "StaticLib2");
         var symbolDiffs = await diffSession.EnumerateSymbolDiffsInLibDiff(staticLib2, this.CancellationToken);
 
-        Assert.IsTrue(symbolDiffs.Count > 0);
+        Assert.IsNotEmpty(symbolDiffs);
 
         foreach (var sym in symbolDiffs)
         {
@@ -135,7 +135,7 @@ public sealed class DiffSession_EnumerateSymbolsInLibTests
         var staticLib3 = libDiffs.Single(ld => ld.ShortName == "StaticLib3");
         var symbolDiffs = await diffSession.EnumerateSymbolDiffsInLibDiff(staticLib3, this.CancellationToken);
 
-        Assert.IsTrue(symbolDiffs.Count > 0);
+        Assert.IsNotEmpty(symbolDiffs);
 
         foreach (var sym in symbolDiffs)
         {

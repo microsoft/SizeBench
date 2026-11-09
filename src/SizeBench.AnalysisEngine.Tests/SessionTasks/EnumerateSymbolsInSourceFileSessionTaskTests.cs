@@ -8,7 +8,7 @@ namespace SizeBench.AnalysisEngine.SessionTasks.Tests;
 public sealed class EnumerateSymbolsInSourceFileSessionTaskTests : IDisposable
 {
     public TestContext? TestContext { get; set; }
-    public CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
+    public CancellationToken CancellationToken => this.TestContext!.CancellationToken;
 
     private SingleBinaryDataGenerator Generator = new SingleBinaryDataGenerator();
 
@@ -76,7 +76,7 @@ public sealed class EnumerateSymbolsInSourceFileSessionTaskTests : IDisposable
         using var logger = new NoOpLogger();
         var symbols = task.Execute(logger);
 
-        Assert.AreEqual(expectedSymbolCount, symbols.Count);
+        Assert.HasCount(expectedSymbolCount, symbols);
     }
 
     public void Dispose() => this.Generator.Dispose();

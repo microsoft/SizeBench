@@ -23,4 +23,5 @@ internal enum BasicTypes : uint
     btChar16 = 32,
     btChar32 = 33,
     btChar8 = 34,
+    btVector = 35, // "SVE and other scalable vector types" per cvconst.h
 }

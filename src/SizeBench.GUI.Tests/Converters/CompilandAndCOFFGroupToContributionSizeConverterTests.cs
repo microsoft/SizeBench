@@ -71,10 +71,9 @@ public sealed class CompilandAndCOFFGroupToContributionSizeConverterTests : IDis
         this.TestCompiland2.MarkFullyConstructed();
     }
 
-    [ExpectedException(typeof(ArgumentException), AllowDerivedTypes = false)]
     [TestMethod]
     public void ConvertOnlyTakesCompilandAndCOFFGroupValuesInThatOrder()
-        => CompilandAndCOFFGroupToContributionSizeConverter.Instance.Convert(new object[] { this.TestCOFFGroup1, this.TestCompiland1 }, typeof(string), null /* ConverterParameter */, null /* CultureInfo */);
+        => Assert.ThrowsExactly<ArgumentException>(() => CompilandAndCOFFGroupToContributionSizeConverter.Instance.Convert(new object[] { this.TestCOFFGroup1, this.TestCompiland1 }, typeof(string), null /* ConverterParameter */, null /* CultureInfo */));
 
     [TestMethod]
     public void ReturnsCorrectSizeWhenContributionExists()

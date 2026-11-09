@@ -140,7 +140,7 @@ internal sealed class FunctionSymbolPageViewModel : SingleBinaryViewModelBase
         this.PageTitle = $"Function Symbol: {this.Function.FormattedName.IncludeParentType}";
 
         var attributes = new List<string>();
-        if (Enum.IsDefined(typeof(AccessModifier), this.Function.AccessModifier))
+        if (Enum.IsDefined(this.Function.AccessModifier))
         {
             attributes.Add($"{this.Function.AccessModifier.ToString().ToLowerInvariant()} access modifier");
         }

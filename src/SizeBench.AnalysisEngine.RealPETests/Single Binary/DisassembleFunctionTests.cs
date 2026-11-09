@@ -20,10 +20,10 @@ public sealed class DisassembleFunctionTests
 
     private string MakePath(string binary) => Path.Combine(this.TestContext!.DeploymentDirectory!, binary);
 
-    private CancellationToken CancellationToken => this.TestContext!.CancellationTokenSource.Token;
+    private CancellationToken CancellationToken => this.TestContext!.CancellationToken;
 
     // This function in ReactNativeXaml.dll exposes bugs in DbgX, so trying to disassemble it ensures we correctly work around that
-    [Timeout(90 * 1000)]
+    [Timeout(90 * 1000, CooperativeCancellation = true)]
     [STATestMethod]
     public void ReactNativeXamlNoReturnFunctionDisassemblesCorrectly()
     {
@@ -43,7 +43,7 @@ public sealed class DisassembleFunctionTests
     }
 
     // This tests a basic block with more than 100 instructions in it, which triggers the code in DisassembleFunction that handles basic blocks too long to get all instructions in one query to DbgX
-    [Timeout(30 * 1000)]
+    [Timeout(30 * 1000, CooperativeCancellation = true)]
     [STATestMethod]
     public void VeryLongBasicBlockDisassemblesCorrectly()
     {
@@ -76,7 +76,7 @@ public sealed class DisassembleFunctionTests
                                             .Replace("\n", "\r", StringComparison.OrdinalIgnoreCase)
                                             .Split('\r', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-        Assert.AreEqual(expectedLines.Length, actualLines.Length);
+        Assert.HasCount(expectedLines.Length, actualLines);
         
         for(var i = 0; i < expectedLines.Length; i++)
         {

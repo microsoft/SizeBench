@@ -312,7 +312,7 @@ internal sealed class FunctionCodeSymbolDiffPageViewModel : BinaryDiffViewModelB
 
         var attributes = new List<string>();
 
-        if (Enum.IsDefined(typeof(AccessModifier), function.AccessModifier))
+        if (Enum.IsDefined(function.AccessModifier))
         {
             attributes.Add($"{function.AccessModifier.ToString().ToLowerInvariant()} access modifier");
         }

@@ -7,19 +7,15 @@ namespace SizeBench.GUI.Converters.Tests;
 [TestClass]
 public class SessionTaskProgressToTaskbarItemProgressStateConverterTests
 {
-    [ExpectedException(typeof(ArgumentException), AllowDerivedTypes = false)]
     [TestMethod]
     public void ConvertOnlyConvertsFromSessionTaskProgress()
-    {
-        SessionTaskProgressToTaskbarItemProgressStateConverter.Instance.Convert(new object(), typeof(TaskbarItemProgressState), null /* ConverterParameter */, null /* CultureInfo */);
-    }
+        => Assert.ThrowsExactly<ArgumentException>(() => SessionTaskProgressToTaskbarItemProgressStateConverter.Instance.Convert(new object(), typeof(TaskbarItemProgressState), null /* ConverterParameter */, null /* CultureInfo */));
 
-    [ExpectedException(typeof(ArgumentException), AllowDerivedTypes = false)]
     [TestMethod]
     public void ConvertThrowsForNull()
     {
         var converter = new SessionTaskProgressToTaskbarItemProgressStateConverter();
-        converter.Convert(null, typeof(TaskbarItemProgressState), null /* ConverterParaeter */, null /* CultureInfo */);
+        Assert.ThrowsExactly<ArgumentException>(() => converter.Convert(null, typeof(TaskbarItemProgressState), null /* ConverterParaeter */, null /* CultureInfo */));
     }
 
     [TestMethod]
@@ -42,10 +38,7 @@ public class SessionTaskProgressToTaskbarItemProgressStateConverterTests
         Assert.AreEqual(TaskbarItemProgressState.Normal, result);
     }
 
-    [ExpectedException(typeof(NotImplementedException), AllowDerivedTypes = false)]
     [TestMethod]
     public void ConvertBackIsNotImplemented()
-    {
-        SessionTaskProgressToTaskbarItemProgressStateConverter.Instance.ConvertBack(TaskbarItemProgressState.Indeterminate, typeof(SessionTaskProgress), null /* ConverterParameter */, null /* CultureInfo */);
-    }
+        => Assert.ThrowsExactly<NotImplementedException>(() => SessionTaskProgressToTaskbarItemProgressStateConverter.Instance.ConvertBack(TaskbarItemProgressState.Indeterminate, typeof(SessionTaskProgress), null /* ConverterParameter */, null /* CultureInfo */));
 }

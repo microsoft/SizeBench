@@ -65,21 +65,21 @@ public sealed class EnumerateBinarySectionsAndCOFFGroupsSessionTaskTests : IDisp
 
         // Check that the COFFGroups and Section properties got linked back and forth between these objects, based on their RVA/Size/VirtualSize
         Assert.AreEqual<ulong>(1000, textSectionOutput.Size);
-        Assert.AreEqual(2, textSectionOutput.COFFGroups.Count);
-        Assert.IsTrue(textSectionOutput.COFFGroups.Any(cg => cg.Name == ".text$x"));
-        Assert.IsTrue(textSectionOutput.COFFGroups.Any(cg => cg.Name == ".text$mn"));
+        Assert.HasCount(2, textSectionOutput.COFFGroups);
+        Assert.Contains(cg => cg.Name == ".text$x", textSectionOutput.COFFGroups);
+        Assert.Contains(cg => cg.Name == ".text$mn", textSectionOutput.COFFGroups);
         Assert.AreEqual(textSectionOutput, textSectionOutput.COFFGroups[0].Section);
         Assert.AreEqual(textSectionOutput, textSectionOutput.COFFGroups[1].Section);
 
         Assert.AreEqual<ulong>(500, rdataSectionOutput.Size);
-        Assert.AreEqual(2, rdataSectionOutput.COFFGroups.Count);
-        Assert.IsTrue(rdataSectionOutput.COFFGroups.Any(cg => cg.Name == ".rdata$brc"));
-        Assert.IsTrue(rdataSectionOutput.COFFGroups.Any(cg => cg.Name == ".testing"));
+        Assert.HasCount(2, rdataSectionOutput.COFFGroups);
+        Assert.Contains(cg => cg.Name == ".rdata$brc", rdataSectionOutput.COFFGroups);
+        Assert.Contains(cg => cg.Name == ".testing", rdataSectionOutput.COFFGroups);
         Assert.AreEqual(rdataSectionOutput, rdataSectionOutput.COFFGroups[0].Section);
         Assert.AreEqual(rdataSectionOutput, rdataSectionOutput.COFFGroups[1].Section);
 
         Assert.AreEqual<ulong>(500, bssSectionOutput.VirtualSize);
-        Assert.AreEqual(1, bssSectionOutput.COFFGroups.Count);
+        Assert.HasCount(1, bssSectionOutput.COFFGroups);
         Assert.AreEqual(".bss-cg", bssSectionOutput.COFFGroups[0].Name);
         Assert.AreEqual(bssSectionOutput, bssSectionOutput.COFFGroups[0].Section);
     }
@@ -147,7 +147,7 @@ public sealed class EnumerateBinarySectionsAndCOFFGroupsSessionTaskTests : IDisp
         _ = new EnumerateBinarySectionsAndCOFFGroupsSessionTask(this.SessionTaskParameters!, token: CancellationToken.None).Execute(logger);
 
         Assert.IsNotNull(this.DataCache.AllBinarySections);
-        Assert.AreEqual(this.Sections.Count, this.DataCache.AllBinarySections.Count);
+        Assert.HasCount(this.Sections.Count, this.DataCache.AllBinarySections);
 
         // Now the cache is filled in, so we shouldn't even try to enumerate out of the DIA Adapter
         this.TestDIAAdapter.BinarySectionsToFind = this.Sections.EnumerationThatThrowsIfEverCalled();
@@ -156,7 +156,7 @@ public sealed class EnumerateBinarySectionsAndCOFFGroupsSessionTaskTests : IDisp
         _ = new EnumerateBinarySectionsAndCOFFGroupsSessionTask(this.SessionTaskParameters!, token: CancellationToken.None).Execute(logger);
 
         Assert.IsNotNull(this.DataCache.AllBinarySections);
-        Assert.AreEqual(this.Sections.Count, this.DataCache.AllBinarySections.Count);
+        Assert.HasCount(this.Sections.Count, this.DataCache.AllBinarySections);
     }
 
     public void Dispose() => this.DataCache?.Dispose();

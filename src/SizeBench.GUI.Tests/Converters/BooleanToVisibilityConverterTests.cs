@@ -6,11 +6,12 @@ namespace SizeBench.GUI.Converters.Tests;
 [TestClass]
 public class BooleanToVisibilityConverterTests
 {
-    [ExpectedException(typeof(ArgumentException), AllowDerivedTypes = false)]
     [TestMethod]
     public void ConvertOnlyTakesBoolValue()
     {
-        BooleanToVisibilityConverter.Instance.Convert(5, typeof(Visibility), null /* ConverterParameter */, null /* CultureInfo */);
+        Assert.ThrowsExactly<ArgumentException>(() =>
+            BooleanToVisibilityConverter.Instance.Convert(5, typeof(Visibility), null /* ConverterParameter */, null /* CultureInfo */)
+        );
     }
 
     [TestMethod]
@@ -31,20 +32,18 @@ public class BooleanToVisibilityConverterTests
         Assert.AreEqual(Visibility.Collapsed, result);
     }
 
-    [ExpectedException(typeof(ArgumentException), AllowDerivedTypes = false)]
     [TestMethod]
     public void ConvertBackOnlyTakesVisibilityValue()
     {
         var converter = new BooleanToVisibilityConverter();
-        converter.ConvertBack(true, typeof(bool), null /* ConverterParameter */, null /* CultureInfo */);
+        Assert.ThrowsExactly<ArgumentException>(() => converter.ConvertBack(true, typeof(bool), null /* ConverterParameter */, null /* CultureInfo */));
     }
 
-    [ExpectedException(typeof(ArgumentException), AllowDerivedTypes = false)]
     [TestMethod]
     public void ConvertBackOnlyConvertsToBool()
     {
         var converter = new BooleanToVisibilityConverter();
-        converter.ConvertBack(Visibility.Visible, typeof(int), null /* ConverterParameter */, null /* CultureInfo */);
+        Assert.ThrowsExactly<ArgumentException>(() => converter.ConvertBack(Visibility.Visible, typeof(int), null /* ConverterParameter */, null /* CultureInfo */));
     }
 
     [TestMethod]
@@ -53,7 +52,7 @@ public class BooleanToVisibilityConverterTests
         var converter = new BooleanToVisibilityConverter();
         var result = converter.ConvertBack(Visibility.Visible, typeof(bool), null /* ConverterParameter */, null /* CultureInfo */);
 
-        Assert.AreEqual(true, result);
+        Assert.IsTrue((bool?)result);
     }
 
     [TestMethod]
@@ -62,6 +61,6 @@ public class BooleanToVisibilityConverterTests
         var converter = new BooleanToVisibilityConverter();
         var result = converter.ConvertBack(Visibility.Collapsed, typeof(bool), null /* ConverterParameter */, null /* CultureInfo */);
 
-        Assert.AreEqual(false, result);
+        Assert.IsFalse((bool?)result);
     }
 }

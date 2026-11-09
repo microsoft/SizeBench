@@ -14,7 +14,7 @@ public sealed class CommandLineTests
         var commandLine = DummyCommandLineFromArguments("/GR /GR- -GR -DFOO");
         Assert.AreEqual(typeof(CommandLine), commandLine.GetType());
         Assert.AreEqual("/GR /GR- -GR -DFOO", commandLine.Raw);
-        Assert.AreEqual(4, commandLine.SplitArguments.Count);
+        Assert.HasCount(4, commandLine.SplitArguments);
         Assert.AreEqual("/GR", commandLine.SplitArguments[0]);
         Assert.AreEqual("/GR-", commandLine.SplitArguments[1]);
         Assert.AreEqual("-GR", commandLine.SplitArguments[2]);

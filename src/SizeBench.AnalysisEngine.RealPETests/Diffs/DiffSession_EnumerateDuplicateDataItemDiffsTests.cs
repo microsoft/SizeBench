@@ -30,7 +30,7 @@ public sealed class DiffSession_EnumerateDuplicateDataItemDiffsTests
         var ddiDiffs = await diffSession.EnumerateDuplicateDataItemDiffs(CancellationToken.None);
         Assert.IsNotNull(ddiDiffs);
 
-        Assert.AreEqual(3, ddiDiffs.Count);
+        Assert.HasCount(3, ddiDiffs);
 
         foreach (var ddiDiff in ddiDiffs)
         {
@@ -49,7 +49,7 @@ public sealed class DiffSession_EnumerateDuplicateDataItemDiffsTests
         var ddiDiffs = await diffSession.EnumerateDuplicateDataItemDiffs(CancellationToken.None);
         Assert.IsNotNull(ddiDiffs);
 
-        Assert.AreEqual(4, ddiDiffs.Count);
+        Assert.HasCount(4, ddiDiffs);
 
         // Duplication that got worse from before -> after, but existed in both
         var duplicatedPoint = ddiDiffs.Single(ddiDiff => ddiDiff.SymbolDiff.Name == "duplicatedPoint");

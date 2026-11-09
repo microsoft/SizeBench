@@ -50,10 +50,10 @@ public sealed class EnumerateTemplateFoldabilityDiffsSessionTaskTests : IDisposa
         using var logger = new NoOpLogger();
         var results = await task.ExecuteAsync(logger);
 
-        Assert.AreEqual(3, results.Count);
-        Assert.AreEqual(1, results.Count(tfiDiff => tfiDiff.BeforeTemplateFoldabilityItem is null));
-        Assert.AreEqual(1, results.Count(tfiDiff => tfiDiff.AfterTemplateFoldabilityItem is null));
-        Assert.AreEqual(1, results.Count(tfiDiff => tfiDiff.BeforeTemplateFoldabilityItem != null && tfiDiff.AfterTemplateFoldabilityItem != null));
+        Assert.HasCount(3, results);
+        Assert.ContainsSingle(tfiDiff => tfiDiff.BeforeTemplateFoldabilityItem is null, results);
+        Assert.ContainsSingle(tfiDiff => tfiDiff.AfterTemplateFoldabilityItem is null, results);
+        Assert.ContainsSingle(tfiDiff => tfiDiff.BeforeTemplateFoldabilityItem != null && tfiDiff.AfterTemplateFoldabilityItem != null, results);
         Assert.AreEqual(0, results.Count(tfiDiff => tfiDiff.BeforeTemplateFoldabilityItem is null && tfiDiff.AfterTemplateFoldabilityItem is null));
     }
 

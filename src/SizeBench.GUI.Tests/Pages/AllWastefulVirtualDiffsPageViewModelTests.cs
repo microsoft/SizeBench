@@ -22,7 +22,7 @@ public sealed class AllWastefulVirtualDiffsPageViewModelTests : IDisposable
         this.MockUITaskScheduler.SetupForSynchronousCompletionOfLongRunningUITasks();
     }
 
-    [Timeout(5 * 1000)] // 5s
+    [Timeout(5 * 1000, CooperativeCancellation = true)] // 5s
     [TestMethod]
     public async Task CanExportToExcel()
     {
@@ -63,21 +63,21 @@ public sealed class AllWastefulVirtualDiffsPageViewModelTests : IDisposable
         viewmodel.WastefulVirtualItemDiffs!.CollectionChanged += (s, e) => collectionChangesSeen++;
 
         Assert.IsTrue(viewmodel.ExcludeCOMTypes);
-        Assert.AreEqual(numberOfNonCOMTypes, viewmodel.WastefulVirtualItemDiffs.Cast<WastefulVirtualItemDiff>().ToList().Count);
+        Assert.HasCount(numberOfNonCOMTypes, viewmodel.WastefulVirtualItemDiffs.Cast<WastefulVirtualItemDiff>().ToList());
 
         viewmodel.ExcludeCOMTypes = false;
 
-        Assert.AreEqual(1, vmPropertyChangesSeen.Count);
+        Assert.HasCount(1, vmPropertyChangesSeen);
         Assert.AreEqual(nameof(AllWastefulVirtualDiffsPageViewModel.ExcludeCOMTypes), vmPropertyChangesSeen[0]);
-        Assert.AreEqual(numberOfCOMTypes + numberOfNonCOMTypes, viewmodel.WastefulVirtualItemDiffs.Cast<WastefulVirtualItemDiff>().ToList().Count);
+        Assert.HasCount(numberOfCOMTypes + numberOfNonCOMTypes, viewmodel.WastefulVirtualItemDiffs.Cast<WastefulVirtualItemDiff>().ToList());
         Assert.AreEqual(1, collectionChangesSeen); // Even though we filtered out multiple items, should just see one INCC due to the DeferRefresh, to keep the UI responsive
 
         // Toggling back should restore everything to the way it was
         viewmodel.ExcludeCOMTypes = true;
-        Assert.AreEqual(2, vmPropertyChangesSeen.Count);
+        Assert.HasCount(2, vmPropertyChangesSeen);
         Assert.AreEqual(nameof(AllWastefulVirtualDiffsPageViewModel.ExcludeCOMTypes), vmPropertyChangesSeen[0]);
         Assert.AreEqual(nameof(AllWastefulVirtualDiffsPageViewModel.ExcludeCOMTypes), vmPropertyChangesSeen[1]);
-        Assert.AreEqual(numberOfNonCOMTypes, viewmodel.WastefulVirtualItemDiffs.Cast<WastefulVirtualItemDiff>().ToList().Count);
+        Assert.HasCount(numberOfNonCOMTypes, viewmodel.WastefulVirtualItemDiffs.Cast<WastefulVirtualItemDiff>().ToList());
         Assert.AreEqual(2, collectionChangesSeen);
     }
 

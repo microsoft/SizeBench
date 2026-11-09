@@ -56,7 +56,9 @@ internal abstract class DiffSessionTask<T>
             // point only, then Dispose).  So, we go through some pains here to ensure the log is
             // disposed at the right time (after the task, or if the task fails to start).
             // In .NET 6 perhaps we could make the logger IAsyncDisposable but this code predates that.
+#pragma warning disable CA2025 // Do not pass 'IDisposable' instances into unawaited tasks - we dispose the logger explicitly in a ContinueWith so we should be fine
             var returnVal = ExecuteCoreAsync(taskLogger);
+#pragma warning restore CA2025 // Do not pass 'IDisposable' instances into unawaited tasks
             returnVal.ContinueWith((previousTask) => taskLogger.Dispose());
             logDisposalQueuedUp = true;
 

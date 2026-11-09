@@ -59,7 +59,7 @@ public class ContributionPageViewModelTests
     }
 
     [TestMethod]
-    [Timeout(5 * 1000)] // in ms
+    [Timeout(5 * 1000, CooperativeCancellation = true)] // in ms
     public Task LibCOFFGroupContributionSymbolsInitializeAsyncFromConstruction()
     {
         var queryString = new Dictionary<string, string>()
@@ -71,7 +71,7 @@ public class ContributionPageViewModelTests
     }
 
     [TestMethod]
-    [Timeout(5 * 1000)] // in ms
+    [Timeout(5 * 1000, CooperativeCancellation = true)] // in ms
     public Task LibSectionContributionSymbolsInitializeAsyncFromConstruction()
     {
         var queryString = new Dictionary<string, string>()
@@ -83,7 +83,7 @@ public class ContributionPageViewModelTests
     }
 
     [TestMethod]
-    [Timeout(5 * 1000)] // in ms
+    [Timeout(5 * 1000, CooperativeCancellation = true)] // in ms
     public Task CompilandCOFFGroupContributionSymbolsInitializeAsyncFromConstruction()
     {
         var queryString = new Dictionary<string, string>()
@@ -96,7 +96,7 @@ public class ContributionPageViewModelTests
     }
 
     [TestMethod]
-    [Timeout(5 * 1000)] // in ms
+    [Timeout(5 * 1000, CooperativeCancellation = true)] // in ms
     public Task CompilandSectionContributionSymbolsInitializeAsyncFromConstruction()
     {
         var queryString = new Dictionary<string, string>()
@@ -158,7 +158,7 @@ public class ContributionPageViewModelTests
             }
         };
 
-        tcsSymbolsReady.SetCanceled();
+        tcsSymbolsReady.SetCanceled(this.TestContext.CancellationToken);
         viewmodel.SetQueryString(new Dictionary<string, string>()
             {
                 { "COFFGroup", ".text$mn" },
@@ -168,4 +168,6 @@ public class ContributionPageViewModelTests
 
         Assert.IsNull(viewmodel.Symbols);
     }
+
+    public TestContext TestContext { get; set; }
 }

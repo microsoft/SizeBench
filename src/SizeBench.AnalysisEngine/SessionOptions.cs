@@ -15,6 +15,8 @@ public sealed record class SessionOptions
     /// </list>
     /// When this is non-empty and the PDB path passed to <see cref="Session.Create(string, string, SessionOptions, SizeBench.Logging.ILogger)"/>
     /// is empty, the symbol server will be used to locate the PDB for the binary.
+    /// DIA also searches the process's <c>_NT_SYMBOL_PATH</c>. Symbol-server lookup remains opt-in.
+    /// <c>_NT_SYMCACHE_PATH</c> names WPA's derived SymCache files, which DIA cannot use as PDBs.
     /// </summary>
     public string? SymbolServerSearchPath { get; init; }
 }

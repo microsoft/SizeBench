@@ -19,9 +19,8 @@ namespace SizeBench.GUI.Controls;
 // diff can never include the numbers.
 //
 // A fixed, uniform line height plus disabled wrapping makes row i sit at exactly i * lineHeight in
-// BOTH panes, so the gutter and text stay aligned even while scrolling.  This is essentially all
-// layout/scroll plumbing that can't be meaningfully unit tested, so it's excluded from coverage; the
-// only piece with real logic - the line numbering - lives in the separately-tested DiffRowBuilder.
+// BOTH panes, so the gutter and text stay aligned even while scrolling. Line numbering lives in the
+// separately-tested DiffRowBuilder.
 [ExcludeFromCodeCoverage]
 public sealed class SelectableDiffViewer : UserControl
 {
@@ -33,8 +32,20 @@ public sealed class SelectableDiffViewer : UserControl
 
     private const double DiffFontSize = 16;
 
+    public static readonly DependencyProperty ZoomPercentProperty =
+        DependencyProperty.Register(nameof(ZoomPercent), typeof(int), typeof(SelectableDiffViewer),
+            new FrameworkPropertyMetadata(100, OnZoomPercentChanged),
+            value => (int)value is >= 20 and <= 200);
+
+    public int ZoomPercent
+    {
+        get => (int)GetValue(ZoomPercentProperty);
+        set => SetValue(ZoomPercentProperty, value);
+    }
+
     private readonly FlowDocumentScrollViewer _textViewer;
     private readonly ScrollViewer _gutterScrollViewer;
+    private readonly ScaleTransform _gutterScale = new ScaleTransform();
     private readonly string _longestLine;
     private ScrollViewer? _textInnerScrollViewer;
     private bool _pageWidthSet;
@@ -57,7 +68,11 @@ public sealed class SelectableDiffViewer : UserControl
             PagePadding = new Thickness(0),
         };
 
-        var gutterPanel = new StackPanel { Orientation = Orientation.Vertical };
+        var gutterPanel = new StackPanel
+        {
+            Orientation = Orientation.Vertical,
+            LayoutTransform = this._gutterScale,
+        };
 
         var longestLine = string.Empty;
         foreach (var row in rows)
@@ -113,6 +128,8 @@ public sealed class SelectableDiffViewer : UserControl
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
             HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
             IsToolBarVisible = false,
+            MinZoom = 20,
+            MaxZoom = 200,
         };
 
         // WPF's built-in rich-text copy path serializes the selection to XAML and then converts it to
@@ -127,6 +144,7 @@ public sealed class SelectableDiffViewer : UserControl
             HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
             BorderThickness = new Thickness(0, 0, 1, 0),
             BorderBrush = GutterSeparatorBrush,
+            VerticalAlignment = VerticalAlignment.Top,
         };
 
         var grid = new Grid();
@@ -140,6 +158,15 @@ public sealed class SelectableDiffViewer : UserControl
         this.Content = grid;
 
         Loaded += OnLoaded;
+    }
+
+    private static void OnZoomPercentChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var viewer = (SelectableDiffViewer)d;
+        var zoomPercent = (int)e.NewValue;
+        viewer._textViewer.Zoom = zoomPercent;
+        viewer._gutterScale.ScaleX = zoomPercent / 100.0;
+        viewer._gutterScale.ScaleY = zoomPercent / 100.0;
     }
 
     private static SolidColorBrush CreateFrozenBrush(Color color)
@@ -219,7 +246,13 @@ public sealed class SelectableDiffViewer : UserControl
     }
 
     private void OnTextScrollChanged(object sender, ScrollChangedEventArgs e)
-        => this._gutterScrollViewer.ScrollToVerticalOffset(e.VerticalOffset);
+    {
+        // Document scrolling uses unscaled coordinates; the gutter scrolls in scaled DIPs.
+        // Matching the viewport also reserves the text viewer's horizontal scrollbar height.
+        var scale = this._textViewer.Zoom / 100.0;
+        this._gutterScrollViewer.Height = e.ViewportHeight * scale;
+        this._gutterScrollViewer.ScrollToVerticalOffset(e.VerticalOffset * scale);
+    }
 
     private void OnGutterMouseWheel(object sender, MouseWheelEventArgs e)
     {

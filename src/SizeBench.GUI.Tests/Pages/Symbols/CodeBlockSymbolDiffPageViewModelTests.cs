@@ -14,6 +14,7 @@ public sealed class CodeBlockSymbolDiffPageViewModelTests : IDisposable
 {
     private DiffTestDataGenerator Generator = new DiffTestDataGenerator();
     private Mock<IUITaskScheduler> MockUITaskScheduler = new Mock<IUITaskScheduler>();
+    private Mock<IDisassemblySettings> MockDisassemblySettings = new Mock<IDisassemblySettings>();
 
     [TestInitialize]
     public void TestInitialize()
@@ -21,6 +22,8 @@ public sealed class CodeBlockSymbolDiffPageViewModelTests : IDisposable
         this.Generator = new DiffTestDataGenerator();
         this.MockUITaskScheduler = new Mock<IUITaskScheduler>();
         this.MockUITaskScheduler.SetupForSynchronousCompletionOfLongRunningUITasks();
+        this.MockDisassemblySettings = new Mock<IDisassemblySettings>();
+        this.MockDisassemblySettings.SetupProperty(settings => settings.TemplateFoldabilityDisassemblyZoomPercent, 100);
     }
 
     [TestMethod]
@@ -36,11 +39,14 @@ public sealed class CodeBlockSymbolDiffPageViewModelTests : IDisposable
         tcsPlacement.SetCanceled(this.TestContext.CancellationToken);
         this.Generator.MockBeforeSession.Setup(s => s.LookupSymbolPlacementInBinary(blockDiff.BeforeSymbol!, It.IsAny<CancellationToken>())).Returns(tcsPlacement.Task);
         this.Generator.MockBeforeSession.Setup(s => s.EnumerateAllSymbolsFoldedAtRVA(blockDiff.BeforeSymbol!.RVA, It.IsAny<CancellationToken>())).Returns(Task.FromResult<IReadOnlyList<ISymbol>>(new List<ISymbol>()));
+        this.Generator.MockBeforeSession.Setup(s => s.DisassembleFunction(expectedDiff.BeforeSymbol!, It.IsAny<DisassembleFunctionOptions>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult("before"));
         this.Generator.MockAfterSession.Setup(s => s.LookupSymbolPlacementInBinary(blockDiff.AfterSymbol!, It.IsAny<CancellationToken>())).Returns(tcsPlacement.Task);
         this.Generator.MockAfterSession.Setup(s => s.EnumerateAllSymbolsFoldedAtRVA(blockDiff.AfterSymbol!.RVA, It.IsAny<CancellationToken>())).Returns(Task.FromResult<IReadOnlyList<ISymbol>>(new List<ISymbol>()));
+        this.Generator.MockAfterSession.Setup(s => s.DisassembleFunction(expectedDiff.AfterSymbol!, It.IsAny<DisassembleFunctionOptions>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult("after"));
 
         var viewmodel = new CodeBlockSymbolDiffPageViewModel(this.MockUITaskScheduler.Object,
-                                                             this.Generator.MockDiffSession.Object);
+                                                             this.Generator.MockDiffSession.Object,
+                                                             this.MockDisassemblySettings.Object);
 
         viewmodel.SetQueryString(new Dictionary<string, string>()
             {
@@ -63,6 +69,8 @@ public sealed class CodeBlockSymbolDiffPageViewModelTests : IDisposable
         Assert.IsTrue(ReferenceEquals(expectedDiff, viewmodel.ParentFunctionSymbolDiff));
         Assert.IsFalse(viewmodel.IsBeforeParentFunctionComplex);
         Assert.IsFalse(viewmodel.IsAfterParentFunctionComplex);
+        Assert.AreEqual("before", viewmodel.Disassembly1);
+        Assert.AreEqual("after", viewmodel.Disassembly2);
     }
 
     [TestMethod]
@@ -81,11 +89,14 @@ public sealed class CodeBlockSymbolDiffPageViewModelTests : IDisposable
                                       .Returns(Task.FromResult<SymbolDiff?>(blockDiff));
         this.Generator.MockBeforeSession.Setup(s => s.LookupSymbolPlacementInBinary(blockDiff.BeforeSymbol!, It.IsAny<CancellationToken>())).Returns(Task.FromResult(beforePlacement));
         this.Generator.MockBeforeSession.Setup(s => s.EnumerateAllSymbolsFoldedAtRVA(blockDiff.BeforeSymbol!.RVA, It.IsAny<CancellationToken>())).Returns(Task.FromResult<IReadOnlyList<ISymbol>>(new List<ISymbol>()));
+        this.Generator.MockBeforeSession.Setup(s => s.DisassembleFunction(expectedDiff.BeforeSymbol!, It.IsAny<DisassembleFunctionOptions>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult("before"));
         this.Generator.MockAfterSession.Setup(s => s.LookupSymbolPlacementInBinary(blockDiff.AfterSymbol!, It.IsAny<CancellationToken>())).Returns(Task.FromResult(afterPlacement));
         this.Generator.MockAfterSession.Setup(s => s.EnumerateAllSymbolsFoldedAtRVA(blockDiff.AfterSymbol!.RVA, It.IsAny<CancellationToken>())).Returns(Task.FromResult<IReadOnlyList<ISymbol>>(new List<ISymbol>()));
+        this.Generator.MockAfterSession.Setup(s => s.DisassembleFunction(expectedDiff.AfterSymbol!, It.IsAny<DisassembleFunctionOptions>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult("after"));
 
         var viewmodel = new CodeBlockSymbolDiffPageViewModel(this.MockUITaskScheduler.Object,
-                                                             this.Generator.MockDiffSession.Object);
+                                                             this.Generator.MockDiffSession.Object,
+                                                             this.MockDisassemblySettings.Object);
 
         viewmodel.SetQueryString(new Dictionary<string, string>()
             {
@@ -108,13 +119,16 @@ public sealed class CodeBlockSymbolDiffPageViewModelTests : IDisposable
         Assert.IsTrue(ReferenceEquals(expectedDiff, viewmodel.ParentFunctionSymbolDiff));
         Assert.IsFalse(viewmodel.IsBeforeParentFunctionComplex);
         Assert.IsFalse(viewmodel.IsAfterParentFunctionComplex);
+        Assert.AreEqual("before", viewmodel.Disassembly1);
+        Assert.AreEqual("after", viewmodel.Disassembly2);
     }
 
     [TestMethod]
     public async Task NonexistentCodeBlockDoesItsBest()
     {
         var viewmodel = new CodeBlockSymbolDiffPageViewModel(this.MockUITaskScheduler.Object,
-                                                             this.Generator.MockDiffSession.Object);
+                                                             this.Generator.MockDiffSession.Object,
+                                                             this.MockDisassemblySettings.Object);
 
         viewmodel.SetQueryString(new Dictionary<string, string>()
             {
@@ -136,6 +150,8 @@ public sealed class CodeBlockSymbolDiffPageViewModelTests : IDisposable
         Assert.IsNull(viewmodel.ParentFunctionSymbolDiff);
         Assert.IsFalse(viewmodel.IsBeforeParentFunctionComplex);
         Assert.IsFalse(viewmodel.IsAfterParentFunctionComplex);
+        Assert.IsNull(viewmodel.Disassembly1);
+        Assert.IsNull(viewmodel.Disassembly2);
     }
 
     [TestMethod]
@@ -190,11 +206,14 @@ public sealed class CodeBlockSymbolDiffPageViewModelTests : IDisposable
                                       .Returns(Task.FromResult<SymbolDiff?>(primaryBlockDiff));
         this.Generator.MockBeforeSession.Setup(s => s.LookupSymbolPlacementInBinary(primaryBlockDiff.BeforeSymbol, It.IsAny<CancellationToken>())).Returns(Task.FromResult(beforePlacement));
         this.Generator.MockBeforeSession.Setup(s => s.EnumerateAllSymbolsFoldedAtRVA(primaryBlockDiff.BeforeSymbol.RVA, It.IsAny<CancellationToken>())).Returns(Task.FromResult<IReadOnlyList<ISymbol>>(allBeforeFoldedFunctions));
+        this.Generator.MockBeforeSession.Setup(s => s.DisassembleFunction(expectedDiff.BeforeSymbol!, It.IsAny<DisassembleFunctionOptions>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult("before"));
         this.Generator.MockAfterSession.Setup(s => s.LookupSymbolPlacementInBinary(primaryBlockDiff.AfterSymbol, It.IsAny<CancellationToken>())).Returns(Task.FromResult(afterPlacement));
         this.Generator.MockAfterSession.Setup(s => s.EnumerateAllSymbolsFoldedAtRVA(primaryBlockDiff.AfterSymbol.RVA, It.IsAny<CancellationToken>())).Returns(Task.FromResult<IReadOnlyList<ISymbol>>(allAfterFoldedFunctions));
+        this.Generator.MockAfterSession.Setup(s => s.DisassembleFunction(expectedDiff.AfterSymbol!, It.IsAny<DisassembleFunctionOptions>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult("after"));
 
         var viewmodel = new CodeBlockSymbolDiffPageViewModel(this.MockUITaskScheduler.Object,
-                                                             this.Generator.MockDiffSession.Object);
+                                                             this.Generator.MockDiffSession.Object,
+                                                             this.MockDisassemblySettings.Object);
 
         viewmodel.SetQueryString(new Dictionary<string, string>()
             {
@@ -224,6 +243,8 @@ public sealed class CodeBlockSymbolDiffPageViewModelTests : IDisposable
         Assert.IsTrue(ReferenceEquals(expectedDiff, viewmodel.ParentFunctionSymbolDiff));
         Assert.IsTrue(viewmodel.IsBeforeParentFunctionComplex);
         Assert.IsTrue(viewmodel.IsAfterParentFunctionComplex);
+        Assert.AreEqual("before", viewmodel.Disassembly1);
+        Assert.AreEqual("after", viewmodel.Disassembly2);
     }
 
     [TestMethod]
@@ -244,11 +265,14 @@ public sealed class CodeBlockSymbolDiffPageViewModelTests : IDisposable
                                       .Returns(Task.FromResult<SymbolDiff?>(blockDiff));
         this.Generator.MockBeforeSession.Setup(s => s.LookupSymbolPlacementInBinary(blockDiff.BeforeSymbol!, It.IsAny<CancellationToken>())).Returns(Task.FromResult(beforePlacement));
         this.Generator.MockBeforeSession.Setup(s => s.EnumerateAllSymbolsFoldedAtRVA(blockDiff.BeforeSymbol!.RVA, It.IsAny<CancellationToken>())).Returns(Task.FromResult<IReadOnlyList<ISymbol>>(new List<ISymbol>()));
+        this.Generator.MockBeforeSession.Setup(s => s.DisassembleFunction(expectedDiff.BeforeSymbol!, It.IsAny<DisassembleFunctionOptions>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult("before"));
         this.Generator.MockAfterSession.Setup(s => s.LookupSymbolPlacementInBinary(blockDiff.AfterSymbol!, It.IsAny<CancellationToken>())).Returns(Task.FromResult(afterPlacement));
         this.Generator.MockAfterSession.Setup(s => s.EnumerateAllSymbolsFoldedAtRVA(blockDiff.AfterSymbol!.RVA, It.IsAny<CancellationToken>())).Returns(Task.FromResult<IReadOnlyList<ISymbol>>(new List<ISymbol>()));
+        this.Generator.MockAfterSession.Setup(s => s.DisassembleFunction(expectedDiff.AfterSymbol!, It.IsAny<DisassembleFunctionOptions>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult("after"));
 
         var viewmodel = new CodeBlockSymbolDiffPageViewModel(this.MockUITaskScheduler.Object,
-                                                             this.Generator.MockDiffSession.Object);
+                                                             this.Generator.MockDiffSession.Object,
+                                                             this.MockDisassemblySettings.Object);
 
         viewmodel.SetQueryString(new Dictionary<string, string>()
             {

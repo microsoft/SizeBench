@@ -13,8 +13,9 @@ public sealed class TwoStringsToDiffViewerUIConverterTests
     [TestMethod]
     public void MoreThanTwoInputsNotAccepted()
     {
-        Assert.ThrowsExactly<ArgumentException>(() => TwoStringsToDiffViewerUIConverter.Instance.Convert(new object[] { "disasm 1", "disasm 2", "disasm 3" }, typeof(object), null /* ConverterParameter */, null /* CultureInfo */));
+        Assert.ThrowsExactly<ArgumentException>(() => TwoStringsToDiffViewerUIConverter.Instance.Convert(new object[] { "disasm 1", "disasm 2", 100 }, typeof(object), null /* ConverterParameter */, null /* CultureInfo */));
         Assert.ThrowsExactly<ArgumentException>(() => TwoStringsToDiffViewerUIConverter.Instance.Convert(new object[] { "disasm 1", "disasm 2", "disasm 3", "disasm 4" }, typeof(object), null /* ConverterParameter */, null /* CultureInfo */));
+        Assert.ThrowsExactly<ArgumentException>(() => TwoStringsToDiffViewerUIConverter.Instance.Convert(new object[] { "disasm 1", "disasm 2", "disasm 3", "disasm 4", "disasm 5" }, typeof(object), null /* ConverterParameter */, null /* CultureInfo */));
     }
 
     [TestMethod]

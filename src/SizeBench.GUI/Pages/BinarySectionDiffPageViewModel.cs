@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using SizeBench.AnalysisEngine;
 using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.ExcelExporter;
@@ -8,7 +9,7 @@ using SizeBench.GUI.Core;
 
 namespace SizeBench.GUI.Pages;
 
-internal sealed class BinarySectionDiffPageViewModel : BinaryDiffViewModelBase
+internal sealed class BinarySectionDiffPageViewModel : DiffSymbolFilterViewModelBase
 {
     private readonly IUITaskScheduler _uiTaskScheduler;
     private readonly IExcelExporter _excelExporter;
@@ -45,7 +46,14 @@ internal sealed class BinarySectionDiffPageViewModel : BinaryDiffViewModelBase
     public ObservableCollection<SymbolDiff>? Symbols
     {
         get => this._symbolsForUI;
-        private set { this._symbolsForUI = value; RaisePropertyChanged(); }
+        private set
+        {
+            this._symbolsForUI = value;
+            RaisePropertyChanged();
+            UpdateFilteredSymbolDiffsView(this._symbolsForUI,
+                                          new SortDescription(nameof(SymbolDiff.SizeDiff), ListSortDirection.Ascending),
+                                          new SortDescription(nameof(SymbolDiff.VirtualSizeDiff), ListSortDirection.Ascending));
+        }
     }
 
     public ObservableCollection<DataGridColumnDescription> DataGridColumnDescriptions { get; } = new ObservableCollection<DataGridColumnDescription>();
@@ -84,7 +92,7 @@ internal sealed class BinarySectionDiffPageViewModel : BinaryDiffViewModelBase
         this.ExportCOFFGroupsToExcelCommand = new DelegateCommand(async () => await uiTaskScheduler.StartExcelExport(excelExporter, this.BinarySectionDiff?.COFFGroupDiffs));
         this.ExportLibsToExcelCommand = new DelegateCommand(ExportLibsToExcel);
         this.ExportCompilandsToExcelCommand = new DelegateCommand(ExportCompilandsToExcel);
-        this.ExportSymbolsToExcelCommand = new DelegateCommand(async () => await uiTaskScheduler.StartExcelExport(excelExporter, this.Symbols));
+        this.ExportSymbolsToExcelCommand = new DelegateCommand(async () => await uiTaskScheduler.StartExcelExport(excelExporter, GetFilteredSymbolDiffsForExport()));
     }
 
     protected internal override async Task InitializeAsync()

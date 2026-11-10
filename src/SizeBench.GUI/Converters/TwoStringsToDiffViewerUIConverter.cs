@@ -20,7 +20,7 @@ public sealed class TwoStringsToDiffViewerUIConverter : IMultiValueConverter
 
         if (values?.Length > 2)
         {
-            throw new ArgumentException("This converter expects exactly two inputs - the two strings to diff");
+            throw new ArgumentException("This converter expects two inputs - the two strings to diff.");
         }
 
         if (values is null || values.Length < 2 || values[0] is null || values[0] == DependencyProperty.UnsetValue || values[1] is null || values[1] == DependencyProperty.UnsetValue)

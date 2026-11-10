@@ -1,4 +1,5 @@
-﻿using SizeBench.AnalysisEngine;
+﻿using System.ComponentModel;
+using SizeBench.AnalysisEngine;
 using SizeBench.AnalysisEngine.Symbols;
 using SizeBench.ExcelExporter;
 using SizeBench.GUI.Commands;
@@ -6,7 +7,7 @@ using SizeBench.GUI.Core;
 
 namespace SizeBench.GUI.Pages;
 
-internal sealed class ContributionDiffPageViewModel : BinaryDiffViewModelBase
+internal sealed class ContributionDiffPageViewModel : DiffSymbolFilterViewModelBase
 {
     private readonly IUITaskScheduler _uiTaskScheduler;
 
@@ -21,7 +22,14 @@ internal sealed class ContributionDiffPageViewModel : BinaryDiffViewModelBase
     public IReadOnlyList<SymbolDiff>? SymbolDiffs
     {
         get => this._symbolDiffs;
-        private set { this._symbolDiffs = value; RaisePropertyChanged(); }
+        private set
+        {
+            this._symbolDiffs = value;
+            RaisePropertyChanged();
+            UpdateFilteredSymbolDiffsView(this._symbolDiffs,
+                                          new SortDescription(nameof(SymbolDiff.SizeDiff), ListSortDirection.Descending),
+                                          new SortDescription(nameof(SymbolDiff.VirtualSizeDiff), ListSortDirection.Descending));
+        }
     }
 
     public DelegateCommand ExportToExcelCommand { get; }
@@ -33,9 +41,10 @@ internal sealed class ContributionDiffPageViewModel : BinaryDiffViewModelBase
         this._uiTaskScheduler = uiTaskScheduler;
         this.ExportToExcelCommand = new DelegateCommand(async () =>
         {
-            if (this.SymbolDiffs != null)
+            var filteredSymbolDiffs = GetFilteredSymbolDiffsForExport();
+            if (filteredSymbolDiffs.Count > 0)
             {
-                await uiTaskScheduler.StartExcelExport(excelExporter, this.SymbolDiffs.ToList());
+                await uiTaskScheduler.StartExcelExport(excelExporter, filteredSymbolDiffs);
             }
         });
     }

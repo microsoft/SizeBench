@@ -8,6 +8,7 @@
                           xmlns:converters="clr-namespace:SizeBench.GUI.Converters"
                           xmlns:componentModel="clr-namespace:System.ComponentModel;assembly=WindowsBase"
                           mc:Ignorable="d" 
+      NavigationCacheMode="Enabled"
       d:DesignHeight="300" d:DesignWidth="600"
       Title="{Binding Lib.ShortName, StringFormat='LIB: {0}'}">
     <navigation:SizeBenchPage.Resources>

@@ -5,6 +5,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:converters="clr-namespace:SizeBench.GUI.Converters"
+      xmlns:controls="clr-namespace:SizeBench.GUI.Controls"
       xmlns:commands="clr-namespace:SizeBench.GUI.Commands"
       xmlns:drawing="clr-namespace:System.Drawing;assembly=System.Drawing"
       xmlns:navigation="clr-namespace:SizeBench.GUI.Controls.Navigation"
@@ -23,6 +24,8 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -305,6 +308,35 @@
                     </StackPanel>
                 </Grid>
             </Grid>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="3" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,8,0,8">
+            <TextBlock VerticalAlignment="Center" Margin="0,0,5,0" Text="Zoom:"/>
+            <ComboBox Width="80"
+                      ItemsSource="{Binding DisassemblyZoomPercentOptions}"
+                      SelectedItem="{Binding DisassemblyZoomPercent, Mode=TwoWay}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding StringFormat={}{0}%}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="4" Grid.ColumnSpan="3" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <ContentPresenter>
+                <ContentPresenter.Resources>
+                    <Style TargetType="{x:Type controls:SelectableDiffViewer}">
+                        <Setter Property="ZoomPercent" Value="{Binding DataContext.DisassemblyZoomPercent, RelativeSource={RelativeSource AncestorType=ContentPresenter}, Mode=OneWay}"/>
+                    </Style>
+                </ContentPresenter.Resources>
+                <ContentPresenter.Content>
+                    <MultiBinding Converter="{x:Static converters:TwoStringsToDiffViewerUIConverter.Instance}" Mode="OneWay">
+                        <Binding Path="Disassembly1" Mode="OneWay"/>
+                        <Binding Path="Disassembly2" Mode="OneWay"/>
+                    </MultiBinding>
+                </ContentPresenter.Content>
+            </ContentPresenter>
         </ScrollViewer>
     </Grid>
 </navigation:SizeBenchPage>

@@ -6,6 +6,7 @@
                           xmlns:symbols="clr-namespace:SizeBench.AnalysisEngine.Symbols;assembly=SizeBench.AnalysisEngine"
                           xmlns:navigation="clr-namespace:SizeBench.GUI.Controls.Navigation"
                           xmlns:converters="clr-namespace:SizeBench.GUI.Converters"
+                          xmlns:controls="clr-namespace:SizeBench.GUI.Controls"
                           mc:Ignorable="d" 
       d:DesignHeight="500" d:DesignWidth="700"
       Title="{Binding TemplateFoldabilityItem.TemplateName, StringFormat='Template Foldability: {0}'}">
@@ -109,9 +110,26 @@
                     </ComboBox.ItemTemplate>
                 </ComboBox>
             </Grid>
+            <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,8,0,0">
+                <TextBlock VerticalAlignment="Center" Margin="0,0,5,0" Text="Zoom:"/>
+                <ComboBox Width="80"
+                          ItemsSource="{Binding DisassemblyZoomPercentOptions}"
+                          SelectedItem="{Binding DisassemblyZoomPercent, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding StringFormat={}{0}%}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
         </Grid>
 
         <ContentPresenter Grid.Row="1">
+            <ContentPresenter.Resources>
+                <Style TargetType="{x:Type controls:SelectableDiffViewer}">
+                    <Setter Property="ZoomPercent" Value="{Binding DataContext.DisassemblyZoomPercent, RelativeSource={RelativeSource AncestorType=ContentPresenter}, Mode=OneWay}"/>
+                </Style>
+            </ContentPresenter.Resources>
             <ContentPresenter.Content>
                 <MultiBinding Converter="{x:Static converters:TwoStringsToDiffViewerUIConverter.Instance}" Mode="OneWay">
                     <Binding Path="Disassembly1" Mode="OneWay"/>

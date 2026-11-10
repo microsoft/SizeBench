@@ -134,6 +134,15 @@ public sealed class TemplateFoldabilityPageViewModelTests : IDisposable
         viewmodel.DecreaseDisassemblyZoom();
         Assert.AreEqual(140, viewmodel.DisassemblyZoomPercent);
         Assert.AreEqual(140, this.MockDisassemblySettings.Object.TemplateFoldabilityDisassemblyZoomPercent);
+
+        Assert.AreEqual(20, viewmodel.DisassemblyZoomPercentOptions.Min());
+        Assert.AreEqual(200, viewmodel.DisassemblyZoomPercentOptions.Max());
+        viewmodel.DisassemblyZoomPercent = 20;
+        viewmodel.DecreaseDisassemblyZoom();
+        Assert.AreEqual(20, viewmodel.DisassemblyZoomPercent);
+        viewmodel.DisassemblyZoomPercent = 200;
+        viewmodel.IncreaseDisassemblyZoom();
+        Assert.AreEqual(200, viewmodel.DisassemblyZoomPercent);
     }
 
     public void Dispose() => this.DataCache.Dispose();

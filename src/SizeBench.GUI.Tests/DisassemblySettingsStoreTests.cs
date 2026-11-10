@@ -7,6 +7,30 @@ namespace SizeBench.GUI.Tests;
 public sealed class DisassemblySettingsStoreTests
 {
     [TestMethod]
+    public void ZeroZoomFromExistingSettingsLoadsAtMinimumZoom()
+    {
+        var tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        Directory.CreateDirectory(tempDirectory);
+
+        try
+        {
+            var storagePath = Path.Combine(tempDirectory, "DisassemblySettings.json");
+            File.WriteAllText(storagePath, """{"TemplateFoldabilityDisassemblyZoomPercent":0}""");
+            using var logger = new TestNoOpApplicationLogger();
+            var store = new DisassemblySettingsStore(logger, storagePath);
+            Assert.AreEqual(20, store.TemplateFoldabilityDisassemblyZoomPercent);
+
+            store.TemplateFoldabilityDisassemblyZoomPercent = 100;
+            store.TemplateFoldabilityDisassemblyZoomPercent = 0;
+            Assert.AreEqual(20, new DisassemblySettingsStore(logger, storagePath).TemplateFoldabilityDisassemblyZoomPercent);
+        }
+        finally
+        {
+            Directory.Delete(tempDirectory, recursive: true);
+        }
+    }
+
+    [TestMethod]
     public void ZoomPercentPersistsAcrossStoreInstances()
     {
         var tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());

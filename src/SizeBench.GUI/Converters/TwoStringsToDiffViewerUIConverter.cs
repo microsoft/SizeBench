@@ -18,9 +18,9 @@ public sealed class TwoStringsToDiffViewerUIConverter : IMultiValueConverter
             throw new ArgumentException("targetType must be object - this is really meant to go into ContentPresenter.Content");
         }
 
-        if (values?.Length > 3)
+        if (values?.Length > 2)
         {
-            throw new ArgumentException("This converter expects two or three inputs - the two strings to diff, and optionally a zoom percent.");
+            throw new ArgumentException("This converter expects two inputs - the two strings to diff.");
         }
 
         if (values is null || values.Length < 2 || values[0] is null || values[0] == DependencyProperty.UnsetValue || values[1] is null || values[1] == DependencyProperty.UnsetValue)
@@ -40,18 +40,7 @@ public sealed class TwoStringsToDiffViewerUIConverter : IMultiValueConverter
         }
 #pragma warning restore CA1508
 
-        var zoomPercent = 100;
-        if (values.Length == 3 && values[2] != DependencyProperty.UnsetValue && values[2] != null)
-        {
-            if (values[2] is not int requestedZoomPercent)
-            {
-                throw new ArgumentException("values[2] must be an int zoom percent");
-            }
-
-            zoomPercent = requestedZoomPercent;
-        }
-
-        return new SelectableDiffViewer(leftString, rightString, zoomPercent);
+        return new SelectableDiffViewer(leftString, rightString);
     }
 
     public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)

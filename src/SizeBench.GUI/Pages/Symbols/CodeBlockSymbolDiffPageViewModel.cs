@@ -120,7 +120,7 @@ internal sealed class CodeBlockSymbolDiffPageViewModel : BinaryDiffViewModelBase
         private set { this._disassembly2 = value; RaisePropertyChanged(); }
     }
 
-    public IReadOnlyList<int> DisassemblyZoomPercentOptions { get; } = Enumerable.Range(0, 11).Select(i => i * 20).ToList();
+    public IReadOnlyList<int> DisassemblyZoomPercentOptions { get; } = Enumerable.Range(1, 10).Select(i => i * 20).ToList();
 
     private int _disassemblyZoomPercent;
     public int DisassemblyZoomPercent

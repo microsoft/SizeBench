@@ -109,7 +109,7 @@ internal sealed class DisassemblySettingsStore : IDisassemblySettings
 
     private static int NormalizeZoomPercent(int zoomPercent)
     {
-        var clamped = Math.Clamp(zoomPercent, 0, 200);
+        var clamped = Math.Clamp(zoomPercent, 20, 200);
         return clamped % 20 == 0 ? clamped : DefaultZoomPercent;
     }
 

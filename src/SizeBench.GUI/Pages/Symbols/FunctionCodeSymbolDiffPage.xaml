@@ -7,6 +7,7 @@
                           xmlns:symbols="clr-namespace:SizeBench.AnalysisEngine.Symbols;assembly=SizeBench.AnalysisEngine"
                           xmlns:navigation="clr-namespace:SizeBench.GUI.Controls.Navigation"
                           xmlns:converters="clr-namespace:SizeBench.GUI.Converters"
+                          xmlns:controls="clr-namespace:SizeBench.GUI.Controls"
                           xmlns:drawing="clr-namespace:System.Drawing;assembly=System.Drawing"
                           mc:Ignorable="d" 
       d:DesignHeight="800" d:DesignWidth="800"
@@ -82,11 +83,15 @@
 
         <ScrollViewer Grid.Row="3" Grid.ColumnSpan="3" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" MaxHeight="500">
             <ContentPresenter>
+                <ContentPresenter.Resources>
+                    <Style TargetType="{x:Type controls:SelectableDiffViewer}">
+                        <Setter Property="ZoomPercent" Value="{Binding DataContext.DisassemblyZoomPercent, RelativeSource={RelativeSource AncestorType=ContentPresenter}, Mode=OneWay}"/>
+                    </Style>
+                </ContentPresenter.Resources>
                 <ContentPresenter.Content>
                     <MultiBinding Converter="{x:Static converters:TwoStringsToDiffViewerUIConverter.Instance}" Mode="OneWay">
                         <Binding Path="Disassembly1" Mode="OneWay"/>
                         <Binding Path="Disassembly2" Mode="OneWay"/>
-                        <Binding Path="DisassemblyZoomPercent" Mode="OneWay"/>
                     </MultiBinding>
                 </ContentPresenter.Content>
             </ContentPresenter>

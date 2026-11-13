@@ -16,13 +16,18 @@ public sealed class DiffSession : IDiffSession
     private readonly ILogger _logger;
     private readonly DiffSessionDataCache _dataCache = new DiffSessionDataCache();
 
-    public static async Task<DiffSession> Create(string beforeBinaryPath, string beforePdbPath,
+    public static Task<DiffSession> Create(string beforeBinaryPath, string beforePdbPath,
                                                  string afterBinaryPath, string afterPdbPath,
                                                  ILogger sessionLogger)
+        => Create(beforeBinaryPath, beforePdbPath, afterBinaryPath, afterPdbPath, new SessionOptions(), sessionLogger);
+
+    public static async Task<DiffSession> Create(string beforeBinaryPath, string beforePdbPath,
+                                                 string afterBinaryPath, string afterPdbPath,
+                                                 SessionOptions sessionOptions, ILogger sessionLogger)
     {
 #pragma warning disable CA2000 // Dispose objects before losing scope - these get owned by the DiffSession and it disposes them.
-        var beforeOpenTask = Session.Create(beforeBinaryPath, beforePdbPath, sessionLogger);
-        var afterOpenTask = Session.Create(afterBinaryPath, afterPdbPath, sessionLogger);
+        var beforeOpenTask = Session.Create(beforeBinaryPath, beforePdbPath, sessionOptions, sessionLogger);
+        var afterOpenTask = Session.Create(afterBinaryPath, afterPdbPath, sessionOptions, sessionLogger);
 #pragma warning restore CA2000 // Dispose objects before losing scope
 
         var sessions = await Task.WhenAll(beforeOpenTask, afterOpenTask).ConfigureAwait(true);

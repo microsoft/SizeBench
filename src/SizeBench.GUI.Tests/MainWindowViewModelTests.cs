@@ -142,7 +142,7 @@ public sealed class MainWindowViewModelTests : IDisposable
         mockDiffSession.SetupGet(ds => ds.BeforeSession).Returns(new Mock<ISession>().Object);
         mockDiffSession.SetupGet(ds => ds.AfterSession).Returns(new Mock<ISession>().Object);
 
-        this.MockSessionFactory.Setup(sf => sf.CreateDiffSession(expectedBeforeBinaryPath, expectedBeforePDBPath, expectedAfterBinaryPath, expectedAfterPDBPath, It.IsAny<ILogger>()))
+        this.MockSessionFactory.Setup(sf => sf.CreateDiffSession(expectedBeforeBinaryPath, expectedBeforePDBPath, expectedAfterBinaryPath, expectedAfterPDBPath, new SessionOptions(), It.IsAny<ILogger>()))
                                .Returns(Task.FromResult(mockDiffSession.Object));
 
         using var container = new WindsorContainer();
@@ -155,7 +155,7 @@ public sealed class MainWindowViewModelTests : IDisposable
                                             $"&AfterBinaryPath={Uri.EscapeDataString(expectedAfterBinaryPath)}" +
                                             $"&AfterPDBPath={Uri.EscapeDataString(expectedAfterPDBPath)}"));
         this.MockSessionFactory.Verify(sf => sf.CreateSession(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ILogger>()), Times.Never());
-        this.MockSessionFactory.Verify(sf => sf.CreateDiffSession(expectedBeforeBinaryPath, expectedBeforePDBPath, expectedAfterBinaryPath, expectedAfterPDBPath, It.IsAny<ILogger>()), Times.Exactly(1));
+        this.MockSessionFactory.Verify(sf => sf.CreateDiffSession(expectedBeforeBinaryPath, expectedBeforePDBPath, expectedAfterBinaryPath, expectedAfterPDBPath, new SessionOptions(), It.IsAny<ILogger>()), Times.Exactly(1));
     }
 
     [TestMethod]
@@ -168,7 +168,7 @@ public sealed class MainWindowViewModelTests : IDisposable
         var expectedInAppPage = @"BinarySection/.text";
 
         var tcsCreateSession = new TaskCompletionSource<IDiffSession>();
-        this.MockSessionFactory.Setup(sf => sf.CreateDiffSession(expectedBeforeBinaryPath, expectedBeforePDBPath, expectedAfterBinaryPath, expectedAfterPDBPath, It.IsAny<ILogger>()))
+        this.MockSessionFactory.Setup(sf => sf.CreateDiffSession(expectedBeforeBinaryPath, expectedBeforePDBPath, expectedAfterBinaryPath, expectedAfterPDBPath, new SessionOptions(), It.IsAny<ILogger>()))
                                .Returns(tcsCreateSession.Task);
 
         var mockDiffSession = new Mock<IDiffSession>();
@@ -191,7 +191,7 @@ public sealed class MainWindowViewModelTests : IDisposable
         Assert.IsNull(vm.SelectedTab);
 
         this.MockSessionFactory.Verify(sf => sf.CreateSession(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<ILogger>()), Times.Never());
-        this.MockSessionFactory.Verify(sf => sf.CreateDiffSession(expectedBeforeBinaryPath, expectedBeforePDBPath, expectedAfterBinaryPath, expectedAfterPDBPath, It.IsAny<ILogger>()), Times.Exactly(1));
+        this.MockSessionFactory.Verify(sf => sf.CreateDiffSession(expectedBeforeBinaryPath, expectedBeforePDBPath, expectedAfterBinaryPath, expectedAfterPDBPath, new SessionOptions(), It.IsAny<ILogger>()), Times.Exactly(1));
         tcsCreateSession.SetResult(mockDiffSession.Object);
 
         await deeplinkResolutionTask;

@@ -21,6 +21,26 @@ public sealed class DiffSession_EnumerateSectionsAndCOFFGroupsTests
     private string AfterPDBPath => Path.Combine(this.TestContext!.DeploymentDirectory!, "CppTestCases_BasicDiffObjectsAfter.pdb");
 
     [TestMethod]
+    public async Task ComparisonUsesSessionOptionsForBothBinaries()
+    {
+        using var logger = new NoOpLogger();
+        var options = new SessionOptions
+        {
+            SymbolSourcesSupported = SymbolSourcesSupported.Code,
+            SymbolServerSearchPath = this.TestContext!.DeploymentDirectory!,
+        };
+        await using var diffSession = await DiffSession.Create(this.BeforeBinaryPath, String.Empty,
+                                                               this.AfterBinaryPath, String.Empty,
+                                                               options, logger);
+
+        Assert.AreEqual(options, diffSession.BeforeSession.SessionOptions);
+        Assert.AreEqual(options, diffSession.AfterSession.SessionOptions);
+        var sectionDiffs = await diffSession.EnumerateBinarySectionsAndCOFFGroupDiffs(CancellationToken.None);
+        Assert.IsNotNull(sectionDiffs);
+        Assert.IsNotEmpty(sectionDiffs);
+    }
+
+    [TestMethod]
     public async Task DiffWithSelfHasZeroSizeDiff()
     {
         using var logger = new NoOpLogger();

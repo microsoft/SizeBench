@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Windows;
+using SizeBench.AnalysisEngine;
 
 namespace SizeBench.GUI.Windows;
 
@@ -19,6 +20,7 @@ internal partial class OpenBinaryDiffWindow : Window
     public string BeforeBinaryPath => this._viewModel.Before.BinaryPath;
     public string AfterPDBPath => this._viewModel.After.PDBPath;
     public string AfterBinaryPath => this._viewModel.After.BinaryPath;
+    public SessionOptions SessionOptions => this._viewModel.SelectSessionOptionsControlViewModel.SessionOptions;
 
     private void btnOK_Click(object sender, RoutedEventArgs e)
         => this.DialogResult = true;

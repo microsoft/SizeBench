@@ -10,6 +10,9 @@ public interface ISessionFactory
     Task<IDiffSession> CreateDiffSession(string beforeBinaryPath, string beforePdbPath,
                                          string afterBinaryPath, string afterPdbPath,
                                          ILogger logger);
+    Task<IDiffSession> CreateDiffSession(string beforeBinaryPath, string beforePdbPath,
+                                         string afterBinaryPath, string afterPdbPath,
+                                         SessionOptions sessionOptions, ILogger logger);
     IEnumerable<ISession> OpenSessions { get; }
     IEnumerable<IDiffSession> OpenDiffSessions { get; }
 }
@@ -28,11 +31,16 @@ internal sealed class SessionFactory : ISessionFactory
 
     public Task<ISession> CreateSession(string binaryPath, string pdbPath, ILogger logger) => CreateSession(binaryPath, pdbPath, new SessionOptions(), logger);
 
+    public Task<IDiffSession> CreateDiffSession(string beforeBinaryPath, string beforePdbPath,
+                                                string afterBinaryPath, string afterPdbPath,
+                                                ILogger logger)
+        => CreateDiffSession(beforeBinaryPath, beforePdbPath, afterBinaryPath, afterPdbPath, new SessionOptions(), logger);
+
     public async Task<IDiffSession> CreateDiffSession(string beforeBinaryPath, string beforePdbPath,
                                                       string afterBinaryPath, string afterPdbPath,
-                                                      ILogger logger)
+                                                      SessionOptions sessionOptions, ILogger logger)
     {
-        var newDiffSession = await DiffSession.Create(beforeBinaryPath, beforePdbPath, afterBinaryPath, afterPdbPath, logger);
+        var newDiffSession = await DiffSession.Create(beforeBinaryPath, beforePdbPath, afterBinaryPath, afterPdbPath, sessionOptions, logger);
         this._openDiffSessions.Add(newDiffSession);
         return newDiffSession;
     }

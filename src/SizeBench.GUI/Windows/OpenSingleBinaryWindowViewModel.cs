@@ -13,6 +13,7 @@ internal sealed class OpenSingleBinaryWindowViewModel : INotifyPropertyChanged
         this.SelectSingleBinaryAndPDBControlViewModel.PropertyChanged += (s, e) => EnableOKButtonIfReady();
 
         this.SelectSessionOptionsControlViewModel = ssoViewModel;
+        this.SelectSessionOptionsControlViewModel.PropertyChanged += (s, e) => EnableOKButtonIfReady();
     }
 
     public SelectSingleBinaryAndPDBControlViewModel SelectSingleBinaryAndPDBControlViewModel { get; }
@@ -44,8 +45,22 @@ internal sealed class OpenSingleBinaryWindowViewModel : INotifyPropertyChanged
 
     private void EnableOKButtonIfReady()
     {
-        this.OKEnabled = File.Exists(this.SelectSingleBinaryAndPDBControlViewModel.PDBPath) &&
-                         File.Exists(this.SelectSingleBinaryAndPDBControlViewModel.BinaryPath);
+        if (!File.Exists(this.SelectSingleBinaryAndPDBControlViewModel.BinaryPath))
+        {
+            this.OKEnabled = false;
+            return;
+        }
+
+        if (File.Exists(this.SelectSingleBinaryAndPDBControlViewModel.PDBPath))
+        {
+            this.OKEnabled = true;
+            return;
+        }
+
+        // No explicit PDB on disk - allow proceeding only when the symbol server fallback is configured
+        // with at least one path, so that DIA has somewhere to look for the matching PDB.
+        this.OKEnabled = this.SelectSessionOptionsControlViewModel.UseSymbolServer &&
+                         this.SelectSessionOptionsControlViewModel.HasAnySymbolServerPaths;
     }
 
 }

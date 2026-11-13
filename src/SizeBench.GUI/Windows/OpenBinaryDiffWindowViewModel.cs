@@ -7,16 +7,20 @@ namespace SizeBench.GUI.Windows;
 internal sealed class OpenBinaryDiffWindowViewModel : INotifyPropertyChanged
 {
     public OpenBinaryDiffWindowViewModel(SelectSingleBinaryAndPDBControlViewModel before,
-                                         SelectSingleBinaryAndPDBControlViewModel after)
+                                         SelectSingleBinaryAndPDBControlViewModel after,
+                                         SelectSessionOptionsControlViewModel sessionOptions)
     {
         this.Before = before;
         this.Before.PropertyChanged += (s, e) => EnableOKButtonIfReady();
         this.After = after;
         this.After.PropertyChanged += (s, e) => EnableOKButtonIfReady();
+        this.SelectSessionOptionsControlViewModel = sessionOptions;
+        this.SelectSessionOptionsControlViewModel.PropertyChanged += (s, e) => EnableOKButtonIfReady();
     }
 
     public SelectSingleBinaryAndPDBControlViewModel Before { get; }
     public SelectSingleBinaryAndPDBControlViewModel After { get; }
+    public SelectSessionOptionsControlViewModel SelectSessionOptionsControlViewModel { get; }
 
     #region INPC
 
@@ -43,10 +47,14 @@ internal sealed class OpenBinaryDiffWindowViewModel : INotifyPropertyChanged
 
     private void EnableOKButtonIfReady()
     {
-        this.OKEnabled = File.Exists(this.Before.PDBPath) &&
-                         File.Exists(this.Before.BinaryPath) &&
-                         File.Exists(this.After.PDBPath) &&
-                         File.Exists(this.After.BinaryPath);
+        var canUseSymbolServer = this.SelectSessionOptionsControlViewModel.UseSymbolServer &&
+                                 this.SelectSessionOptionsControlViewModel.HasAnySymbolServerPaths;
+        this.OKEnabled = CanOpenBinary(this.Before, canUseSymbolServer) &&
+                         CanOpenBinary(this.After, canUseSymbolServer);
     }
+
+    private static bool CanOpenBinary(SelectSingleBinaryAndPDBControlViewModel binary, bool canUseSymbolServer)
+        => File.Exists(binary.BinaryPath) &&
+           (File.Exists(binary.PDBPath) || (String.IsNullOrEmpty(binary.PDBPath) && canUseSymbolServer));
 
 }

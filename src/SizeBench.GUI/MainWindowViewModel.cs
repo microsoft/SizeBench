@@ -240,7 +240,7 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
             return;
         }
 
-        var diffSession = await OpenDiffSessionFromBinaryPathsAndPDBPaths(deeplinkLog, beforeBinaryPath, beforePdbPath, afterBinaryPath, afterPdbPath);
+        var diffSession = await OpenDiffSessionFromBinaryPathsAndPDBPaths(deeplinkLog, beforeBinaryPath, beforePdbPath, afterBinaryPath, afterPdbPath, new SessionOptions());
 
         // diffSession can be null if the deeplink fails to open the binary/pdb (like, say, it's not present at the location anymore).
         if (diffSession is null)
@@ -405,7 +405,8 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
         {
             var diffSession = await OpenDiffSessionFromBinaryPathsAndPDBPaths(taskLog,
                                                                                         window.BeforeBinaryPath, window.BeforePDBPath,
-                                                                                        window.AfterBinaryPath, window.AfterPDBPath);
+                                                                                        window.AfterBinaryPath, window.AfterPDBPath,
+                                                                                        window.SessionOptions);
 
             // We can get null if the diff session fails to open, say due to a DIA error, corrupt PDB, etc.
             if (diffSession != null)
@@ -421,7 +422,7 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
         taskLog.Log("OpenBinaryDiff command execution ended.");
     }
 
-    private async Task<IDiffSession?> OpenDiffSessionFromBinaryPathsAndPDBPaths(ILogger taskLog, string beforeBinaryPath, string beforePdbPath, string afterBinaryPath, string afterPdbPath)
+    private async Task<IDiffSession?> OpenDiffSessionFromBinaryPathsAndPDBPaths(ILogger taskLog, string beforeBinaryPath, string beforePdbPath, string afterBinaryPath, string afterPdbPath, SessionOptions sessionOptions)
     {
         taskLog.Log($"Creating Diff Session for Before=({beforeBinaryPath}, {beforePdbPath}), After=({afterBinaryPath}, {afterPdbPath})");
         IDiffSession? diffSession = null;
@@ -431,7 +432,7 @@ internal sealed class MainWindowViewModel : INotifyPropertyChanged, IDialogServi
                                   "Opening diff",
                                   "This operation can take a little bit if the PDBs are large and over a network connection.",
                                   isCancelable: false,
-                                  task: async (token) => diffSession = await this._sessionFactory.CreateDiffSession(beforeBinaryPath, beforePdbPath, afterBinaryPath, afterPdbPath, this._applicationLogger.CreateSessionLog($"{beforeBinaryPath} vs. {afterBinaryPath}")));
+                                  task: async (token) => diffSession = await this._sessionFactory.CreateDiffSession(beforeBinaryPath, beforePdbPath, afterBinaryPath, afterPdbPath, sessionOptions, this._applicationLogger.CreateSessionLog($"{beforeBinaryPath} vs. {afterBinaryPath}")));
         }
 #pragma warning disable CA1031 // Do not catch general exception types - it's better to show the user an error than to crash, if anything should throw when opening a diff
         catch (Exception ex)
